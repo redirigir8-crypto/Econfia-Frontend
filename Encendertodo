@@ -1,0 +1,76 @@
+
+
+#  **PROCEDIMIENTO PARA ENCENDER BACKEND, CELERY Y FRONT**
+
+## ENCENDER BACKEND (Django)
+
+### Paso 1 — Ir al backend
+ejemplo de la ruta 
+powershell
+cd "C:\Users\GrupoSoluciones\Desktop\Carpeta respaldo\Respaldo\econfia-backend"
+
+### Paso 2 — Activar entorno virtual
+
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+### **Paso 3** — Ejecutar servidor
+
+```powershell
+python manage.py runserver
+```
+
+---
+
+## ** ENCENDER CELERY**
+
+📌 Abrir otra ventana de PowerShell (no cerrar el backend)
+
+### **Paso 1** — Ir al backend
+
+```powershell
+cd "C:\Users\GrupoSoluciones\Desktop\Carpeta respaldo\Respaldo\econfia-backend"
+```
+
+### **Paso 2** — Activar entorno virtual
+
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+### **Paso 3** — Ejecutar Celery
+
+```powershell
+celery -A backend worker -l info -P threads
+```
+
+---
+
+## **3️⃣ ENCENDER FRONTEND (React)**
+
+📌 Abrir **otra ventana** de PowerShell
+
+### **Paso 1** — Ir al frontend
+
+```powershell
+cd "C:\Users\GrupoSoluciones\Desktop\Carpeta respaldo\Respaldo\frontend-econfia"
+```
+
+### **Paso 2** — Ejecutar
+
+```powershell
+npm start
+```
+
+---
+
+##  **ORDEN CORRECTO DE ARRANQUE**
+
+1. Backend
+2. Celery
+3. Frontend
+
+---
+
+Si quieres también te hago una versión más corta tipo “chuleta” para pegar en tu escritorio.
