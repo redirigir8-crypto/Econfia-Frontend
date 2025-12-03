@@ -71,7 +71,7 @@ export default function ParticlesBackground() {
         interactivity: {
           events: {
             onHover: {
-              enable: true,
+              enable: false,
               mode: "attract"
             },
             resize: true

@@ -178,13 +178,6 @@ export default function ConsultaContratista() {
                 Consulta inteligente de candidatos con experiencia premium
               </h1>
 
-              {/* Aviso de horario debajo del título */}
-              {showHorarioAviso && (
-                <div className="mt-3 rounded-xl border border-amber-200 bg-amber-100/80 text-amber-900 px-4 py-2 text-sm backdrop-blur-sm">
-                  ⚠️ Alta demanda entre 11:00 y 22:00. Los tiempos pueden variar levemente.
-                </div>
-              )}
-
               <p className="mt-3 text-base leading-relaxed text-white">
                 Verifica documentos y obtén resultados de forma segura y veloz.
                 Una experiencia clara, minimalista y centrada en la confiabilidad.

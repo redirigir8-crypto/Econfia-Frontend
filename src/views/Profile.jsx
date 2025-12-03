@@ -78,7 +78,38 @@ function NeonCard({ title, children, className = "" }) {
 export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("foto", file);
+
+    setUploadingPhoto(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/api/profile/update-photo/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Error al subir la foto");
+      
+      const updatedProfile = await response.json();
+      setProfile(updatedProfile);
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      alert("Error al subir la foto. Por favor intenta de nuevo.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -146,12 +177,13 @@ export default function Profile() {
             </h2>
 
             <div
-              className="w-28 h-28 rounded-full my-5 overflow-hidden border"
+              className="w-28 h-28 rounded-full my-5 overflow-hidden border relative group cursor-pointer"
               style={{
                 borderColor: "#ffffff30",
                 boxShadow:
                   "0 0 12px rgba(0,229,255,.35), 0 0 28px rgba(124,77,255,.25)",
               }}
+              onClick={() => document.getElementById('photoInput').click()}
             >
               {profile?.perfil?.foto ? (
                 <img
@@ -160,11 +192,30 @@ export default function Profile() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-black/40 text-3xl font-bold text-white/80">
-                  {profile?.full_name ? profile.full_name[0] : profile?.username?.[0]}
-                </div>
+                <img
+                  src="https://www.gravatar.com/avatar/?d=mp"
+                  alt="Avatar por defecto"
+                  className="w-full h-full object-cover bg-gradient-to-br from-cyan-500/20 to-purple-500/20"
+                />
               )}
+              
+              {/* Overlay al hover */}
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white text-xs font-medium">
+                  {uploadingPhoto ? "Subiendo..." : "Cambiar foto"}
+                </span>
+              </div>
             </div>
+
+            {/* Input oculto para subir foto */}
+            <input
+              id="photoInput"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+              disabled={uploadingPhoto}
+            />
 
             <h3 className="text-lg font-semibold text-white">{profile?.username}</h3>
             <p className="text-white/70 text-sm mb-2">{profile?.email || "Sin correo"}</p>

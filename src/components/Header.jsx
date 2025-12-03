@@ -31,7 +31,7 @@ export default function Header() {
             <button className="flex items-center gap-1 hover:text-cyan-300 transition">
               Servicios <ChevronDown size={16} />
             </button>
-            <div className="absolute hidden group-hover:block bg-white text-black mt-2 rounded-lg shadow-lg w-72">
+            <div className="absolute hidden group-hover:block bg-white text-black mt-2 rounded-lg shadow-lg w-72 z-[100]">
               <Link
                 to="/consulta"
                 className="block px-4 py-3 hover:bg-gray-100"

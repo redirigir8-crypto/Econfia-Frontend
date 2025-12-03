@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow } from "swiper/modules";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Search, FileText, LogOut, User, HelpCircle, Briefcase, Sparkles,
+  Search, FileText, LogOut, User, HelpCircle, HardHat, CheckCircle2,
 } from "lucide-react";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
@@ -12,8 +12,8 @@ const menuItems = [
   { path: "/logout",     icon: <LogOut size={40} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
 
   { path: "/consulta",             icon: <Search size={40} strokeWidth={1.5} />,    label: "E-Core Full" },
-  { path: "/consulta-contratista", icon: <Briefcase size={40} strokeWidth={1.5} />, label: "E-unity Contratista" },
-  { path: "/consulta-medida",      icon: <Sparkles size={40} strokeWidth={1.5} />,  label: "E-ssential" },
+  { path: "/consulta-contratista", icon: <HardHat size={40} strokeWidth={1.5} />, label: "E-unity Contratista" },
+  { path: "/consulta-medida",      icon: <CheckCircle2 size={40} strokeWidth={1.5} />,  label: "E-ssential" },
   { path: "/profile",    icon: <User size={40} strokeWidth={1.5} />,     label: "Perfil" },
   { path: "/resultados", icon: <FileText size={40} strokeWidth={1.5} />, label: "Resultados" },
   { path: "/ayuda",      icon: <HelpCircle size={40} strokeWidth={1.5} />,label: "Ayuda" },
