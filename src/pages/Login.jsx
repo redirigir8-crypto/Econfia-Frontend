@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import Toast from "../components/Toast";
 import loginVideo from "../assets/login.mp4";
-import { Navigate } from "react-router-dom";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 
 export default function Login() {
   const [user, setUser] = useState("");
@@ -11,6 +11,7 @@ export default function Login() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
   const API_URL = process.env.REACT_APP_API_URL;
@@ -99,7 +100,38 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 md:p-10 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 relative">
+      {/* Botón retorno arriba a la izquierda */}
+      <div className="absolute top-6 left-6 z-40">
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
+          aria-label="Volver al inicio"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Volver</span>
+        </button>
+      </div>
+
+      {/* Logo/Branding arriba al centro */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-40">
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+          aria-label="Ir al inicio"
+        >
+          <img 
+            src="/img/logo.png" 
+            alt="Econfia Logo" 
+            className="h-10 md:h-12"
+            onError={(e) => {
+              // Si no existe logo.png, mostrar un ícono genérico
+              e.target.style.display = "none";
+            }}
+          />
+          <span className="text-lg md:text-xl font-bold text-white hidden sm:inline"></span>
+        </button>
+      </div>
       {/* Overlay de carga global */}
       {loading && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">

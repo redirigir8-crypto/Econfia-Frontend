@@ -2,50 +2,161 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Toast from "../components/Toast";
-import Header from "../components/Header"
-/* ==== Robot Avatar (compacto + responsive) ==== */
-function Robot({ look = "center", talking = false, className = "" }) {
+import Header from "../components/Header";
+import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaLinkedin, FaTwitter, FaFacebook } from "react-icons/fa";
+
+// Estilos de animación
+const animationStyles = `
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in-down {
+    animation: fadeInDown 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in-left {
+    animation: fadeInLeft 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in-right {
+    animation: fadeInRight 0.8s ease-out forwards;
+  }
+  
+  .animation-delay-100 { animation-delay: 0.1s; opacity: 0; }
+  .animation-delay-200 { animation-delay: 0.2s; opacity: 0; }
+  .animation-delay-300 { animation-delay: 0.3s; opacity: 0; }
+  .animation-delay-400 { animation-delay: 0.4s; opacity: 0; }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleTag = document.createElement('style');
+  styleTag.innerHTML = animationStyles;
+  if (!document.head.querySelector('style[data-contacto-animations]')) {
+    styleTag.setAttribute('data-contacto-animations', 'true');
+    document.head.appendChild(styleTag);
+  }
+}
+/* ==== Avatar de chat moderno y elegante ==== */
+function ChatAvatar({ look = "center", talking = false, className = "" }) {
   const map = {
     center: { x: 0, y: 0 },
-    nombre: { x: -5, y: -4 },
-    email: { x: 6, y: -1 },
-    asunto: { x: 6, y: -4 },
-    mensaje: { x: 0, y: 6 },
+    nombre: { x: -3, y: -3 },
+    email: { x: 4, y: -2 },
+    asunto: { x: 4, y: -3 },
+    mensaje: { x: 0, y: 4 },
   };
   const p = map[look] || map.center;
 
   return (
     <motion.div
       className={`relative ${className}`}
-      initial={{ scale: 0.96 }}
-      animate={{ scale: 1 }}
-      transition={{ type: "spring", stiffness: 140, damping: 12 }}
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 160, damping: 15 }}
     >
-      {/* casco */}
-      <div className="absolute inset-0 rounded-[20px] bg-gradient-to-br from-cyan-400/25 via-blue-500/20 to-fuchsia-500/20 border border-cyan-400/50 backdrop-blur" />
-      {/* cara */}
-      <div className="absolute inset-2 rounded-[16px] bg-white" />
-      {/* antena */}
-      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-1.5 h-3.5 bg-gradient-to-b from-fuchsia-400 to-cyan-400 rounded-full" />
-      <div className="absolute -top-[12px] left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,.75)]" />
-      {/* ojos */}
-      <div className="absolute left-[28%] top-[45%] w-[1.4rem] h-[1.4rem] rounded-full bg-white border border-gray-300 grid place-items-center">
-        <div
-          className="w-[0.55rem] h-[0.55rem] rounded-full bg-gray-900 transition-transform"
-          style={{ transform: `translate(${p.x}px, ${p.y}px)` }}
-        />
+      {/* Círculo exterior con gradiente animado */}
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 animate-pulse shadow-[0_0_40px_rgba(34,211,238,0.6)]" />
+      
+      {/* Círculo medio */}
+      <div className="absolute inset-1 rounded-full bg-gradient-to-br from-gray-900 to-gray-800" />
+      
+      {/* Círculo interior (cara) */}
+      <div className="absolute inset-3 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+        {/* Partículas decorativas */}
+        <div className="absolute top-4 right-4 w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
+        <div className="absolute bottom-6 left-5 w-1 h-1 rounded-full bg-purple-400 animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute top-6 left-6 w-1 h-1 rounded-full bg-blue-400 animate-pulse" style={{ animationDelay: '1s' }} />
+        
+        {/* Contenedor de la cara */}
+        <div className="relative w-full h-full flex flex-col items-center justify-center">
+          {/* Ojos modernos */}
+          <div className="flex gap-4 mb-3">
+            {/* Ojo izquierdo */}
+            <div className="relative w-8 h-8">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+              <div className="absolute inset-1 rounded-full bg-gray-900" />
+              <div
+                className="absolute top-1/2 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-cyan-300 to-blue-400 transition-transform duration-300"
+                style={{ transform: `translate(calc(-50% + ${p.x}px), calc(-50% + ${p.y}px))` }}
+              />
+            </div>
+            
+            {/* Ojo derecho */}
+            <div className="relative w-8 h-8">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+              <div className="absolute inset-1 rounded-full bg-gray-900" />
+              <div
+                className="absolute top-1/2 left-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-cyan-300 to-blue-400 transition-transform duration-300"
+                style={{ transform: `translate(calc(-50% + ${p.x}px), calc(-50% + ${p.y}px))` }}
+              />
+            </div>
+          </div>
+          
+          {/* Boca moderna con onda de sonido */}
+          <div className="relative">
+            <div className={`h-1 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 transition-all duration-200 shadow-[0_0_10px_rgba(34,211,238,0.5)]`}
+                 style={{ width: talking ? '48px' : '32px' }}
+            />
+            {talking && (
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                <div className="w-1 bg-cyan-400/50 rounded-full animate-pulse" style={{ height: '4px', animationDelay: '0s' }} />
+                <div className="w-1 bg-cyan-400/50 rounded-full animate-pulse" style={{ height: '6px', animationDelay: '0.1s' }} />
+                <div className="w-1 bg-cyan-400/50 rounded-full animate-pulse" style={{ height: '4px', animationDelay: '0.2s' }} />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="absolute right-[28%] top-[45%] w-[1.4rem] h-[1.4rem] rounded-full bg-white border border-gray-300 grid place-items-center">
-        <div
-          className="w-[0.55rem] h-[0.55rem] rounded-full bg-gray-900 transition-transform"
-          style={{ transform: `translate(${p.x}px, ${p.y}px)` }}
-        />
-      </div>
-      {/* boca */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 bottom-4 w-[3rem] rounded-full bg-gradient-to-r from-fuchsia-500 to-cyan-500 transition-all"
-        style={{ height: talking ? 12 : 6 }}
-      />
+      
+      {/* Indicador de estado (pulso cuando habla) */}
+      {talking && (
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)]" />
+      )}
     </motion.div>
   );
 }
@@ -133,119 +244,219 @@ export default function Contacto() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-64px)] pt-[88px] md:pt-[96px] text-white overflow-x-hidden">
+    <main className="min-h-screen pt-20 md:pt-24 text-white overflow-x-hidden relative">
+      {/* Elementos decorativos de fondo */}
+      <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      
       {toast && <Toast type={toast.type} message={toast.msg} />}
       <Header />
-      {/* Contenido centrado con columnas: izquierda formulario, derecha robot */}
-      <section className="mx-auto max-w-[1100px] px-5 md:px-6 py-6 md:py-8">
-        <div className="grid gap-10 md:gap-12 md:grid-cols-[minmax(0,1fr)_360px] items-start">
-          {/* IZQUIERDA: Título + Form */}
-          <div>
-            <h1 className="text-3xl md:text-5xl font-extrabold text-center md:text-left">
-              Hablemos <span className="text-cyan-400">hoy</span>
-            </h1>
-            <p className="text-white/80 max-w-xl mt-2 text-center md:text-left mx-auto md:mx-0">
-              ¿Tienes preguntas sobre planes, integraciones o cumplimiento?
-              Escríbenos y un especialista te contactará.
-            </p>
+      
+      {/* Contenido principal */}
+      <section className="relative z-10 mx-auto max-w-[1200px] px-5 md:px-6 py-8 md:py-12">
+        {/* Header de la página */}
+        <div className="text-center mb-12 animate-fade-in-down">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-4">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+            </span>
+            <span className="text-cyan-300 text-sm font-medium">Estamos aquí para ayudarte</span>
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent mb-4">
+            Conversemos
+          </h1>
+          <p className="text-white/80 text-lg max-w-2xl mx-auto leading-relaxed">
+            ¿Tienes preguntas sobre <span className="text-cyan-300 font-semibold">planes, integraciones o cumplimiento</span>?
+            Escríbenos y un especialista te contactará pronto.
+          </p>
+        </div>
 
-            <form onSubmit={onSubmit} className="mt-7 space-y-4 max-w-xl">
-              <div>
-                <label className="block text-sm text-white/70 mb-1">Nombre</label>
-                <input
-                  name="nombre"
-                  value={form.nombre}
-                  onChange={handleType}
-                  onFocus={() => { setLook("nombre"); speak("Escribe tu nombre"); }}
-                  onBlur={() => setLook("center")}
-                  required
-                  className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2 outline-none focus:border-cyan-400"
-                  placeholder="Tu nombre"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid gap-8 lg:gap-12 lg:grid-cols-[1.2fr_1fr] items-start">
+          {/* IZQUIERDA: Formulario */}
+          <div className="animate-fade-in-left animation-delay-100">
+            <form onSubmit={onSubmit} className="rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-white/5 to-white/[0.02] p-6 md:p-8 shadow-[0_0_30px_rgba(34,211,238,0.1)] backdrop-blur-sm">
+              <div className="space-y-5">
                 <div>
-                  <label className="block text-sm text-white/70 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-white/90 mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">1</span>
+                    Nombre completo
+                  </label>
                   <input
-                    name="email"
-                    type="email"
-                    value={form.email}
+                    name="nombre"
+                    value={form.nombre}
                     onChange={handleType}
-                    onFocus={() => { setLook("email"); speak("Tu correo"); }}
+                    onFocus={() => { setLook("nombre"); speak("Escribe tu nombre"); }}
                     onBlur={() => setLook("center")}
                     required
-                    className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2 outline-none focus:border-cyan-400"
-                    placeholder="tu@email.com"
+                    className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400 focus:bg-white/10 transition-all text-white placeholder:text-white/40"
+                    placeholder="Tu nombre completo"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm text-white/70 mb-1">Asunto</label>
-                  <input
-                    name="asunto"
-                    value={form.asunto}
-                    onChange={handleType}
-                    onFocus={() => { setLook("asunto"); speak("Asunto"); }}
-                    onBlur={() => setLook("center")}
-                    className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2 outline-none focus:border-cyan-400"
-                    placeholder="Consulta sobre eConfia"
-                  />
-                </div>
-              </div>
 
-              <div>
-                <label className="block text-sm text-white/70 mb-1">Mensaje</label>
-                <textarea
-                  name="mensaje"
-                  value={form.mensaje}
+                <div className="grid md:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-sm font-medium text-white/90 mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">2</span>
+                      Email
+                    </label>
+                    <input
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleType}
+                      onFocus={() => { setLook("email"); speak("Tu correo"); }}
+                      onBlur={() => setLook("center")}
+                      required
+                      className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400 focus:bg-white/10 transition-all text-white placeholder:text-white/40"
+                      placeholder="tu@email.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/90 mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">3</span>
+                      Asunto
+                    </label>
+                    <input
+                      name="asunto"
+                      value={form.asunto}
+                      onChange={handleType}
+                      onFocus={() => { setLook("asunto"); speak("Asunto"); }}
+                      onBlur={() => setLook("center")}
+                      className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400 focus:bg-white/10 transition-all text-white placeholder:text-white/40"
+                      placeholder="Consulta sobre eConfia"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white/90 mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">4</span>
+                    Mensaje
+                  </label>
+                  <textarea
+                    name="mensaje"
+                    value={form.mensaje}
                   onChange={handleType}
                   onFocus={() => { setLook("mensaje"); speak("Cuéntanos tu caso"); }}
                   onBlur={() => setLook("center")}
-                  rows={4}
+                  rows={5}
                   required
-                  className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2 outline-none focus:border-cyan-400"
-                  placeholder="Cuéntanos tu caso…"
+                  className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400 focus:bg-white/10 transition-all text-white placeholder:text-white/40 resize-none"
+                  placeholder="Cuéntanos más sobre tu consulta..."
                 />
-              </div>
+                </div>
 
-              <div className="flex justify-center md:justify-start">
-                <button
-                  disabled={loading}
-                  className="rounded-full bg-cyan-500/20 border border-cyan-400 px-7 py-2.5 hover:bg-cyan-500/30 disabled:opacity-60"
-                >
-                  {loading ? "Enviando…" : "Enviar mensaje"}
-                </button>
+                <div className="flex justify-center md:justify-start pt-2">
+                  <button
+                    disabled={loading}
+                    className="group px-8 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold border-2 border-transparent hover:from-transparent hover:to-transparent hover:border-cyan-400 hover:text-cyan-400 transition-all shadow-lg hover:shadow-cyan-400/50 transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <span className="animate-spin">⏳</span>
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <FaEnvelope />
+                        Enviar mensaje
+                        <span className="group-hover:translate-x-1 transition-transform">→</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
 
-          {/* DERECHA: Robot dentro de la "tarjeta de información" */}
-          <aside className="rounded-2xl border border-white/10 bg-white/5 p-6 w-full max-w-[360px] mx-auto overflow-hidden">
-            <div className="flex flex-col items-center text-center">
-              {/* Robot compacto */}
-              <Robot
-                look={look}
-                talking={talking}
-                className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28"
-              />
-              <button
-                onClick={() => { setSoundOn((s) => !s); if (!soundOn) ensureAudio(); }}
-                className={`mt-3 text-xs px-3 py-1 rounded-full border ${
-                  soundOn
-                    ? "border-cyan-400 text-cyan-300 bg-cyan-500/10"
-                    : "border-white/20 text-white/70 hover:border-cyan-400"
-                }`}
-                title="Activar/Desactivar sonido"
-              >
-                {soundOn ? "🔊 Sonido ON" : "🔇 Sonido OFF"}
-              </button>
+          {/* DERECHA: Robot + Info de contacto */}
+          <div className="space-y-6 animate-fade-in-right animation-delay-200">
+            {/* Card del Robot */}
+            <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-white/5 to-white/[0.02] p-6 md:p-8 shadow-[0_0_30px_rgba(34,211,238,0.1)] backdrop-blur-sm">
+              <div className="flex flex-col items-center text-center">
+                {/* Avatar moderno */}
+                <ChatAvatar
+                  look={look}
+                  talking={talking}
+                  className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 mb-4"
+                />
+                
+                <button
+                  onClick={() => { setSoundOn((s) => !s); if (!soundOn) ensureAudio(); }}
+                  className={`text-sm px-5 py-2 rounded-full border transition-all ${
+                    soundOn
+                      ? "border-cyan-400 text-cyan-300 bg-cyan-500/20 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                      : "border-white/20 text-white/70 hover:border-cyan-400 hover:bg-cyan-500/10"
+                  }`}
+                  title="Activar/Desactivar sonido"
+                >
+                  {soundOn ? "🔊 Sonido activado" : "🔇 Activar sonido"}
+                </button>
 
-              <p className="text-white/75 text-sm mt-4">
-                Soy <span className="text-cyan-300 font-semibold">eBot</span>.  
-                Sigo tu escritura y puedo guiarte con voz si activas el sonido.
-              </p>
+                <p className="text-white/80 text-sm mt-5 leading-relaxed">
+                  Soy <span className="text-cyan-300 font-bold">eBot</span>, tu asistente virtual.  
+                  Sigo tu escritura en tiempo real y puedo guiarte con voz si activas el sonido. 🤖
+                </p>
+              </div>
             </div>
-          </aside>
+
+            {/* Card de información de contacto */}
+            <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-pink-500/5 p-6 shadow-[0_0_25px_rgba(168,85,247,0.1)] backdrop-blur-sm">
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">📞</span>
+                Información de contacto
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 group cursor-pointer hover:translate-x-1 transition-transform">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 group-hover:bg-cyan-500/30 transition-all">
+                    <FaEnvelope />
+                  </div>
+                  <div>
+                    <p className="text-white/60 text-xs">Email</p>
+                    <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">contacto@econfia.co</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 group cursor-pointer hover:translate-x-1 transition-transform">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 group-hover:bg-cyan-500/30 transition-all">
+                    <FaPhone />
+                  </div>
+                  <div>
+                    <p className="text-white/60 text-xs">Teléfono</p>
+                    <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">+57 (601) 234 5678</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 group cursor-pointer hover:translate-x-1 transition-transform">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 group-hover:bg-cyan-500/30 transition-all">
+                    <FaMapMarkerAlt />
+                  </div>
+                  <div>
+                    <p className="text-white/60 text-xs">Ubicación</p>
+                    <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">Bogotá, Colombia</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <p className="text-white/60 text-xs mb-3">Síguenos en redes sociales</p>
+                <div className="flex gap-3">
+                  <a href="#" className="w-10 h-10 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-all hover:scale-110">
+                    <FaLinkedin size={18} />
+                  </a>
+                  <a href="#" className="w-10 h-10 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-all hover:scale-110">
+                    <FaTwitter size={18} />
+                  </a>
+                  <a href="#" className="w-10 h-10 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-all hover:scale-110">
+                    <FaFacebook size={18} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>

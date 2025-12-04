@@ -23,9 +23,36 @@ export default function ChatWidgetTawk({ name, email }) {
     const s0 = document.getElementsByTagName("script")[0];
     s0.parentNode.insertBefore(s1, s0);
 
-    // setear datos del visitante cuando el widget cargue (opcional)
+    // setear datos del visitante y personalizar estilos cuando el widget cargue
     const trySetVisitor = () => {
       try {
+        // Personalizar colores del chat
+        if (window.Tawk_API?.customize) {
+          window.Tawk_API.customize({
+            displayMode: "bubble",
+            placement: "br", // bottom-right
+            theme: "dark"
+          });
+        }
+
+        // Cambiar color del bubble a cyan/azul oscuro
+        if (window.Tawk_API?.updateVisitorChat) {
+          const style = document.createElement("style");
+          style.innerHTML = `
+            #tawk-bubble-frame {
+              background-color: #1a3a52 !important;
+              border: 1px solid #00D9FF !important;
+            }
+            .tawk-chat-container {
+              background-color: #0f1f2e !important;
+            }
+            .tawk-message {
+              background-color: #1a3a52 !important;
+            }
+          `;
+          document.head.appendChild(style);
+        }
+
         if ((name || email) && window.Tawk_API?.setAttributes) {
           window.Tawk_API.setAttributes(
             { name: name || undefined, email: email || undefined },

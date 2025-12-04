@@ -193,7 +193,7 @@ export default function Profile() {
                 />
               ) : (
                 <img
-                  src="https://www.gravatar.com/avatar/?d=mp"
+                  src="https://www.gravatar.com/avatar/?d=mp  "
                   alt="Avatar por defecto"
                   className="w-full h-full object-cover bg-gradient-to-br from-cyan-500/20 to-purple-500/20"
                 />

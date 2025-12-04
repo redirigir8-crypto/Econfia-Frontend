@@ -9,14 +9,14 @@ import "swiper/css";
 import "swiper/css/effect-coverflow";
 
 const menuItems = [
-  { path: "/logout",     icon: <LogOut size={40} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
+  { path: "/logout",     icon: <LogOut size={28} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
 
-  { path: "/consulta",             icon: <Search size={40} strokeWidth={1.5} />,    label: "E-Core Full" },
-  { path: "/consulta-contratista", icon: <HardHat size={40} strokeWidth={1.5} />, label: "E-unity Contratista" },
-  { path: "/consulta-medida",      icon: <CheckCircle2 size={40} strokeWidth={1.5} />,  label: "E-ssential" },
-  { path: "/profile",    icon: <User size={40} strokeWidth={1.5} />,     label: "Perfil" },
-  { path: "/resultados", icon: <FileText size={40} strokeWidth={1.5} />, label: "Resultados" },
-  { path: "/ayuda",      icon: <HelpCircle size={40} strokeWidth={1.5} />,label: "Ayuda" },
+  { path: "/consulta",             icon: <Search size={28} strokeWidth={1.5} />,    label: "E-Core Full" },
+  { path: "/consulta-contratista", icon: <HardHat size={28} strokeWidth={1.5} />, label: "E-unity Contratista" },
+  { path: "/consulta-medida",      icon: <CheckCircle2 size={28} strokeWidth={1.5} />,  label: "E-ssential" },
+  { path: "/profile",    icon: <User size={28} strokeWidth={1.5} />,     label: "Perfil" },
+  { path: "/resultados", icon: <FileText size={28} strokeWidth={1.5} />, label: "Resultados" },
+  { path: "/ayuda",      icon: <HelpCircle size={28} strokeWidth={1.5} />,label: "Ayuda" },
 ];
 
 export default function Taskbar() {
@@ -45,17 +45,52 @@ export default function Taskbar() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 w-[94%] max-w-3xl mx-auto mb-10 z-50">
+      <style>{`
+        @keyframes orbitRotation {
+          from {
+            transform: rotateY(0deg) translateZ(20px);
+          }
+          to {
+            transform: rotateY(360deg) translateZ(20px);
+          }
+        }
+        .icon-rotate-active {
+          animation: orbitRotation 2.5s linear infinite;
+          transform-style: preserve-3d;
+        }
+        .icon-rotate-active::before {
+          animation: orbitRotation 6s linear infinite;
+        }
+        .icon-sphere-reflection {
+          position: relative;
+        }
+        .icon-sphere-reflection::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: inherit;
+          display: inherit;
+          align-items: inherit;
+          justify-content: inherit;
+          color: inherit;
+          transform: translateZ(-20px);
+          opacity: 0.8;
+          pointer-events: none;
+        }
+      `}</style>
       <Swiper
         modules={[EffectCoverflow]}
         effect="coverflow"
         grabCursor
         centeredSlides
         slidesPerView={3}
-        loop={false}                              // índices estables
-        initialSlide={currentIndex}               // arranca ya alineado a la URL actual
+        loop={false}
+        initialSlide={currentIndex}
         onSwiper={(sw) => (swiperRef.current = sw)}
         onSlideChange={(sw) => {
-          // Si el slide cambió por nuestra propia sincronización, lo ignoramos
           if (ignoreNextChange.current) {
             ignoreNextChange.current = false;
             return;
@@ -75,12 +110,20 @@ export default function Taskbar() {
             {({ isActive }) => (
               <div
                 onClick={() => navigate(item.path)}
-                className="flex flex-col items-center justify-center transition-all duration-300 cursor-pointer"
+                className="flex flex-col items-center justify-center transition-all duration-300 cursor-pointer pt-6"
               >
-                <div className={`transition-all duration-300 ${
-                  isActive ? "scale-125 text-white" : "scale-90 text-white/40 blur-[1px]"
-                }`}>
-                  {item.icon}
+                <div className="relative inline-block icon-sphere-container">
+                  <div 
+                    className={`icon-sphere-reflection relative z-10 transition-all duration-300 ${
+                      isActive ? "icon-rotate-active scale-125 text-white" : "scale-90 text-white/40 blur-[1px]"
+                    }`}
+                    style={{
+                      perspective: "800px",
+                      transformStyle: "preserve-3d"
+                    }}
+                  >
+                    {item.icon}
+                  </div>
                 </div>
                 <span className={`mt-2 text-sm transition-all duration-300 ${
                   isActive ? "text-white" : "text-white/40 blur-[1px]"

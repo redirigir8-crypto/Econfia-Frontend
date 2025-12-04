@@ -166,7 +166,7 @@ export default function ConsultaContratista() {
       )}
 
       {/* Home - Tema claro con hero + formulario */}
-      <section className="relative min-h-screen flex items-center justify-center py-8 pb-10">
+      <section className="relative min-h-screen flex items-start justify-center pt-0 pb-10">
         <div className="max-w-5xl mx-auto px-4 w-full">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             {/* Hero copy (izquierda) */}

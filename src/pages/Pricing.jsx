@@ -6,6 +6,51 @@ import { FaDatabase, FaBolt, FaShieldAlt, FaHeadset } from "react-icons/fa";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
+// Agregar estilos de animación
+const animationStyles = `
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in-down {
+    animation: fadeInDown 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  .animation-delay-100 { animation-delay: 0.1s; opacity: 0; }
+  .animation-delay-200 { animation-delay: 0.2s; opacity: 0; }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleTag = document.createElement('style');
+  styleTag.innerHTML = animationStyles;
+  if (!document.head.querySelector('style[data-pricing-animations]')) {
+    styleTag.setAttribute('data-pricing-animations', 'true');
+    document.head.appendChild(styleTag);
+  }
+}
+
 const LOGO = "/img/logo-econfia-1.png";
 /* --- Tarjeta de plan --- */
 /* --- Tarjeta de plan --- */
@@ -20,51 +65,55 @@ const PlanCard = ({
   return (
     <div
       className={[
-        "relative rounded-2xl border bg-white/5 border-white/10",
-        "p-5 md:p-6 shadow-3xl transition-all duration-300",
-        "hover:shadow-[0_0_28px_rgba(34,211,238,0.22)] hover:border-cyan-300/40",
-        highlight ? "outline outline-1 outline-cyan-400/40" : "",
-        "m-0 h-full",
+        "relative rounded-2xl border bg-gradient-to-br from-white/5 to-white/[0.02] border-white/10",
+        "p-6 md:p-7 shadow-3xl transition-all duration-500",
+        "hover:shadow-[0_0_35px_rgba(34,211,238,0.3)] hover:border-cyan-300/50 hover:scale-105 hover:from-white/10 hover:to-white/5",
+        highlight ? "outline outline-2 outline-cyan-400/50 shadow-[0_0_25px_rgba(34,211,238,0.25)]" : "",
+        "m-0 h-full group cursor-pointer",
       ].join(" ")}
     >
       {badge && (
-        <div className="absolute -top-3 right-4 px-3 py-1 text-xs rounded-full bg-cyan-500 text-black font-semibold">
+        <div className="absolute -top-3 right-4 px-4 py-1.5 text-xs rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg animate-pulse">
           {badge}
         </div>
       )}
 
       <div className="flex flex-col h-full m-0">
         {/* Logo + Título */}
-        <div className="flex items-center gap-3">
-          <img
-            src={LOGO} // 👈 ahora sí usa la constante
-            alt="Econfia Logo"
-            className="w-7 h-7 object-contain"
-          />
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-9 h-9 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-all group-hover:scale-110">
+            <img
+              src={LOGO}
+              alt="Econfia Logo"
+              className="w-6 h-6 object-contain"
+            />
+          </div>
 
           <h3
-            className="text-[clamp(1.15rem,1.6vw,1.45rem)] font-bold leading-tight m-0"
+            className="text-[clamp(1.25rem,1.7vw,1.55rem)] font-bold leading-tight m-0 group-hover:text-cyan-300 transition-colors"
             style={{ fontFamily: "poppins, sans-serif" }}
           >
             {title}
           </h3>
         </div>
 
-        <p className="text-gray-300 mt-1.5 m-0 text-[0.95rem]">{subtitle}</p>
+        <p className="text-gray-300 group-hover:text-gray-200 mt-1.5 m-0 text-[1rem] leading-relaxed transition-colors">{subtitle}</p>
 
         {/* Bullets */}
-        <ul className="mt-4 mb-5 space-y-2.5 text-gray-200 text-[0.98rem] leading-[1.6] m-0">
-          {features.map((f) => (
-            <li key={f} className="flex items-center gap-3 m-0">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0" />
-              <span className="m-0">{f}</span>
+        <ul className="mt-5 mb-6 space-y-3 text-gray-200 text-[1rem] leading-[1.65] m-0 flex-grow">
+          {features.map((f, idx) => (
+            <li key={f} className="flex items-start gap-3 m-0 group/item hover:translate-x-1 transition-transform" style={{ animationDelay: `${idx * 50}ms` }}>
+              <span className="w-5 h-5 mt-0.5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shrink-0 flex items-center justify-center group-hover/item:scale-125 transition-transform">
+                <span className="text-white text-xs font-bold">✓</span>
+              </span>
+              <span className="m-0 group-hover/item:text-white transition-colors">{f}</span>
             </li>
           ))}
         </ul>
 
         {/* Botón */}
         <button
-          className="mt-3 self-center px-7 py-2.5 rounded-full bg-cyan-500 text-black border border-transparent hover:bg-transparent hover:border-white hover:text-white transition"
+          className="mt-auto self-center px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold border-2 border-transparent hover:from-transparent hover:to-transparent hover:border-cyan-400 hover:text-cyan-400 transition-all shadow-lg hover:shadow-cyan-400/50 transform hover:scale-105"
           style={{ fontFamily: "poppins, sans-serif" }}
         >
           {cta}
@@ -168,58 +217,58 @@ function PricingSlide() {
         <header className="m-0 grid place-items-center">
           <div className="w-full max-w-[880px] text-center">
             <h1
-              className="text-[clamp(2rem,3.5vw,3rem)] font-bold leading-tight tracking-tight"
+              className="text-[clamp(2rem,3.5vw,3rem)] font-bold leading-tight tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent animate-fade-in-down"
               style={{ fontFamily: "poppins, sans-serif" }}
             >
-              Planes y <span className="text-cyan-400">Precios</span>
+              Elige el plan perfecto para ti
             </h1>
 
-            <p className="text-gray-300 mt-2 text-[0.98rem]">
-              Consultamos más de{" "}
-              <span className="text-cyan-300 font-semibold">200 fuentes</span> en
-              tiempo real. Reportes claros, cumplimiento normativo y tiempos de
-              respuesta consistentes.
+            <p className="text-gray-300 mt-4 text-[1.05rem] leading-relaxed animate-fade-in-up animation-delay-100">
+              Accede a más de{" "}
+              <span className="text-cyan-300 font-semibold">200 fuentes oficiales</span> en
+              tiempo real. Reportes profesionales, cumplimiento garantizado y 
+              <span className="text-cyan-300 font-semibold"> resultados instantáneos</span>.
             </p>
           </div>
         </header>
 
         {/* Ventajas compactas */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 m-0">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] transition">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 m-0 animate-fade-in-up animation-delay-200">
+          <div className="group rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] hover:bg-white/10 transition-all cursor-pointer transform hover:scale-105">
             <div className="flex items-center gap-3">
-              <FaDatabase className="text-cyan-400 text-xl" />
+              <FaDatabase className="text-cyan-400 text-xl group-hover:text-cyan-300 transition-colors" />
               <div>
-                <div className="font-semibold">200+ fuentes</div>
+                <div className="font-semibold group-hover:text-cyan-300 transition-colors">200+ fuentes</div>
                 <div className="text-gray-300 text-sm">Listas restrictivas y más.</div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] transition">
+          <div className="group rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] hover:bg-white/10 transition-all cursor-pointer transform hover:scale-105">
             <div className="flex items-center gap-3">
-              <FaBolt className="text-cyan-400 text-xl" />
+              <FaBolt className="text-cyan-400 text-xl group-hover:text-cyan-300 transition-colors" />
               <div>
-                <div className="font-semibold">Tiempo real</div>
+                <div className="font-semibold group-hover:text-cyan-300 transition-colors">Tiempo real</div>
                 <div className="text-gray-300 text-sm">Resultados en segundos.</div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] transition">
+          <div className="group rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] hover:bg-white/10 transition-all cursor-pointer transform hover:scale-105">
             <div className="flex items-center gap-3">
-              <FaShieldAlt className="text-cyan-400 text-xl" />
+              <FaShieldAlt className="text-cyan-400 text-xl group-hover:text-cyan-300 transition-colors" />
               <div>
-                <div className="font-semibold">Cumplimiento</div>
+                <div className="font-semibold group-hover:text-cyan-300 transition-colors">Cumplimiento</div>
                 <div className="text-gray-300 text-sm">Soporte a normativas.</div>
               </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] transition">
+          <div className="group rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] hover:bg-white/10 transition-all cursor-pointer transform hover:scale-105">
             <div className="flex items-center gap-3">
-              <FaHeadset className="text-cyan-400 text-xl" />
+              <FaHeadset className="text-cyan-400 text-xl group-hover:text-cyan-300 transition-colors" />
               <div>
-                <div className="font-semibold">Soporte</div>
+                <div className="font-semibold group-hover:text-cyan-300 transition-colors">Soporte</div>
                 <div className="text-gray-300 text-sm">Acompañamiento experto.</div>
               </div>
             </div>

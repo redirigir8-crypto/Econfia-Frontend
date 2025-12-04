@@ -1,38 +1,140 @@
 // src/pages/Nosotros.jsx
 import { useEffect, useRef, useState } from "react";
-import Header from "../components/Header"
+import Header from "../components/Header";
+import { FaRocket, FaEye, FaHeart, FaShieldAlt, FaBolt, FaUsers } from "react-icons/fa";
+
+// Estilos de animación
+const animationStyles = `
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in-down {
+    animation: fadeInDown 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in-left {
+    animation: fadeInLeft 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in-right {
+    animation: fadeInRight 0.8s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.8s ease-out forwards;
+  }
+  
+  .animation-delay-100 { animation-delay: 0.1s; opacity: 0; }
+  .animation-delay-200 { animation-delay: 0.2s; opacity: 0; }
+  .animation-delay-300 { animation-delay: 0.3s; opacity: 0; }
+  .animation-delay-400 { animation-delay: 0.4s; opacity: 0; }
+  .animation-delay-500 { animation-delay: 0.5s; opacity: 0; }
+  .animation-delay-600 { animation-delay: 0.6s; opacity: 0; }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleTag = document.createElement('style');
+  styleTag.innerHTML = animationStyles;
+  if (!document.head.querySelector('style[data-nosotros-animations]')) {
+    styleTag.setAttribute('data-nosotros-animations', 'true');
+    document.head.appendChild(styleTag);
+  }
+}
+
 /* ------- UI helpers ------- */
 const Chip = ({ children }) => (
-  <span className="text-xs px-3 py-1 rounded-full border border-white/10 bg-white/5">
+  <span className="text-xs px-3 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400/50 transition-all cursor-default hover:scale-105">
     {children}
   </span>
 );
 
 const Stat = ({ n, l }) => (
-  <div className="rounded-2xl p-6 border border-white/10 bg-white/[0.04]">
-    <div className="text-3xl font-bold text-cyan-400">{n}</div>
-    <div className="text-white/70">{l}</div>
+  <div className="group rounded-2xl p-6 border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] hover:from-white/10 hover:to-white/5 hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(34,211,238,0.2)] transition-all duration-500 cursor-pointer transform hover:scale-105">
+    <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent group-hover:from-cyan-300 group-hover:to-blue-400 transition-all">{n}</div>
+    <div className="text-white/70 mt-2 group-hover:text-white/90 transition-colors">{l}</div>
   </div>
 );
 
-function Valor({ titulo, resumen, detalle }) {
+function Valor({ titulo, resumen, detalle, icon }) {
   const [open, setOpen] = useState(false);
   return (
-    <>
-    
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-      <div className="flex items-start justify-between gap-4">
-        <h4 className="text-lg font-semibold text-white">{titulo}</h4>
-        <button
-          onClick={() => setOpen(!open)}
-          className="text-xs px-3 py-1 rounded-full border border-white/10 hover:border-cyan-400 hover:text-cyan-300"
-        >
-          {open ? "Ver menos" : "Ver más"}
-        </button>
+    <div className="group rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-6 hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(34,211,238,0.15)] hover:from-white/10 hover:to-white/5 transition-all duration-500 transform hover:scale-105">
+      <div className="flex items-start gap-4 mb-3">
+        <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl group-hover:bg-cyan-500/30 group-hover:scale-110 transition-all flex-shrink-0">
+          {icon}
+        </div>
+        <div className="flex-1">
+          <h4 className="text-lg font-semibold text-white group-hover:text-cyan-300 transition-colors">{titulo}</h4>
+        </div>
       </div>
-      <p className="text-white/75 mt-2">{open ? detalle : resumen}</p>
+      
+      <p className="text-white/75 group-hover:text-white/90 transition-colors leading-relaxed">
+        {open ? detalle : resumen}
+      </p>
+      
+      <button
+        onClick={() => setOpen(!open)}
+        className="mt-4 text-xs px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400/50 transition-all"
+      >
+        {open ? "Ver menos ↑" : "Ver más ↓"}
+      </button>
     </div>
-    </>
   );
 }
 
@@ -96,33 +198,48 @@ export default function Nosotros() {
         {/* ===== Slide 1: Hero + Servicios ===== */}
         <div className="snap-start shrink-0 w-full h-full overflow-y-auto">
           <div className="mx-auto max-w-[1200px] px-6 py-6 md:py-8">
-            <header className="grid place-items-start gap-3">
+            <header className="grid place-items-start gap-4 animate-fade-in-down">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                </span>
+                <span className="text-cyan-300 text-sm font-medium">Conoce más sobre nosotros</span>
+              </div>
+              
               <h1
-                className="text-[clamp(2rem,3.5vw,3.2rem)] font-extrabold leading-tight tracking-tight"
+                className="text-[clamp(2.5rem,4vw,4rem)] font-extrabold leading-tight tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent"
                 style={{ fontFamily: "poppins, sans-serif" }}
               >
-                Sobre <span className="text-cyan-400">eConfia</span>
+                Sobre eConfia
               </h1>
-              <p className="text-white/80 max-w-3xl text-[0.98rem] text-justify">
-                eConfia es una plataforma de verificación y listas restrictivas que
+              
+              <p className="text-white/90 max-w-3xl text-[1.05rem] leading-relaxed">
+                eConfia es una <span className="text-cyan-300 font-semibold">plataforma líder de verificación</span> y listas restrictivas que
                 automatiza consultas en fuentes nacionales e internacionales para
                 reducir riesgo operativo y de cumplimiento. Cumple normativa, guarda
-                evidencia y genera reportes claros para decisiones ágiles.
+                evidencia y genera reportes claros para <span className="text-cyan-300 font-semibold">decisiones ágiles y seguras</span>.
               </p>
             </header>
 
-            <section className="mt-6">
-              <h2 className="text-2xl md:text-3xl font-bold">Servicios</h2>
-              <p className="text-white/80 max-w-3xl mt-3 text-justify">
+            <section className="mt-8 animate-fade-in-up animation-delay-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                  <FaRocket className="text-white text-xl" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-cyan-300 bg-clip-text text-transparent">Nuestros Servicios</h2>
+              </div>
+              
+              <p className="text-white/90 max-w-3xl mt-4 leading-relaxed">
                 Ofrecemos servicios de calidad para complementar tus procesos y{" "}
-                <span className="text-white">prevenir proactivamente irregularidades</span>{" "}
+                <span className="text-cyan-300 font-semibold">prevenir proactivamente irregularidades</span>{" "}
                 que afecten la imagen de tu empresa. Contamos con un equipo
                 multidisciplinario y metodologías de cumplimiento para que tomes
                 decisiones con confianza.
               </p>
 
               <div className="max-w-3xl">
-                <div className="flex flex-wrap gap-2 mt-4 justify-start items-start content-start">
+                <div className="flex flex-wrap gap-2.5 mt-6 justify-start items-start content-start">
                   {[
                     "Psicólogos",
                     "Criminalística",
@@ -136,8 +253,10 @@ export default function Nosotros() {
                     "SGSST",
                     "SARLAFT",
                     "Bienestar",
-                  ].map((t) => (
-                    <Chip key={t}>{t}</Chip>
+                  ].map((t, idx) => (
+                    <div key={t} className="animate-scale-in" style={{ animationDelay: `${0.3 + idx * 0.05}s`, opacity: 0 }}>
+                      <Chip>{t}</Chip>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -149,12 +268,17 @@ export default function Nosotros() {
         <div className="snap-start shrink-0 w-full h-full overflow-y-auto">
           <div className="mx-auto max-w-[1200px] px-6 py-6 md:py-8">
             {/* Misión / Visión */}
-            <section className="mt-2">
-              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 md:p-5 overflow-hidden">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
-                  <article className="h-full min-h-[220px] rounded-2xl p-5 border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] flex flex-col overflow-hidden">
-                    <h3 className="text-xl font-semibold">Misión</h3>
-                    <p className="text-white/75 mt-2">
+            <section className="mt-2 animate-fade-in-up">
+              <div className="rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-white/5 to-white/[0.02] p-6 md:p-7 shadow-[0_0_30px_rgba(34,211,238,0.1)]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                  <article className="group h-full min-h-[240px] rounded-2xl p-6 border border-white/10 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(34,211,238,0.2)] transition-all duration-500 flex flex-col transform hover:scale-105">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 rounded-xl bg-cyan-500/30 flex items-center justify-center group-hover:bg-cyan-500/40 transition-all">
+                        <FaRocket className="text-cyan-300 text-2xl group-hover:scale-110 transition-transform" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-white group-hover:text-cyan-300 transition-colors">Misión</h3>
+                    </div>
+                    <p className="text-white/85 leading-relaxed group-hover:text-white transition-colors">
                       Proveer soluciones óptimas mediante información, verificación e
                       investigación para garantizar personal apto, idóneo y honesto. Con
                       altos estándares de confidencialidad y tecnología de última
@@ -162,9 +286,14 @@ export default function Nosotros() {
                     </p>
                   </article>
 
-                  <article className="h-full min-h-[220px] rounded-2xl p-5 border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] flex flex-col overflow-hidden">
-                    <h3 className="text-xl font-semibold">Visión</h3>
-                    <p className="text-white/75 mt-2">
+                  <article className="group h-full min-h-[240px] rounded-2xl p-6 border border-white/10 bg-gradient-to-br from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 hover:border-purple-400/50 hover:shadow-[0_0_25px_rgba(168,85,247,0.2)] transition-all duration-500 flex flex-col transform hover:scale-105">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 rounded-xl bg-purple-500/30 flex items-center justify-center group-hover:bg-purple-500/40 transition-all">
+                        <FaEye className="text-purple-300 text-2xl group-hover:scale-110 transition-transform" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors">Visión</h3>
+                    </div>
+                    <p className="text-white/85 leading-relaxed group-hover:text-white transition-colors">
                       Para 2030, GRUPO SOLUCIONES será referente en asesoría de
                       confiabilidad y selección, con infraestructura sólida, gestión
                       moderna orientada a valor y tecnología de punta.
@@ -175,7 +304,7 @@ export default function Nosotros() {
             </section>
 
             {/* Métricas */}
-            <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
+            <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8 animate-fade-in-up animation-delay-200">
               <Stat n="150+" l="Fuentes integradas" />
               <Stat n="60s" l="Tiempo promedio por consulta" />
               <Stat n="99.9%" l="Disponibilidad" />
@@ -188,48 +317,78 @@ export default function Nosotros() {
         <div className="snap-start shrink-0 w-full h-full overflow-y-auto">
           <div className="mx-auto max-w-[1200px] px-6 py-6 md:py-8">
             <section className="mt-2 pb-6">
-              <h2 className="text-2xl md:text-3xl font-bold">Valores corporativos</h2>
+              <div className="flex items-center gap-3 mb-6 animate-fade-in-down">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                  <FaHeart className="text-white text-2xl" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-cyan-300 bg-clip-text text-transparent">Valores Corporativos</h2>
+              </div>
+              
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                <Valor
-                  titulo="Calidad"
-                  resumen="Ejecutamos con mejora continua en cada servicio."
-                  detalle="Todas nuestras actividades se realizan bajo mejora continua, midiendo, aprendiendo y optimizando procesos para resultados predecibles."
-                />
-                <Valor
-                  titulo="Confidencialidad y control"
-                  resumen="Protegemos datos y hallazgos con controles estrictos."
-                  detalle="Compromiso total con la confidencialidad: controles de acceso, trazabilidad, manejo seguro de evidencias y cumplimiento de privacidad."
-                />
-                <Valor
-                  titulo="Competitividad"
-                  resumen="Calidad y eficiencia a precios competitivos."
-                  detalle="Servicios y productos de calidad con eficiencia y eficacia, optimizando costos sin sacrificar el estándar de cumplimiento."
-                />
-                <Valor
-                  titulo="Honestidad"
-                  resumen="Actuamos con honradez, equidad y claridad."
-                  detalle="Relaciones basadas en dignidad, transparencia y responsabilidad profesional."
-                />
-                <Valor
-                  titulo="Oportunidad"
-                  resumen="Agilidad con cumplimiento estricto."
-                  detalle="Respondemos rápido y dentro del marco normativo para ajustarnos a las necesidades del cliente y del mercado."
-                />
-                <Valor
-                  titulo="Servicio y satisfacción"
-                  resumen="Atención respetuosa orientada a expectativas."
-                  detalle="Escuchamos, entendemos y nos alineamos a lo que necesitas. Meta: superar expectativas con soluciones claras."
-                />
-                <Valor
-                  titulo="Transparencia"
-                  resumen="Comunicación clara y actualizaciones permanentes."
-                  detalle="Informamos avances y hallazgos. Evidencias y enlaces disponibles para auditoría y trazabilidad."
-                />
-                <Valor
-                  titulo="Adaptabilidad"
-                  resumen="Formación continua ante el cambio."
-                  detalle="Actualizamos procesos, tecnología y habilidades del equipo para mantener y elevar la calidad del servicio."
-                />
+                <div className="animate-fade-in-up animation-delay-100">
+                  <Valor
+                    titulo="Calidad"
+                    icon={<FaBolt />}
+                    resumen="Ejecutamos con mejora continua en cada servicio."
+                    detalle="Todas nuestras actividades se realizan bajo mejora continua, midiendo, aprendiendo y optimizando procesos para resultados predecibles."
+                  />
+                </div>
+                <div className="animate-fade-in-up animation-delay-200">
+                  <Valor
+                    titulo="Confidencialidad y control"
+                    icon={<FaShieldAlt />}
+                    resumen="Protegemos datos y hallazgos con controles estrictos."
+                    detalle="Compromiso total con la confidencialidad: controles de acceso, trazabilidad, manejo seguro de evidencias y cumplimiento de privacidad."
+                  />
+                </div>
+                <div className="animate-fade-in-up animation-delay-300">
+                  <Valor
+                    titulo="Competitividad"
+                    icon={<FaRocket />}
+                    resumen="Calidad y eficiencia a precios competitivos."
+                    detalle="Servicios y productos de calidad con eficiencia y eficacia, optimizando costos sin sacrificar el estándar de cumplimiento."
+                  />
+                </div>
+                <div className="animate-fade-in-up animation-delay-400">
+                  <Valor
+                    titulo="Honestidad"
+                    icon={<FaHeart />}
+                    resumen="Actuamos con honradez, equidad y claridad."
+                    detalle="Relaciones basadas en dignidad, transparencia y responsabilidad profesional."
+                  />
+                </div>
+                <div className="animate-fade-in-up animation-delay-500">
+                  <Valor
+                    titulo="Oportunidad"
+                    icon={<FaBolt />}
+                    resumen="Agilidad con cumplimiento estricto."
+                    detalle="Respondemos rápido y dentro del marco normativo para ajustarnos a las necesidades del cliente y del mercado."
+                  />
+                </div>
+                <div className="animate-fade-in-up animation-delay-600">
+                  <Valor
+                    titulo="Servicio y satisfacción"
+                    icon={<FaUsers />}
+                    resumen="Atención respetuosa orientada a expectativas."
+                    detalle="Escuchamos, entendemos y nos alineamos a lo que necesitas. Meta: superar expectativas con soluciones claras."
+                  />
+                </div>
+                <div className="animate-fade-in-up animation-delay-100">
+                  <Valor
+                    titulo="Transparencia"
+                    icon={<FaEye />}
+                    resumen="Comunicación clara y actualizaciones permanentes."
+                    detalle="Informamos avances y hallazgos. Evidencias y enlaces disponibles para auditoría y trazabilidad."
+                  />
+                </div>
+                <div className="animate-fade-in-up animation-delay-200">
+                  <Valor
+                    titulo="Adaptabilidad"
+                    icon={<FaRocket />}
+                    resumen="Formación continua ante el cambio."
+                    detalle="Actualizamos procesos, tecnología y habilidades del equipo para mantener y elevar la calidad del servicio."
+                  />
+                </div>
               </div>
             </section>
           </div>
@@ -237,30 +396,34 @@ export default function Nosotros() {
       </section>
 
       {/* Controles (flechas + dots) */}
-      <div className="pointer-events-none fixed bottom-6 left-0 right-0 flex items-center justify-center gap-3">
-        <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-black/30 border border-white/15 backdrop-blur px-2 py-1">
+      <div className="pointer-events-none fixed bottom-8 left-0 right-0 flex items-center justify-center gap-3 z-50">
+        <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-black/40 border border-cyan-500/30 backdrop-blur-xl px-4 py-2 shadow-[0_0_20px_rgba(34,211,238,0.3)]">
           <button
             onClick={prev}
-            className="px-3 py-1 text-sm rounded-full hover:bg-white/10"
+            className="px-4 py-2 text-sm rounded-full hover:bg-cyan-500/20 text-white hover:text-cyan-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed font-medium"
             disabled={page === 0}
           >
-            ◀︎
+            ← Anterior
           </button>
-          {[0, 1, 2].map((i) => (
-            <button
-              key={i}
-              onClick={() => go(i)}
-              className={`w-2.5 h-2.5 rounded-full ${
-                page === i ? "bg-cyan-400" : "bg-white/40"
-              }`}
-            />
-          ))}
+          <div className="flex items-center gap-2">
+            {[0, 1, 2].map((i) => (
+              <button
+                key={i}
+                onClick={() => go(i)}
+                className={`transition-all duration-300 rounded-full ${
+                  page === i 
+                    ? "w-8 h-3 bg-gradient-to-r from-cyan-400 to-blue-500" 
+                    : "w-3 h-3 bg-white/40 hover:bg-white/60"
+                }`}
+              />
+            ))}
+          </div>
           <button
             onClick={next}
-            className="px-3 py-1 text-sm rounded-full hover:bg-white/10"
+            className="px-4 py-2 text-sm rounded-full hover:bg-cyan-500/20 text-white hover:text-cyan-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed font-medium"
             disabled={page === 2}
           >
-            ▶︎
+            Siguiente →
           </button>
         </div>
       </div>
