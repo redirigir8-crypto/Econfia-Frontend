@@ -333,7 +333,7 @@ function Home() {
                         <p className="text-[10px] md:text-xs text-slate-400">Fuentes</p>
                       </div>
                       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg md:rounded-xl p-2 md:p-3 text-center hover:bg-white/10 transition-all">
-                        <p className="text-xl md:text-2xl font-bold text-cyan-400">&lt;5s</p>
+                        <p className="text-xl md:text-2xl font-bold text-cyan-400">&lt;5 Min</p>
                         <p className="text-[10px] md:text-xs text-slate-400">Respuesta</p>
                       </div>
                       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg md:rounded-xl p-2 md:p-3 text-center hover:bg-white/10 transition-all">

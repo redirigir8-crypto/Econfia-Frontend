@@ -77,60 +77,59 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
   if (!isOpen) return null;
 
   return createPortal(
-    // Fondo BLANCO al abrir el modal
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-3xl w-full p-6 relative text-slate-900">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-slate-900/95 to-blue-900/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl shadow-cyan-500/20 max-w-2xl w-full p-6 relative">
         {/* Botón cerrar */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-slate-500 hover:text-red-500 text-xl font-bold"
+          className="absolute top-4 right-4 text-white/60 hover:text-cyan-400 text-2xl font-bold transition-colors"
           aria-label="Cerrar"
         >
           ✕
         </button>
 
-        <h2 className="text-2xl font-semibold mb-4 text-center">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-cyan-300 bg-clip-text text-transparent mb-4 text-center">
           Consulta a la Medida
         </h2>
 
         {/* Filtro */}
-        <div className="mb-3">
+        <div className="mb-4">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filtrar fuentes por nombre..."
-            className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Buscar fuente..."
+            className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
           />
-          <p className="text-xs text-slate-500 mt-1">
-            {filteredFuentes.length} fuente{filteredFuentes.length === 1 ? "" : "s"} encontradas
+          <p className="text-xs text-white/60 mt-1">
+            {filteredFuentes.length} fuente{filteredFuentes.length === 1 ? "" : "s"} encontrada{filteredFuentes.length === 1 ? "" : "s"}
           </p>
         </div>
 
         {/* Lista de fuentes */}
-        <div className="max-h-72 overflow-y-auto space-y-2 mb-4">
+        <div className="max-h-64 overflow-y-auto space-y-2 mb-4 pr-2">
           {filteredFuentes.length > 0 ? (
             filteredFuentes.map((fuente) => (
               <label
                 key={fuente.id}
-                className="flex items-center gap-3 bg-slate-50 hover:bg-slate-100 p-3 rounded-lg border border-slate-200"
+                className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 hover:border-cyan-500/30 cursor-pointer transition-all"
               >
                 <input
                   type="checkbox"
-                  className="accent-blue-600 w-4 h-4"
+                  className="accent-cyan-500 w-4 h-4 cursor-pointer"
                   checked={seleccionadas.includes(fuente.nombre)}
                   onChange={() => handleCheckbox(fuente.nombre)}
                 />
                 <div className="flex flex-col">
-                  <span className="font-medium">{fuente.nombre_pila || fuente.nombre}</span>
+                  <span className="font-medium text-white">{fuente.nombre_pila || fuente.nombre}</span>
                   {fuente.nombre && (
-                    <span className="text-xs text-slate-500">{fuente.nombre}</span>
+                    <span className="text-xs text-white/50">{fuente.nombre}</span>
                   )}
                 </div>
               </label>
             ))
           ) : (
-            <p className="text-slate-500 text-center">
+            <p className="text-white/60 text-center text-sm py-4">
               {fuentes.length === 0
                 ? "No hay fuentes disponibles."
                 : "No hay coincidencias con el filtro."}
@@ -142,13 +141,13 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
         <button
           onClick={handleConsultar}
           disabled={loading || seleccionadas.length === 0}
-          className={`w-full px-4 py-2 rounded-full font-medium text-sm transition-all ${
+          className={`w-full px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
             loading || seleccionadas.length === 0
-              ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg"
+              ? "bg-white/10 text-white/40 cursor-not-allowed"
+              : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
           }`}
         >
-          {loading ? "Consultando..." : "Consultar"}
+          {loading ? "Consultando..." : "Consultar Fuentes"}
         </button>
       </div>
     </div>,
@@ -318,148 +317,152 @@ export default function Consulta() {
       )}
 
       {/* Formulario */}
-      <div className="min-h-screen flex items-center justify-center px-4 py-8 pb-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl w-full">
-          <div className="text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Consulta lista dinámica de adversos
-            </h1>
-            <p className="text-lg text-white/70 leading-relaxed text-justify">
-              Seleccione el tipo de documento e ingrese el cupo numérico y
-              acceda a los resultados de manera rápida, segura y confiable.
-            </p>
+      <div className="min-h-screen flex items-center justify-center px-4 py-8 pb-6 relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+        {/* Elementos decorativos de fondo */}
+        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
-            <p className="mt-4 text-[10px] text-red-400/80 leading-snug text-justify">
-              Al realizar esta consulta, declara y certifica que cuenta con la
-              autorización válida y expresa del titular del tipo de documento
-              objeto de verificación, y que la información será utilizada de
-              forma responsable, conforme a la normatividad vigente en Colombia.
-            </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center max-w-5xl w-full relative z-10">
+          {/* Lado izquierdo: Información */}
+          <div className="text-center md:text-left space-y-3">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
+                Consulta de Listas Dinámicas
+              </h1>
+              <p className="mt-2 text-sm text-white/70 leading-relaxed">
+                Verifica antecedentes de manera rápida, segura y confiable.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-lg p-3">
+              <p className="text-xs text-white/80 leading-relaxed">
+                <span className="text-cyan-400 font-semibold">⚠️ Declaración:</span> Al realizar esta consulta, declara y certifica que cuenta con la autorización válida del titular.
+              </p>
+            </div>
           </div>
 
-          <div className="relative w-full max-w-md mx-auto border border-white/30 rounded-2xl shadow-xl">
-            <div className="absolute inset-0 bg-white/5 blur-[4px] border rounded-2xl"></div>
+          {/* Lado derecho: Formulario */}
+          <div className="relative w-full max-w-sm mx-auto">
+            <div className="relative w-full bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[20px] border border-white/10 shadow-2xl shadow-cyan-500/10 p-6 group">
+              {/* Glow effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
-            <div className="relative p-8">
-              <h2 className="text-2xl font-semibold text-white mb-6 text-center">
-                <img
-                  src="/img/logo-econfia-rojo.png"
-                  alt="Mi Imagen"
-                  className="mx-auto max-h-16 w-auto"
-                />
-              </h2>
+              <div className="relative z-10">
+                <div className="mb-4 text-center">
+                  <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2 flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                    </span>
+                    <span className="text-cyan-300 text-xs font-medium">Verificación segura</span>
+                  </div>
+                  <h2 className="text-xl font-bold text-white">Verificar Ahora</h2>
+                </div>
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                {/* Inputs */}
-                <div className="flex flex-col gap-2">
-                  <select
-                    value={tipoDoc}
-                    onChange={(e) => setTipoDoc(e.target.value)}
-                    className="w-full px-2 py-1 rounded-md bg-white/10 text-sm border border-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-white"
-                  >
-                    <option className="bg-black/50 text-white" value="">
-                      Seleccione tipo de documento
-                    </option>
-                    <option className="bg-black/50 text-white" value="CC">
-                      Cédula de Ciudadanía (CC)
-                    </option>
-                    <option className="bg-black/50 text-white" value="TI">
-                      Tarjeta de Identidad (TI)
-                    </option>
-                    <option className="bg-black/50 text-white" value="CE">
-                      Cédula de Extranjería (CE)
-                    </option>
-                    <option className="bg-black/50 text-white" value="PPT">
-                      Permiso de Protección Temporal (PPT)
-                    </option>
-                    <option className="bg-black/50 text-white" value="PEP">
-                      Permiso Especial de Permanencia (PEP)
-                    </option>
-                    <option className="bg-black/50 text-white" value="NIT">
-                      NIT
-                    </option>
-                  </select>
+                <form onSubmit={handleSubmit} className="space-y-2">
+                  {/* Select Tipo de Documento */}
+                  <div>
+                    <label className="text-xs font-semibold text-white/70 mb-1 block">Tipo de Documento</label>
+                    <select
+                      value={tipoDoc}
+                      onChange={(e) => setTipoDoc(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                    >
+                      <option className="bg-slate-900 text-white" value="">
+                        Seleccione tipo de documento
+                      </option>
+                      <option className="bg-slate-900 text-white" value="CC">
+                        Cédula de Ciudadanía (CC)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="TI">
+                        Tarjeta de Identidad (TI)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="CE">
+                        Cédula de Extranjería (CE)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="PPT">
+                        Permiso de Protección Temporal (PPT)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="PEP">
+                        Permiso Especial de Permanencia (PEP)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="NIT">
+                        NIT
+                      </option>
+                    </select>
+                  </div>
 
-                  <input
-                    type="text"
-                    value={cedula}
-                    onChange={(e) => setCedula(e.target.value)}
-                    placeholder="Ingrese cupo de númerico"
-                    className="w-full px-2 py-1 rounded-md bg-white/10 text-white text-sm placeholder-white/50 border border-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                  />
+                  {/* Input Cédula */}
+                  <div>
+                    <label className="text-xs font-semibold text-white/70 mb-1 block">Número de Documento</label>
+                    <input
+                      type="text"
+                      value={cedula}
+                      onChange={(e) => setCedula(e.target.value)}
+                      placeholder="Ej: 1234567890"
+                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                    />
+                  </div>
 
-                  <div className="w-full">
-                    <label className="text-xs text-white/80 mb-1 block">
-                      Fecha de Expedición
-                    </label>
+                  {/* Input Fecha */}
+                  <div>
+                    <label className="text-xs font-semibold text-white/70 mb-1 block">Fecha de Expedición (Opcional)</label>
                     <input
                       type="date"
                       value={fechaExpedicion}
                       onChange={(e) => setFechaExpedicion(e.target.value)}
-                      className="w-full px-2 py-1 rounded-md bg-white/10 text-white text-sm border border-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                     />
                   </div>
-                </div>
 
-                {/* Checkboxes */}
-                <div className="flex flex-col gap-2 mt-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={acepta}
-                      onChange={(e) => setAcepta(e.target.checked)}
-                      className="accent-blue-500 w-3 h-3"
-                    />
-                    <span className="text-white/80">
-                      Acepto los{" "}
-                      <a
-                        href="#"
-                        onClick={() => setOpen(true)}
-                        className="text-blue-400 underline"
-                      >
-                        términos y condiciones
-                      </a>
-                    </span>
+                  {/* Checkboxes */}
+                  <div className="space-y-1 pt-1">
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={acepta}
+                        onChange={(e) => setAcepta(e.target.checked)}
+                        className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      />
+                      <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                        Acepto los{" "}
+                        <button
+                          type="button"
+                          onClick={() => setOpen(true)}
+                          className="text-cyan-400 hover:text-cyan-300 underline font-medium"
+                        >
+                          términos y condiciones
+                        </button>
+                      </span>
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={consentimiento}
+                        onChange={(e) => setConsentimiento(e.target.checked)}
+                        className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      />
+                      <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                        Confirmo tener consentimiento del titular
+                      </span>
+                    </label>
                   </div>
 
-                  <Terminos isOpen={open} onClose={() => setOpen(false)}>
-                    <h2 className="text-xl font-bold mb-4">
-                      Términos y Condiciones
-                    </h2>
-                    <p>
-                      Aviso Legal y Declaración de Cumplimiento Normativo...
-                    </p>
-                  </Terminos>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={consentimiento}
-                      onChange={(e) => setConsentimiento(e.target.checked)}
-                      className="accent-green-500 w-3 h-3"
-                    />
-                    <span className="text-white/80">
-                      Confirmo que cuento con el consentimiento del titular del
-                      documento
-                    </span>
-                  </div>
-                </div>
-
-                {/* Botón principal */}
-                <button
-                  type="submit"
-                  disabled={!acepta || !consentimiento}
-                  className={`mt-2 px-4 py-1 rounded-full font-medium text-sm transition-all duration-300 ease-in-out 
-                    ${
-                      !acepta || !consentimiento
-                        ? "bg-gray-500 cursor-not-allowed text-white/70"
-                        : "bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-105 hover:shadow-lg"
+                  {/* Botón principal */}
+                  <button
+                    type="submit"
+                    disabled={!acepta || !consentimiento || loading}
+                    className={`w-full mt-3 px-6 py-2 rounded-lg font-semibold text-xs transition-all duration-300 ${
+                      !acepta || !consentimiento || loading
+                        ? "bg-white/10 text-white/40 cursor-not-allowed"
+                        : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
                     }`}
-                >
-                  Consultar
-                </button>
-
-              </form>
+                  >
+                    {loading ? "Procesando..." : "Consultar Ahora"}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
