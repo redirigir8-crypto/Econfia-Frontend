@@ -166,7 +166,7 @@ export default function ConsultaContratista() {
       )}
 
       {/* Home - Tema oscuro con hero + formulario elegante */}
-      <section className="relative min-h-screen flex items-center justify-center py-8 pb-36 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+      <section className="relative h-screen flex items-center justify-center py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
         {/* Elementos decorativos de fondo */}
         <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />

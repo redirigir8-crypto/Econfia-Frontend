@@ -48,10 +48,10 @@ function ElegantCard({ title, children, className = "" }) {
       {/* Glow effect sutil */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
       
-      <div className="relative p-6">
+      <div className="relative p-3 md:p-4">
         {title && (
-          <div className="mb-4">
-            <h2 className="text-2xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+          <div className="mb-2 md:mb-3">
+            <h2 className="text-lg md:text-xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
               {title}
             </h2>
           </div>
@@ -154,7 +154,7 @@ export default function Profile() {
   ];
 
   return (
-    <section className="relative min-h-screen py-8 pb-36 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+    <section className="relative h-screen py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
       {/* Elementos decorativos de fondo */}
       <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -275,15 +275,15 @@ export default function Profile() {
           </svg>
 
           {/* Gráficos */}
-          <div className="grid lg:grid-cols-2 gap-6 w-full">
+          <div className="grid lg:grid-cols-2 gap-4 md:gap-6 w-full">
             {/* Barras: Consultas por estado */}
-            <div className="relative rounded-xl border border-cyan-500/20 p-5 bg-gradient-to-br from-slate-900/60 to-blue-900/20 backdrop-blur-lg shadow-xl shadow-cyan-500/10 hover:shadow-cyan-500/20 transition-all group">
+            <div className="relative rounded-xl border border-cyan-500/20 p-3 md:p-4 bg-gradient-to-br from-slate-900/60 to-blue-900/20 backdrop-blur-lg shadow-xl shadow-cyan-500/10 hover:shadow-cyan-500/20 transition-all group">
               {/* Glow decorativo */}
               <div className="absolute -top-1 -right-1 w-20 h-20 bg-cyan-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
               
-              <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="flex items-center justify-center gap-2 mb-2 md:mb-3">
                 <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-lg shadow-cyan-500/50 animate-pulse" />
-                <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 font-black text-base">
+                <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 font-black text-sm md:text-base">
                   Consultas por Estado
                 </h3>
               </div>
@@ -335,18 +335,18 @@ export default function Profile() {
             </div>
 
             {/* Pie: Resumen consultas */}
-            <div className="relative rounded-xl border border-blue-500/20 p-5 bg-gradient-to-br from-slate-900/60 to-purple-900/20 backdrop-blur-lg shadow-xl shadow-blue-500/10 hover:shadow-blue-500/20 transition-all group w-full">
+            <div className="relative rounded-xl border border-blue-500/20 p-3 md:p-4 bg-gradient-to-br from-slate-900/60 to-purple-900/20 backdrop-blur-lg shadow-xl shadow-blue-500/10 hover:shadow-blue-500/20 transition-all group w-full">
               {/* Glow decorativo */}
               <div className="absolute -top-1 -left-1 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
               
-              <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="flex items-center justify-center gap-2 mb-2 md:mb-3">
                 <div className="w-2 h-2 rounded-full bg-blue-400 shadow-lg shadow-blue-500/50 animate-pulse" style={{ animationDelay: '0.3s' }} />
-                <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400 font-black text-base">
+                <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400 font-black text-sm md:text-base">
                   Resumen de Consultas
                 </h3>
               </div>
               
-              <div className="h-[280px]">
+              <div className="h-[180px] md:h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <defs>

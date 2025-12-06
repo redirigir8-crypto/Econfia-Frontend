@@ -32,34 +32,35 @@ function percentFrom(startTs, nowTs, duration = DURATION_MS) {
   return Math.round(pct * 100);
 }
 
-/* ===== Barra neón (sin tiempo) ===== */
-function NeonProgressBar({ percent = 0, showLabel = true, className = "" }) {
+/* ===== Barra elegante con gradiente cyan-blue ===== */
+function ElegantProgressBar({ percent = 0, showLabel = true, className = "" }) {
   const pct = Math.max(0, Math.min(100, Math.round(percent)));
   return (
     <div className={`w-full ${className}`}>
-      <div className="w-full h-2 rounded-full bg-white/10 border border-white/10 overflow-hidden relative">
+      <div className="w-full h-2.5 rounded-full bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 overflow-hidden relative backdrop-blur-sm">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 shadow-[0_0_12px_rgba(34,211,238,0.6)]"
-          style={{ width: `${pct}%`, transition: "width 0.8s linear" }}
+          className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.7)]"
+          style={{ width: `${pct}%`, transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}
         />
-        <div className="pointer-events-none absolute inset-0 shadow-[0_0_20px_rgba(59,130,246,0.35)_inset]" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/10" />
       </div>
       {showLabel && (
-        <div className="mt-1 text-[10px] text-cyan-300 font-mono text-right">
+        <div className="mt-1.5 text-[11px] text-cyan-400 font-semibold tracking-wide text-right">
           {pct}%
         </div>
       )}
     </div>
   );
 }
-function NeonCard({ children, className = "" }) {
+function ElegantCard({ children, className = "" }) {
   return (
     <div
       className={[
-        "px-3 py-2 rounded-xl border text-gray-100",
-        "bg-[radial-gradient(120%_80%_at_0%_0%,rgba(34,211,238,0.10),transparent_60%),radial-gradient(120%_80%_at_100%_0%,rgba(217,70,239,0.08),transparent_60%)]",
-        "border-cyan-400/30 hover:border-cyan-300/50 transition",
-        "shadow-[0_0_12px_rgba(34,211,238,0.25)]",
+        "px-4 py-3 rounded-xl border text-gray-100",
+        "bg-gradient-to-br from-slate-800/40 via-slate-900/30 to-slate-800/40",
+        "border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300",
+        "shadow-[0_4px_20px_rgba(6,182,212,0.15)] hover:shadow-[0_6px_25px_rgba(6,182,212,0.25)]",
+        "backdrop-blur-xl hover:scale-[1.02] transform",
         className,
       ].join(" ")}
     >
@@ -88,14 +89,13 @@ function ProcessDockPortal({ items }) {
 
   if (!container) return null;
   const now = Date.now();
-
   return createPortal(
     <div className="fixed top-4 right-4 z-[9999]">
-      <div className="backdrop-blur-md bg-black/60 border border-white/10 rounded-2xl shadow-2xl w-[300px]">
-        <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
-          <div className="flex items-center gap-2 text-gray-100">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
-            <span className="text-xs font-semibold tracking-wide">
+      <div className="backdrop-blur-xl bg-gradient-to-br from-slate-900/90 via-blue-950/80 to-slate-900/90 border border-cyan-500/30 rounded-2xl shadow-[0_8px_32px_rgba(6,182,212,0.3)] w-[320px]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-cyan-500/20">
+          <div className="flex items-center gap-3 text-gray-100">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+            <span className="text-sm font-bold tracking-wide bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
               {items.length > 0
                 ? `Procesando ${items.length} ${items.length === 1 ? "caso" : "casos"}`
                 : "Sin procesos en curso"}
@@ -103,33 +103,33 @@ function ProcessDockPortal({ items }) {
           </div>
           <button
             onClick={() => setOpen(v => !v)}
-            className="text-[11px] px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-gray-100 border border-white/10 transition"
+            className="text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-cyan-300 border border-cyan-500/30 transition-all duration-300"
           >
             {open ? "Minimizar" : "Expandir"}
           </button>
         </div>
 
         {open && items.length > 0 && (
-          <div className="px-3 pb-3 pt-2 max-h-[50vh] overflow-auto">
-            <div className="flex flex-col gap-2">
+          <div className="px-4 pb-4 pt-3 max-h-[50vh] overflow-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent">
+            <div className="flex flex-col gap-3">
               {items.map(card => {
                 const start = startsRef.current.get(card.id) ?? now;
                 const percent = percentFrom(start, now);
                 return (
-                  <NeonCard key={`${card.id}-${card.persona}`} className="gap-2">
-                    <div className="flex items-center gap-3">
-                      {/* loader circular (solo en CARD) */}
-                      <span className="inline-block w-4 h-4 rounded-full border-2 border-white/20 border-t-cyan-400 animate-spin shadow-[0_0_8px_rgba(34,211,238,0.7)]" />
-                      <div className="min-w-0">
-                        <div className="text-xs font-semibold line-clamp-1">{card.persona}</div>
-                        <div className="text-[10px] text-gray-300">
+                  <ElegantCard key={`${card.id}-${card.persona}`} className="gap-2">
+                    <div className="flex items-center gap-3 mb-2">
+                      {/* loader circular elegante */}
+                      <span className="inline-block w-5 h-5 rounded-full border-2 border-slate-700/50 border-t-cyan-400 animate-spin shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-bold text-cyan-100 line-clamp-1">{card.persona}</div>
+                        <div className="text-xs text-slate-400 mt-0.5">
                           {card.cedula ? `CC ${card.cedula}` : ""}
                           {card.fecha ? ` · ${new Date(card.fecha).toLocaleTimeString()}` : ""}
                         </div>
                       </div>
                     </div>
-                    <NeonProgressBar percent={percent} />
-                  </NeonCard>
+                    <ElegantProgressBar percent={percent} />
+                  </ElegantCard>
                 );
               })}
             </div>
@@ -175,81 +175,132 @@ export default function TablaResultados({ data = [], onVerResultados }) {
     <>
       <ProcessDockPortal items={enProcesoCards} />
 
-      <div className="backdrop-blur-md bg-white/5 border border-white/10 shadow-lg rounded-2xl p-4 text-gray-200">
-        <table className="min-w-full text-left text-sm">
-          <thead className="bg-white/10 border-b border-white/20">
-            <tr>
-              <th className="px-4 py-2">ID</th>
-              <th className="px-4 py-2">Cédula</th>
-              <th className="px-4 py-2">Nombre</th>
-              <th className="px-4 py-2">Estado</th>
-              <th className="px-4 py-2">Fecha</th>
-              <th className="px-4 py-2">Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            {datosPagina.map(item => {
-              const estado = (item.estado || "").toLowerCase();
-              const isProcessing = estado === "en_proceso";
-              const isDone = estado === "completado";
-              const start = startsRef.current.get(item.id) ?? now;
-              const percent = percentFrom(start, now);
+      <div className="backdrop-blur-xl bg-gradient-to-br from-slate-900/50 via-blue-950/30 to-slate-900/50 border border-cyan-500/20 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-xl md:rounded-2xl overflow-hidden">
+        {/* Header elegante */}
+        <div className="px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-b border-cyan-500/20">
+          <h3 className="text-sm md:text-base font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent flex items-center gap-1.5 md:gap-2">
+            <svg className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Historial de Consultas
+          </h3>
+        </div>
 
-              return (
-                <tr key={item.id} className="border-b border-white/10 hover:bg-white/5 transition align-top">
-                  <td className="px-4 py-2">{item.id}</td>
-                  <td className="px-4 py-2">{item.cedula}</td>
-                  <td className="px-4 py-2">{item.nombre || "—"}</td>
+        {/* Tabla con scroll */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left text-sm">
+            <thead>
+            <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">ID</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Cédula</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Nombre</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Estado</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Fecha</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Acción</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-cyan-500/10">
+              {datosPagina.map((item, idx) => {
+                const estado = (item.estado || "").toLowerCase();
+                const isProcessing = estado === "en_proceso";
+                const isDone = estado === "completado";
+                const start = startsRef.current.get(item.id) ?? now;
+                const percent = percentFrom(start, now);
 
-                  {/* ESTADO: solo barra + % */}
-                  <td className="px-4 py-2">
-                    {isProcessing ? (
-                      <NeonProgressBar percent={percent} />
-                    ) : isDone ? (
-                      <span className="text-green-400 font-semibold">Completado</span>
-                    ) : (
-                      <span className="text-gray-300">{item.estado || "—"}</span>
-                    )}
-                  </td>
+                return (
+                  <tr 
+                    key={item.id} 
+                    className="group hover:bg-gradient-to-r hover:from-cyan-500/5 hover:to-blue-500/5 transition-all duration-300 align-top"
+                  >
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 font-mono text-[10px] md:text-xs">
+                      <span className="inline-flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-cyan-500/20 group-hover:border-cyan-500/40 transition-colors text-[10px] md:text-xs">
+                        {item.id}
+                      </span>
+                    </td>
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm">{item.cedula}</td>
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-100 font-medium text-xs md:text-sm">{item.nombre || "—"}</td>
 
-                  <td className="px-4 py-2">
-                    {item.fecha ? new Date(item.fecha).toLocaleString() : "—"}
-                  </td>
+                    {/* ESTADO con badges elegantes */}
+                    <td className="px-2 md:px-3 py-1.5 md:py-2">
+                      {isProcessing ? (
+                        <div className="max-w-[140px]">
+                          <ElegantProgressBar percent={percent} />
+                        </div>
+                      ) : isDone ? (
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-semibold text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          Completado
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 text-xs">
+                          {item.estado || "—"}
+                        </span>
+                      )}
+                    </td>
 
-                  <td className="px-4 py-2">
-                    {isDone ? (
-                      <button
-                        onClick={() => onVerResultados?.(item.id)}
-                        className="px-3 py-1 bg-blue-600/80 text-white rounded-lg hover:bg-blue-500 transition shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                      >
-                        Ver resultados
-                      </button>
-                    ) : (
-                      <span className="text-cyan-300">Procesando…</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 text-[10px] md:text-xs">
+                      {item.fecha ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-cyan-300 font-semibold">
+                            {new Date(item.fecha).toLocaleDateString()}
+                          </span>
+                          <span className="text-slate-500">
+                            {new Date(item.fecha).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      ) : "—"}
+                    </td>
 
-        {/* Paginación */}
-        <div className="flex justify-between items-center mt-4 text-gray-300">
+                    <td className="px-2 md:px-3 py-1.5 md:py-2">
+                      {isDone ? (
+                        <button
+                          onClick={() => onVerResultados?.(item.id)}
+                          className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105 transform text-[10px] md:text-xs"
+                        >
+                          Ver resultados
+                        </button>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-cyan-400 text-[10px] md:text-xs">
+                          <span className="inline-block w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+                          Procesando…
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Paginación elegante */}
+        <div className="flex justify-between items-center px-2 md:px-3 py-1.5 md:py-2 mb-0.5 md:mb-1 bg-gradient-to-r from-slate-800/30 to-slate-900/30 border-t border-cyan-500/20">
           <button
             onClick={() => setPagina(prev => Math.max(prev - 1, 1))}
             disabled={pagina === 1}
-            className="px-3 py-1 bg-white/10 border border-white/20 rounded-lg disabled:opacity-40 hover:bg-white/20 transition"
+            className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1 text-[10px] md:text-xs"
           >
+            <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
             Anterior
           </button>
-          <span> Página {pagina} de {totalPaginas || 1} </span>
+          
+          <span className="text-slate-300 font-semibold text-[10px] md:text-xs">
+            Página <span className="text-cyan-400">{pagina}</span> de <span className="text-cyan-400">{totalPaginas || 1}</span>
+          </span>
+          
           <button
             onClick={() => setPagina(prev => Math.min(prev + 1, totalPaginas || 1))}
             disabled={pagina === totalPaginas || totalPaginas === 0}
-            className="px-3 py-1 bg-white/10 border border-white/20 rounded-lg disabled:opacity-40 hover:bg-white/20 transition"
+            className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1 text-[10px] md:text-xs"
           >
             Siguiente
+            <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       </div>

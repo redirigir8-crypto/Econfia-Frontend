@@ -209,7 +209,12 @@ export default function DetalleResultados({ consultaId }) {
   };
 
   if (loading) {
-    return <p className="text-center text-gray-300 text-sm">Cargando detalle...</p>;
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-4">
+        <div className="w-16 h-16 rounded-full border-4 border-slate-800 border-t-cyan-400 animate-spin shadow-[0_0_20px_rgba(6,182,212,0.5)]" />
+        <p className="text-slate-300 text-sm font-semibold">Cargando detalles...</p>
+      </div>
+    );
   }
 
   // 🔍 Filtros
@@ -253,7 +258,7 @@ export default function DetalleResultados({ consultaId }) {
     return pages;
   };
 
-  // 🎛️ Estado UI
+  // 🎛️ Estado UI con badges elegantes
   const EstadoCell = ({ item }) => {
     const estado = (item.estado || "").toLowerCase();
     const showRevalidandoUI =
@@ -261,15 +266,13 @@ export default function DetalleResultados({ consultaId }) {
 
     if (showRevalidandoUI) {
       return (
-        <button
-          disabled
-          aria-busy
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-white text-[10px] bg-gray-500 cursor-not-allowed"
+        <span
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-slate-600/20 to-slate-700/20 border border-slate-500/30 text-slate-300 font-semibold text-xs"
           title="Revalidando..."
         >
-          Revalidando...
-          <RefreshCw size={12} className="animate-spin" />
-        </button>
+          <RefreshCw size={14} className="animate-spin" />
+          Revalidando
+        </span>
       );
     }
 
@@ -277,125 +280,154 @@ export default function DetalleResultados({ consultaId }) {
       return (
         <button
           onClick={() => reintentarConsulta(item.id)}
-          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-white text-[10px] bg-yellow-600/80 hover:bg-yellow-500 transition"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30 hover:border-amber-400/50 text-amber-300 hover:text-amber-200 font-semibold text-xs transition-all duration-300 hover:scale-105 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_20px_rgba(245,158,11,0.4)]"
           title="Reintentar"
         >
-          offline
-          <RefreshCw size={12} />
+          <RefreshCw size={14} />
+          Offline
         </button>
       );
     }
 
-    const color =
-      estado === "validado"
-        ? "text-green-400"
-        : estado === "error"
-        ? "text-red-400"
-        : "text-gray-300";
+    if (estado === "validado") {
+      return (
+        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-semibold text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          Validado
+        </span>
+      );
+    }
 
-    return <span className={`font-medium ${color}`}>{item.estado}</span>;
+    if (estado === "error") {
+      return (
+        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/30 text-red-400 font-semibold text-xs shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
+          Error
+        </span>
+      );
+    }
+
+    return (
+      <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 text-xs font-medium">
+        {item.estado || "—"}
+      </span>
+    );
   };
 
   return (
-    <div className="mt-16 w-full text-xs pr-32 pl-16">
-      <h2 className="text-lg font-semibold mb-2 text-white">
-        Resultados de la consulta #{consultaId}
-      </h2>
+    <div className="w-full px-4 md:px-8 lg:px-12 py-3 md:py-4 h-full flex flex-col">
+      {/* Header elegante */}
+      <div className="mb-3 md:mb-4">
+        <div className="inline-block px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-1.5">
+          <span className="text-cyan-300 text-[10px] md:text-xs font-medium">Consulta #{consultaId}</span>
+        </div>
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+          Detalles de Resultados
+        </h2>
+      </div>
 
-      {/* 🔍 Barra de búsqueda y filtros */}
-      <div className="flex flex-wrap gap-2 mb-3">
+      {/* 🔍 Barra de búsqueda y filtros elegantes */}
+      <div className="flex flex-wrap gap-1.5 md:gap-2 mb-2 md:mb-3">
         <input
           type="text"
-          placeholder="Buscar..."
+          placeholder="🔍 Buscar..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-2 py-1 rounded bg-white/10 border border-white/20 text-gray-200 text-xs"
+          className="flex-1 min-w-[150px] px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
         />
         <input
           type="text"
           placeholder="Fuente"
           value={filters.fuente}
           onChange={(e) => setFilters({ ...filters, fuente: e.target.value })}
-          className="px-2 py-1 rounded bg-white/10 border border-white/20 text-gray-200 text-xs"
+          className="w-24 md:w-28 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs md:text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
         />
         <input
           type="text"
-          placeholder="Tipo de Fuente"
+          placeholder="Tipo"
           value={filters.tipo_fuente}
           onChange={(e) => setFilters({ ...filters, tipo_fuente: e.target.value })}
-          className="px-2 py-1 rounded bg-white/10 border border-white/20 text-gray-200 text-xs"
+          className="w-20 md:w-24 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs md:text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
         />
         <select
           value={filters.estado}
           onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
-          className="px-2 py-1 rounded bg-white/10 border border-white/20 text-gray-200 text-xs"
+          className="w-28 md:w-32 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs md:text-sm text-white focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all appearance-none cursor-pointer"
         >
-          <option value="">Todos los estados</option>
-          <option value="validado">validado</option>
-          <option value="offline">offline</option>
-          <option value="error">error</option>
-          <option value="revalidando">revalidando</option>
+          <option className="bg-slate-900" value="">Todos</option>
+          <option className="bg-slate-900" value="validado">Validado</option>
+          <option className="bg-slate-900" value="offline">Offline</option>
+          <option className="bg-slate-900" value="error">Error</option>
+          <option className="bg-slate-900" value="revalidando">Revalidando</option>
         </select>
         <input
           type="text"
           placeholder="Score"
           value={filters.score}
           onChange={(e) => setFilters({ ...filters, score: e.target.value })}
-          className="px-2 py-1 rounded bg-white/10 border border-white/20 text-gray-200 text-xs"
+          className="w-16 md:w-20 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs md:text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
         />
 
         <button
           onClick={() =>
             setFilters({ fuente: "", tipo_fuente: "", estado: "", score: "" })
           }
-          className="inline-flex items-center px-3 py-1 rounded-lg text-white text-xs
-                     bg-gradient-to-r from-blue-500 to-blue-700
-                     hover:brightness-110 active:scale-[0.98] transition
-                     focus:outline-none focus:ring-2 focus:ring-blue-400/60"
+          className="inline-flex items-center px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-white text-xs md:text-sm font-semibold bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300"
         >
           Limpiar
         </button>
       </div>
 
-      <div className="backdrop-blur-md bg-white/5 border border-white/10 shadow-md rounded-xl p-2 text-gray-200 overflow-x-auto">
-        <table className="table-auto text-left text-xs min-w-full w-1/2">
-          <thead className="bg-white/10 border-b border-white/20">
-            <tr>
-              <th className="px-2 py-1">Fuente</th>
-              <th className="px-2 py-1">Tipo de Fuente</th>
-              <th className="px-2 py-1">Estado</th>
-              <th className="px-2 py-1">Score</th>
-              <th className="px-2 py-1">Evidencia</th>
+      {/* Contenedor con scroll para la tabla */}
+      <div className="flex-1 overflow-auto backdrop-blur-xl bg-gradient-to-br from-slate-900/50 via-blue-950/30 to-slate-900/50 border border-cyan-500/20 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-xl md:rounded-2xl mb-3 md:mb-4">
+        <table className="table-auto text-left text-sm min-w-full">
+          <thead>
+            <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Fuente</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Tipo</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Estado</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Score</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider text-center">Evidencia</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-cyan-500/10">
             {datosPagina.length > 0 ? (
               datosPagina.map((item) => (
                 <tr
                   key={item.id}
-                  className="border-b border-white/10 hover:bg-white/5 transition"
+                  className="group hover:bg-gradient-to-r hover:from-cyan-500/5 hover:to-blue-500/5 transition-all duration-300"
                 >
-                  <td className="px-2 py-1">{item.fuente}</td>
-                  <td className="px-2 py-1">{item.tipo_fuente}</td>
-                  <td className="px-2 py-1">
+                  <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm">{item.fuente}</td>
+                  <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 text-xs md:text-sm">{item.tipo_fuente}</td>
+                  <td className="px-2 md:px-3 py-1.5 md:py-2">
                     <EstadoCell item={item} />
                   </td>
-                  <td className="px-2 py-1">{item.score}</td>
-                  <td className="px-2 py-1">
+                  <td className="px-2 md:px-3 py-1.5 md:py-2">
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 md:py-1 rounded-lg bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 text-cyan-300 font-bold text-xs md:text-sm">
+                      {item.score}
+                    </span>
+                  </td>
+                  <td className="px-2 md:px-3 py-1.5 md:py-2">
                     {item.archivo ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-1">
                         <a
                           href={buildMediaUrl(item.archivo)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white 
-                                     bg-gradient-to-r from-blue-500 to-blue-700 
-                                     shadow-sm hover:shadow transition 
-                                     hover:scale-[1.03] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-400/60"
+                          className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-lg text-white 
+                                     bg-gradient-to-r from-blue-500 to-blue-600 
+                                     hover:from-blue-400 hover:to-blue-500
+                                     shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]
+                                     transition-all duration-300
+                                     hover:scale-110 active:scale-95"
                           title="Ver evidencia"
                           aria-label="Ver evidencia"
                         >
-                          <Eye size={16} />
+                          <Eye size={14} className="md:w-4 md:h-4" />
                         </a>
                         <button
                           onClick={() =>
@@ -406,26 +438,35 @@ export default function DetalleResultados({ consultaId }) {
                                 .toLowerCase()}_${consultaId}_${item.id}`
                             )
                           }
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white 
-                                     bg-gradient-to-r from-cyan-400 to-blue-500 
-                                     shadow-sm hover:shadow transition 
-                                     hover:scale-[1.03] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-cyan-300/60"
+                          className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-lg text-white 
+                                     bg-gradient-to-r from-cyan-500 to-blue-500 
+                                     hover:from-cyan-400 hover:to-blue-400
+                                     shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]
+                                     transition-all duration-300
+                                     hover:scale-110 active:scale-95"
                           title="Descargar como PDF"
                           aria-label="Descargar como PDF"
                         >
-                          <Download size={16} />
+                          <Download size={14} className="md:w-4 md:h-4" />
                         </button>
                       </div>
                     ) : (
-                      <span className="text-gray-400 text-[10px]">Sin archivo</span>
+                      <span className="text-slate-500 text-xs italic text-center block">Sin archivo</span>
                     )}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center text-gray-400 py-2 italic">
-                  No se encontraron resultados
+                <td colSpan={5} className="text-center py-12">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-cyan-500/20 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <p className="text-slate-400 text-sm italic">No se encontraron resultados</p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -433,49 +474,58 @@ export default function DetalleResultados({ consultaId }) {
         </table>
       </div>
 
-      {/* 📑 Paginación */}
-      <div className="flex justify-center items-center gap-2 mt-2 text-gray-300 text-xs pl-[15rem] pr-[15rem]">
+      {/* 📑 Paginación elegante - Fija en la parte inferior */}
+      <div className="flex flex-wrap justify-center items-center gap-2 pb-1">
         <button
           onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
           disabled={pagina === 1}
-          className="px-2 py-0.5 bg-white/10 border border-white/20 rounded disabled:opacity-40 hover:bg-white/20 transition text-[11px]"
+          className="px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1.5 text-sm"
         >
-          ←
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Anterior
         </button>
 
-        {getPages().map((p, i) =>
-          p === "..." ? (
-            <span key={i} className="px-2">...</span>
-          ) : (
-            <button
-              key={i}
-              onClick={() => setPagina(p)}
-              className={`px-2 py-0.5 rounded ${
-                p === pagina
-                  ? "bg-blue-500 text-white"
-                  : "bg-white/10 border border-white/20 hover:bg-white/20"
-              }`}
-            >
-              {p}
-            </button>
-          )
-        )}
+        <div className="flex items-center gap-2">
+          {getPages().map((p, i) =>
+            p === "..." ? (
+              <span key={i} className="px-2 text-slate-500">...</span>
+            ) : (
+              <button
+                key={i}
+                onClick={() => setPagina(p)}
+                className={`w-9 h-9 rounded-lg font-semibold transition-all duration-300 text-sm ${
+                  p === pagina
+                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.5)] scale-110"
+                    : "bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300"
+                }`}
+              >
+                {p}
+              </button>
+            )
+          )}
+        </div>
 
         <button
           onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))}
           disabled={pagina === totalPaginas || totalPaginas === 0}
-          className="px-2 py-0.5 bg-white/10 border border-white/20 rounded disabled:opacity-40 hover:bg-white/20 transition text-[11px]"
+          className="px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1.5 text-sm"
         >
-          →
+          Siguiente
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </button>
 
         {/* Ir a página */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2 ml-4">
           <input
             type="number"
             value={inputPage}
             onChange={(e) => setInputPage(e.target.value)}
-            className="w-10 px-1 py-0.5 rounded bg-white/10 border border-white/20 text-center text-gray-200 text-[11px]"
+            placeholder="Pág."
+            className="w-16 px-3 py-2 rounded-lg bg-gradient-to-br from-slate-900/50 to-slate-800/50 border border-cyan-500/20 text-center text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all text-sm"
           />
           <button
             onClick={() => {
@@ -485,9 +535,9 @@ export default function DetalleResultados({ consultaId }) {
                 setInputPage("");
               }
             }}
-            className="px-2 py-0.5 bg-blue-600 text-white rounded hover:bg-blue-500 text-[11px]"
+            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:scale-105 text-sm"
           >
-            Go
+            Ir
           </button>
         </div>
       </div>

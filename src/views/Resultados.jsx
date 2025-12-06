@@ -205,7 +205,7 @@ export default function Resultados() {
   });
 
   return (
-    <section className="relative min-h-screen py-8 pb-36 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+    <section className="relative h-screen py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
       {/* Elementos decorativos de fondo */}
       <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -214,32 +214,32 @@ export default function Resultados() {
         {!consultaSeleccionada ? (
           <div className="w-full max-w-7xl mx-auto">
             {/* Título */}
-            <div className="mb-6">
-              <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3">
-                <span className="text-cyan-300 text-xs font-medium">Panel de resultados</span>
+            <div className="mb-3 md:mb-4">
+              <div className="inline-block px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
+                <span className="text-cyan-300 text-[10px] md:text-xs font-medium">Panel de resultados</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
                 Resultados de Consultas
               </h1>
             </div>
 
             {/* Barra de búsqueda y filtros */}
-            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-6 gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-3 md:mb-4 gap-2 md:gap-3">
               <input
                 type="text"
                 placeholder="Buscar por ID, Cédula o Estado..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full md:w-1/2 px-4 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder-white/40 focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/20 transition-all backdrop-blur-sm"
+                className="w-full md:w-1/2 px-3 py-1.5 md:py-2 rounded-lg bg-white/5 border border-white/15 text-sm text-white placeholder-white/40 focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/20 transition-all backdrop-blur-sm"
               />
 
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <select
                   value={filters.estado}
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, estado: e.target.value }))
                   }
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white focus:outline-none focus:border-blue-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-blue-500/20 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-white/5 border border-white/15 text-sm text-white focus:outline-none focus:border-blue-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-blue-500/20 transition-all backdrop-blur-sm appearance-none cursor-pointer"
                 >
                   <option className="bg-slate-900 text-white" value="">Todos los estados</option>
                   <option className="bg-slate-900 text-white" value="en_proceso">En proceso</option>
@@ -253,7 +253,7 @@ export default function Resultados() {
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, fecha: e.target.value }))
                   }
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white focus:outline-none focus:border-purple-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-purple-500/20 transition-all backdrop-blur-sm"
+                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-white/5 border border-white/15 text-sm text-white focus:outline-none focus:border-purple-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-purple-500/20 transition-all backdrop-blur-sm"
                 />
               </div>
             </div>
@@ -278,8 +278,32 @@ export default function Resultados() {
             slidesPerView={1}
             pagination={{ clickable: true }}
             navigation
-            className="h-full"
+            className="h-full swiper-custom-nav"
           >
+          <style jsx global>{`
+            .swiper-custom-nav .swiper-button-next,
+            .swiper-custom-nav .swiper-button-prev {
+              color: #06b6d4;
+              background: rgba(6, 182, 212, 0.1);
+              backdrop-filter: blur(10px);
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              border: 1px solid rgba(6, 182, 212, 0.3);
+              transition: all 0.3s;
+            }
+            .swiper-custom-nav .swiper-button-next:hover,
+            .swiper-custom-nav .swiper-button-prev:hover {
+              background: rgba(6, 182, 212, 0.2);
+              border-color: rgba(6, 182, 212, 0.5);
+              transform: scale(1.1);
+            }
+            .swiper-custom-nav .swiper-button-next::after,
+            .swiper-custom-nav .swiper-button-prev::after {
+              font-size: 16px;
+              font-weight: bold;
+            }
+          `}</style>
 
             {/* Slide 2: Detalles con botones abajo */}
             <SwiperSlide className="flex flex-col">

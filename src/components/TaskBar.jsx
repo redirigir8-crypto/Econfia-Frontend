@@ -44,7 +44,7 @@ export default function Taskbar() {
   }, [currentIndex]);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-[94%] max-w-3xl mx-auto mb-10 z-50">
+    <div className="fixed bottom-0 left-0 right-0 w-[94%] max-w-3xl mx-auto mb-4 z-50">
       <style>{`
         @keyframes orbitRotation {
           from {
@@ -110,7 +110,7 @@ export default function Taskbar() {
             {({ isActive }) => (
               <div
                 onClick={() => navigate(item.path)}
-                className="flex flex-col items-center justify-center transition-all duration-300 cursor-pointer pt-6"
+                className="flex flex-col items-center justify-center transition-all duration-300 cursor-pointer pt-2"
               >
                 <div className="relative inline-block icon-sphere-container">
                   <div 
