@@ -5,72 +5,59 @@ import {
   PieChart, Pie, Cell
 } from "recharts";
 
-/** Paleta y helpers de estilo “neón” */
-const NEON = {
-  bgPanel: "bg-white/5 backdrop-blur-md border border-white/20",
+/** Paleta y helpers de estilo elegante */
+const THEME = {
+  bgPanel: "bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 backdrop-blur-xl border border-white/10",
   text: "text-white",
   subtext: "text-white/70",
-  cyan: "#00E5FF",
-  purple: "#7C4DFF",
-  magenta: "#FF00D4",
-  lime: "#B8FF00",
-  orange: "#FF8A00",
-  yellow: "#FFE500",
+  cyan: "#06b6d4",
+  blue: "#3b82f6",
+  purple: "#8b5cf6",
+  pink: "#ec4899",
+  emerald: "#10b981",
+  amber: "#f59e0b",
 };
-const PIE_COLORS = [NEON.cyan, NEON.purple, NEON.magenta, NEON.lime, NEON.orange, NEON.yellow];
+const PIE_COLORS = [THEME.cyan, THEME.blue, THEME.purple, THEME.pink, THEME.emerald, THEME.amber];
 
-/** Tooltip “glass” personalizado */
+/** Tooltip elegante personalizado */
 function GlassTooltip({ active, payload, label }) {
   if (!active || !payload || !payload.length) return null;
   return (
-    <div className="px-3 py-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-md shadow-lg">
-      {label && <div className="text-xs text-white/80 mb-1">{label}</div>}
+    <div className="px-3 py-2 rounded-lg border border-white/20 bg-gradient-to-br from-slate-900/95 via-blue-900/40 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/20">
+      {label && <div className="text-xs text-cyan-300 mb-1 font-semibold">{label}</div>}
       {payload.map((p, i) => (
         <div key={i} className="text-sm text-white flex items-center gap-2">
           <span
-            className="inline-block w-2.5 h-2.5 rounded-full"
-            style={{ background: p.color }}
+            className="inline-block w-2.5 h-2.5 rounded-full shadow-lg"
+            style={{ background: p.color, boxShadow: `0 0 8px ${p.color}` }}
           />
           <span className="opacity-90">{p.name}:</span>
-          <span className="font-semibold">{p.value}</span>
+          <span className="font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">{p.value}</span>
         </div>
       ))}
     </div>
   );
 }
 
-/** Card contenedor con halo neón */
-function NeonCard({ title, children, className = "" }) {
+/** Card contenedor elegante */
+function ElegantCard({ title, children, className = "" }) {
   return (
     <div
-      className={`${NEON.bgPanel} rounded-2xl shadow-xl relative overflow-hidden ${className}`}
-      style={{
-        boxShadow:
-          "0 0 0.6rem #ffffff10, inset 0 0 0.6rem #ffffff08",
-      }}
+      className={`${THEME.bgPanel} rounded-[20px] shadow-2xl shadow-cyan-500/10 relative overflow-hidden group ${className}`}
     >
-      {/* Halo animado suave */}
-      <div
-        className="pointer-events-none absolute -inset-24 opacity-30 blur-3xl"
-        style={{
-          background:
-            "conic-gradient(from 90deg, rgba(124,77,255,.35), rgba(0,229,255,.25), rgba(255,0,212,.30), rgba(124,77,255,.35))",
-          animation: "spin 16s linear infinite",
-        }}
-      />
+      {/* Glow effect sutil */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+      
       <div className="relative p-6">
         {title && (
-          <h2 className="text-xl font-semibold text-white tracking-wide mb-4">
-            {title}
-          </h2>
+          <div className="mb-4">
+            <h2 className="text-2xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+              {title}
+            </h2>
+          </div>
         )}
         {children}
       </div>
-      <style>{`
-        @keyframes spin { 
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }
@@ -167,22 +154,25 @@ export default function Profile() {
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto mt-8 px-4 pb-32">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Card izquierda: perfil */}
-        <NeonCard className="lg:col-span-1">
+    <section className="relative min-h-screen py-8 pb-36 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+      {/* Elementos decorativos de fondo */}
+      <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
+      <div className="w-full max-w-7xl mx-auto px-4 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Card izquierda: perfil */}
+          <ElegantCard className="lg:col-span-1">
           <div className="flex flex-col items-center">
-            <h2 className="font-bold text-white text-2xl text-center">
-              Bienvenido {profile?.full_name}
+            <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3">
+              <span className="text-cyan-300 text-xs font-medium">Mi Perfil</span>
+            </div>
+            <h2 className="font-black text-2xl text-center bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent mb-2">
+              {profile?.full_name}
             </h2>
 
             <div
-              className="w-28 h-28 rounded-full my-5 overflow-hidden border relative group cursor-pointer"
-              style={{
-                borderColor: "#ffffff30",
-                boxShadow:
-                  "0 0 12px rgba(0,229,255,.35), 0 0 28px rgba(124,77,255,.25)",
-              }}
+              className="w-28 h-28 rounded-full my-4 overflow-hidden border-2 border-cyan-500/30 relative group cursor-pointer transition-all hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/50"
               onClick={() => document.getElementById('photoInput').click()}
             >
               {profile?.perfil?.foto ? (
@@ -200,8 +190,8 @@ export default function Profile() {
               )}
               
               {/* Overlay al hover */}
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="text-white text-xs font-medium">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white text-xs font-semibold drop-shadow-lg">
                   {uploadingPhoto ? "Subiendo..." : "Cambiar foto"}
                 </span>
               </div>
@@ -218,40 +208,31 @@ export default function Profile() {
             />
 
             <h3 className="text-lg font-semibold text-white">{profile?.username}</h3>
-            <p className="text-white/70 text-sm mb-2">{profile?.email || "Sin correo"}</p>
+            <p className="text-white/60 text-sm mb-3">{profile?.email || "Sin correo"}</p>
 
-            <span
-              className="text-xs px-3 py-1 rounded-full"
-              style={{
-                color: "#0A0A0A",
-                background:
-                  "linear-gradient(90deg, #00E5FF 0%, #7C4DFF 100%)",
-                boxShadow:
-                  "0 0 12px rgba(0,229,255,.45), 0 0 18px rgba(124,77,255,.45)",
-              }}
-            >
+            <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold shadow-lg shadow-cyan-500/30">
               {profile?.groups?.length > 0 ? profile.groups[0] : "Usuario"}
             </span>
 
             <div className="w-full grid grid-cols-2 gap-3 mt-5">
-              <div className="rounded-xl px-4 py-3 border border-white/10 bg-white/5">
-                <div className="text-xs text-white/70">Consultas disponibles</div>
-                <div className="text-white text-xl font-semibold">
+              <div className="rounded-lg px-4 py-3 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 hover:from-cyan-500/20 hover:to-blue-500/10 transition-all">
+                <div className="text-xs text-cyan-300 font-medium">Consultas</div>
+                <div className="text-white text-2xl font-black">
                   {profile?.perfil?.consultas_disponibles ?? 0}
                 </div>
               </div>
-              <div className="rounded-xl px-4 py-3 border border-white/10 bg-white/5">
-                <div className="text-xs text-white/70">Plan</div>
-                <div className="text-white text-xl font-semibold">
+              <div className="rounded-lg px-4 py-3 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 hover:from-blue-500/20 hover:to-purple-500/10 transition-all">
+                <div className="text-xs text-blue-300 font-medium">Plan</div>
+                <div className="text-white text-2xl font-black">
                   {profile?.perfil?.plan ?? "—"}
                 </div>
               </div>
             </div>
           </div>
-        </NeonCard>
+        </ElegantCard>
 
         {/* Card derecha: estadísticas y gráficos */}
-        <NeonCard title="Estadísticas" className="lg:col-span-2 w-full">
+        <ElegantCard title="Estadísticas" className="lg:col-span-2 w-full">
           {/* Defs globales para glow/gradientes */}
           <svg width="0" height="0" className="absolute">
             <defs>
@@ -275,20 +256,20 @@ export default function Profile() {
 
               {/* Gradiente para barras */}
               <linearGradient id="gradBar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={NEON.cyan} />
-                <stop offset="100%" stopColor={NEON.purple} />
+                <stop offset="0%" stopColor={THEME.cyan} />
+                <stop offset="100%" stopColor={THEME.blue} />
               </linearGradient>
 
-              {/* Trazo neón para barras */}
+              {/* Trazo elegante para barras */}
               <linearGradient id="gradBarStroke" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor={NEON.magenta} />
-                <stop offset="100%" stopColor={NEON.cyan} />
+                <stop offset="0%" stopColor={THEME.cyan} />
+                <stop offset="100%" stopColor={THEME.blue} />
               </linearGradient>
 
               {/* Gradiente para pie (anillo) */}
               <linearGradient id="gradPie" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor={NEON.purple} />
-                <stop offset="100%" stopColor={NEON.cyan} />
+                <stop offset="0%" stopColor={THEME.blue} />
+                <stop offset="100%" stopColor={THEME.cyan} />
               </linearGradient>
             </defs>
           </svg>
@@ -296,71 +277,122 @@ export default function Profile() {
           {/* Gráficos */}
           <div className="grid lg:grid-cols-2 gap-6 w-full">
             {/* Barras: Consultas por estado */}
-            <div className="rounded-xl border border-white/10 p-4 bg-white/5">
-              <h3 className="text-white font-semibold mb-3 text-center">
-                Consultas por estado
-              </h3>
-              <div className="h-[260px]">
+            <div className="relative rounded-xl border border-cyan-500/20 p-5 bg-gradient-to-br from-slate-900/60 to-blue-900/20 backdrop-blur-lg shadow-xl shadow-cyan-500/10 hover:shadow-cyan-500/20 transition-all group">
+              {/* Glow decorativo */}
+              <div className="absolute -top-1 -right-1 w-20 h-20 bg-cyan-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-lg shadow-cyan-500/50 animate-pulse" />
+                <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 font-black text-base">
+                  Consultas por Estado
+                </h3>
+              </div>
+              
+              <div className="h-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={consultasPorEstado} margin={{ top: 8, right: 20, left: -20, bottom: 8 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.12)" />
-                    <XAxis dataKey="name" stroke="#E6F7FF" tick={{ fill: "#C8F9FF", fontSize: 12 }} />
-                    <YAxis stroke="#E6F7FF" tick={{ fill: "#C8F9FF", fontSize: 12 }} />
-                    <Tooltip content={<GlassTooltip />} />
-                    <Legend
-                      wrapperStyle={{ color: "#fff" }}
-                      formatter={(v) => <span className="text-white/80">{v}</span>}
+                  <BarChart data={consultasPorEstado} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+                    <defs>
+                      <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.9} />
+                        <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.6} />
+                      </linearGradient>
+                      <filter id="barShadow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                        <feOffset dx="0" dy="2" result="offsetblur" />
+                        <feComponentTransfer>
+                          <feFuncA type="linear" slope="0.5" />
+                        </feComponentTransfer>
+                        <feMerge>
+                          <feMergeNode />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+                    </defs>
+                    <CartesianGrid strokeDasharray="4 4" stroke="rgba(6,182,212,0.08)" vertical={false} />
+                    <XAxis 
+                      dataKey="name" 
+                      stroke="#06b6d4" 
+                      tick={{ fill: "#67e8f9", fontSize: 11, fontWeight: 600 }} 
+                      axisLine={{ stroke: "#06b6d4", strokeWidth: 2 }}
                     />
+                    <YAxis 
+                      stroke="#06b6d4" 
+                      tick={{ fill: "#67e8f9", fontSize: 11, fontWeight: 600 }} 
+                      axisLine={{ stroke: "#06b6d4", strokeWidth: 2 }}
+                    />
+                    <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(6,182,212,0.1)" }} />
                     <Bar
                       dataKey="total"
                       name="Total"
-                      fill="url(#gradBar)"
-                      radius={[8, 8, 0, 0]}
-                      stroke="url(#gradBarStroke)"
-                      strokeWidth={1.6}
-                    >
-                      {consultasPorEstado.map((_, i) => (
-                        <Cell
-                          key={i}
-                          filter="url(#neonGlowCyan)"
-                        />
-                      ))}
-                    </Bar>
+                      fill="url(#barGradient1)"
+                      radius={[10, 10, 0, 0]}
+                      filter="url(#barShadow)"
+                      animationDuration={800}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             {/* Pie: Resumen consultas */}
-            <div className="rounded-xl border border-white/10 p-4 bg-white/5 w-full">
-              <h3 className="text-white font-semibold mb-3 text-center">
-                Resumen de consultas
-              </h3>
-              <div className="h-[260px]">
+            <div className="relative rounded-xl border border-blue-500/20 p-5 bg-gradient-to-br from-slate-900/60 to-purple-900/20 backdrop-blur-lg shadow-xl shadow-blue-500/10 hover:shadow-blue-500/20 transition-all group w-full">
+              {/* Glow decorativo */}
+              <div className="absolute -top-1 -left-1 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <div className="w-2 h-2 rounded-full bg-blue-400 shadow-lg shadow-blue-500/50 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400 font-black text-base">
+                  Resumen de Consultas
+                </h3>
+              </div>
+              
+              <div className="h-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
+                    <defs>
+                      {consultasResumen.map((_, index) => (
+                        <linearGradient key={`pieGrad-${index}`} id={`pieGradient${index}`} x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor={PIE_COLORS[index % PIE_COLORS.length]} stopOpacity={1} />
+                          <stop offset="100%" stopColor={PIE_COLORS[index % PIE_COLORS.length]} stopOpacity={0.7} />
+                        </linearGradient>
+                      ))}
+                      <filter id="pieShadow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur in="SourceAlpha" stdDeviation="4" />
+                        <feOffset dx="0" dy="3" result="offsetblur" />
+                        <feComponentTransfer>
+                          <feFuncA type="linear" slope="0.4" />
+                        </feComponentTransfer>
+                        <feMerge>
+                          <feMergeNode />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
+                    </defs>
                     <Tooltip content={<GlassTooltip />} />
                     <Legend
-                      wrapperStyle={{ color: "#fff" }}
-                      formatter={(v) => <span className="text-white/80">{v}</span>}
+                      wrapperStyle={{ paddingTop: "10px" }}
+                      formatter={(v) => <span className="text-cyan-200 text-xs font-semibold">{v}</span>}
+                      iconType="circle"
                     />
                     <Pie
                       data={consultasResumen}
                       dataKey="total"
                       nameKey="name"
                       cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={85}
-                      paddingAngle={4}
-                      stroke="url(#gradPie)"
-                      strokeWidth={2}
+                      cy="45%"
+                      innerRadius={55}
+                      outerRadius={90}
+                      paddingAngle={6}
+                      strokeWidth={3}
+                      filter="url(#pieShadow)"
+                      animationDuration={1000}
+                      animationBegin={200}
                     >
                       {consultasResumen.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={PIE_COLORS[index % PIE_COLORS.length]}
-                          filter="url(#neonGlowPurple)"
+                          fill={`url(#pieGradient${index})`}
+                          stroke={PIE_COLORS[index % PIE_COLORS.length]}
                         />
                       ))}
                     </Pie>
@@ -369,8 +401,9 @@ export default function Profile() {
               </div>
             </div>
           </div>
-        </NeonCard>
+        </ElegantCard>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

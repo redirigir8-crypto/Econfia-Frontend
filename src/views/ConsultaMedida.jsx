@@ -77,79 +77,92 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
   if (!isOpen) return null;
 
   return createPortal(
-    // Fondo BLANCO al abrir el modal
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-3xl w-full p-6 relative text-slate-900">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
+      {/* Elementos decorativos de fondo */}
+      <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
+      <div className="relative bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full p-6 text-white">
+        {/* Glow effect */}
+        <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+
         {/* Botón cerrar */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-slate-500 hover:text-red-500 text-xl font-bold"
+          className="absolute top-3 right-3 text-white/60 hover:text-red-400 text-xl font-bold transition-colors z-10"
           aria-label="Cerrar"
         >
           ✕
         </button>
 
-        <h2 className="text-2xl font-semibold mb-4 text-center">
-          Consulta a la Medida
-        </h2>
+        <div className="relative z-10">
+          <div className="text-center mb-4">
+            <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
+              <span className="text-cyan-300 text-xs font-medium">Personaliza tu consulta</span>
+            </div>
+            <h2 className="text-2xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+              Consulta a la Medida
+            </h2>
+          </div>
 
-        {/* Filtro */}
-        <div className="mb-3">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Filtrar fuentes por nombre..."
-            className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <p className="text-xs text-slate-500 mt-1">
-            {filteredFuentes.length} fuente{filteredFuentes.length === 1 ? "" : "s"} encontradas
-          </p>
-        </div>
-
-        {/* Lista de fuentes */}
-        <div className="max-h-72 overflow-y-auto space-y-2 mb-4">
-          {filteredFuentes.length > 0 ? (
-            filteredFuentes.map((fuente) => (
-              <label
-                key={fuente.id}
-                className="flex items-center gap-3 bg-slate-50 hover:bg-slate-100 p-3 rounded-lg border border-slate-200"
-              >
-                <input
-                  type="checkbox"
-                  className="accent-blue-600 w-4 h-4"
-                  checked={seleccionadas.includes(fuente.nombre)}
-                  onChange={() => handleCheckbox(fuente.nombre)}
-                />
-                <div className="flex flex-col">
-                  <span className="font-medium">{fuente.nombre_pila || fuente.nombre}</span>
-                  {fuente.nombre && (
-                    <span className="text-xs text-slate-500">{fuente.nombre}</span>
-                  )}
-                </div>
-              </label>
-            ))
-          ) : (
-            <p className="text-slate-500 text-center">
-              {fuentes.length === 0
-                ? "No hay fuentes disponibles."
-                : "No hay coincidencias con el filtro."}
+          {/* Filtro */}
+          <div className="mb-3">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Filtrar fuentes por nombre..."
+              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+            />
+            <p className="text-xs text-white/60 mt-1">
+              {filteredFuentes.length} fuente{filteredFuentes.length === 1 ? "" : "s"} encontradas
             </p>
-          )}
-        </div>
+          </div>
 
-        {/* Botón consultar */}
-        <button
-          onClick={handleConsultar}
-          disabled={loading || seleccionadas.length === 0}
-          className={`w-full px-4 py-2 rounded-full font-medium text-sm transition-all ${
-            loading || seleccionadas.length === 0
-              ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg"
-          }`}
-        >
-          {loading ? "Consultando..." : "Consultar"}
-        </button>
+          {/* Lista de fuentes */}
+          <div className="max-h-72 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
+            {filteredFuentes.length > 0 ? (
+              filteredFuentes.map((fuente) => (
+                <label
+                  key={fuente.id}
+                  className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 cursor-pointer transition-all hover:shadow-md hover:shadow-cyan-500/10 group"
+                >
+                  <input
+                    type="checkbox"
+                    className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                    checked={seleccionadas.includes(fuente.nombre)}
+                    onChange={() => handleCheckbox(fuente.nombre)}
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-medium text-white group-hover:text-cyan-300 transition-colors">{fuente.nombre_pila || fuente.nombre}</span>
+                    {fuente.nombre && (
+                      <span className="text-xs text-white/50">{fuente.nombre}</span>
+                    )}
+                  </div>
+                </label>
+              ))
+            ) : (
+              <p className="text-white/60 text-center py-4">
+                {fuentes.length === 0
+                  ? "No hay fuentes disponibles."
+                  : "No hay coincidencias con el filtro."}
+              </p>
+            )}
+          </div>
+
+          {/* Botón consultar */}
+          <button
+            onClick={handleConsultar}
+            disabled={loading || seleccionadas.length === 0}
+            className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${
+              loading || seleccionadas.length === 0
+                ? "bg-white/10 text-white/40 cursor-not-allowed"
+                : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+            }`}
+          >
+            {loading ? "Consultando..." : "Consultar"}
+          </button>
+        </div>
       </div>
     </div>,
     document.body
@@ -317,109 +330,141 @@ export default function ConsultaMedida() {
         />
       )}
 
-      {/* Formulario */}
-      <div className="min-h-screen flex items-center justify-center px-4 py-8 pb-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl w-full">
-          <div className="text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Consulta lista dinámica de adversos a la medida
-            </h1>
-            <p className="text-lg text-white/70 leading-relaxed text-justify">
-              Seleccione el tipo de documento e ingrese el cupo numérico y seleccione las fuentes a su gusto.
+      {/* Formulario con fondo elegante */}
+      <section className="relative min-h-screen flex items-center justify-center py-8 pb-36 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+        {/* Elementos decorativos de fondo */}
+        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center max-w-5xl w-full px-4 relative z-10">
+          <div className="text-center md:text-left space-y-3">
+            <div>
+              <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                </span>
+                <span className="text-cyan-300 text-xs font-medium">Consulta Personalizada</span>
+              </div>
+              <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
+                Consulta a la Medida
+              </h1>
+            </div>
+
+            <p className="text-sm text-white/70 leading-relaxed">
+              Seleccione el tipo de documento e ingrese el número. Luego elija las fuentes específicas que desea consultar.
             </p>
 
-            <p className="mt-4 text-[10px] text-red-400/80 leading-snug text-justify">
-              Al realizar esta consulta, declara y certifica que cuenta con la
-              autorización válida y expresa del titular del tipo de documento
-              objeto de verificación, y que la información será utilizada de
-              forma responsable, conforme a la normatividad vigente en Colombia.
+            <div className="space-y-2 pt-2">
+              <div className="flex items-start gap-3">
+                <span className="mt-1 h-2 w-2 rounded-full bg-cyan-500 flex-shrink-0" />
+                <span className="text-xs text-white/80">Personaliza completamente tu búsqueda.</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <span className="text-xs text-white/80">Selecciona solo las fuentes que necesitas.</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 h-2 w-2 rounded-full bg-purple-500 flex-shrink-0" />
+                <span className="text-xs text-white/80">Resultados precisos y eficientes.</span>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-red-400/70 leading-snug pt-2">
+              Al realizar esta consulta, declara y certifica que cuenta con la autorización válida y expresa del titular del documento objeto de verificación.
             </p>
           </div>
 
-          <div className="relative w-full max-w-md mx-auto border border-white/30 rounded-2xl shadow-xl">
-            <div className="absolute inset-0 bg-white/5 blur-[4px] border rounded-2xl"></div>
+          <div className="relative w-full max-w-sm mx-auto">
+            <div className="relative w-full bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[20px] border border-white/10 shadow-2xl shadow-cyan-500/10 p-6 group">
+              {/* Glow effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
-            <div className="relative p-8">
-              <h2 className="text-2xl font-semibold text-white mb-6 text-center">
-                <img
-                  src="/img/logo-econfia-rojo.png"
-                  alt="Mi Imagen"
-                  className="mx-auto max-h-16 w-auto"
-                />
-              </h2>
-
-              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                {/* Inputs */}
-                <div className="flex flex-col gap-2">
-                  <select
-                    value={tipoDoc}
-                    onChange={(e) => setTipoDoc(e.target.value)}
-                    className="w-full px-2 py-1 rounded-md bg-white/10 text-sm border border-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400 text-white"
-                  >
-                    <option className="bg-black/50 text-white" value="">
-                      Seleccione tipo de documento
-                    </option>
-                    <option className="bg-black/50 text-white" value="CC">
-                      Cédula de Ciudadanía (CC)
-                    </option>
-                    <option className="bg-black/50 text-white" value="TI">
-                      Tarjeta de Identidad (TI)
-                    </option>
-                    <option className="bg-black/50 text-white" value="CE">
-                      Cédula de Extranjería (CE)
-                    </option>
-                    <option className="bg-black/50 text-white" value="PPT">
-                      Permiso de Protección Temporal (PPT)
-                    </option>
-                    <option className="bg-black/50 text-white" value="PEP">
-                      Permiso Especial de Permanencia (PEP)
-                    </option>
-                    <option className="bg-black/50 text-white" value="NIT">
-                      NIT
-                    </option>
-                  </select>
-
-                  <input
-                    type="text"
-                    value={cedula}
-                    onChange={(e) => setCedula(e.target.value)}
-                    placeholder="Ingrese cupo de númerico"
-                    className="w-full px-2 py-1 rounded-md bg-white/10 text-white text-sm placeholder-white/50 border border-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+              <div className="relative z-10">
+                <div className="flex items-center justify-center mb-4">
+                  <img
+                    src="/img/logo-econfia-rojo.png"
+                    alt="Econfía"
+                    className="max-h-10 w-auto"
                   />
+                </div>
 
-                  <div className="w-full">
-                    <label className="text-xs text-white/80 mb-1 block">
-                      Fecha de Expedición
-                    </label>
+                <form onSubmit={handleSubmit} className="space-y-2">
+                {/* Inputs */}
+                <div className="space-y-2">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-white/70">Tipo de documento</label>
+                    <select
+                      value={tipoDoc}
+                      onChange={(e) => setTipoDoc(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                    >
+                      <option className="bg-slate-900 text-white" value="">
+                        Seleccione tipo de documento
+                      </option>
+                      <option className="bg-slate-900 text-white" value="CC">
+                        Cédula de Ciudadanía (CC)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="TI">
+                        Tarjeta de Identidad (TI)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="CE">
+                        Cédula de Extranjería (CE)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="PPT">
+                        Permiso de Protección Temporal (PPT)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="PEP">
+                        Permiso Especial de Permanencia (PEP)
+                      </option>
+                      <option className="bg-slate-900 text-white" value="NIT">
+                        NIT
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-white/70">Número de documento</label>
+                    <input
+                      type="text"
+                      value={cedula}
+                      onChange={(e) => setCedula(e.target.value)}
+                      placeholder="Ingrese número de documento"
+                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-white/70">Fecha de expedición (Opcional)</label>
                     <input
                       type="date"
                       value={fechaExpedicion}
                       onChange={(e) => setFechaExpedicion(e.target.value)}
-                      className="w-full px-2 py-1 rounded-md bg-white/10 text-white text-sm border border-white/20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                     />
                   </div>
                 </div>
 
                 {/* Checkboxes */}
-                <div className="flex flex-col gap-2 mt-2 text-sm">
-                  <div className="flex items-center gap-2">
+                <div className="space-y-1 pt-1">
+                  <label className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={acepta}
                       onChange={(e) => setAcepta(e.target.checked)}
-                      className="accent-blue-500 w-3 h-3"
+                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
                     />
-                    <span className="text-white/80">
+                    <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
                       Acepto los{" "}
                       <a
                         href="#"
-                        onClick={() => setOpen(true)}
-                        className="text-blue-400 underline"
+                        onClick={(e) => { e.preventDefault(); setOpen(true); }}
+                        className="text-cyan-400 hover:text-cyan-300 underline font-medium"
                       >
                         términos y condiciones
                       </a>
                     </span>
-                  </div>
+                  </label>
 
                   <Terminos isOpen={open} onClose={() => setOpen(false)}>
                     <h2 className="text-xl font-bold mb-4">
@@ -430,18 +475,17 @@ export default function ConsultaMedida() {
                     </p>
                   </Terminos>
 
-                  <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={consentimiento}
                       onChange={(e) => setConsentimiento(e.target.checked)}
-                      className="accent-green-500 w-3 h-3"
+                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
                     />
-                    <span className="text-white/80">
-                      Confirmo que cuento con el consentimiento del titular del
-                      documento
+                    <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                      Confirmo consentimiento del titular
                     </span>
-                  </div>
+                  </label>
                 </div>
 
 
@@ -457,20 +501,25 @@ export default function ConsultaMedida() {
                     setShowConsultaMedida(true);
                   }}
                   disabled={!acepta || !consentimiento}
-                  className={`flex-1 px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 ease-in-out 
+                  className={`mt-3 w-full px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-300
                     ${
                       !acepta || !consentimiento
-                        ? "bg-gray-500 cursor-not-allowed text-white/70"
-                        : "bg-blue-800 hover:bg-blue-900 text-white transform hover:scale-105 hover:shadow-lg"
+                        ? "bg-white/10 text-white/40 cursor-not-allowed"
+                        : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
                     }`}
                 >
                   Consulta a la medida
                 </button>
-              </form>
+                </form>
+              </div>
             </div>
+            {/* Nota de privacidad */}
+            <p className="text-[10px] text-white/60 text-center mt-2">
+              Cumplimiento normativo y uso responsable de la información.
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Modal: Consulta a la Medida */}
       <ModalConsultaMedida
