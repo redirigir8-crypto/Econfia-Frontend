@@ -348,14 +348,52 @@ function Home() {
           </section>
         </SwiperSlide>
 
-        {/* Slide 2: Servicios dinámicos (original) */}
+        {/* Slide 2: Servicios dinámicos (innovador) */}
         <SwiperSlide>
-          <SlideDinamicLists onMore={() => window.location.assign("/profile")} />
+          <section className="relative w-full min-h-screen flex items-center justify-center pt-20 md:pt-24">
+            <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-blue-900/20 to-black/40" />
+            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 w-full flex flex-col items-center justify-center">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-8 text-center animate-fade-in-down">Servicios Econfiá</h2>
+              <div className="flex flex-wrap justify-center gap-10 w-full">
+                <div className="bg-gradient-to-tr from-cyan-500/30 to-blue-500/30 rounded-2xl shadow-2xl p-8 flex flex-col items-center w-80 hover:scale-105 transition-transform duration-300 animate-fade-in-up animation-delay-100">
+                  <span className="text-cyan-400 text-5xl mb-4 animate-pulse">🔍</span>
+                  <h3 className="text-xl font-bold text-white mb-2">Consulta de antecedentes</h3>
+                  <p className="text-slate-200 text-center mb-4">Verifica antecedentes en segundos con fuentes oficiales.</p>
+                  <a href="/consulta" className="px-8 py-3 rounded-full bg-cyan-500 text-white font-semibold shadow-lg hover:bg-cyan-600 transition">Consultar</a>
+                </div>
+                <div className="bg-gradient-to-tr from-blue-500/30 to-cyan-500/30 rounded-2xl shadow-2xl p-8 flex flex-col items-center w-80 hover:scale-105 transition-transform duration-300 animate-fade-in-up animation-delay-200">
+                  <span className="text-blue-400 text-5xl mb-4 animate-pulse">📊</span>
+                  <h3 className="text-xl font-bold text-white mb-2">Reportes y análisis</h3>
+                  <p className="text-slate-200 text-center mb-4">Obtén reportes claros y análisis de riesgo personalizados.</p>
+                  <a href="/resultados" className="px-8 py-3 rounded-full bg-blue-500 text-white font-semibold shadow-lg hover:bg-blue-600 transition">Ver reportes</a>
+                </div>
+              </div>
+            </div>
+          </section>
         </SwiperSlide>
 
-        {/* Slide 3: Vista contratista (original) */}
+        {/* Slide 3: Vista contratista (innovador) */}
         <SwiperSlide>
-          <ContratistaView />
+          <section className="relative w-full min-h-screen flex items-center justify-center pt-20 md:pt-24">
+            <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-blue-900/20 to-black/40" />
+            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 w-full flex flex-col items-center justify-center">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-8 text-center animate-fade-in-down">Para contratistas</h2>
+              <div className="flex flex-wrap justify-center gap-10 w-full">
+                <div className="bg-gradient-to-tr from-green-400/30 to-blue-500/30 rounded-2xl shadow-2xl p-8 flex flex-col items-center w-80 hover:scale-105 transition-transform duration-300 animate-fade-in-up animation-delay-100">
+                  <span className="text-green-400 text-5xl mb-4 animate-pulse">🧑‍💼</span>
+                  <h3 className="text-xl font-bold text-white mb-2">Verificación contratista</h3>
+                  <p className="text-slate-200 text-center mb-4">Soluciones especializadas para contratistas y empresas.</p>
+                  <a href="/consulta-contratista" className="px-8 py-3 rounded-full bg-green-500 text-white font-semibold shadow-lg hover:bg-green-600 transition">Consultar</a>
+                </div>
+                <div className="bg-gradient-to-tr from-yellow-400/30 to-blue-500/30 rounded-2xl shadow-2xl p-8 flex flex-col items-center w-80 hover:scale-105 transition-transform duration-300 animate-fade-in-up animation-delay-200">
+                  <span className="text-yellow-400 text-5xl mb-4 animate-pulse">💼</span>
+                  <h3 className="text-xl font-bold text-white mb-2">Gestión de perfil</h3>
+                  <p className="text-slate-200 text-center mb-4">Administra tu perfil y accede a tus reportes fácilmente.</p>
+                  <a href="/profile" className="px-8 py-3 rounded-full bg-yellow-500 text-white font-semibold shadow-lg hover:bg-yellow-600 transition">Ir al perfil</a>
+                </div>
+              </div>
+            </div>
+          </section>
         </SwiperSlide>
       </Swiper>
     </div>

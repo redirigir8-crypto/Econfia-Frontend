@@ -4,6 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   PieChart, Pie, Cell
 } from "recharts";
+import { Modal } from "antd";
 
 /** Paleta y helpers de estilo elegante */
 const THEME = {
@@ -62,10 +63,20 @@ function ElegantCard({ title, children, className = "" }) {
   );
 }
 
+const AVATAR_LIST = [
+  "https://api.dicebear.com/7.x/bottts/svg?seed=avatar1",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=avatar2",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=avatar3",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=avatar4",
+  "https://api.dicebear.com/7.x/bottts/svg?seed=avatar5",
+];
+
 export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
 
   const handlePhotoUpload = async (e) => {
@@ -93,6 +104,30 @@ export default function Profile() {
     } catch (error) {
       console.error("Error uploading photo:", error);
       alert("Error al subir la foto. Por favor intenta de nuevo.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleAvatarSelect = async (avatar) => {
+    setSelectedAvatar(avatar);
+    setShowAvatarModal(false);
+    setUploadingPhoto(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/api/profile/update-photo/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({ avatar }),
+      });
+      if (!response.ok) throw new Error("Error al actualizar el avatar");
+      const updatedProfile = await response.json();
+      setProfile(updatedProfile);
+    } catch (error) {
+      alert("Error al actualizar el avatar");
     } finally {
       setUploadingPhoto(false);
     }
@@ -173,39 +208,42 @@ export default function Profile() {
 
             <div
               className="w-28 h-28 rounded-full my-4 overflow-hidden border-2 border-cyan-500/30 relative group cursor-pointer transition-all hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/50"
-              onClick={() => document.getElementById('photoInput').click()}
+              onClick={() => setShowAvatarModal(true)}
             >
-              {profile?.perfil?.foto ? (
-                <img
-                  src={`${API_URL}${profile.perfil.foto}`}
-                  alt="Foto de perfil"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <img
-                  src="https://www.gravatar.com/avatar/?d=mp  "
-                  alt="Avatar por defecto"
-                  className="w-full h-full object-cover bg-gradient-to-br from-cyan-500/20 to-purple-500/20"
-                />
-              )}
+              <img
+                src={selectedAvatar || (profile?.perfil?.foto ? `${API_URL}${profile.perfil.foto}` : "https://www.gravatar.com/avatar/?d=mp")}
+                alt="Foto de perfil"
+                className="w-full h-full object-cover"
+              />
               
               {/* Overlay al hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <span className="text-white text-xs font-semibold drop-shadow-lg">
-                  {uploadingPhoto ? "Subiendo..." : "Cambiar foto"}
+                  {uploadingPhoto ? "Actualizando..." : "Cambiar avatar"}
                 </span>
               </div>
             </div>
 
-            {/* Input oculto para subir foto */}
-            <input
-              id="photoInput"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handlePhotoUpload}
-              disabled={uploadingPhoto}
-            />
+            {/* Modal para selección de avatar */}
+            <Modal
+              open={showAvatarModal}
+              onCancel={() => setShowAvatarModal(false)}
+              footer={null}
+              title="Selecciona tu avatar"
+              centered
+            >
+              <div className="flex flex-wrap gap-4 justify-center py-4">
+                {AVATAR_LIST.map((avatar, idx) => (
+                  <img
+                    key={idx}
+                    src={avatar}
+                    alt={`Avatar ${idx+1}`}
+                    className={`w-20 h-20 rounded-full border-2 cursor-pointer hover:border-cyan-400 transition ${selectedAvatar === avatar ? "border-cyan-500" : "border-transparent"}`}
+                    onClick={() => handleAvatarSelect(avatar)}
+                  />
+                ))}
+              </div>
+            </Modal>
 
             <h3 className="text-lg font-semibold text-white">{profile?.username}</h3>
             <p className="text-white/60 text-sm mb-3">{profile?.email || "Sin correo"}</p>
