@@ -442,7 +442,7 @@ export default function Contacto() {
               </div>
 
               <div className="mt-6 pt-6 border-t border-white/10">
-                <p className="text-white/60 text-xs mb-3">Síguenos en redes sociales</p>
+                <p className="text-white/60 text-xs mb-3">Redese Sociales</p>
                 <div className="flex gap-3">
                   <a href="#" className="w-10 h-10 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-all hover:scale-110">
                     <FaLinkedin size={18} />
