@@ -38,6 +38,7 @@ import "swiper/css/navigation";
 import networkGif from "./assets/GIF by São Paulo City.gif";
 import codingGif from "./assets/coding internet security GIF by Matthew Butler.gif";
 import connectionGif from "./assets/GIF by TQI - Tecnologia, Qualidade em Informação.gif";
+import AdminPanel from "./pages/AdminPanel";
 
 // Estilos CSS para el efecto libro
 const bookStyles = `
@@ -426,7 +427,6 @@ export default function App() {
 
             {/* Protegidas (Dashboard como layout) */}
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
-
               {/* Hijas protegidas */}
               <Route path="/consulta" element={<Consulta />} />
               <Route path="/consulta-medida" element={<ConsultaMedida />} />
@@ -436,6 +436,9 @@ export default function App() {
               <Route path="/logout" element={<LogOut />} />
               <Route path="/ayuda" element={<Ayuda />} />
             </Route>
+
+            {/* Panel de administración protegido */}
+            <Route path="/admin" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
           </Routes>
         </Router>
       </CardProvider>
