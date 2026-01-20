@@ -63,7 +63,7 @@ export default function Register() {
       } else {
         setToast({
           type: "success",
-          message: "Cuenta creada con éxito. Revisa tu correo para activarla.",
+          message: "Cuenta creada con éxito. Espera Activación.",
         });
         setTimeout(() => setRedirect(true), 2500);
       }

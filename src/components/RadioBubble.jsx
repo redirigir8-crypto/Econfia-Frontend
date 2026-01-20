@@ -44,7 +44,7 @@ export default function RadioBubble() {
     setCurrentTime(0);
     setDuration(0);
     audio.load();
-    if (isPlaying) {
+    if (isPlaying && window.__userInteracted) {
       audio.play().catch(() => setIsPlaying(false)); // autoplay puede bloquearse
     }
   }, [src]);
@@ -72,8 +72,12 @@ export default function RadioBubble() {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      try { await audioRef.current.play(); setIsPlaying(true); }
-      catch { /* autoplay bloqueado */ }
+      try {
+        if (window.__userInteracted) {
+          await audioRef.current.play();
+          setIsPlaying(true);
+        }
+      } catch { /* autoplay bloqueado */ }
     }
   };
   const prev = () => {

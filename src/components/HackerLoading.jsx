@@ -37,7 +37,9 @@ const audios = {
 
     const audio = new Audio(audios[randomMessage]);
     audioRef.current = audio;
-    audio.play().catch(() => {});
+    if (window.__userInteracted) {
+      audio.play().catch(() => {});
+    }
 
     audio.onended = () => {
       if (onFinish) onFinish();

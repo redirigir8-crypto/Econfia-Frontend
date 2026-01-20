@@ -39,6 +39,9 @@ import networkGif from "./assets/GIF by São Paulo City.gif";
 import codingGif from "./assets/coding internet security GIF by Matthew Butler.gif";
 import connectionGif from "./assets/GIF by TQI - Tecnologia, Qualidade em Informação.gif";
 import AdminPanel from "./pages/AdminPanel";
+import AdminUsuarios from "./components/AdminUsuarios";
+import AdminPlanes from "./components/AdminPlanes";
+import AdminFuentes from "./components/AdminFuentes";
 
 // Estilos CSS para el efecto libro
 const bookStyles = `
@@ -435,9 +438,12 @@ export default function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/logout" element={<LogOut />} />
               <Route path="/ayuda" element={<Ayuda />} />
+              {/* CRUD admin dentro del layout para mostrar TaskBar */}
+              <Route path="/admin-usuarios" element={<AdminUsuarios />} />
+              <Route path="/admin-planes" element={<AdminPlanes />} />
+              <Route path="/admin-fuentes" element={<AdminFuentes />} />
             </Route>
-
-            {/* Panel de administración protegido */}
+            {/* Panel de administración general (si lo usas) */}
             <Route path="/admin" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
           </Routes>
         </Router>

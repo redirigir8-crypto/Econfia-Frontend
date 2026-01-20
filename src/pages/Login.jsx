@@ -152,12 +152,16 @@ export default function Login() {
         ? "/sounds/error-011-352286.mp3"
         : undefined;
 
-      if (soundPath) {
+      if (soundPath && window.__userInteracted) {
         const audio = new Audio(soundPath);
         audio.play().catch((err) => {
           console.warn("No se pudo reproducir el sonido:", err);
         });
       }
+    // Global: marcar interacción de usuario para permitir sonidos
+    if (typeof window !== 'undefined' && !window.__userInteracted) {
+      window.addEventListener('click', () => { window.__userInteracted = true; }, { once: true });
+    }
     }}
   />
 )}
