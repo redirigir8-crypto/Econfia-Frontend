@@ -225,7 +225,7 @@ export default function Jarvis3D({ playAudio }) {
 
     let intervalId;
 
-    if (playAudio) {
+    if (playAudio && window.__userInteracted) {
       audio.play().catch(console.error);
 
       // cada 5s cambiar sonido
@@ -238,7 +238,9 @@ export default function Jarvis3D({ playAudio }) {
         track = audioCtx.createMediaElementSource(audio);
         track.connect(analyser);
         analyser.connect(audioCtx.destination);
-        audio.play().catch(console.error);
+        if (window.__userInteracted) {
+          audio.play().catch(console.error);
+        }
       }, 5000);
     }
 

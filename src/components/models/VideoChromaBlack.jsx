@@ -72,7 +72,11 @@ export default function VideoChromaBlack({
     };
 
     const onCanPlay = async () => {
-      try { await video.play(); } catch {}
+      try {
+        if (window.__userInteracted) {
+          await video.play();
+        }
+      } catch {}
       video.playbackRate = playbackRate;
       draw();
     };

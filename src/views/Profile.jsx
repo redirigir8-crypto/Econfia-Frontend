@@ -159,6 +159,8 @@ export default function Profile() {
         if (!resStats.ok) throw new Error("Error al obtener las estadísticas");
         const statsData = await resStats.json();
         setStats(statsData);
+        // Guardar los datos de stats (que incluyen is_staff y is_superuser) en localStorage como 'user'
+        localStorage.setItem("user", JSON.stringify(statsData));
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -260,9 +262,15 @@ export default function Profile() {
                 </div>
               </div>
               <div className="rounded-lg px-4 py-3 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 hover:from-blue-500/20 hover:to-purple-500/10 transition-all">
-                <div className="text-xs text-blue-300 font-medium">Plan</div>
-                <div className="text-white text-2xl font-black">
-                  {profile?.perfil?.plan ?? "—"}
+                <div className="text-xs text-blue-300 font-medium">Planes activos</div>
+                <div className="text-white text-base font-bold flex flex-wrap gap-1">
+                  {(profile?.perfil?.planes && profile.perfil.planes.length > 0)
+                    ? profile.perfil.planes.map((plan) => (
+                        <span key={plan.id} className="px-2 py-1 rounded bg-cyan-700/40 text-cyan-100 text-xs font-semibold mr-1 mb-1">
+                          {plan.nombre.charAt(0).toUpperCase() + plan.nombre.slice(1)}
+                        </span>
+                      ))
+                    : <span className="text-slate-400">Sin plan</span>}
                 </div>
               </div>
             </div>

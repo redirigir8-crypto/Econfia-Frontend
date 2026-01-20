@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow } from "swiper/modules";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -8,38 +8,88 @@ import {
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 
-const menuItems = [
-  { path: "/logout",     icon: <LogOut size={28} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
 
-  { path: "/consulta",             icon: <Search size={28} strokeWidth={1.5} />,    label: "E-Core Full" },
-  { path: "/consulta-contratista", icon: <HardHat size={28} strokeWidth={1.5} />, label: "E-unity Contratista" },
-  { path: "/consulta-medida",      icon: <Target size={28} strokeWidth={1.5} />,  label: "E-ssential" },
+
+export default function Taskbar() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    try {
+      const u = JSON.parse(localStorage.getItem("user"));
+      setUser(u);
+      console.log("[TaskBar] user:", u);
+      if (u) {
+        console.log("[TaskBar] is_staff:", u.is_staff, "is_superuser:", u.is_superuser);
+      }
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    function handleUserUpdate() {
+      try {
+        const u = JSON.parse(localStorage.getItem("user"));
+        setUser(u);
+      } catch {
+        setUser(null);
+      }
+    }
+    window.addEventListener("user-updated", handleUserUpdate);
+    return () => window.removeEventListener("user-updated", handleUserUpdate);
+  }, []);
+
+  const hasPlanes = user?.perfil?.planes && user.perfil.planes.length > 0;
+  const hasConsultas = (user?.perfil?.consultas_disponibles ?? 0) > 0;
+  const isAdmin = user?.is_superuser || user?.is_staff;
+
+// Accesos de consulta según los planes asignados
+let consultaItems = [];
+if (hasPlanes) {
+  const planes = user.perfil.planes.map(p => (p.nombre || '').toLowerCase());
+  if (planes.includes("ecorefull")) {
+    consultaItems.push({ path: "/consulta", icon: <Search size={28} strokeWidth={1.5} />, label: "E-Core Full" });
+  }
+  if (planes.includes("contratista")) {
+    consultaItems.push({ path: "/consulta-contratista", icon: <HardHat size={28} strokeWidth={1.5} />, label: "E-unity Contratista" });
+  }
+  if (planes.includes("essential")) {
+    consultaItems.push({ path: "/consulta-medida", icon: <Target size={28} strokeWidth={1.5} />, label: "E-ssential" });
+  }
+}
+
+// Menú base
+let menuItems = [
+  { path: "/logout",     icon: <LogOut size={28} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
+  ...consultaItems,
   { path: "/profile",    icon: <User size={28} strokeWidth={1.5} />,     label: "Perfil" },
   { path: "/resultados", icon: <FileText size={28} strokeWidth={1.5} />, label: "Resultados" },
   { path: "/ayuda",      icon: <HelpCircle size={28} strokeWidth={1.5} />,label: "Ayuda" },
 ];
 
-export default function Taskbar() {
+// Accesos CRUD solo para admin
+if (isAdmin) {
+  menuItems = [
+    ...menuItems,
+    { path: "/admin-usuarios", icon: <User size={28} strokeWidth={1.5} />, label: "Admin Usuarios" },
+    { path: "/admin-planes", icon: <FileText size={28} strokeWidth={1.5} />, label: "Admin Planes" },
+    { path: "/admin-fuentes", icon: <Search size={28} strokeWidth={1.5} />, label: "Admin Fuentes" },
+  ];
+}
+
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const swiperRef = useRef(null);
-
-  // Flag para evitar loop: cuando sincronizamos manualmente, ignoramos el próximo slideChange
   const ignoreNextChange = useRef(false);
-
-  // índice según la ruta actual (soporta subrutas /profile/ajustes)
   const currentIndex = useMemo(() => {
     const i = menuItems.findIndex(m => pathname === m.path || pathname.startsWith(m.path + "/"));
     return i >= 0 ? i : 0;
-  }, [pathname]);
-
-  // Sincroniza el carrusel cuando cambia la URL
+  }, [pathname, user]);
   useEffect(() => {
     const sw = swiperRef.current;
     if (!sw) return;
     if (sw.activeIndex !== currentIndex) {
-      ignoreNextChange.current = true;           // evitamos navegar por este cambio programático
-      sw.slideTo(currentIndex, 0);               // sin animación
+      ignoreNextChange.current = true;
+      sw.slideTo(currentIndex, 0);
     }
   }, [currentIndex]);
 
