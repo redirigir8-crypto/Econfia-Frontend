@@ -82,6 +82,10 @@ const AdminPlanes = () => {
       setShowModal(false);
       fetchPlanes();
       refreshUserProfile();
+      // Fuerza recarga de la página de usuarios si el admin está en esa ruta
+      if (window.location.pathname === "/admin-usuarios") {
+        window.location.reload();
+      }
     } catch {
       setToast({ type: "error", message: "Error al asignar usuarios" });
     }
@@ -244,49 +248,49 @@ const AdminPlanes = () => {
                       Asignar
                     </button>
                   </td>
-                      {/* Modal para asignar usuarios */}
-                      {showModal && (
-                        <Modal onClose={() => setShowModal(false)}>
-                          <h3 className="text-xl font-bold mb-4 text-slate-900">Asignar usuarios al plan: <span className="text-cyan-700">{selectedPlan?.nombre}</span></h3>
-                          <div className="max-h-64 overflow-y-auto mb-4 bg-slate-800/80 rounded-lg p-4 border border-cyan-900/40">
-                            {users.length === 0 ? (
-                              <div className="text-center text-slate-400">No hay usuarios disponibles</div>
-                            ) : (
-                              users.map((u) => (
-                                <label key={u.id} className="flex items-center gap-3 mb-3 p-2 rounded-lg bg-slate-900/80 hover:bg-cyan-900/30 transition border border-cyan-700/20">
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedUsers.includes(u.id)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        setSelectedUsers([...selectedUsers, u.id]);
-                                      } else {
-                                        setSelectedUsers(selectedUsers.filter((id) => id !== u.id));
-                                      }
-                                    }}
-                                    className="accent-cyan-500 w-5 h-5"
-                                  />
-                                  <span className="text-white font-semibold">{u.username}</span>
-                                  <span className="text-cyan-300">{u.email}</span>
-                                </label>
-                              ))
-                            )}
-                          </div>
-                          <button
-                            onClick={handleAsignarUsuarios}
-                            className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold shadow hover:from-cyan-400 hover:to-blue-400 transition-all w-full"
-                          >
-                            Asignar usuarios
-                          </button>
-                        </Modal>
-                      )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
-        </section>
+      {/* Modal para asignar usuarios (fuera de la tabla) */}
+      {showModal && (
+        <Modal onClose={() => setShowModal(false)}>
+          <h3 className="text-xl font-bold mb-4 text-slate-900">Asignar usuarios al plan: <span className="text-cyan-700">{selectedPlan?.nombre}</span></h3>
+          <div className="max-h-64 overflow-y-auto mb-4 bg-slate-800/80 rounded-lg p-4 border border-cyan-900/40">
+            {users.length === 0 ? (
+              <div className="text-center text-slate-400">No hay usuarios disponibles</div>
+            ) : (
+              users.map((u) => (
+                <label key={u.id} className="flex items-center gap-3 mb-3 p-2 rounded-lg bg-slate-900/80 hover:bg-cyan-900/30 transition border border-cyan-700/20">
+                  <input
+                    type="checkbox"
+                    checked={selectedUsers.includes(u.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedUsers([...selectedUsers, u.id]);
+                      } else {
+                        setSelectedUsers(selectedUsers.filter((id) => id !== u.id));
+                      }
+                    }}
+                    className="accent-cyan-500 w-5 h-5"
+                  />
+                  <span className="text-white font-semibold">{u.username}</span>
+                  <span className="text-cyan-300">{u.email}</span>
+                </label>
+              ))
+            )}
+          </div>
+          <button
+            onClick={handleAsignarUsuarios}
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold shadow hover:from-cyan-400 hover:to-blue-400 transition-all w-full"
+          >
+            Asignar usuarios
+          </button>
+        </Modal>
+      )}
+    </section>
   );
 };
 
