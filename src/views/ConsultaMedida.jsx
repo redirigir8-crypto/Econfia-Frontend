@@ -53,17 +53,21 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
     setLoading(true);
     try {
       const token = localStorage.getItem("token"); // Obtener token
+      const bodyPayload = {
+        cedula: data.cedula,
+        tipo_doc: data.tipo_doc,
+        lista_nombres: seleccionadas,
+      };
+      if (data.fecha_expedicion) {
+        bodyPayload.fecha_expedicion = data.fecha_expedicion;
+      }
       const res = await fetch(`${API_URL}/api/consultar/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Token ${token}`, // Cabecera de autorización
+          Authorization: `Token ${token}`,
         },
-        body: JSON.stringify({
-          cedula: data.cedula,
-          tipo_doc: data.tipo_doc,
-          lista_nombres: seleccionadas,
-        }),
+        body: JSON.stringify(bodyPayload),
       });
       await res.json();
       onClose(); // Cierra el modal o maneja resultados
