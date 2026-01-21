@@ -231,19 +231,19 @@ const AdminPlanes = () => {
                   <td className="px-3 py-2 flex gap-2">
                     <button
                       onClick={() => handleEdit(plan)}
-                      className="px-3 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold shadow hover:from-cyan-400 hover:to-blue-400 transition-all"
+                      className="px-3 py-1 rounded-lg bg-cyan-700/50 text-white font-semibold shadow-none hover:bg-cyan-700/100 hover:shadow-[0_0_12px_2px_rgba(21,94,117,0.7)] transition-all"
                     >
                       Editar
                     </button>
                     <button
                       onClick={() => handleDelete(plan.id)}
-                      className="px-3 py-1 rounded-lg bg-red-600 text-white font-semibold shadow hover:bg-red-500 transition-all"
+                      className="px-3 py-1 rounded-lg bg-red-600/50 text-white font-semibold shadow-none hover:bg-red-600/100 hover:shadow-[0_0_12px_2px_rgba(220,38,38,0.7)] transition-all"
                     >
                       Eliminar
                     </button>
                     <button
                       onClick={() => handleAsignar(plan)}
-                      className="px-3 py-1 rounded-lg bg-purple-600 text-white font-semibold shadow hover:bg-purple-500 transition-all"
+                      className="px-3 py-1 rounded-lg bg-slate-600/50 text-white font-semibold shadow-none hover:bg-slate-600/100 hover:shadow-[0_0_12px_2px_rgba(147,51,234,0.7)] transition-all"
                     >
                       Asignar
                     </button>

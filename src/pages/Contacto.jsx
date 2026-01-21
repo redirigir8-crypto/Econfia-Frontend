@@ -162,7 +162,21 @@ function ChatAvatar({ look = "center", talking = false, className = "" }) {
 }
 
 export default function Contacto() {
-  const API_URL = process.env.REACT_APP_API_URL;
+  let API_URL = process.env.REACT_APP_API_URL;
+  if (!API_URL) {
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    ) {
+      API_URL = "http://localhost:8000/";
+    } else {
+      API_URL = "https://www.econfia.co/";
+    }
+  }
+  // Asegura que la URL termine con /
+  if (!API_URL.endsWith("/")) {
+    API_URL += "/";
+  }
 
   const [form, setForm] = useState({ nombre: "", email: "", asunto: "", mensaje: "" });
   const [loading, setLoading] = useState(false);
@@ -222,20 +236,39 @@ export default function Contacto() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (API_URL) {
-        await fetch(`${API_URL}api/contacto/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        });
-      } else {
-        console.log("Contacto DEMO:", form);
+      const response = await fetch(`${API_URL}api/contacto/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error HTTP");
       }
-      setToast({ type: "success", msg: "¡Mensaje enviado! Te responderemos pronto." });
+
+      const data = await response.json();
+
+      if (!data.ok) {
+        throw new Error("Respuesta inválida");
+      }
+
+      setToast({
+        type: "success",
+        msg: "¡Mensaje enviado! Te responderemos pronto.",
+      });
+
       speak("¡Gracias! Recibimos tu mensaje.");
+
       setForm({ nombre: "", email: "", asunto: "", mensaje: "" });
-    } catch {
-      setToast({ type: "error", msg: "Hubo un error al enviar. Intenta de nuevo." });
+
+    } catch (error) {
+      console.error("ERROR CONTACTO:", error);
+      setToast({
+        type: "error",
+        msg: "Hubo un error al enviar. Intenta de nuevo.",
+      });
       speak("Algo salió mal. Inténtalo de nuevo.");
     } finally {
       setLoading(false);
@@ -249,7 +282,7 @@ export default function Contacto() {
       <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       
-      {toast && <Toast type={toast.type} message={toast.msg} />}
+      {toast && <Toast type={toast.type} message={toast.msg} onClose={()=>setToast(null)} />}
       <Header />
       
       {/* Contenido principal */}
@@ -416,7 +449,7 @@ export default function Contacto() {
                   </div>
                   <div>
                     <p className="text-white/60 text-xs">Email</p>
-                    <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">contacto@econfia.co</p>
+                    <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">econfia18@gmail.com</p>
                   </div>
                 </div>
 
