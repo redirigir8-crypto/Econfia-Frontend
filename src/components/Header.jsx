@@ -1,5 +1,5 @@
 // src/components/Header.jsx
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import logo from "../assets/logo-econfia (1).png";
 import { Link, NavLink} from "react-router-dom";
 import { ChevronDown, Menu, X } from "lucide-react";
@@ -11,7 +11,28 @@ const linkActive = "text-cyan-400";
 export default function Header() {
   const [isServiciosOpen, setIsServiciosOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+  const serviciosRef = useRef(null);
+
+  // Cerrar el menú de servicios si se hace clic fuera
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        serviciosRef.current &&
+        !serviciosRef.current.contains(event.target)
+      ) {
+        setIsServiciosOpen(false);
+      }
+    }
+    if (isServiciosOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isServiciosOpen]);
+
   return (
     <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-[1rem] bg-white/5 border-b border-white/10 h-16 md:h-20">
       <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
@@ -30,49 +51,50 @@ export default function Header() {
         {/* Navegación Desktop */}
         <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-white text-sm font-medium">
           {/* Dropdown Servicios */}
-          <div 
+          <div
             className="relative"
-            onMouseLeave={() => setIsServiciosOpen(false)}
+            ref={serviciosRef}
           >
-            <button 
-              onClick={() => setIsServiciosOpen(!isServiciosOpen)}
+            <button
+              onClick={() => setIsServiciosOpen((open) => !open)}
               className={`flex items-center gap-1 hover:text-cyan-300 transition ${isServiciosOpen ? 'text-cyan-400' : ''}`}
+              type="button"
             >
               Servicios <ChevronDown size={16} />
             </button>
             {isServiciosOpen && (
               <div className="absolute left-0 bg-white text-black mt-2 rounded-lg shadow-xl w-72 z-[100] border border-gray-200">
-              <Link
-                to="/servicio-econfia"
-                className="block px-4 py-3 hover:bg-gray-100 rounded-t-lg transition"
-                onClick={() => setIsServiciosOpen(false)}
-              >
-                <span className="font-semibold">Econfia</span>
-                <p className="text-xs text-gray-600 mt-1">
-                  Consulta de lista dinámica de adversos
-                </p>
-              </Link>
-              <Link
-                to="/servicio-contratista"
-                className="block px-4 py-3 hover:bg-gray-100 transition border-t border-gray-100"
-                onClick={() => setIsServiciosOpen(false)}
-              >
-                <span className="font-semibold">Econfia Contratista</span>
-                <p className="text-xs text-gray-600 mt-1">
-                  Documentos para contratistas
-                </p>
-              </Link>
-              <Link
-                to="/servicio-seguridad"
-                className="block px-4 py-3 hover:bg-gray-100 rounded-b-lg transition border-t border-gray-100"
-                onClick={() => setIsServiciosOpen(false)}
-              >
-                <span className="font-semibold">Econfia Estudios de seguridad</span>
-                <p className="text-xs text-gray-600 mt-1">
-                  Selección de personal especializada
-                </p>
-              </Link>
-            </div>
+                <Link
+                  to="/servicio-econfia"
+                  className="block px-4 py-3 hover:bg-gray-100 rounded-t-lg transition"
+                  onClick={() => setIsServiciosOpen(false)}
+                >
+                  <span className="font-semibold">Econfia</span>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Consulta de lista dinámica de adversos
+                  </p>
+                </Link>
+                <Link
+                  to="/servicio-contratista"
+                  className="block px-4 py-3 hover:bg-gray-100 transition border-t border-gray-100"
+                  onClick={() => setIsServiciosOpen(false)}
+                >
+                  <span className="font-semibold">Econfia Contratista</span>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Documentos para contratistas
+                  </p>
+                </Link>
+                <Link
+                  to="/servicio-seguridad"
+                  className="block px-4 py-3 hover:bg-gray-100 rounded-b-lg transition border-t border-gray-100"
+                  onClick={() => setIsServiciosOpen(false)}
+                >
+                  <span className="font-semibold">Econfia Estudios de seguridad</span>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Selección de personal especializada
+                  </p>
+                </Link>
+              </div>
             )}
           </div>
 
@@ -133,9 +155,9 @@ export default function Header() {
         <div className="lg:hidden absolute top-full left-0 w-full bg-gray-900/95 backdrop-blur-xl border-b border-white/10 shadow-2xl max-h-[calc(100vh-4rem)] md:max-h-[calc(100vh-5rem)] overflow-y-auto">
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col space-y-3">
             {/* Servicios móvil */}
-            <div>
+            <div ref={serviciosRef}>
               <button
-                onClick={() => setIsServiciosOpen(!isServiciosOpen)}
+                onClick={() => setIsServiciosOpen((open) => !open)}
                 className="w-full flex items-center justify-between text-white font-medium py-2"
               >
                 Servicios

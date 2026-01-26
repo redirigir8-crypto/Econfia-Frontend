@@ -229,24 +229,33 @@ const AdminPlanes = () => {
                   <td className="px-3 py-2">{plan.nombre}</td>
                   <td className="px-3 py-2">{plan.descripcion}</td>
                   <td className="px-3 py-2 flex gap-2">
+
+                    <div className="p-[1px] rounded-lg bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent">
                     <button
                       onClick={() => handleEdit(plan)}
-                      className="px-3 py-1 rounded-lg bg-cyan-700/50 text-white font-semibold shadow-none hover:bg-cyan-700/100 hover:shadow-[0_0_12px_2px_rgba(21,94,117,0.7)] transition-all"
+                      className="px-3 py-1 rounded-lg bg-slate-700/50 text-white font-semibold shadow-none hover:bg-slate-700/100 hover:shadow-[0_0_12px_2px_rgba(21,94,117,0.7)] transition-all"
                     >
                       Editar
                     </button>
+                    </div>
+                    <div className="p-[1px] rounded-lg bg-gradient-to-r from-transparent via-red-500/40 to-transparent">
                     <button
                       onClick={() => handleDelete(plan.id)}
-                      className="px-3 py-1 rounded-lg bg-red-600/50 text-white font-semibold shadow-none hover:bg-red-600/100 hover:shadow-[0_0_12px_2px_rgba(220,38,38,0.7)] transition-all"
+                      className="px-3 py-1 rounded-lg bg-slate-600/50 text-white font-semibold shadow-none hover:bg-slate-600/100 hover:shadow-[0_0_12px_2px_rgba(220,38,38,0.7)] transition-all"
                     >
                       Eliminar
                     </button>
-                    <button
+                    </div>
+
+                    <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-purple-500/40 to-transparent">
+                      <button
                       onClick={() => handleAsignar(plan)}
                       className="px-3 py-1 rounded-lg bg-slate-600/50 text-white font-semibold shadow-none hover:bg-slate-600/100 hover:shadow-[0_0_12px_2px_rgba(147,51,234,0.7)] transition-all"
                     >
                       Asignar
                     </button>
+                    </div>
+
                   </td>
                 </tr>
               ))}

@@ -356,46 +356,58 @@ const AdminUsuarios = () => {
                   )}
                 </td>
                 <td className="px-3 py-2 flex gap-2 flex-wrap">
+                  <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent">
                   <button
                     onClick={() => handleOpenConsultasModal(u)}
-                    className="px-3 py-2 rounded-lg bg-cyan-700/50 text-white hover:bg-cyan-700/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(21,94,117,0.7)]"
+                    className="px-3 py-2 rounded-lg bg-slate-700/50 text-white hover:bg-slate-700/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(21,94,117,0.7)]"
                   >
                     Consultas
                   </button>
+                  </div>
                   {u.perfil && (
+                    <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-sky-500/40 to-transparent">
                     <button
                       onClick={() => handleEditPlanes(u)}
-                      className="px-3 py-2 rounded-lg bg-sky-600/50 text-white hover:bg-sky-600/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(2,132,199,0.7)]"
+                      className="px-3 py-2 rounded-lg bg-slate-600/50 text-white hover:bg-slate-600/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(2,132,199,0.7)]"
                     >
                       Editar Planes
                     </button>
+                    </div>
                   )}
+                  <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent">
                   <button
                     onClick={() => handleEditUser(u)}
-                    className="px-3 py-2 rounded-lg bg-indigo-700/50 text-white hover:bg-indigo-700/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(67,56,202,0.7)]"
+                    className="px-3 py-2 rounded-lg bg-slate-700/50 text-white hover:bg-slate-700/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(67,56,202,0.7)]"
                   >
                     Editar
                   </button>
+                  </div>
+                  <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-purple-500/40 to-transparent">
                   <button
                     onClick={() => handleDeleteUser(u)}
-                    className="px-3 py-2 rounded-lg bg-gray-700/50 text-white hover:bg-gray-700/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(55,65,81,0.7)]"
+                    className="px-3 py-2 rounded-lg bg-slate-700/50 text-white hover:bg-slate-700/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(147,51,234,0.7)]"
                   >
                     Eliminar
                   </button>
+                  </div>
                   {!u.is_active ? (
+                    <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-green-500/40 to-transparent">
                     <button
                       onClick={() => handleToggleActive(u)}
-                      className="px-3 py-2 rounded-lg text-white bg-green-600/60 hover:bg-green-600/80 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(22,163,74,0.7)]"
+                      className="px-3 py-2 rounded-lg text-white bg-slate-600/60 hover:bg-slate-600/80 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(22,163,74,0.7)]"
                     >
                       Activar
                     </button>
+                    </div>
                   ) : (
+                    <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-red-500/40 to-transparent">
                     <button
                       onClick={() => handleToggleActive(u)}
-                      className="px-3 py-2 rounded-lg text-white bg-red-600/50 hover:bg-red-600/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(220,38,38,0.7)]"
+                      className="px-3 py-2 rounded-lg text-white bg-slate-600/50 hover:bg-slate-600/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(220,38,38,0.7)]"
                     >
                       Desactivar
                     </button>
+                    </div>
                   )}
                 </td>
               </tr>
