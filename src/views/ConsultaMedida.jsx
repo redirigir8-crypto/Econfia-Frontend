@@ -10,6 +10,7 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
   const [seleccionadas, setSeleccionadas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState(""); // filtro de texto
+  const [toast, setToast] = useState(null); // NUEVO: para mostrar errores
   const API_URL = process.env.REACT_APP_API_URL;
 
   // Cargar fuentes al abrir modal
@@ -69,106 +70,144 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
         },
         body: JSON.stringify(bodyPayload),
       });
-      await res.json();
+      const result = await res.json();
+      if (!res.ok) {
+        setToast({
+          type: "error",
+          message: result.error || `Error HTTP: ${res.status}`,
+        });
+        return;
+      }
       onClose(); // Cierra el modal o maneja resultados
     } catch (err) {
       console.error("Error consultando:", err);
+      setToast({ type: "error", message: "Ocurrió un error en la consulta" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Seleccionar/deseleccionar todas las fuentes
+  const allSelected = filteredFuentes.length > 0 && filteredFuentes.every(f => seleccionadas.includes(f.nombre));
+  const handleToggleAll = () => {
+    if (allSelected) {
+      // Deseleccionar todas
+      setSeleccionadas([]);
+    } else {
+      // Seleccionar todas
+      setSeleccionadas(filteredFuentes.map(f => f.nombre));
     }
   };
 
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
-      {/* Elementos decorativos de fondo */}
-      <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+    <>
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+          sound="sounds/error-011-352286.mp3"
+        />
+      )}
+      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
+        {/* Elementos decorativos de fondo */}
+        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
-      <div className="relative bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full p-6 text-white">
-        {/* Glow effect */}
-        <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+        <div className="relative bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full p-6 text-white">
+          {/* Glow effect */}
+          <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
-        {/* Botón cerrar */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-white/60 hover:text-red-400 text-xl font-bold transition-colors z-10"
-          aria-label="Cerrar"
-        >
-          ✕
-        </button>
-
-        <div className="relative z-10">
-          <div className="text-center mb-4">
-            <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
-              <span className="text-cyan-300 text-xs font-medium">Personaliza tu consulta</span>
-            </div>
-            <h2 className="text-2xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
-              Consulta a la Medida
-            </h2>
-          </div>
-
-          {/* Filtro */}
-          <div className="mb-3">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Filtrar fuentes por nombre..."
-              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
-            />
-            <p className="text-xs text-white/60 mt-1">
-              {filteredFuentes.length} fuente{filteredFuentes.length === 1 ? "" : "s"} encontradas
-            </p>
-          </div>
-
-          {/* Lista de fuentes */}
-          <div className="max-h-72 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
-            {filteredFuentes.length > 0 ? (
-              filteredFuentes.map((fuente) => (
-                <label
-                  key={fuente.id}
-                  className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 cursor-pointer transition-all hover:shadow-md hover:shadow-cyan-500/10 group"
-                >
-                  <input
-                    type="checkbox"
-                    className="accent-cyan-500 w-4 h-4 cursor-pointer"
-                    checked={seleccionadas.includes(fuente.nombre)}
-                    onChange={() => handleCheckbox(fuente.nombre)}
-                  />
-                  <div className="flex flex-col">
-                    <span className="font-medium text-white group-hover:text-cyan-300 transition-colors">{fuente.nombre_pila || fuente.nombre}</span>
-                    {fuente.nombre && (
-                      <span className="text-xs text-white/50">{fuente.nombre}</span>
-                    )}
-                  </div>
-                </label>
-              ))
-            ) : (
-              <p className="text-white/60 text-center py-4">
-                {fuentes.length === 0
-                  ? "No hay fuentes disponibles."
-                  : "No hay coincidencias con el filtro."}
-              </p>
-            )}
-          </div>
-
-          {/* Botón consultar */}
+          {/* Botón cerrar */}
           <button
-            onClick={handleConsultar}
-            disabled={loading || seleccionadas.length === 0}
-            className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${
-              loading || seleccionadas.length === 0
-                ? "bg-white/10 text-white/40 cursor-not-allowed"
-                : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
-            }`}
+            onClick={onClose}
+            className="absolute top-3 right-3 text-white/60 hover:text-red-400 text-xl font-bold transition-colors z-10"
+            aria-label="Cerrar"
           >
-            {loading ? "Consultando..." : "Consultar"}
+            ✕
           </button>
+
+          <div className="relative z-10">
+            <div className="text-center mb-4">
+              <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
+                <span className="text-cyan-300 text-xs font-medium">Personaliza tu consulta</span>
+              </div>
+              <h2 className="text-2xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+                Consulta a la Medida
+              </h2>
+            </div>
+
+            {/* Filtro */}
+            <div className="mb-3 flex flex-col md:flex-row md:items-center md:gap-2">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Filtrar fuentes por nombre..."
+                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+              />
+              <button
+                type="button"
+                onClick={handleToggleAll}
+                className={`mt-2 md:mt-0 md:ml-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 border border-cyan-400/40 ${
+                  allSelected
+                    ? "bg-cyan-500/80 text-white hover:bg-cyan-400"
+                    : "bg-white/10 text-cyan-300 hover:bg-cyan-500/20"
+                }`}
+              >
+                {allSelected ? "Deseleccionar todas" : "Seleccionar todas"}
+              </button>
+            </div>
+
+            {/* Lista de fuentes */}
+            <div className="max-h-72 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
+              {filteredFuentes.length > 0 ? (
+                filteredFuentes.map((fuente) => (
+                  <label
+                    key={fuente.id}
+                    className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 cursor-pointer transition-all hover:shadow-md hover:shadow-cyan-500/10 group"
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      checked={seleccionadas.includes(fuente.nombre)}
+                      onChange={() => handleCheckbox(fuente.nombre)}
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-medium text-white group-hover:text-cyan-300 transition-colors">{fuente.nombre_pila || fuente.nombre}</span>
+                      {fuente.nombre && (
+                        <span className="text-xs text-white/50">{fuente.nombre}</span>
+                      )}
+                    </div>
+                  </label>
+                ))
+              ) : (
+                <p className="text-white/60 text-center py-4">
+                  {fuentes.length === 0
+                    ? "No hay fuentes disponibles."
+                    : "No hay coincidencias con el filtro."}
+                </p>
+              )}
+            </div>
+
+            {/* Botón consultar */}
+            <button
+              onClick={handleConsultar}
+              disabled={loading || seleccionadas.length === 0}
+              className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${
+                loading || seleccionadas.length === 0
+                  ? "bg-white/10 text-white/40 cursor-not-allowed"
+                  : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+              }`}
+            >
+              {loading ? "Consultando..." : "Consultar"}
+            </button>
+          </div>
         </div>
       </div>
-    </div>,
+    </>,
     document.body
   );
 }

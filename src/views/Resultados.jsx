@@ -19,11 +19,13 @@ import { ArrowLeft, FileDown, FileText, Images } from "lucide-react";
 function FloatingActionsPortal({
   apiUrl,
   consultaId,
+  consultaEstado, // NUEVO: estado de la consulta
   onBack,
   onOpenIndividual, // abre tu ModalDescargaIndividual
 }) {
   const [el, setEl] = useState(null);
   const [open, setOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false); // NUEVO: loading para descarga
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -50,10 +52,15 @@ function FloatingActionsPortal({
 
   const goBack = () => (typeof onBack === "function" ? onBack() : window.history.back());
 
-  const downloadPdf = (tipo) => {
-    const url = `${apiUrl}/api/generar_consolidado_full/${consultaId}/${tipo}/`;
-    window.open(url, "_blank", "noopener,noreferrer");
-    setOpen(false);
+  const downloadPdf = async (tipo) => {
+    setDownloading(true);
+    try {
+      const url = `${apiUrl}/api/generar_consolidado_full/${consultaId}/${tipo}/`;
+      window.open(url, "_blank", "noopener,noreferrer");
+      setOpen(false);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (!el) return null;
@@ -77,10 +84,15 @@ function FloatingActionsPortal({
           <button
             onClick={() => setOpen((v) => !v)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
-                       text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-105"
+                       text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
             title="Descargar PDF"
+            disabled={downloading}
           >
-            <FileDown size={16} />
+            {downloading ? (
+              <span className="inline-block w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />
+            ) : (
+              <FileDown size={16} />
+            )}
             <span className="text-sm font-semibold">PDF</span>
           </button>
 
@@ -89,17 +101,21 @@ function FloatingActionsPortal({
                             bg-gradient-to-br from-slate-900/95 via-blue-900/40 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/20 animate-in fade-in duration-200">
               <button
                 onClick={() => downloadPdf(1)}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-cyan-500/20 transition-all border-b border-white/10 group"
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-cyan-500/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={downloading}
               >
                 <FileText size={16} className="group-hover:text-cyan-400 transition-colors" /> 
                 <span className="group-hover:text-cyan-300">Descargar PDF Completo</span>
+                {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
               </button>
               <button
                 onClick={() => downloadPdf(3)}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-blue-500/20 transition-all border-b border-white/10 group"
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-blue-500/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={downloading}
               >
                 <Images size={16} className="group-hover:text-blue-400 transition-colors" /> 
                 <span className="group-hover:text-blue-300">Descargar PDF Resumen</span>
+                {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
               </button>
               <button
                 onClick={() => { setOpen(false); onOpenIndividual?.(); }}
@@ -269,6 +285,9 @@ export default function Resultados() {
           <FloatingActionsPortal
             apiUrl={API_URL}
             consultaId={consultaSeleccionada}
+            consultaEstado={
+              (data.find((c) => c.id === consultaSeleccionada)?.estado || '').toLowerCase()
+            }
             onBack={() => setConsultaSeleccionada(null)}
             onOpenIndividual={() => setShowModalIndividual(true)}
           />
