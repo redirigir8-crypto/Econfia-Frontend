@@ -449,7 +449,7 @@ export default function Contacto() {
                   </div>
                   <div>
                     <p className="text-white/60 text-xs">Email</p>
-                    <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">econfia18@gmail.com</p>
+                    <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">coordinaciondesarrollo@solutionsgroupcol.com</p>
                   </div>
                 </div>
 
@@ -459,7 +459,7 @@ export default function Contacto() {
                   </div>
                   <div>
                     <p className="text-white/60 text-xs">Teléfono</p>
-                    <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">+57 (601) 234 5678</p>
+                    <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">+57 (317)081 5394</p>
                   </div>
                 </div>
 
