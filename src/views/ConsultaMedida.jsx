@@ -5,7 +5,7 @@ import Toast from "../components/Toast";
 import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
 
-function ModalConsultaMedida({ isOpen, onClose, data }) {
+function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
   const [fuentes, setFuentes] = useState([]);
   const [seleccionadas, setSeleccionadas] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -78,7 +78,9 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
         });
         return;
       }
-      onClose(); // Cierra el modal o maneja resultados
+      // Notifica al padre para mostrar resultados y redirigir
+      if (onSuccess) onSuccess(result.datos || result);
+      onClose();
     } catch (err) {
       console.error("Error consultando:", err);
       setToast({ type: "error", message: "Ocurrió un error en la consulta" });
@@ -246,12 +248,21 @@ export default function ConsultaMedida() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validación manual de campos requeridos
+    if (!tipoDoc) {
+      setToast({ type: "error", message: "Selecciona el tipo de documento." });
+      return;
+    }
+    if (!cedula) {
+      setToast({ type: "error", message: "Ingresa el número de documento." });
+      return;
+    }
     if (!acepta) {
-      alert("Debes aceptar los términos y condiciones.");
+      setToast({ type: "error", message: "Debes aceptar los términos y condiciones." });
       return;
     }
     if (!consentimiento) {
-      alert("Debes confirmar que cuentas con el consentimiento del titular.");
+      setToast({ type: "error", message: "Debes confirmar que cuentas con el consentimiento del titular." });
       return;
     }
 
@@ -436,8 +447,9 @@ export default function ConsultaMedida() {
                 {/* Inputs */}
                 <div className="space-y-2">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Tipo de documento</label>
+                    <label className="text-xs font-semibold text-white/70">Tipo de documento *</label>
                     <select
+                      required
                       value={tipoDoc}
                       onChange={(e) => setTipoDoc(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
@@ -467,8 +479,9 @@ export default function ConsultaMedida() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Número de documento</label>
+                    <label className="text-xs font-semibold text-white/70">Número de documento *</label>
                     <input
+                      required
                       type="text"
                       value={cedula}
                       onChange={(e) => setCedula(e.target.value)}
@@ -513,8 +526,211 @@ export default function ConsultaMedida() {
                     <h2 className="text-xl font-bold mb-4">
                       Términos y Condiciones
                     </h2>
-                    <p>
-                      Aviso Legal y Declaración de Cumplimiento Normativo...
+                    <p
+                      className="text-sm mb-4"
+                      style={{
+                        textAlign: "justify",
+                        lineHeight: "1.7",
+                        whiteSpace: "pre-line",
+                        padding: "1.5rem",
+                        borderRadius: "12px",
+                        background: "rgba(255,255,255,0.97)",
+                        color: "#222",
+                        maxHeight: "60vh",
+                        overflowY: "auto",
+                        fontSize: "1rem",
+                        boxShadow: "0 2px 16px 0 rgba(0,0,0,0.08)",
+                        margin: "0.5rem 0"
+                      }}
+                    >
+                      Aplicativo ECONFIA
+                1. Objeto
+                Los presentes Términos y Condiciones regulan el acceso, uso y consulta de
+                información a través del aplicativo ECONFIA, destinado a la verificación de
+                personas naturales y jurídicas en listas restrictivas, vinculantes, informativas y
+                bases de datos públicas y privadas, con fines de debida diligencia, conocimiento
+                de contrapartes, gestión del riesgo y cumplimiento normativo.
+                2. Marco normativo aplicable
+                El uso del aplicativo ECONFIA se rige, entre otras, por las siguientes disposiciones
+                legales y regulatorias vigentes en la República de Colombia:
+                 Constitución Política de Colombia, artículo 15 (derecho al habeas data).
+                 Ley 1581 de 2012 y sus decretos reglamentarios (protección de datos
+                personales).
+                 Ley 1266 de 2008 (hábeas data financiero, crediticio, comercial y de
+                servicios).
+                 Decreto 1377 de 2013.
+                 Normas relacionadas con SARLAFT, SAGRILAFT, SIPLAFT,
+                LA/FT/FPADM, según el sector aplicable.
+                 Circulares y lineamientos expedidos por la Superintendencia Financiera de
+                Colombia, Superintendencia de Sociedades y demás autoridades
+                competentes.
+                3. Naturaleza de la información
+                La información consultada a través de ECONFIA:
+                 Proviene de fuentes públicas, abiertas, oficiales o de terceros legalmente
+                autorizados.
+                 Tiene carácter referencial, informativo y de apoyo para los procesos
+                internos de análisis de riesgo.
+                 No constituye por sí sola prueba concluyente, sanción, acusación o
+                declaración de responsabilidad sobre las personas consultadas.
+
+                4. Finalidad del tratamiento de datos
+                El tratamiento de los datos personales consultados mediante ECONFIA tiene
+                como finalidades principales:
+                 Cumplir obligaciones legales y regulatorias en materia de prevención de
+                riesgos.
+                 Realizar procesos de debida diligencia y conocimiento de clientes,
+                proveedores, contratistas, aliados o empleados.
+                 Prevenir riesgos legales, reputacionales, financieros y operativos.
+                En ningún caso la información será utilizada para fines distintos a los aquí
+                establecidos.
+                5. Responsabilidad del usuario
+                El usuario del aplicativo ECONFIA se obliga a:
+                 Utilizar la información consultada únicamente para fines lícitos y
+                autorizados por la ley.
+                 Garantizar que cuenta con la base legal correspondiente para realizar las
+                consultas.
+                 Interpretar los resultados como un insumo de análisis, complementándolos
+                con otros mecanismos de verificación.
+                 Abstenerse de divulgar, comercializar o reutilizar la información de manera
+                no autorizada.
+                6. Limitación de responsabilidad
+                ECONFIA no garantiza que la información consultada se encuentre libre de
+                errores, actualizada en tiempo real o completa en todos los casos, dado que
+                depende de la actualización de las fuentes de origen.
+                En consecuencia, ECONFIA no será responsable por decisiones tomadas
+                exclusivamente con base en los resultados de las consultas.
+                7. Protección de datos personales
+                ECONFIA actúa como encargado del tratamiento, conforme a la Ley 1581 de
+                2012, y adopta medidas técnicas, administrativas y organizacionales razonables
+                para proteger la información contra acceso no autorizado, pérdida o uso indebido.
+                Los titulares de los datos podrán ejercer sus derechos de conocimiento,
+                actualización, rectificación y supresión, conforme a la política de tratamiento de
+                datos personales vigente.
+                8. Confidencialidad
+
+                La información obtenida a través del aplicativo ECONFIA es confidencial y de uso
+                restringido. El usuario se compromete a no divulgarla a terceros no autorizados ni
+                a utilizarla de forma contraria a la ley.
+                9. Aceptación de los términos
+                El acceso y uso del aplicativo ECONFIA implica la aceptación expresa e
+                irrevocable de los presentes Términos y Condiciones. En caso de no estar de
+                acuerdo, el usuario deberá abstenerse de utilizar la plataforma.
+                10. Modificaciones
+                ECONFIA se reserva el derecho de modificar los presentes Términos y
+                Condiciones en cualquier momento, en atención a cambios normativos, operativos
+                o tecnológicos. Las modificaciones serán aplicables desde su publicación.
+
+                POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES
+                Aplicativo ECONFIA
+                1. Identificación del responsable del tratamiento
+                El aplicativo ECONFIA actúa como Responsable y/o Encargado del
+                Tratamiento de Datos Personales, según corresponda, en los términos definidos
+                por la Ley 1581 de 2012 y sus decretos reglamentarios, para la información
+                tratada en el marco de la consulta de listas restrictivas y bases de datos.
+                2. Marco legal
+                La presente Política se rige principalmente por:
+                 Artículo 15 de la Constitución Política de Colombia.
+                 Ley 1581 de 2012 – Régimen General de Protección de Datos Personales.
+                 Decreto 1377 de 2013.
+                 Decreto 1074 de 2015.
+                 Ley 1266 de 2008 (cuando aplique).
+                 Circulares de la Superintendencia de Industria y Comercio (SIC).
+                3. Definiciones
+                Para efectos de la presente Política, se adoptan las definiciones previstas en la
+                Ley 1581 de 2012, entre ellas:
+                 Dato personal
+
+                 Dato público
+                 Dato sensible
+                 Titular
+                 Tratamiento
+                 Responsable del tratamiento
+                 Encargado del tratamiento
+                4. Principios aplicables
+                ECONFIA garantiza que el tratamiento de los datos personales se realizará bajo
+                los principios de:
+                 Legalidad
+                 Finalidad
+                 Libertad
+                 Veracidad o calidad
+                 Transparencia
+                 Acceso y circulación restringida
+                 Seguridad
+                 Confidencialidad
+                5. Tipo de datos tratados
+                En desarrollo de su objeto, ECONFIA podrá tratar:
+                 Datos de identificación de personas naturales y jurídicas.
+                 Datos de contacto.
+                 Información contenida en listas restrictivas, sancionatorias, vinculantes
+                o informativas.
+                 Datos públicos provenientes de fuentes abiertas, oficiales o legalmente
+                habilitadas.
+                ECONFIA no recolecta ni trata datos sensibles, salvo cuando la ley lo autorice
+                expresamente o sea estrictamente necesario para el cumplimiento de obligaciones
+                legales.
+                6. Finalidades del tratamiento
+                Los datos personales tratados a través del aplicativo ECONFIA serán utilizados
+                para:
+                 Realizar consultas en listas restrictivas y bases de datos.
+                 Cumplir obligaciones legales y regulatorias en materia de prevención de
+                riesgos.
+                 Apoyar procesos de debida diligencia, conocimiento de contrapartes y
+                análisis de riesgo.
+
+                 Prevenir riesgos legales, reputacionales, financieros y operativos.
+                 Atender requerimientos de autoridades competentes.
+                En ningún caso los datos serán utilizados con fines distintos a los aquí descritos.
+                7. Autorización del titular
+                El tratamiento de los datos personales se realizará previa autorización expresa,
+                previa e informada del titular, salvo las excepciones previstas en la ley,
+                especialmente cuando se trate de datos públicos.
+                El usuario del aplicativo declara que cuenta con la autorización correspondiente
+                para realizar las consultas a través de ECONFIA.
+                8. Derechos de los titulares
+                De conformidad con el artículo 8 de la Ley 1581 de 2012, los titulares tienen
+                derecho a:
+                 Conocer, actualizar y rectificar sus datos personales.
+                 Solicitar prueba de la autorización otorgada.
+                 Ser informados sobre el uso dado a sus datos.
+                 Presentar quejas ante la Superintendencia de Industria y Comercio.
+                 Revocar la autorización y/o solicitar la supresión del dato, cuando sea
+                procedente.
+                 Acceder de forma gratuita a sus datos personales.
+                9. Procedimiento para el ejercicio de derechos
+                Las consultas, reclamos o solicitudes relacionadas con datos personales deberán
+                realizarse a través de los canales definidos por ECONFIA, indicando:
+                 Identificación del titular.
+                 Descripción clara de la solicitud.
+                 Documentos que la soporten, si aplica.
+                Los plazos de atención se ajustarán a lo establecido en la Ley 1581 de 2012 y
+                normas concordantes.
+                10. Deberes de ECONFIA
+                ECONFIA se compromete a:
+                 Garantizar al titular el pleno y efectivo ejercicio de sus derechos.
+                 Conservar la información bajo condiciones de seguridad adecuadas.
+                 Actualizar y rectificar la información cuando sea necesario.
+
+                 Tramitar consultas y reclamos conforme a la ley.
+                 Adoptar medidas técnicas, administrativas y organizacionales para proteger
+                los datos.
+                11. Seguridad de la información
+                ECONFIA implementa medidas razonables de seguridad para evitar la
+                adulteración, pérdida, consulta, uso o acceso no autorizado de los datos
+                personales.
+                12. Transferencia y transmisión de datos
+                Los datos personales podrán ser transmitidos o transferidos a terceros únicamente
+                cuando:
+                 Sea necesario para el cumplimiento de la finalidad del servicio.
+                 Exista autorización legal o contractual.
+                 Se garantice el cumplimiento de los estándares de protección exigidos por
+                la ley colombiana.
+                13. Vigencia
+                La presente Política de Tratamiento de Datos Personales rige a partir de su
+                publicación y permanecerá vigente mientras ECONFIA desarrolle las actividades
+                descritas.
+
+                Los datos personales serán conservados durante el tiempo necesario para cumplir
+                la finalidad del tratamiento y las obligaciones legales.
                     </p>
                   </Terminos>
 
@@ -533,6 +749,7 @@ export default function ConsultaMedida() {
 
 
                 {/* Botón: Consulta a la Medida */}
+                {/** Botón: Consulta a la Medida (solo habilitado si todos los campos requeridos están completos) */}
                 <button
                   type="button"
                   onClick={() => {
@@ -543,10 +760,12 @@ export default function ConsultaMedida() {
                     });
                     setShowConsultaMedida(true);
                   }}
-                  disabled={!acepta || !consentimiento}
+                  disabled={
+                    !tipoDoc || !cedula || !acepta || !consentimiento
+                  }
                   className={`mt-3 w-full px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-300
                     ${
-                      !acepta || !consentimiento
+                      !tipoDoc || !cedula || !acepta || !consentimiento
                         ? "bg-white/10 text-white/40 cursor-not-allowed"
                         : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
                     }`}
@@ -569,6 +788,13 @@ export default function ConsultaMedida() {
         isOpen={showConsultaMedida}
         onClose={() => setShowConsultaMedida(false)}
         data={datos}
+        onSuccess={(datosConsulta) => {
+          setDatos(datosConsulta);
+          setShowResultados(true);
+          setTimeout(() => {
+            navigate("/resultados");
+          }, 2000);
+        }}
       />
     </>
   );

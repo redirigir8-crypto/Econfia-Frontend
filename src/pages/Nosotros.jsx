@@ -294,7 +294,7 @@ export default function Nosotros() {
                       <h3 className="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors">Visión</h3>
                     </div>
                     <p className="text-white/85 leading-relaxed group-hover:text-white transition-colors">
-                      Para 2030, GRUPO SOLUCIONES será referente en asesoría de
+                      Para 2030, eConfia será referente en asesoría de
                       confiabilidad y selección, con infraestructura sólida, gestión
                       moderna orientada a valor y tecnología de punta.
                     </p>

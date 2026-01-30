@@ -5,6 +5,7 @@ import FullPageSlider from "../components/FullPageSlider";
 import { FaDatabase, FaBolt, FaShieldAlt, FaHeadset } from "react-icons/fa";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 // Agregar estilos de animación
 const animationStyles = `
@@ -62,6 +63,7 @@ const PlanCard = ({
   cta = "Empezar",
   highlight = false,
 }) => {
+  const navigate = useNavigate();
   return (
     <div
       className={[
@@ -115,6 +117,7 @@ const PlanCard = ({
         <button
           className="mt-auto self-center px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold border-2 border-transparent hover:from-transparent hover:to-transparent hover:border-cyan-400 hover:text-cyan-400 transition-all shadow-lg hover:shadow-cyan-400/50 transform hover:scale-105"
           style={{ fontFamily: "poppins, sans-serif" }}
+          onClick={() => navigate('/contacto')}
         >
           {cta}
         </button>
@@ -127,54 +130,43 @@ const PlanCard = ({
 /* --- Datos de planes (4 en total) --- */
 const PLANS = [
   {
-    title: "E-Unity",
-    subtitle: "Paga solo lo que usas. Ideal para validaciones puntuales.",
+    title: "E-CoreFull",
+    subtitle: "Ideal para organizaciones que necesitan máxima cobertura.",
     features: [
       "1 validación = 1 consulta",
-      "Acceso a + 100 fuentes",
-      "Resultados en segundos",
+      "Acceso a +200 fuentes",
+      "Resultados en minutos",
       "Reporte en PDF",
     ],
-    cta: "Comprar consulta",
+    cta: "Empezar ahora",
     highlight: false,
   },
   {
-    title: "E-ssential",
-    subtitle: "Uso mensual ilimitado para equipos y empresas.",
+    title: "E-Contratista",
+    subtitle: "Ideal para Contratistas, que busca optimizar su tiempo de busqueda en documentos importantes.",
     badge: "Popular",
     features: [
-      "Consultas ilimitadas",
-      "Acceso a +100 fuentes",
+      "1 validación = 1 consulta",
+      "Acceso a 15 fuentes",
       "Reportes y auditoría",
       "Soporte prioritario",
+      "Reporte en PDF"
     ],
     cta: "Empezar ahora",
     highlight: true,
   },
   {
-    title: "E-nhance",
-    subtitle: "Para equipos en crecimiento con necesidades regulares.",
+    title: "E-ssential",
+    subtitle: "Idial para consultar fuentes especificas y necesarias.",
     features: [
-      "Hasta 5.000 consultas / mes",
+      "1 validación = 1 consulta",
       "Acceso a +200 fuentes",
       "Soporte estándar",
+      "Reporte en PDF"
     ],
-    cta: "Solicitar demo",
+    cta: "Empezar ahora",
     highlight: false,
-  },
-  {
-    title: "E-nterprise",
-    subtitle: "Alto volumen, seguridad avanzada y soporte dedicado.",
-    badge: "Nuevo",
-    features: [
-      "Consultas y usuarios a medida",
-      "SLAs y auditoría avanzada",
-      "API dedicada y SSO",
-      "Soporte premium 24/7",
-    ],
-    cta: "Hablar con ventas",
-    highlight: true,
-  },
+  }
 ];
 
 /* --- Slide de precios con navegación --- */

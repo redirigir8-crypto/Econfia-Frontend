@@ -30,6 +30,14 @@ const AdminFuentes = () => {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [toast, setToast] = useState(null);
+
+  // Toast auto-hide
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 3500);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
   const [error, setError] = useState("");
 
   /* =========================
@@ -70,7 +78,9 @@ const AdminFuentes = () => {
   const filteredFuentes = fuentes.filter(
     (f) =>
       (!filterNombre ||
-        f.nombre.toLowerCase().includes(filterNombre.toLowerCase())) &&
+        f.nombre.toLowerCase().includes(filterNombre.toLowerCase()) ||
+        (f.nombre_pila && f.nombre_pila.toLowerCase().includes(filterNombre.toLowerCase()))
+      ) &&
       (!filterTipo || (f.tipo.id || f.tipo) === parseInt(filterTipo))
   );
 
@@ -139,21 +149,34 @@ const AdminFuentes = () => {
 
       if (!res.ok) throw new Error(await res.text());
 
-      const created = await res.json();
-      setFuentes([...fuentes, created]);
+      const result = await res.json();
+      // El backend ahora retorna { detail, fuente }
+      setFuentes([...fuentes, result.fuente || result]);
       setNewFuente({ nombre: "", nombre_pila: "", tipo: "" });
       setShowCreateModal(false);
-      setToast({ type: "success", message: "Fuente creada" });
+      setToast({ type: "success", message: result.detail || "Fuente creada" });
     } catch (err) {
       setError(err.message);
     }
   };
 
+
+  // Mensaje toast visual
+  const ToastMsg = toast && (
+    <div className={`fixed top-6 right-6 z-50 px-6 py-3 rounded-xl shadow-xl font-semibold text-white transition-all
+      ${toast.type === "success" ? "bg-green-600/90" : "bg-red-600/90"}`}
+    >
+      {toast.message}
+    </div>
+  );
+
   if (error) return <div className="text-red-500 p-4">{error}</div>;
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 py-8">
-      <div className="max-w-6xl mx-auto px-4">
+    <>
+      {ToastMsg}
+      <section className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 py-8">
+        <div className="max-w-6xl mx-auto px-4">
 
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
@@ -375,6 +398,7 @@ const AdminFuentes = () => {
         )}
       </div>
     </section>
+    </>
   );
 };
 

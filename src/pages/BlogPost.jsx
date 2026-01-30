@@ -207,11 +207,11 @@ export default function BlogPost() {
           </div>
         </header>
 
-        <figure className="mb-12 rounded-3xl overflow-hidden border border-cyan-500/30 shadow-2xl">
+        <figure className="mb-12 rounded-3xl overflow-hidden border border-cyan-500/30 shadow-2xl bg-black/40 aspect-[4/3] w-full max-w-3xl mx-auto flex items-center justify-center">
           <img
             src={post.cover}
             alt={post.title}
-            className="w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover"
+            className="w-full h-full object-cover object-top"
             loading="lazy"
             onError={(e) => {
               e.currentTarget.src = fallbackImg;

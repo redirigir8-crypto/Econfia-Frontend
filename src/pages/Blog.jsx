@@ -68,14 +68,14 @@ function FeaturedPost({ post }) {
     >
       <div className="grid md:grid-cols-2 gap-0">
         {/* Imagen */}
-        <div className="relative h-[300px] md:h-full overflow-hidden">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-black/40 rounded-3xl flex items-center justify-center">
           <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
             <FaFire /> Destacado
           </div>
           <img
             src={post.cover}
             alt={post.title}
-            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover"
             loading="lazy"
             onError={(e) => {
               e.currentTarget.src = fallbackImg;
@@ -127,11 +127,11 @@ function PostCard({ post }) {
       className="cursor-pointer rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg hover:border-cyan-300/40 hover:shadow-cyan-500/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.03] flex flex-col h-full group"
     >
       {/* cover con overlay gradient */}
-      <div className="aspect-[16/9] w-full overflow-hidden relative">
+      <div className="aspect-[4/3] w-full overflow-hidden relative bg-black/40 rounded-2xl flex items-center justify-center">
         <img
           src={post.cover}
           alt={post.title}
-          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover"
           loading="lazy"
           onError={(e) => {
             e.currentTarget.src = fallbackImg;
