@@ -61,11 +61,13 @@ if (hasPlanes) {
 
 // Menú base
 let menuItems = [
+ 
   { path: "/logout",     icon: <LogOut size={28} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
   ...consultaItems,
   { path: "/profile",    icon: <img src={UserBaseIcon} alt="Perfil" style={{width:28,height:28}} />,     label: "Perfil" },
   { path: "/resultados", icon: <FileText size={28} strokeWidth={1.5} />, label: "Resultados" },
   { path: "/ayuda",      icon: <HelpCircle size={28} strokeWidth={1.5} />,label: "Ayuda" },
+  { path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Consulta Empresa" },
 ];
 
 // Accesos CRUD solo para admin
@@ -75,6 +77,7 @@ if (isAdmin) {
     { path: "/admin-usuarios", icon: <User size={28} strokeWidth={1.5} />, label: "Admin Usuarios" },
     { path: "/admin-planes", icon: <FileText size={28} strokeWidth={1.5} />, label: "Admin Planes" },
     { path: "/admin-fuentes", icon: <Search size={28} strokeWidth={1.5} />, label: "Admin Fuentes" },
+
   ];
 }
 

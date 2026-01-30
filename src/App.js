@@ -42,6 +42,11 @@ import AdminPanel from "./pages/AdminPanel";
 import AdminUsuarios from "./components/AdminUsuarios";
 import AdminPlanes from "./components/AdminPlanes";
 import AdminFuentes from "./components/AdminFuentes";
+import EmpresaRuesView from "./components/EmpresaRuesView";
+import EmpresaRuesPage from "./pages/EmpresaRuesPage";
+import EmpresaRuesResult from "./components/EmpresaRuesResult";
+import EmpresaRuesForm from "./components/EmpresaRuesForm";
+import ConsultaEmpresa from "./views/ConsultaEmpresa";
 
 // Estilos CSS para el efecto libro
 const bookStyles = `
@@ -434,6 +439,8 @@ export default function App() {
               <Route path="/consulta" element={<Consulta />} />
               <Route path="/consulta-medida" element={<ConsultaMedida />} />
               <Route path="/consulta-contratista" element={<ConsultaContratista />} />
+              <Route path="/consulta-empresa" element={<ConsultaEmpresa />} />
+              <Route path="/resultado-empresa/:nit" element={<EmpresaRuesResult />} />
               <Route path="/resultados" element={<Resultados />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/logout" element={<LogOut />} />

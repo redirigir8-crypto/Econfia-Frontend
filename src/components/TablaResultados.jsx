@@ -192,7 +192,7 @@ export default function TablaResultados({ data = [], onVerResultados }) {
             <thead>
             <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">ID</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Cédula</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">NIT/Documento</th>
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Nombre</th>
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Estado</th>
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Fecha</th>
@@ -217,8 +217,12 @@ export default function TablaResultados({ data = [], onVerResultados }) {
                         {item.id}
                       </span>
                     </td>
-                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm">{item.cedula}</td>
-                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-100 font-medium text-xs md:text-sm">{item.nombre || "—"}</td>
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm">
+                      {item.tipo === "EMPRESA" ? item.nit : item.cedula}
+                    </td>
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-100 font-medium text-xs md:text-sm">
+                      {item.tipo === "EMPRESA" ? item.nombre : (item.nombre || "—")}
+                    </td>
 
                     {/* ESTADO con badges elegantes */}
                     <td className="px-2 md:px-3 py-1.5 md:py-2">
