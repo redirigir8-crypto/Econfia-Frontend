@@ -5,10 +5,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search, FileText, LogOut, User, HelpCircle, HardHat, Target, ArrowUpCircle,
 } from "lucide-react";
+import { Fuel } from "lucide-react";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
-
-
+import HardHatIcon from '../assets/icons8-contratista-64 (1).png';
+import UserCogIcon from '../assets/icons8-lista-de-verificación-64.png';
+import UserBaseIcon from '../assets/icons8-usuario-48 (1).png';
 
 export default function Taskbar() {
   const [user, setUser] = useState(null);
@@ -47,13 +49,13 @@ let consultaItems = [];
 if (hasPlanes) {
   const planes = user.perfil.planes.map(p => (p.nombre || '').toLowerCase());
   if (planes.includes("ecorefull")) {
-    consultaItems.push({ path: "/consulta", icon: <Search size={28} strokeWidth={1.5} />, label: "E-Core Full" });
+    consultaItems.push({ path: "/consulta", icon: <Fuel size={28} strokeWidth={1.5} />, label: "E-Core Full" });
   }
   if (planes.includes("contratista")) {
-    consultaItems.push({ path: "/consulta-contratista", icon: <HardHat size={28} strokeWidth={1.5} />, label: "E-unity Contratista" });
+    consultaItems.push({ path: "/consulta-contratista", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
   }
   if (planes.includes("essential")) {
-    consultaItems.push({ path: "/consulta-medida", icon: <Target size={28} strokeWidth={1.5} />, label: "E-ssential" });
+    consultaItems.push({ path: "/consulta-medida", icon: <img src={UserCogIcon} alt="Essential" style={{width:28,height:28}} />, label: "E-ssential" });
   }
 }
 
@@ -61,7 +63,7 @@ if (hasPlanes) {
 let menuItems = [
   { path: "/logout",     icon: <LogOut size={28} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
   ...consultaItems,
-  { path: "/profile",    icon: <User size={28} strokeWidth={1.5} />,     label: "Perfil" },
+  { path: "/profile",    icon: <img src={UserBaseIcon} alt="Perfil" style={{width:28,height:28}} />,     label: "Perfil" },
   { path: "/resultados", icon: <FileText size={28} strokeWidth={1.5} />, label: "Resultados" },
   { path: "/ayuda",      icon: <HelpCircle size={28} strokeWidth={1.5} />,label: "Ayuda" },
 ];
