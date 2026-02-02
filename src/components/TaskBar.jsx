@@ -11,6 +11,7 @@ import "swiper/css/effect-coverflow";
 import HardHatIcon from '../assets/icons8-contratista-64 (1).png';
 import UserCogIcon from '../assets/icons8-lista-de-verificación-64.png';
 import UserBaseIcon from '../assets/icons8-usuario-48 (1).png';
+import AjustesIcon from '../assets/icons8-ajustes-de-usuarioesse-64 (2).png';
 
 export default function Taskbar() {
   const [user, setUser] = useState(null);
@@ -57,6 +58,13 @@ if (hasPlanes) {
   if (planes.includes("essential")) {
     consultaItems.push({ path: "/consulta-medida", icon: <img src={UserCogIcon} alt="Essential" style={{width:28,height:28}} />, label: "E-ssential" });
   }
+
+  if (planes.includes("basic-element") || planes.includes("basic-elemnt")) {
+    consultaItems.push({ path: "/consulta-basic-elemnt", icon: <img src={AjustesIcon} alt="Basic Elemnt" style={{width:28,height:28}} />, label: "Basic Elemnt" });
+  }
+  if(planes.includes("empresa")){
+    consultaItems.push({ path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
+  }
 }
 
 // Menú base
@@ -67,7 +75,6 @@ let menuItems = [
   { path: "/profile",    icon: <img src={UserBaseIcon} alt="Perfil" style={{width:28,height:28}} />,     label: "Perfil" },
   { path: "/resultados", icon: <FileText size={28} strokeWidth={1.5} />, label: "Resultados" },
   { path: "/ayuda",      icon: <HelpCircle size={28} strokeWidth={1.5} />,label: "Ayuda" },
-  { path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Consulta Empresa" },
 ];
 
 // Accesos CRUD solo para admin

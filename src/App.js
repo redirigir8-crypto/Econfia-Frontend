@@ -14,6 +14,7 @@ import Pricing from "./pages/Pricing";
 import Consulta from "./views/Consulta";
 import ConsultaContratista from "./views/ConsultaContratista";
 import ConsultaMedida from "./views/ConsultaMedida";
+import ConsultaBasicElemnt from "./views/ConsultaBasicElemnt";
 import Resultados from "./views/Resultados";
 import LogOut from "./views/LogOut";
 import Ayuda from "./views/Ayuda";
@@ -438,6 +439,7 @@ export default function App() {
               {/* Hijas protegidas */}
               <Route path="/consulta" element={<Consulta />} />
               <Route path="/consulta-medida" element={<ConsultaMedida />} />
+              <Route path="/consulta-basic-elemnt" element={<ConsultaBasicElemnt />} />
               <Route path="/consulta-contratista" element={<ConsultaContratista />} />
               <Route path="/consulta-empresa" element={<ConsultaEmpresa />} />
               <Route path="/resultado-empresa/:nit" element={<EmpresaRuesResult />} />
