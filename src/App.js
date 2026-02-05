@@ -48,6 +48,7 @@ import EmpresaRuesPage from "./pages/EmpresaRuesPage";
 import EmpresaRuesResult from "./components/EmpresaRuesResult";
 import EmpresaRuesForm from "./components/EmpresaRuesForm";
 import ConsultaEmpresa from "./views/ConsultaEmpresa";
+import ConsultaFask from "./views/ConsultaFask";
 
 // Estilos CSS para el efecto libro
 const bookStyles = `
@@ -438,6 +439,7 @@ export default function App() {
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
               {/* Hijas protegidas */}
               <Route path="/consulta" element={<Consulta />} />
+              <Route path="/consulta-fask" element={<ConsultaFask />} />
               <Route path="/consulta-medida" element={<ConsultaMedida />} />
               <Route path="/consulta-basic-elemnt" element={<ConsultaBasicElemnt />} />
               <Route path="/consulta-contratista" element={<ConsultaContratista />} />

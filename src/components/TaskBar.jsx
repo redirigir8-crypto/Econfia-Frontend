@@ -12,6 +12,7 @@ import HardHatIcon from '../assets/icons8-contratista-64 (1).png';
 import UserCogIcon from '../assets/icons8-lista-de-verificación-64.png';
 import UserBaseIcon from '../assets/icons8-usuario-48 (1).png';
 import AjustesIcon from '../assets/icons8-ajustes-de-usuarioesse-64 (2).png';
+import IconFask from '../assets/icon-fask.png';
 
 export default function Taskbar() {
   const [user, setUser] = useState(null);
@@ -37,6 +38,30 @@ export default function Taskbar() {
         setUser(null);
       }
     }
+// ...existing code...
+// Accesos de consulta según los planes asignados
+let consultaItems = [];
+if (user?.perfil?.planes && user.perfil.planes.length > 0) {
+  const planes = user.perfil.planes.map(p => (p.nombre || '').toLowerCase());
+  if (planes.includes("ecorefull")) {
+    consultaItems.push({ path: "/consulta", icon: <Fuel size={28} strokeWidth={1.5} />, label: "E-Core Full" });
+  }
+  if (planes.includes("contratista")) {
+    consultaItems.push({ path: "/consulta-contratista", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
+  }
+  if (planes.includes("essential")) {
+    consultaItems.push({ path: "/consulta-medida", icon: <img src={UserCogIcon} alt="Essential" style={{width:28,height:28}} />, label: "E-ssential" });
+  }
+  if (planes.includes("basic-element") || planes.includes("basic-elemnt")) {
+    consultaItems.push({ path: "/consulta-basic-elemnt", icon: <img src={AjustesIcon} alt="Basic Elemnt" style={{width:28,height:28}} />, label: "Basic Elemnt" });
+  }
+  if(planes.includes("empresa")){
+    consultaItems.push({ path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
+  }
+  if (planes.includes("econfiafask")) {
+    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="EconfiaFask" style={{width:28,height:28}} />, label: "EconfiaFask" });
+  }
+}
     window.addEventListener("user-updated", handleUserUpdate);
     return () => window.removeEventListener("user-updated", handleUserUpdate);
   }, []);
@@ -58,12 +83,14 @@ if (hasPlanes) {
   if (planes.includes("essential")) {
     consultaItems.push({ path: "/consulta-medida", icon: <img src={UserCogIcon} alt="Essential" style={{width:28,height:28}} />, label: "E-ssential" });
   }
-
   if (planes.includes("basic-element") || planes.includes("basic-elemnt")) {
     consultaItems.push({ path: "/consulta-basic-elemnt", icon: <img src={AjustesIcon} alt="Basic Elemnt" style={{width:28,height:28}} />, label: "Basic Elemnt" });
   }
   if(planes.includes("empresa")){
     consultaItems.push({ path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
+  }
+  if (planes.includes("econfiafask")) {
+    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="EconfiaFask" style={{width:28,height:28}} />, label: "EconfiaFask" });
   }
 }
 
