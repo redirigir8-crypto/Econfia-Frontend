@@ -61,6 +61,10 @@ if (user?.perfil?.planes && user.perfil.planes.length > 0) {
   if (planes.includes("econfiafask")) {
     consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="EconfiaFask" style={{width:28,height:28}} />, label: "EconfiaFask" });
   }
+  if (planes.includes("essencial-express")) {
+    consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={IconFask} alt="Essencial Express" style={{width:28,height:28}} />, label: "Essencial Express" });
+  }
+
 }
     window.addEventListener("user-updated", handleUserUpdate);
     return () => window.removeEventListener("user-updated", handleUserUpdate);
@@ -91,6 +95,9 @@ if (hasPlanes) {
   }
   if (planes.includes("econfiafask")) {
     consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="EconfiaFask" style={{width:28,height:28}} />, label: "EconfiaFask" });
+  }
+  if (planes.includes("essencial-express")) {
+    consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={IconFask} alt="Essencial Express" style={{width:28,height:28}} />, label: "Essencial Express" });
   }
 }
 

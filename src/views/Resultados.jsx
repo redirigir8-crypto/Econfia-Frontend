@@ -121,9 +121,19 @@ function FloatingActionsPortal({
                 onClick={() => { setOpen(false); onOpenIndividual?.(); }}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-purple-500/20 transition-all group"
               >
-                <FileText size={16} className="group-hover:text-purple-400 transition-colors" /> 
+                <FileText size={16} className="group-hover:text-purple-400 transition-colors" />
                 <span className="group-hover:text-purple-300">Descarga individual</span>
               </button>
+              <a
+                href={`${apiUrl}/api/descargar_pdf_exclusivo/${consultaId}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-green-500/20 transition-all group"
+                style={{ textDecoration: 'none' }}
+              >
+                <FileText size={16} className="group-hover:text-green-400 transition-colors" />
+                <span className="group-hover:text-green-300">Descargar PDF Exclusivo</span>
+              </a>
             </div>
           )}
         </div>
