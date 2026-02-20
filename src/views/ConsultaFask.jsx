@@ -80,7 +80,7 @@ export default function ConsultaFask() {
             <div className="relative bg-white/10 border border-white/30 rounded-2xl p-10 shadow-2xl text-center max-w-md w-full mx-4 backdrop-blur-md">
               <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-400 mx-auto mb-6"></div>
               <p className="text-white text-lg font-semibold animate-pulse">
-                Procesando consulta EconfiaFask...
+                Procesando consulta EconfiaFast...
               </p>
             </div>
           </div>,
@@ -90,7 +90,7 @@ export default function ConsultaFask() {
         <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
           <div className="p-8 shadow-2xl max-w-2xl w-full mx-4 text-center">
             <h2 className="text-2xl font-semibold text-white mb-4">Consulta enviada</h2>
-            <p className="text-white/80 mb-6">La consulta EconfiaFask ha sido procesada.</p>
+            <p className="text-white/80 mb-6">La consulta EconfiaFast ha sido procesada.</p>
             <CardDni data={datos} />
           </div>
         </div>,

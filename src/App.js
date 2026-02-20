@@ -32,6 +32,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ServicioEconfia from "./pages/ServicioEconfia";
 import ServicioContratista from "./pages/ServicioContratista";
 import ServicioSeguridad from "./pages/ServicioSeguridad";
+import TitulosValidationForm from "./views/TitulosValidationForm";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Keyboard } from "swiper/modules";
 import "swiper/css";
@@ -442,6 +443,7 @@ export default function App() {
               <Route path="/consulta" element={<Consulta />} />
               <Route path="/consulta-essencial-express" element={<ConsultaEssencialExpress />} />
               <Route path="/consulta-fask" element={<ConsultaFask />} />
+              <Route path="/consulta-titulos" element={<TitulosValidationForm />} />
               <Route path="/consulta-medida" element={<ConsultaMedida />} />
               <Route path="/consulta-basic-elemnt" element={<ConsultaBasicElemnt />} />
               <Route path="/consulta-contratista" element={<ConsultaContratista />} />

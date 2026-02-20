@@ -124,16 +124,38 @@ function FloatingActionsPortal({
                 <FileText size={16} className="group-hover:text-purple-400 transition-colors" />
                 <span className="group-hover:text-purple-300">Descarga individual</span>
               </button>
-              <a
-                href={`${apiUrl}/api/descargar_pdf_exclusivo/${consultaId}/`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-green-500/20 transition-all group"
-                style={{ textDecoration: 'none' }}
+              <button
+                onClick={async () => {
+                  setDownloading(true);
+                  try {
+                    const token = localStorage.getItem("token");
+                    const url = `${apiUrl}/api/descargar_pdf_validacion_titulo/${consultaId}/`;
+                    const res = await fetch(url, {
+                      method: "GET",
+                      headers: { Authorization: `Token ${token}` },
+                    });
+                    if (!res.ok) throw new Error("No se pudo descargar el PDF");
+                    const blob = await res.blob();
+                    const link = document.createElement("a");
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = `validacion_titulo_${consultaId}.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    setOpen(false);
+                  } catch (e) {
+                    alert("No se pudo descargar el PDF de validación de título");
+                  } finally {
+                    setDownloading(false);
+                  }
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-green-500/20 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={downloading}
               >
                 <FileText size={16} className="group-hover:text-green-400 transition-colors" />
-                <span className="group-hover:text-green-300">Descargar PDF Exclusivo</span>
-              </a>
+                <span className="group-hover:text-green-300">Descargar PDF Validación Título</span>
+                {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-green-400 rounded-full animate-spin" />}
+              </button>
             </div>
           )}
         </div>

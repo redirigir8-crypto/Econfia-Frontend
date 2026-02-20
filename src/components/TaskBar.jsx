@@ -65,6 +65,7 @@ if (user?.perfil?.planes && user.perfil.planes.length > 0) {
     consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={IconFask} alt="Essencial Express" style={{width:28,height:28}} />, label: "Essencial Express" });
   }
 
+
 }
     window.addEventListener("user-updated", handleUserUpdate);
     return () => window.removeEventListener("user-updated", handleUserUpdate);
@@ -98,6 +99,9 @@ if (hasPlanes) {
   }
   if (planes.includes("essencial-express")) {
     consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={IconFask} alt="Essencial Express" style={{width:28,height:28}} />, label: "Essencial Express" });
+  }
+  if(planes.includes("validacion-titulos")){
+  consultaItems.push({ path: "/consulta-titulos", icon: <img src={UserCogIcon} alt="Validación de títulos" style={{width:28,height:28}} />, label: "Validación de títulos" });
   }
 }
 
