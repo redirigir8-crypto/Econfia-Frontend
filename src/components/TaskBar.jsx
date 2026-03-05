@@ -59,7 +59,7 @@ if (user?.perfil?.planes && user.perfil.planes.length > 0) {
     consultaItems.push({ path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
   }
   if (planes.includes("econfiafask")) {
-    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="EconfiaFask" style={{width:28,height:28}} />, label: "EconfiaFask" });
+    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="EconfiaFast" style={{width:28,height:28}} />, label: "EconfiaFask" });
   }
   if (planes.includes("essencial-express")) {
     consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={IconFask} alt="Essencial Express" style={{width:28,height:28}} />, label: "Essencial Express" });
@@ -95,7 +95,7 @@ if (hasPlanes) {
     consultaItems.push({ path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
   }
   if (planes.includes("econfiafask")) {
-    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="EconfiaFask" style={{width:28,height:28}} />, label: "EconfiaFask" });
+    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="EconfiaFast" style={{width:28,height:28}} />, label: "EconfiaFast" });
   }
   if (planes.includes("essencial-express")) {
     consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={IconFask} alt="Essencial Express" style={{width:28,height:28}} />, label: "Essencial Express" });
