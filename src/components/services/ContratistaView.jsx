@@ -26,7 +26,7 @@ export default function ContratistaView({
         <div
           className="
             pointer-events-none absolute inset-0
-            bg-gradient-to-r from-black/80 via-black/60 to-transparent
+            bg-linear-to-r from-black/80 via-black/60 to-transparent
             opacity-100 lg:opacity-0 lg:group-hover:opacity-100
             transition-opacity duration-300
           "

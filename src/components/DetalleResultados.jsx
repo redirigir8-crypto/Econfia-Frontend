@@ -260,7 +260,8 @@ export default function DetalleResultados({ consultaId }) {
 
   // 🎛️ Estado UI con badges elegantes
   const EstadoCell = ({ item }) => {
-    const estado = (item.estado || "").toLowerCase();
+    const estadoRaw = item.estado || "";
+    const estado = estadoRaw.toLowerCase();
     const showRevalidandoUI =
       estado === "revalidando" || pendingRevalIds.has(item.id);
 
@@ -289,7 +290,8 @@ export default function DetalleResultados({ consultaId }) {
       );
     }
 
-    if (estado === "validado") {
+    // Accept 'Validado', 'Validada' (any case)
+    if (["validado", "validada"].includes(estado)) {
       return (
         <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-semibold text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)]">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
