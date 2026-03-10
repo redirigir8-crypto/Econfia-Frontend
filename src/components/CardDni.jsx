@@ -1,5 +1,13 @@
 // src/components/IDCard.jsx
 export default function CardDni({ data }) {
+  // Mapeo alternativo para campos del backend
+  const apellido = data?.last_name || data?.apellido || "";
+  const nombre = data?.first_name || data?.nombre || "";
+  const cedula = data?.document || data?.cedula || "";
+  const sexo = data?.gender || data?.sexo || "";
+  const fechaNacimiento = data?.birth_date || data?.fecha_nacimiento || "";
+  const tipoDoc = data?.doc_type || data?.tipo_doc || "";
+  const fechaExpedicion = data?.fecha_expedicion || "";
   return (
     <div className="max-w-lg w-full bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
       {/* Encabezado */}
@@ -9,11 +17,11 @@ export default function CardDni({ data }) {
             República de Colombia
           </h2>
           <p className="text-xs text-gray-500">
-            {data?.tipo_doc === "CC" ? "Cédula de ciudadanía" : "Documento"}
+            {tipoDoc === "CC" ? "Cédula de ciudadanía" : "Documento"}
           </p>
         </div>
         <span className="text-xs font-semibold text-gray-600">
-          NUIP: {data?.cedula}
+          NUIP: {cedula}
         </span>
       </div>
 
@@ -24,7 +32,7 @@ export default function CardDni({ data }) {
           {data?.foto ? (
             <img
               src={data.foto}
-              alt={`${data?.nombre} ${data?.apellido}`}
+              alt={`${nombre} ${apellido}`}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -35,15 +43,15 @@ export default function CardDni({ data }) {
         {/* Datos */}
         <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-800">
           <span className="font-semibold">Apellidos:</span>
-          <span>{data?.apellido}</span>
+          <span>{apellido}</span>
           <span className="font-semibold">Nombres:</span>
-          <span>{data?.nombre}</span>
+          <span>{nombre}</span>
 
           <span className="font-semibold">Sexo:</span>
-          <span>{data?.sexo}</span>
+          <span>{sexo}</span>
 
           <span className="font-semibold">Fecha Nac.:</span>
-          <span>{data?.fecha_nacimiento}</span>
+          <span>{fechaNacimiento ? new Date(fechaNacimiento).toLocaleDateString() : "—"}</span>
 
         </div>
       </div>
@@ -52,7 +60,7 @@ export default function CardDni({ data }) {
       <div className="mt-4 text-xs text-gray-600">
         <p>
           <span className="font-semibold">Fecha de expedición:</span>{" "}
-          {data?.fecha_expedicion}
+          {fechaExpedicion}
         </p>
       </div>
     </div>

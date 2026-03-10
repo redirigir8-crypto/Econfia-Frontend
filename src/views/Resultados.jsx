@@ -52,10 +52,32 @@ function FloatingActionsPortal({
 
   const goBack = () => (typeof onBack === "function" ? onBack() : window.history.back());
 
+  // Detectar tipo de consulta para mostrar el botón FAST
+  let tipoConsulta = "";
+  const consulta = window?.econfiaResultadosData?.find?.(c => c.id === consultaId) || null;
+  tipoConsulta = consulta?.tipo_consulta || consulta?.tipo || "";
+  if (!tipoConsulta && typeof window !== "undefined") {
+    const data = window?.econfiaResultadosData;
+    if (data) {
+      const c = data.find(c => c.id === consultaId);
+      tipoConsulta = c?.tipo_consulta || c?.tipo || "";
+    }
+  }
+
   const downloadPdf = async (tipo) => {
     setDownloading(true);
     try {
-      const url = `${apiUrl}/api/generar_consolidado_full/${consultaId}/${tipo}/`;
+      let url;
+      // Solo para el PDF resumen (tipo === 3)
+      if (tipo === 3) {
+        if (tipoConsulta && tipoConsulta.toLowerCase() === "econfiafask") {
+          url = `${apiUrl}/api/descargar_pdf_fast/${consultaId}/`;
+        } else {
+          url = `${apiUrl}/api/generar_consolidado_full/${consultaId}/3/`;
+        }
+      } else {
+        url = `${apiUrl}/api/generar_consolidado_full/${consultaId}/${tipo}/`;
+      }
       window.open(url, "_blank", "noopener,noreferrer");
       setOpen(false);
     } finally {
@@ -117,6 +139,27 @@ function FloatingActionsPortal({
                 <span className="group-hover:text-blue-300">Descargar PDF Resumen</span>
                 {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
               </button>
+              {/* Botón PDF FAST solo para econfiafask */}
+              {tipoConsulta && tipoConsulta.toLowerCase() === "econfiafask" && (
+                <button
+                  onClick={async () => {
+                    setDownloading(true);
+                    try {
+                      const url = `${apiUrl}/api/descargar_pdf_fast/${consultaId}/`;
+                      window.open(url, "_blank", "noopener,noreferrer");
+                      setOpen(false);
+                    } finally {
+                      setDownloading(false);
+                    }
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-green-500/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={downloading}
+                >
+                  <FileText size={16} className="group-hover:text-green-400 transition-colors" />
+                  <span className="group-hover:text-green-300">Descargar PDF FAST</span>
+                  {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-green-400 rounded-full animate-spin" />}
+                </button>
+              )}
               <button
                 onClick={() => { setOpen(false); onOpenIndividual?.(); }}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-purple-500/20 transition-all group"
