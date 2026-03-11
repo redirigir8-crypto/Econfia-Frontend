@@ -58,6 +58,9 @@ export default function ConsultaContratista() {
   const [acepta, setAcepta] = useState(false);
   const [consentimiento, setConsentimiento] = useState(false);
   // Estado para el modal de Términos
+  const [profesionSugerencias, setProfesionSugerencias] = useState([]);
+  const [showSugerencias, setShowSugerencias] = useState(false);
+  const [profesionLoading, setProfesionLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -80,6 +83,23 @@ export default function ConsultaContratista() {
   }, []);
 
   // ✅ Habilita botón solo si TODO está correcto
+    // Autocompletado de profesión
+    useEffect(() => {
+      if (!profesion || profesion.length < 2) {
+        setProfesionSugerencias([]);
+        setShowSugerencias(false);
+        return;
+      }
+      setProfesionLoading(true);
+      fetch(`${API_URL}/api/autocomplete_profesiones/?q=${encodeURIComponent(profesion)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setProfesionSugerencias(data.profesiones || []);
+          setShowSugerencias((data.profesiones || []).length > 0);
+        })
+        .catch(() => setProfesionSugerencias([]))
+        .finally(() => setProfesionLoading(false));
+    }, [profesion, API_URL]);
   const canSubmit = useMemo(() => {
     return (
       tipoDoc &&
@@ -166,7 +186,7 @@ export default function ConsultaContratista() {
       tipo_doc: tipoDoc,
       cedula: String(cedula).trim(),
       fecha_expedicion: fechaExpedicion || undefined, // opcional
-      profesion: profesionNormalizada, // ✅ requerido para activar contratista
+      profesion: [profesionNormalizada], // ✅ requerido para activar contratista (array)
       email: String(email).trim().toLowerCase(), // ✅ requerido para activar contratista
     };
 
@@ -397,25 +417,51 @@ export default function ConsultaContratista() {
                       <label className="text-xs font-semibold text-white/70">
                         Profesión *
                       </label>
-                      <select
+                      <input
                         required
+                        type="text"
                         value={profesion}
-                        onChange={(e) => setProfesion(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
-                      >
-                        <option className="bg-slate-900 text-white" value="">
-                          Seleccione profesión
-                        </option>
-                        {PROFESIONES.map((prof) => (
-                          <option
-                            className="bg-slate-900 text-white"
-                            value={prof}
-                            key={prof}
+                        onChange={(e) => {
+                          setProfesion(e.target.value);
+                          setShowSugerencias(profesionSugerencias.length > 0);
+                        }}
+                        placeholder="Escribe tu profesión"
+                        autoComplete="off"
+                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        onFocus={() => setShowSugerencias(profesionSugerencias.length > 0)}
+                        onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
+                      />
+                      {showSugerencias && (
+                        <div style={{ position: "relative" }}>
+                          <ul
+                            style={{
+                              position: "absolute",
+                              top: "100%",
+                              left: 0,
+                              width: "100%",
+                              marginTop: "4px",
+                              zIndex: 30,
+                            }}
+                            className="bg-slate-900 border border-cyan-500/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
                           >
-                            {prof}
-                          </option>
-                        ))}
-                      </select>
+                            {profesionLoading && (
+                              <li className="px-3 py-2 text-xs text-white/60">Cargando…</li>
+                            )}
+                            {profesionSugerencias.map((sug) => (
+                              <li
+                                key={sug.nombre}
+                                className="px-3 py-2 text-xs text-white hover:bg-cyan-500/20 cursor-pointer"
+                                onMouseDown={() => {
+                                  setProfesion(sug.nombre);
+                                  setShowSugerencias(false);
+                                }}
+                              >
+                                {sug.nombre} {sug.entidad_reguladora && `(${sug.entidad_reguladora})`}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
                     {/* Correo */}

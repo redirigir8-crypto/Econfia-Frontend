@@ -44,10 +44,10 @@ let consultaItems = [];
 if (user?.perfil?.planes && user.perfil.planes.length > 0) {
   const planes = user.perfil.planes.map(p => (p.nombre || '').toLowerCase());
   if (planes.includes("ecorefull")) {
-    consultaItems.push({ path: "/consulta", icon: <Fuel size={28} strokeWidth={1.5} />, label: "E-Core Full" });
+    consultaItems.push({ path: "/consulta_E-CoreFull", icon: <Fuel size={28} strokeWidth={1.5} />, label: "Consulta_E-CoreFull" });
   }
   if (planes.includes("contratista")) {
-    consultaItems.push({ path: "/consulta-contratista", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
+    consultaItems.push({ path: "/consulta_E-Contratista", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
   }
   if (planes.includes("essential")) {
     consultaItems.push({ path: "/consulta-medida", icon: <img src={UserCogIcon} alt="Essential" style={{width:28,height:28}} />, label: "E-ssential" });
@@ -80,10 +80,10 @@ let consultaItems = [];
 if (hasPlanes) {
   const planes = user.perfil.planes.map(p => (p.nombre || '').toLowerCase());
   if (planes.includes("ecorefull")) {
-    consultaItems.push({ path: "/consulta", icon: <Fuel size={28} strokeWidth={1.5} />, label: "E-Core Full" });
+    consultaItems.push({ path: "/consulta_E-CoreFull", icon: <Fuel size={28} strokeWidth={1.5} />, label: "E-Core Full" });
   }
   if (planes.includes("contratista")) {
-    consultaItems.push({ path: "/consulta-contratista", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
+    consultaItems.push({ path: "/consulta_E-Contratista", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
   }
   if (planes.includes("essential")) {
     consultaItems.push({ path: "/consulta-medida", icon: <img src={UserCogIcon} alt="Essential" style={{width:28,height:28}} />, label: "E-ssential" });

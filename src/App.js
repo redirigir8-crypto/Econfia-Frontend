@@ -440,13 +440,14 @@ export default function App() {
             {/* Protegidas (Dashboard como layout) */}
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
               {/* Hijas protegidas */}
+              <Route path="/consulta_E-CoreFull" element={<Consulta />} />
               <Route path="/consulta" element={<Consulta />} />
               <Route path="/consulta-essencial-express" element={<ConsultaEssencialExpress />} />
               <Route path="/consulta-fask" element={<ConsultaFask />} />
               <Route path="/consulta-titulos" element={<TitulosValidationForm />} />
               <Route path="/consulta-medida" element={<ConsultaMedida />} />
               <Route path="/consulta-basic-elemnt" element={<ConsultaBasicElemnt />} />
-              <Route path="/consulta-contratista" element={<ConsultaContratista />} />
+              <Route path="/consulta_E-Contratista" element={<ConsultaContratista />} />
               <Route path="/consulta-empresa" element={<ConsultaEmpresa />} />
               <Route path="/resultado-empresa/:nit" element={<EmpresaRuesResult />} />
               <Route path="/resultados" element={<Resultados />} />
