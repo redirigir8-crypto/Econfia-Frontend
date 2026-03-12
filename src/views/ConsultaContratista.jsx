@@ -1,9 +1,52 @@
-import { useState, useEffect, useMemo } from "react";
+
+import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
 import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
+
+// Lista de profesiones actuales
+const PROFESIONES = [
+  "Abogado/a",
+  "Economista",
+  "Psicólogo/a",
+  "Bacteriólogo/a",
+  "Biólogo/a",
+  "Químico/a",
+  "Ingeniero/a Químico/a",
+  "Ingeniero/a de Petróleos",
+  "Topógrafo/a",
+  "Arquitecto/a",
+  "Tecnólogo/a en Electricidad/Electrónica/Electromecánica",
+  "Técnico/a Electricista",
+  "Ingeniero/a Eléctrico/Mecánico/Electrónico/Telecom/Metalúrgico/Aeronáutico/Nuclear/Electromecánico",
+  "Ingeniero/a",
+  "Administrador/a de Empresas/Negocios",
+  "Administrador/a Ambiental",
+  "Contador/a",
+  "Auxiliar en salud",
+  "Tecnólogo en desarrollo de software",
+  "Técnico en desarrollo de software",
+  "Ingeniero en desarrollo de software, sistemas ",
+  "Médico",
+  "Enfermero",
+  "Enfermera",
+  "Odontólogo",
+  "Psicólogo",
+  "Bacteriólogo",
+  "Fisioterapeuta",
+  "Terapeuta ocupacional",
+  "Instrumentador quirúrgico",
+  "Nutricionista dietista",
+  "Fonoaudiólogo",
+  "Químico farmacéutico",
+  "Optómetra",
+  "Terapeuta respiratorio",
+  "Regente de farmacia",
+  "Auxiliar en salud",
+
+];
 
 const isValidEmail = (s) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || "").trim());
@@ -13,6 +56,16 @@ export default function ConsultaContratista() {
   const [cedula, setCedula] = useState("");
   const [fechaExpedicion, setFechaExpedicion] = useState("");
   const [profesion, setProfesion] = useState("");
+  const [profesionFocus, setProfesionFocus] = useState(false);
+  const [profesionInput, setProfesionInput] = useState("");
+  const profesionRef = useRef(null);
+    // Filtrar profesiones según lo que escribe el usuario
+    const profesionesFiltradas = useMemo(() => {
+      if (!profesionInput) return PROFESIONES;
+      return PROFESIONES.filter((p) =>
+        p.toLowerCase().includes(profesionInput.toLowerCase())
+      );
+    }, [profesionInput]);
   const [email, setEmail] = useState("");
   const [acepta, setAcepta] = useState(false);
   const [consentimiento, setConsentimiento] = useState(false);
@@ -63,7 +116,7 @@ export default function ConsultaContratista() {
       return;
     }
     if (!profesion) {
-      setToast({ type: "error", message: "Selecciona la profesión." });
+      setToast({ type: "error", message: "Ingresa la profesión." });
       return;
     }
     if (!isValidEmail(email)) {
@@ -272,36 +325,41 @@ export default function ConsultaContratista() {
                       />
                     </div>
 
-                    {/* Profesión */}
-                    <div className="flex flex-col gap-1">
+                    {/* Profesión con autocompletado */}
+                    <div className="flex flex-col gap-1 relative">
                       <label className="text-xs font-semibold text-white/70">Profesión *</label>
-                      <select
+                      <input
                         required
-                        value={profesion}
-                        onChange={(e) => setProfesion(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
-                      >
-                        <option className="bg-slate-900 text-white" value="">
-                          Seleccione profesión
-                        </option>
-                        <option className="bg-slate-900 text-white" value="Abogado/a">Abogado/a</option>
-                        <option className="bg-slate-900 text-white" value="Economista">Economista</option>
-                        <option className="bg-slate-900 text-white" value="Psicólogo/a">Psicólogo/a</option>
-                        <option className="bg-slate-900 text-white" value="Bacteriólogo/a">Bacteriólogo/a</option>
-                        <option className="bg-slate-900 text-white" value="Biólogo/a">Biólogo/a</option>
-                        <option className="bg-slate-900 text-white" value="Químico/a">Químico/a</option>
-                        <option className="bg-slate-900 text-white" value="Ingeniero/a Químico/a">Ingeniero/a Químico/a</option>
-                        <option className="bg-slate-900 text-white" value="Ingeniero/a de Petróleos">Ingeniero/a de Petróleos</option>
-                        <option className="bg-slate-900 text-white" value="Topógrafo/a">Topógrafo/a</option>
-                        <option className="bg-slate-900 text-white" value="Arquitecto/a">Arquitecto/a</option>
-                        <option className="bg-slate-900 text-white" value="Tecnólogo/a en Electricidad/Electrónica/Electromecánica">Tecnólogo/a en Electricidad/Electrónica/Electromecánica</option>
-                        <option className="bg-slate-900 text-white" value="Técnico/a Electricista">Técnico/a Electricista</option>
-                        <option className="bg-slate-900 text-white" value="Ingeniero/a Eléctrico/Mecánico/Electrónico/Telecom/Metalúrgico/Aeronáutico/Nuclear/Electromecánico">Ingeniero/a Eléctrico/Mecánico/Electrónico/Telecom/Metalúrgico/Aeronáutico/Nuclear/Electromecánico</option>
-                        <option className="bg-slate-900 text-white" value="Ingeniero/a">Ingeniero/a</option>
-                        <option className="bg-slate-900 text-white" value="Administrador/a de Empresas/Negocios">Administrador/a de Empresas/Negocios</option>
-                        <option className="bg-slate-900 text-white" value="Administrador/a Ambiental">Administrador/a Ambiental</option>
-                        <option className="bg-slate-900 text-white" value="Contador/a">Contador/a</option>
-                      </select>
+                        type="text"
+                        value={profesionInput}
+                        ref={profesionRef}
+                        onFocus={() => setProfesionFocus(true)}
+                        onBlur={() => setTimeout(() => setProfesionFocus(false), 150)}
+                        onChange={e => {
+                          setProfesionInput(e.target.value);
+                          setProfesion(e.target.value);
+                        }}
+                        placeholder="Escribe tu profesión"
+                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        autoComplete="off"
+                      />
+                      {profesionFocus && profesionesFiltradas.length > 0 && (
+                        <ul className="absolute z-20 top-full left-0 w-full bg-white border border-cyan-200 rounded-lg shadow-lg max-h-48 overflow-y-auto mt-1">
+                          {profesionesFiltradas.map((p) => (
+                            <li
+                              key={p}
+                              className="px-3 py-2 text-sm text-slate-800 hover:bg-cyan-100 cursor-pointer"
+                              onMouseDown={() => {
+                                setProfesionInput(p);
+                                setProfesion(p);
+                                setProfesionFocus(false);
+                              }}
+                            >
+                              {p}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
 
                     {/* Correo */}
