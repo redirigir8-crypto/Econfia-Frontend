@@ -1,11 +1,13 @@
 // DetalleResultados.jsx
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { RefreshCw, Eye, Download } from "lucide-react";
 import { jsPDF } from "jspdf";
 
 export default function DetalleResultados({ consultaId }) {
   const [detalle, setDetalle] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [resultadoModal, setResultadoModal] = useState(null);
 
   // Ids marcados localmente como "revalidando" tras click en offline
   const [pendingRevalIds, setPendingRevalIds] = useState(() => new Set());
@@ -121,6 +123,49 @@ export default function DetalleResultados({ consultaId }) {
     a.click();
     a.remove();
     URL.revokeObjectURL(a.href);
+  };
+
+  const hasEvidenceFile = (archivo) => {
+    if (typeof archivo !== "string") return false;
+    return archivo.trim().length > 0;
+  };
+
+  const getNumericScore = (scoreValue) => {
+    const parsed = Number(scoreValue);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const isPositiveResult = (item) => {
+    const numericScore = getNumericScore(item?.score);
+    if (numericScore !== null) return numericScore >= 3;
+    const estado = (item?.estado || "").toLowerCase();
+    return estado === "validado" || estado === "completado";
+  };
+
+  const normalizeMensaje = (mensaje) => {
+    if (mensaje == null) return "Sin mensaje disponible.";
+    if (typeof mensaje !== "string") {
+      try {
+        return JSON.stringify(mensaje, null, 2);
+      } catch {
+        return String(mensaje);
+      }
+    }
+
+    const cleaned = mensaje.trim();
+    if (!cleaned) return "Sin mensaje disponible.";
+
+    const looksLikeJson = cleaned.startsWith("{") || cleaned.startsWith("[");
+    if (looksLikeJson) {
+      try {
+        const parsed = JSON.parse(cleaned);
+        return JSON.stringify(parsed, null, 2);
+      } catch {
+        return cleaned;
+      }
+    }
+
+    return cleaned;
   };
   // --------------------------------------
 
@@ -412,7 +457,7 @@ export default function DetalleResultados({ consultaId }) {
                     </span>
                   </td>
                   <td className="px-2 md:px-3 py-1.5 md:py-2">
-                    {item.archivo ? (
+                    {hasEvidenceFile(item.archivo) ? (
                       <div className="flex items-center justify-center gap-1">
                         <a
                           href={buildMediaUrl(item.archivo)}
@@ -448,6 +493,22 @@ export default function DetalleResultados({ consultaId }) {
                           aria-label="Descargar como PDF"
                         >
                           <Download size={14} className="md:w-4 md:h-4" />
+                        </button>
+                      </div>
+                    ) : item.mensaje || item.score != null ? (
+                      <div className="flex items-center justify-center">
+                        <button
+                          onClick={() => setResultadoModal(item)}
+                          className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-white
+                                     bg-gradient-to-r from-emerald-500/80 to-teal-500/80
+                                     hover:from-emerald-400 hover:to-teal-400
+                                     shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:shadow-[0_0_20px_rgba(16,185,129,0.45)]
+                                     transition-all duration-300
+                                     hover:scale-105 active:scale-95 text-xs font-semibold"
+                          title="Ver resultado"
+                          aria-label="Ver resultado"
+                        >
+                          Ver resultado
                         </button>
                       </div>
                     ) : (
@@ -541,6 +602,70 @@ export default function DetalleResultados({ consultaId }) {
           </button>
         </div>
       </div>
+
+      {resultadoModal &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[12000] overflow-y-auto bg-black/70 backdrop-blur-sm p-4 md:p-6"
+            onClick={() => setResultadoModal(null)}
+          >
+            <div
+              className="mx-auto w-full max-w-3xl max-h-[calc(100vh-2rem)] md:max-h-[calc(100vh-3rem)] rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900/95 via-blue-950/70 to-slate-900/95 shadow-[0_10px_40px_rgba(6,182,212,0.2)] p-4 md:p-6 flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between gap-3 mb-4 shrink-0">
+                <h3 className="text-lg md:text-xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+                  Resultado detallado
+                </h3>
+                <button
+                  onClick={() => setResultadoModal(null)}
+                  className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-semibold transition-all"
+                >
+                  Cerrar
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 shrink-0">
+                <div className="rounded-xl border border-cyan-500/20 bg-slate-900/60 p-3">
+                  <p className="text-xs text-cyan-300 mb-1">Fuente</p>
+                  <p className="text-sm text-white font-semibold">{resultadoModal.fuente || "Sin fuente"}</p>
+                </div>
+                <div className="rounded-xl border border-cyan-500/20 bg-slate-900/60 p-3">
+                  <p className="text-xs text-cyan-300 mb-1">Estado</p>
+                  <p className="text-sm text-white font-semibold capitalize">{resultadoModal.estado || "Sin estado"}</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-white/20 bg-slate-900/60 p-4 mb-4 shrink-0">
+                {isPositiveResult(resultadoModal) ? (
+                  <div className="flex items-center gap-3 text-emerald-300">
+                    <span className="text-3xl" aria-hidden="true">😊</span>
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-emerald-400/90">Resultado favorable</p>
+                      <p className="text-base md:text-lg font-black">Score: {resultadoModal.score ?? "N/A"}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 text-red-300">
+                    <span className="text-3xl" aria-hidden="true">😠</span>
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-red-400/90">Resultado con alerta</p>
+                      <p className="text-base md:text-lg font-black">Score: {resultadoModal.score ?? "N/A"}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-cyan-500/20 bg-slate-900/60 p-3 flex-1 min-h-0">
+                <p className="text-xs text-cyan-300 mb-2">Detalle</p>
+                <pre className="text-xs md:text-sm text-slate-100 whitespace-pre-wrap break-words h-full overflow-auto leading-relaxed">
+                  {normalizeMensaje(resultadoModal.mensaje)}
+                </pre>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
