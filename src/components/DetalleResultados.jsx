@@ -497,19 +497,35 @@ export default function DetalleResultados({ consultaId }) {
                       </div>
                     ) : item.mensaje || item.score != null ? (
                       <div className="flex items-center justify-center">
-                        <button
-                          onClick={() => setResultadoModal(item)}
-                          className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-white
-                                     bg-gradient-to-r from-emerald-500/80 to-teal-500/80
-                                     hover:from-emerald-400 hover:to-teal-400
-                                     shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:shadow-[0_0_20px_rgba(16,185,129,0.45)]
-                                     transition-all duration-300
-                                     hover:scale-105 active:scale-95 text-xs font-semibold"
-                          title="Ver resultado"
-                          aria-label="Ver resultado"
-                        >
-                          Ver resultado
-                        </button>
+                        {isPositiveResult(item) ? (
+                          <button
+                            onClick={() => setResultadoModal(item)}
+                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-white
+                                       bg-gradient-to-r from-red-500/80 to-rose-500/80
+                                       hover:from-red-400 hover:to-rose-400
+                                       shadow-[0_0_15px_rgba(239,68,68,0.25)] hover:shadow-[0_0_20px_rgba(239,68,68,0.45)]
+                                       transition-all duration-300
+                                       hover:scale-105 active:scale-95 text-xs font-semibold"
+                            title="Ver resultado con alerta"
+                            aria-label="Ver resultado con alerta"
+                          >
+                            Ver resultado
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setResultadoModal(item)}
+                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-slate-300
+                                       bg-gradient-to-r from-slate-600/50 to-slate-700/50
+                                       hover:from-slate-500/60 hover:to-slate-600/60
+                                       border border-slate-500/30
+                                       transition-all duration-300
+                                       hover:scale-105 active:scale-95 text-xs font-semibold"
+                            title="Ver detalle"
+                            aria-label="Ver detalle"
+                          >
+                            Ver detalle
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <span className="text-slate-500 text-xs italic text-center block">Sin archivo</span>
@@ -638,18 +654,18 @@ export default function DetalleResultados({ consultaId }) {
 
               <div className="rounded-xl border border-white/20 bg-slate-900/60 p-4 mb-4 shrink-0">
                 {isPositiveResult(resultadoModal) ? (
-                  <div className="flex items-center gap-3 text-emerald-300">
-                    <span className="text-3xl" aria-hidden="true">😊</span>
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-emerald-400/90">Resultado favorable</p>
-                      <p className="text-base md:text-lg font-black">Score: {resultadoModal.score ?? "N/A"}</p>
-                    </div>
-                  </div>
-                ) : (
                   <div className="flex items-center gap-3 text-red-300">
                     <span className="text-3xl" aria-hidden="true">😠</span>
                     <div>
                       <p className="text-xs uppercase tracking-wider text-red-400/90">Resultado con alerta</p>
+                      <p className="text-base md:text-lg font-black">Score: {resultadoModal.score ?? "N/A"}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 text-green-300">
+                    <span className="text-3xl" aria-hidden="true">😊</span>
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-green-400/90">Sin hallazgo relevante</p>
                       <p className="text-base md:text-lg font-black">Score: {resultadoModal.score ?? "N/A"}</p>
                     </div>
                   </div>

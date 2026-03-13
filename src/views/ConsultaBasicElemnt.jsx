@@ -83,7 +83,7 @@ export default function ConsultaBasicElemnt() {
       {/* Icono y título */}
       <div className="absolute top-10 left-10 flex items-center gap-3 z-20">
         <FaCogs className="text-cyan-400 text-3xl" />
-        <span className="text-cyan-200 font-bold text-lg">Consulta Basic Elemnt</span>
+        <span className="text-cyan-200 font-bold text-lg">Consulta Basic Element</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center max-w-5xl w-full px-4 relative z-10">
         <div className="text-center md:text-left space-y-3">
@@ -96,7 +96,7 @@ export default function ConsultaBasicElemnt() {
               <span className="text-cyan-300 text-xs font-medium">Consulta Especial</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
-              Consulta Basic Elemnt
+              Econfia Basic Element
             </h1>
           </div>
           <p className="text-sm text-white/70 leading-relaxed">

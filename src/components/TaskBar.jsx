@@ -89,16 +89,16 @@ if (hasPlanes) {
     consultaItems.push({ path: "/consulta-medida", icon: <img src={UserCogIcon} alt="Essential" style={{width:28,height:28}} />, label: "E-ssential" });
   }
   if (planes.includes("basic-element") || planes.includes("basic-elemnt")) {
-    consultaItems.push({ path: "/consulta-basic-elemnt", icon: <img src={AjustesIcon} alt="Basic Elemnt" style={{width:28,height:28}} />, label: "Basic Elemnt" });
+    consultaItems.push({ path: "/consulta-basic-elemnt", icon: <img src={AjustesIcon} alt="E-Basic Element" style={{width:28,height:28}} />, label: "Basic Element" });
   }
   if(planes.includes("empresa")){
     consultaItems.push({ path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
   }
   if (planes.includes("econfiafask")) {
-    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="EconfiaFast" style={{width:28,height:28}} />, label: "EconfiaFast" });
+    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="E-Fast" style={{width:28,height:28}} />, label: "EconfiaFast" });
   }
   if (planes.includes("essencial-express")) {
-    consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={IconFask} alt="Essencial Express" style={{width:28,height:28}} />, label: "Essencial Express" });
+    consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={IconFask} alt="E-Essencial Express" style={{width:28,height:28}} />, label: "E-Essencial Express" });
   }
   if(planes.includes("validacion-titulos")){
   consultaItems.push({ path: "/consulta-titulos", icon: <img src={UserCogIcon} alt="Validación de títulos" style={{width:28,height:28}} />, label: "Validación de títulos" });
