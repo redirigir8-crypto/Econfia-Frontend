@@ -32,26 +32,17 @@ function percentFrom(startTs, nowTs, duration = DURATION_MS) {
   return Math.round(pct * 100);
 }
 
-/* ===== Barra elegante con gradiente cyan-blue ===== */
-function ElegantProgressBar({ percent = 0, showLabel = true, className = "" }) {
-  const pct = Math.max(0, Math.min(100, Math.round(percent)));
+function ElegantProgressBarIndeterminate({ className = "" }) {
   return (
     <div className={`w-full ${className}`}>
-      <div className="w-full h-2.5 rounded-full bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 overflow-hidden relative backdrop-blur-sm">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.7)]"
-          style={{ width: `${pct}%`, transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}
-        />
+      <div className="relative w-full h-2.5 rounded-full bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 overflow-hidden backdrop-blur-sm">
+        <div className="absolute top-0 h-full w-[30%] rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.7)] animate-indeterminate-bar-pingpong" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/10" />
       </div>
-      {showLabel && (
-        <div className="mt-1.5 text-[11px] text-cyan-400 font-semibold tracking-wide text-right">
-          {pct}%
-        </div>
-      )}
     </div>
   );
 }
+
 function ElegantCard({ children, className = "" }) {
   return (
     <div
@@ -128,7 +119,7 @@ function ProcessDockPortal({ items }) {
                         </div>
                       </div>
                     </div>
-                    <ElegantProgressBar percent={percent} />
+                    <ElegantProgressBarIndeterminate />
                   </ElegantCard>
                 );
               })}
@@ -228,7 +219,7 @@ export default function TablaResultados({ data = [], onVerResultados }) {
                     <td className="px-2 md:px-3 py-1.5 md:py-2">
                       {isProcessing ? (
                         <div className="max-w-[140px]">
-                          <ElegantProgressBar percent={percent} />
+                          <ElegantProgressBarIndeterminate />
                         </div>
                       ) : isDone ? (
                         <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-semibold text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)]">

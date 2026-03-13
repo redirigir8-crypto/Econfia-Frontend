@@ -82,8 +82,6 @@ export default function ConsultaBasicElemnt() {
     <section className="relative h-screen flex items-center justify-center py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
       {/* Icono y título */}
       <div className="absolute top-10 left-10 flex items-center gap-3 z-20">
-        <FaCogs className="text-cyan-400 text-3xl" />
-        <span className="text-cyan-200 font-bold text-lg">Consulta Basic Element</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center max-w-5xl w-full px-4 relative z-10">
         <div className="text-center md:text-left space-y-3">
@@ -107,6 +105,9 @@ export default function ConsultaBasicElemnt() {
           <div className="relative w-full bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[20px] border border-white/10 shadow-2xl shadow-cyan-500/10 p-6 group">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
             <div className="relative z-10">
+              <div className="flex items-center justify-center mb-4">
+                <img src="/img/logo-econfia-rojo.png" alt="Econfía" className="max-h-10 w-auto" />
+              </div>  
               <form onSubmit={handleSubmit} className="space-y-2">
                 <div className="space-y-2">
                   <div className="flex flex-col gap-1">
