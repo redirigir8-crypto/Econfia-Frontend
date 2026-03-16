@@ -19,7 +19,7 @@ import { ArrowLeft, FileDown, FileText, Images } from "lucide-react";
 function FloatingActionsPortal({
   apiUrl,
   consultaId,
-  consultaEstado, // NUEVO: estado de la consulta
+  consultaTipo,
   onBack,
   onOpenIndividual, // abre tu ModalDescargaIndividual
 }) {
@@ -52,12 +52,55 @@ function FloatingActionsPortal({
 
   const goBack = () => (typeof onBack === "function" ? onBack() : window.history.back());
 
+  const tipoConsultaNormalizado = (consultaTipo || "").toLowerCase();
+  const isEconfiafask = tipoConsultaNormalizado === "econfiafask";
+
   const downloadPdf = async (tipo) => {
     setDownloading(true);
     try {
-      const url = `${apiUrl}/api/generar_consolidado_full/${consultaId}/${tipo}/`;
+      const token = localStorage.getItem("token");
+
+      if (tipo === 3 && isEconfiafask) {
+        const url = `${apiUrl}/api/descargar_pdf_fast/${consultaId}/`;
+        const res = await fetch(url, {
+          method: "GET",
+          headers: token ? { Authorization: `Token ${token}` } : {},
+        });
+
+        if (!res.ok) {
+          throw new Error(`Error al descargar PDF FAST: ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        const disposition = res.headers.get("content-disposition") || "";
+        const match = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
+        const filename = match?.[1]
+          ? decodeURIComponent(match[1])
+          : `resumen_fast_${consultaId}.pdf`;
+
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(link.href);
+        setOpen(false);
+        return;
+      }
+
+      let url;
+      // Solo para el PDF resumen (tipo === 3)
+      if (tipo === 3) {
+        url = `${apiUrl}/api/generar_consolidado_full/${consultaId}/3/`;
+      } else {
+        url = `${apiUrl}/api/generar_consolidado_full/${consultaId}/${tipo}/`;
+      }
       window.open(url, "_blank", "noopener,noreferrer");
       setOpen(false);
+    } catch (error) {
+      console.error("Error al descargar PDF:", error);
+      alert("No se pudo descargar el PDF solicitado");
     } finally {
       setDownloading(false);
     }
@@ -99,63 +142,77 @@ function FloatingActionsPortal({
           {open && (
             <div className="absolute left-0 mt-2 w-56 rounded-lg overflow-hidden border border-white/20
                             bg-gradient-to-br from-slate-900/95 via-blue-900/40 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/20 animate-in fade-in duration-200">
-              <button
-                onClick={() => downloadPdf(1)}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-cyan-500/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
-                disabled={downloading}
-              >
-                <FileText size={16} className="group-hover:text-cyan-400 transition-colors" /> 
-                <span className="group-hover:text-cyan-300">Descargar PDF Completo</span>
-                {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
-              </button>
-              <button
-                onClick={() => downloadPdf(3)}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-blue-500/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
-                disabled={downloading}
-              >
-                <Images size={16} className="group-hover:text-blue-400 transition-colors" /> 
-                <span className="group-hover:text-blue-300">Descargar PDF Resumen</span>
-                {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
-              </button>
-              <button
-                onClick={() => { setOpen(false); onOpenIndividual?.(); }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-purple-500/20 transition-all group"
-              >
-                <FileText size={16} className="group-hover:text-purple-400 transition-colors" />
-                <span className="group-hover:text-purple-300">Descarga individual</span>
-              </button>
-              <button
-                onClick={async () => {
-                  setDownloading(true);
-                  try {
-                    const token = localStorage.getItem("token");
-                    const url = `${apiUrl}/api/descargar_pdf_validacion_titulo/${consultaId}/`;
-                    const res = await fetch(url, {
-                      method: "GET",
-                      headers: { Authorization: `Token ${token}` },
-                    });
-                    if (!res.ok) throw new Error("No se pudo descargar el PDF");
-                    const blob = await res.blob();
-                    const link = document.createElement("a");
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = `validacion_titulo_${consultaId}.pdf`;
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                    setOpen(false);
-                  } catch (e) {
-                    alert("No se pudo descargar el PDF de validación de título");
-                  } finally {
-                    setDownloading(false);
-                  }
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-green-500/20 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
-                disabled={downloading}
-              >
-                <FileText size={16} className="group-hover:text-green-400 transition-colors" />
-                <span className="group-hover:text-green-300">Descargar PDF Validación Título</span>
-                {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-green-400 rounded-full animate-spin" />}
-              </button>
+              {isEconfiafask ? (
+                <button
+                  onClick={() => downloadPdf(3)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-blue-500/20 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={downloading}
+                >
+                  <Images size={16} className="group-hover:text-blue-400 transition-colors" />
+                  <span className="group-hover:text-blue-300">Descargar PDF Resumen</span>
+                  {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => downloadPdf(1)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-cyan-500/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={downloading}
+                  >
+                    <FileText size={16} className="group-hover:text-cyan-400 transition-colors" />
+                    <span className="group-hover:text-cyan-300">Descargar PDF Completo</span>
+                    {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
+                  </button>
+                  <button
+                    onClick={() => downloadPdf(3)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-blue-500/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={downloading}
+                  >
+                    <Images size={16} className="group-hover:text-blue-400 transition-colors" />
+                    <span className="group-hover:text-blue-300">Descargar PDF Resumen</span>
+                    {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
+                  </button>
+                  <button
+                    onClick={() => { setOpen(false); onOpenIndividual?.(); }}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-purple-500/20 transition-all group"
+                  >
+                    <FileText size={16} className="group-hover:text-purple-400 transition-colors" />
+                    <span className="group-hover:text-purple-300">Descarga individual</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setDownloading(true);
+                      try {
+                        const token = localStorage.getItem("token");
+                        const url = `${apiUrl}/api/descargar_pdf_validacion_titulo/${consultaId}/`;
+                        const res = await fetch(url, {
+                          method: "GET",
+                          headers: { Authorization: `Token ${token}` },
+                        });
+                        if (!res.ok) throw new Error("No se pudo descargar el PDF");
+                        const blob = await res.blob();
+                        const link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = `validacion_titulo_${consultaId}.pdf`;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        setOpen(false);
+                      } catch (e) {
+                        alert("No se pudo descargar el PDF de validación de título");
+                      } finally {
+                        setDownloading(false);
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-green-500/20 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={downloading}
+                  >
+                    <FileText size={16} className="group-hover:text-green-400 transition-colors" />
+                    <span className="group-hover:text-green-300">Descargar PDF Validación Título</span>
+                    {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-green-400 rounded-full animate-spin" />}
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -252,6 +309,12 @@ export default function Resultados() {
     return matchSearch && matchEstado && matchFecha;
   });
 
+  const consultaActual = data.find((c) => c.id === consultaSeleccionada) || null;
+  const consultaTipoActual =
+    consultaActual?.tipo_consulta ||
+    consultaActual?.tipo ||
+    (consultaActual?.es_econfiafask ? "econfiafask" : "");
+
   return (
     <section className="relative h-screen py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
       {/* Elementos decorativos de fondo */}
@@ -317,9 +380,7 @@ export default function Resultados() {
           <FloatingActionsPortal
             apiUrl={API_URL}
             consultaId={consultaSeleccionada}
-            consultaEstado={
-              (data.find((c) => c.id === consultaSeleccionada)?.estado || '').toLowerCase()
-            }
+            consultaTipo={consultaTipoActual}
             onBack={() => setConsultaSeleccionada(null)}
             onOpenIndividual={() => setShowModalIndividual(true)}
           />

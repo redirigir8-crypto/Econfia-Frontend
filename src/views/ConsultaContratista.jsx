@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+
+import { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -54,6 +55,16 @@ export default function ConsultaContratista() {
   const [cedula, setCedula] = useState("");
   const [fechaExpedicion, setFechaExpedicion] = useState("");
   const [profesion, setProfesion] = useState("");
+  const [profesionFocus, setProfesionFocus] = useState(false);
+  const [profesionInput, setProfesionInput] = useState("");
+  const profesionRef = useRef(null);
+    // Filtrar profesiones según lo que escribe el usuario
+    const profesionesFiltradas = useMemo(() => {
+      if (!profesionInput) return PROFESIONES;
+      return PROFESIONES.filter((p) =>
+        p.toLowerCase().includes(profesionInput.toLowerCase())
+      );
+    }, [profesionInput]);
   const [email, setEmail] = useState("");
   const [acepta, setAcepta] = useState(false);
   const [consentimiento, setConsentimiento] = useState(false);
@@ -124,7 +135,7 @@ export default function ConsultaContratista() {
       return;
     }
     if (!profesion) {
-      setToast({ type: "error", message: "Selecciona la profesión." });
+      setToast({ type: "error", message: "Ingresa la profesión." });
       return;
     }
     if (!isValidEmail(email)) {

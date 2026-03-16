@@ -88,10 +88,11 @@ const ConsultaSlide = ({ consultaId }) => {
     );
   }
 
-  const nombreCompleto = `${consulta?.candidato?.nombre || ""} ${consulta?.candidato?.apellido || ""}`.trim();
-  const fechaNac = consulta?.candidato?.fecha_nacimiento
-    ? new Date(consulta.candidato.fecha_nacimiento).toLocaleDateString()
-    : "—";
+  // Mapeo alternativo para campos del backend
+  const nombreCompleto = `${consulta?.candidato?.first_name || consulta?.candidato?.nombre || ""} ${consulta?.candidato?.last_name || consulta?.candidato?.apellido || ""}`.trim();
+  const fechaNac = consulta?.candidato?.birth_date
+    ? new Date(consulta.candidato.birth_date).toLocaleDateString()
+    : (consulta?.candidato?.fecha_nacimiento ? new Date(consulta.candidato.fecha_nacimiento).toLocaleDateString() : "—");
   const fechaConsulta = consulta?.fecha ? new Date(consulta.fecha).toLocaleString() : "—";
 
   return (
@@ -157,9 +158,9 @@ const ConsultaSlide = ({ consultaId }) => {
                   {/* info */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <InfoRow icon={<User2 size={16} />} label="Nombre" value={nombreCompleto || "—"} />
-                    <InfoRow icon={<IdCard size={16} />} label="Cédula" value={consulta?.candidato?.cedula || "—"} />
-                    <InfoRow icon={<Venus size={16} />} label="Sexo" value={consulta?.candidato?.sexo || "—"} />
-                    <InfoRow icon={<FileWarning size={16} />} label="Tipo doc." value={consulta?.candidato?.tipo_doc || "—"} />
+                    <InfoRow icon={<IdCard size={16} />} label="Cédula" value={consulta?.candidato?.document || consulta?.candidato?.cedula || "—"} />
+                    <InfoRow icon={<Venus size={16} />} label="Sexo" value={consulta?.candidato?.gender || consulta?.candidato?.sexo || "—"} />
+                    <InfoRow icon={<FileWarning size={16} />} label="Tipo doc." value={consulta?.candidato?.doc_type || consulta?.candidato?.tipo_doc || "—"} />
                     <InfoRow icon={<Calendar size={16} />} label="Nacimiento" value={fechaNac} />
                   </div>
                 </div>

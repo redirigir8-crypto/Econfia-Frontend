@@ -36,6 +36,23 @@ body::before {
   100% { transform: translate(20px, 20px) scale(1.05); }
 }
 
+/* Barra indeterminada tipo Android */
+@keyframes indeterminate-bar-pingpong {
+  0% {
+    left: -30%;
+  }
+  50% {
+    left: 100%;
+    transform: translateX(-100%);
+  }
+  100% {
+    left: -30%;
+  }
+}
+.animate-indeterminate-bar-pingpong {
+  animation: indeterminate-bar-pingpong 2.5s ease-in-out infinite;
+}
+
 /* Ocultar widgets de chat */
 #intercom-container,
 .intercom-launcher,
