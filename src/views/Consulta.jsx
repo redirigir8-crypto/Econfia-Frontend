@@ -355,7 +355,7 @@ export default function Consulta() {
           <div className="text-center md:text-left space-y-3">
             <div>
               <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
-                Econfia Core Full
+                Consulta de Listas Dinámicas
               </h1>
               <p className="mt-2 text-sm text-white/70 leading-relaxed">
                 Verifica antecedentes de manera rápida, segura y confiable.
