@@ -50,7 +50,7 @@ body::before {
   }
 }
 .animate-indeterminate-bar-pingpong {
-  animation: indeterminate-bar-pingpong 2.5s ease-in-out infinite;
+  animation: indeterminate-bar-pingpong 2s ease-in-out infinite;
 }
 
 /* Ocultar widgets de chat */

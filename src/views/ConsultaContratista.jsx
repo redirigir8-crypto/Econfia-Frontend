@@ -239,7 +239,7 @@ export default function ConsultaContratista() {
                   <span className="text-cyan-300 text-xs font-medium">Consulta Contratista</span>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
-                  Consulta de Contratistas
+                  Econfia Contratistas
                 </h1>
               </div>
 
