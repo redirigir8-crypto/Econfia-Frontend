@@ -45,25 +45,25 @@ let consultaItems = [];
 if (user?.perfil?.planes && user.perfil.planes.length > 0) {
   const planes = user.perfil.planes.map(p => (p.nombre || '').toLowerCase());
   if (planes.includes("ecorefull")) {
-    consultaItems.push({ path: "/consulta_E-CoreFull", icon: <Fuel size={28} strokeWidth={1.5} />, label: "Consulta_E-CoreFull" });
+    consultaItems.push({ path: "/3c8f1a2e", icon: <Fuel size={28} strokeWidth={1.5} />, label: "Consulta_E-CoreFull" });
   }
   if (planes.includes("contratista")) {
-    consultaItems.push({ path: "/consulta_E-Contratista", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
+    consultaItems.push({ path: "/6c1b9f3d", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
   }
   if (planes.includes("essential")) {
-    consultaItems.push({ path: "/consulta-medida", icon: <img src={UserCogIcon} alt="Essential" style={{width:28,height:28}} />, label: "E-ssential" });
+    consultaItems.push({ path: "/9e3a6c1f", icon: <img src={UserCogIcon} alt="Essential" style={{width:28,height:28}} />, label: "E-ssential" });
   }
   if (planes.includes("basic-element") || planes.includes("basic-elemnt")) {
-    consultaItems.push({ path: "/consulta-basic-elemnt", icon: <img src={AjustesIcon} alt="E-Basic Element" style={{width:28,height:28}} />, label: "E-Basic Element" });
+    consultaItems.push({ path: "/b4f8d2e7", icon: <img src={AjustesIcon} alt="E-Basic Element" style={{width:28,height:28}} />, label: "E-Basic Element" });
   }
   if(planes.includes("empresa")){
-    consultaItems.push({ path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
+    consultaItems.push({ path: "/4a7e2b8f", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
   }
-  if (planes.includes("econfiafask")) {
-    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="E-Fast" style={{width:28,height:28}} />, label: "E-Fast" });
+  if (planes.includes("econfiafast")) {
+    consultaItems.push({ path: "/7f3a9e2b", icon: <img src={IconFask} alt="E-Fast" style={{width:28,height:28}} />, label: "E-Fast" });
   }
   if (planes.includes("essencial-express")) {
-    consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={express} alt="E-Essencial Express" style={{width:28,height:28}} />, label: "E-Essencial Express" });
+    consultaItems.push({ path: "/a1e6c4b8", icon: <img src={express} alt="E-Essencial Express" style={{width:28,height:28}} />, label: "E-Essencial Express" });
   }
 
 
@@ -81,48 +81,48 @@ let consultaItems = [];
 if (hasPlanes) {
   const planes = user.perfil.planes.map(p => (p.nombre || '').toLowerCase());
   if (planes.includes("ecorefull")) {
-    consultaItems.push({ path: "/consulta_E-CoreFull", icon: <Fuel size={28} strokeWidth={1.5} />, label: "E-Core Full" });
+    consultaItems.push({ path: "/3c8f1a2e", icon: <Fuel size={28} strokeWidth={1.5} />, label: "E-Core Full" });
   }
   if (planes.includes("contratista")) {
-    consultaItems.push({ path: "/consulta_E-Contratista", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
+    consultaItems.push({ path: "/6c1b9f3d", icon: <img src={HardHatIcon} alt="Contratista" style={{width:28,height:28}} />, label: "E-Contratista" });
   }
   if (planes.includes("essential")) {
-    consultaItems.push({ path: "/consulta-medida", icon: <img src={UserCogIcon} alt="E-Essential" style={{width:28,height:28}} />, label: "E-Essential" });
+    consultaItems.push({ path: "/9e3a6c1f", icon: <img src={UserCogIcon} alt="E-Essential" style={{width:28,height:28}} />, label: "E-Essential" });
   }
   if (planes.includes("basic-element") || planes.includes("basic-elemnt")) {
-    consultaItems.push({ path: "/consulta-basic-elemnt", icon: <img src={AjustesIcon} alt="E-Basic Element" style={{width:28,height:28}} />, label: "E-Basic Element" });
+    consultaItems.push({ path: "/b4f8d2e7", icon: <img src={AjustesIcon} alt="E-Basic Element" style={{width:28,height:28}} />, label: "E-Basic Element" });
   }
   if(planes.includes("empresa")){
-    consultaItems.push({ path: "/consulta-empresa", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
+    consultaItems.push({ path: "/4a7e2b8f", icon: <HardHat size={28} strokeWidth={1.5} />, label: "Empresa RUES" });
   }
-  if (planes.includes("econfiafask")) {
-    consultaItems.push({ path: "/consulta-fask", icon: <img src={IconFask} alt="E-Fast" style={{width:28,height:28}} />, label: "E-Fast" });
+  if (planes.includes("econfiafast")) {
+    consultaItems.push({ path: "/7f3a9e2b", icon: <img src={IconFask} alt="E-Fast" style={{width:28,height:28}} />, label: "E-Fast" });
   }
   if (planes.includes("essencial-express")) {
-    consultaItems.push({ path: "/consulta-essencial-express", icon: <img src={express} alt="E-Essencial Express" style={{width:28,height:28}} />, label: "E-Essencial Express" });
+    consultaItems.push({ path: "/a1e6c4b8", icon: <img src={express} alt="E-Essencial Express" style={{width:28,height:28}} />, label: "E-Essencial Express" });
   }
   if(planes.includes("validacion-titulos")){
-  consultaItems.push({ path: "/consulta-titulos", icon: <img src={UserCogIcon} alt="Validación de títulos" style={{width:28,height:28}} />, label: "Validación de títulos" });
+  consultaItems.push({ path: "/2b7d5e9c", icon: <img src={UserCogIcon} alt="Validación de títulos" style={{width:28,height:28}} />, label: "Validación de títulos" });
   }
 }
 
 // Menú base
 let menuItems = [
  
-  { path: "/logout",     icon: <LogOut size={28} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
+  { path: "/f1d8a5c3", icon: <LogOut size={28} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
   ...consultaItems,
-  { path: "/profile",    icon: <img src={UserBaseIcon} alt="Perfil" style={{width:28,height:28}} />,     label: "Perfil" },
-  { path: "/resultados", icon: <FileText size={28} strokeWidth={1.5} />, label: "Resultados" },
-  { path: "/ayuda",      icon: <HelpCircle size={28} strokeWidth={1.5} />,label: "Ayuda" },
+  { path: "/e9c4b2f7", icon: <img src={UserBaseIcon} alt="Perfil" style={{width:28,height:28}} />,     label: "Perfil" },
+  { path: "/d3b7f1e9", icon: <FileText size={28} strokeWidth={1.5} />, label: "Resultados" },
+  { path: "/c2e6b9a4", icon: <HelpCircle size={28} strokeWidth={1.5} />,label: "Ayuda" },
 ];
 
 // Accesos CRUD solo para admin
 if (isAdmin) {
   menuItems = [
     ...menuItems,
-    { path: "/admin-usuarios", icon: <User size={28} strokeWidth={1.5} />, label: "Admin Usuarios" },
-    { path: "/admin-planes", icon: <FileText size={28} strokeWidth={1.5} />, label: "Admin Planes" },
-    { path: "/admin-fuentes", icon: <Search size={28} strokeWidth={1.5} />, label: "Admin Fuentes" },
+    { path: "/7b3f9d1e", icon: <User size={28} strokeWidth={1.5} />, label: "Admin Usuarios" },
+    { path: "/1e5c8a4b", icon: <FileText size={28} strokeWidth={1.5} />, label: "Admin Planes" },
+    { path: "/4d9b2f6e", icon: <Search size={28} strokeWidth={1.5} />, label: "Admin Fuentes" },
 
   ];
 }

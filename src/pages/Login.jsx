@@ -28,7 +28,7 @@ export default function Login() {
 
   // si ya hay sesión, redirige a /profile
   if (token) {
-    return <Navigate to="/profile" replace />;
+    return <Navigate to="/e9c4b2f7" replace />;
   }
 
   const handleSubmit = async (e) => {
@@ -87,7 +87,7 @@ export default function Login() {
           message: `Bienvenido ${data.user.username}!`,
         });
         // Navegación dura para refrescar estado global (si aplica)
-        window.location.href = "/profile";
+        window.location.href = "/e9c4b2f7";
       }
     } catch (err) {
       setToast({

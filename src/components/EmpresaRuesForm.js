@@ -64,7 +64,7 @@ const EmpresaRuesForm = () => {
     setError("");
     try {
       // Solo navega, el resultado se carga en la vista de resultados
-      navigate(`/resultado-empresa/${nit}`);
+      navigate(`/8f5c3a1b/${nit}`);
     } catch (err) {
       setError("Error al consultar la empresa.");
     }

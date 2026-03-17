@@ -40,7 +40,7 @@ export default function Consulta() {
               persist: true, // no se cierra solo
               action: {
                 text: "Ver resultados",
-                onClick: () => navigate("/resultados"),
+                onClick: () => navigate("/d3b7f1e9"),
               },
             });
           }

@@ -74,7 +74,7 @@ export default function SlideDinamicLists({ onMore }) {
               </div>
 
               <Link
-                to="/profile"
+                to="/e9c4b2f7"
                 className="self-start px-7 py-3 rounded-full bg-white text-slate-900 font-semibold border border-white/20 shadow-lg
                            hover:bg-transparent hover:text-white transition-colors"
               >

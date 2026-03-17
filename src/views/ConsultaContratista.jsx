@@ -225,7 +225,7 @@ export default function ConsultaContratista() {
       setShowResultados(true);
 
       setTimeout(() => {
-        navigate("/resultados");
+        navigate("/d3b7f1e9");
       }, 2000);
     } catch (error) {
       console.error("Error en la consulta:", error);

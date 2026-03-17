@@ -53,14 +53,14 @@ function FloatingActionsPortal({
   const goBack = () => (typeof onBack === "function" ? onBack() : window.history.back());
 
   const tipoConsultaNormalizado = (consultaTipo || "").toLowerCase();
-  const isEconfiafask = tipoConsultaNormalizado === "econfiafask";
+  const isEconfiafast = tipoConsultaNormalizado === "econfiafast";
 
   const downloadPdf = async (tipo) => {
     setDownloading(true);
     try {
       const token = localStorage.getItem("token");
 
-      if (tipo === 3 && isEconfiafask) {
+      if (tipo === 3 && isEconfiafast) {
         const url = `${apiUrl}/api/descargar_pdf_fast/${consultaId}/`;
         const res = await fetch(url, {
           method: "GET",
@@ -142,14 +142,14 @@ function FloatingActionsPortal({
           {open && (
             <div className="absolute left-0 mt-2 w-56 rounded-lg overflow-hidden border border-white/20
                             bg-gradient-to-br from-slate-900/95 via-blue-900/40 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/20 animate-in fade-in duration-200">
-              {isEconfiafask ? (
+              {isEconfiafast ? (
                 <button
                   onClick={() => downloadPdf(3)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-blue-500/20 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
                   disabled={downloading}
                 >
                   <Images size={16} className="group-hover:text-blue-400 transition-colors" />
-                  <span className="group-hover:text-blue-300">Descargar PDF Resumen</span>
+                  <span className="group-hover:text-blue-300">Descargar PDF</span>
                   {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
                 </button>
               ) : (

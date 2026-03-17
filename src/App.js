@@ -378,7 +378,7 @@ function Home() {
                   <span className="text-blue-400 text-5xl mb-4 animate-pulse">📊</span>
                   <h3 className="text-xl font-bold text-white mb-2">Reportes y análisis</h3>
                   <p className="text-slate-200 text-center mb-4">Obtén reportes claros y análisis de riesgo personalizados.</p>
-                  <a href="/resultados" className="px-8 py-3 rounded-full bg-blue-500 text-white font-semibold shadow-lg hover:bg-blue-600 transition">Ver reportes</a>
+                  <a href="/d3b7f1e9" className="px-8 py-3 rounded-full bg-blue-500 text-white font-semibold shadow-lg hover:bg-blue-600 transition">Ver reportes</a>
                 </div>
               </div>
             </div>
@@ -402,7 +402,7 @@ function Home() {
                   <span className="text-yellow-400 text-5xl mb-4 animate-pulse">💼</span>
                   <h3 className="text-xl font-bold text-white mb-2">Gestión de perfil</h3>
                   <p className="text-slate-200 text-center mb-4">Administra tu perfil y accede a tus reportes fácilmente.</p>
-                  <a href="/profile" className="px-8 py-3 rounded-full bg-yellow-500 text-white font-semibold shadow-lg hover:bg-yellow-600 transition">Ir al perfil</a>
+                  <a href="/e9c4b2f7" className="px-8 py-3 rounded-full bg-yellow-500 text-white font-semibold shadow-lg hover:bg-yellow-600 transition">Ir al perfil</a>
                 </div>
               </div>
             </div>
@@ -440,27 +440,27 @@ export default function App() {
             {/* Protegidas (Dashboard como layout) */}
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
               {/* Hijas protegidas */}
-              <Route path="/consulta_E-CoreFull" element={<Consulta />} />
+              <Route path="/3c8f1a2e" element={<Consulta />} />
               <Route path="/consulta" element={<Consulta />} />
-              <Route path="/consulta-essencial-express" element={<ConsultaEssencialExpress />} />
-              <Route path="/consulta-fask" element={<ConsultaFask />} />
-              <Route path="/consulta-titulos" element={<TitulosValidationForm />} />
-              <Route path="/consulta-medida" element={<ConsultaMedida />} />
-              <Route path="/consulta-basic-elemnt" element={<ConsultaBasicElemnt />} />
-              <Route path="/consulta_E-Contratista" element={<ConsultaContratista />} />
-              <Route path="/consulta-empresa" element={<ConsultaEmpresa />} />
-              <Route path="/resultado-empresa/:nit" element={<EmpresaRuesResult />} />
-              <Route path="/resultados" element={<Resultados />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/logout" element={<LogOut />} />
-              <Route path="/ayuda" element={<Ayuda />} />
+              <Route path="/a1e6c4b8" element={<ConsultaEssencialExpress />} />
+              <Route path="/7f3a9e2b" element={<ConsultaFask />} />
+              <Route path="/2b7d5e9c" element={<TitulosValidationForm />} />
+              <Route path="/9e3a6c1f" element={<ConsultaMedida />} />
+              <Route path="/b4f8d2e7" element={<ConsultaBasicElemnt />} />
+              <Route path="/6c1b9f3d" element={<ConsultaContratista />} />
+              <Route path="/4a7e2b8f" element={<ConsultaEmpresa />} />
+              <Route path="/8f5c3a1b/:nit" element={<EmpresaRuesResult />} />
+              <Route path="/d3b7f1e9" element={<Resultados />} />
+              <Route path="/e9c4b2f7" element={<Profile />} />
+              <Route path="/f1d8a5c3" element={<LogOut />} />
+              <Route path="/c2e6b9a4" element={<Ayuda />} />
               {/* CRUD admin dentro del layout para mostrar TaskBar */}
-              <Route path="/admin-usuarios" element={<AdminUsuarios />} />
-              <Route path="/admin-planes" element={<AdminPlanes />} />
-              <Route path="/admin-fuentes" element={<AdminFuentes />} />
+              <Route path="/7b3f9d1e" element={<AdminUsuarios />} />
+              <Route path="/1e5c8a4b" element={<AdminPlanes />} />
+              <Route path="/4d9b2f6e" element={<AdminFuentes />} />
             </Route>
             {/* Panel de administración general (si lo usas) */}
-            <Route path="/admin" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
+            <Route path="/a8e3c7b2" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
           </Routes>
         </Router>
       </CardProvider>

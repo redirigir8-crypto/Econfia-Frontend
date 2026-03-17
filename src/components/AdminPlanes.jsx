@@ -83,7 +83,7 @@ const AdminPlanes = () => {
       fetchPlanes();
       refreshUserProfile();
       // Fuerza recarga de la página de usuarios si el admin está en esa ruta
-      if (window.location.pathname === "/admin-usuarios") {
+      if (window.location.pathname === "/7b3f9d1e") {
         window.location.reload();
       }
     } catch {

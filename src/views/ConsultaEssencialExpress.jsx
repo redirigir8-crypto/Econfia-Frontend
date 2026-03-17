@@ -435,7 +435,7 @@ export default function ConsultaEssencialExpress() {
           setDatos(datosConsulta);
           setShowResultados(true);
           setTimeout(() => {
-            navigate("/resultados");
+            navigate("/d3b7f1e9");
           }, 2000);
         }}
       />

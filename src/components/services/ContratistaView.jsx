@@ -73,7 +73,7 @@ export default function ContratistaView({
 
           {/* Botón CTA */}
           <Link
-                to="/profile"
+                to="/e9c4b2f7"
           >
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
