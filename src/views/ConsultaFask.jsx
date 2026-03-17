@@ -94,11 +94,11 @@ export default function ConsultaBasicElemnt() {
               <span className="text-cyan-300 text-xs font-medium">Consulta Especial</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
-              Consulta EconfiaFast
+              Econfia Fast
             </h1>
           </div>
           <p className="text-sm text-white/70 leading-relaxed">
-            Realice consultas rapidas con nuestra integración EconfiaFast, diseñada para ofrecer resultados inmediatos y precisos. Ideal para validaciones rápidas y verificaciones instantáneas, esta consulta es perfecta para situaciones donde el tiempo es esencial. Con EconfiaFast, obtenga la información que necesita al instante, sin comprometer la calidad ni la seguridad de los datos.
+            Realice consultas rapidas con nuestra integración Econfia Fast, diseñada para ofrecer resultados inmediatos y precisos. Ideal para validaciones rápidas y verificaciones instantáneas, esta consulta es perfecta para situaciones donde el tiempo es esencial. Con Econfia Fast, obtenga la información que necesita al instante, sin comprometer la calidad ni la seguridad de los datos.
           </p>
         </div>
         <div className="relative w-full max-w-sm mx-auto">
