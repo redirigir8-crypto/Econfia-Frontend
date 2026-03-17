@@ -1,8 +1,26 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-/* ===== Progreso simulado (5 min por ítem) ===== */
-const DURATION_MS = 5 * 60 * 1000;
+/* ===== Duraciones por tipo de plan ===== */
+const DURATION_MAP = {
+  "econfiafast":          2 * 60 * 1000,
+  "essencial-express":    2 * 60 * 1000,
+  "essential-express":    2 * 60 * 1000,
+  "basic-element":        4 * 60 * 1000,
+  "basic-elemnt":         4 * 60 * 1000,
+  "essential":            5 * 60 * 1000,
+  "empresa":              5 * 60 * 1000,
+  "validacion-titulos":   6 * 60 * 1000,
+  "contratista":         10 * 60 * 1000,
+  "ecorefull":           11 * 60 * 1000,
+};
+const DEFAULT_DURATION = 8 * 60 * 1000;
+
+function getDuration(tipo_consulta) {
+  if (!tipo_consulta) return DEFAULT_DURATION;
+  const key = tipo_consulta.toLowerCase().trim();
+  return DURATION_MAP[key] ?? DEFAULT_DURATION;
+}
 
 function useStartTimes(items, getId, getFecha) {
   const startsRef = useRef(new Map());
@@ -26,19 +44,80 @@ function useTicker(ms = 1000) {
     return () => clearInterval(t);
   }, [ms]);
 }
-function percentFrom(startTs, nowTs, duration = DURATION_MS) {
+function percentFrom(startTs, nowTs, tipo_consulta) {
+  const duration = getDuration(tipo_consulta);
   const elapsed = Math.max(0, nowTs - startTs);
   const pct = Math.min(1, elapsed / duration);
   return Math.round(pct * 100);
 }
 
-function ElegantProgressBarIndeterminate({ className = "" }) {
+/* Devuelve colores según el % de tiempo transcurrido:
+   0–33 % → azul  |  33–66 % → amarillo  |  66–100 % → verde */
+function barColors(percent) {
+  if (percent < 33) return {
+    bar:  "linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #0ea5e9 100%)",
+    glow: "rgba(59,130,246,0.65)",
+    text: "#60a5fa",
+    border: "rgba(59,130,246,0.35)",
+  };
+  if (percent < 66) return {
+    bar:  "linear-gradient(90deg, #1d4ed8 0%, #ca8a04 45%, #facc15 100%)",
+    glow: "rgba(234,179,8,0.65)",
+    text: "#fde047",
+    border: "rgba(234,179,8,0.35)",
+  };
+  return {
+    bar:  "linear-gradient(90deg, #166534 0%, #16a34a 45%, #4ade80 100%)",
+    glow: "rgba(34,197,94,0.65)",
+    text: "#4ade80",
+    border: "rgba(34,197,94,0.35)",
+  };
+}
+
+function ProgressBar({ percent = 0, compact = false }) {
+  const { bar, glow, border } = barColors(percent);
+  const height = compact ? 8 : 10;
+  // El relleno va de 4% (mínimo visible) a 100%
+  const fill = Math.max(4, Math.min(percent, 100));
   return (
-    <div className={`w-full ${className}`}>
-      <div className="relative w-full h-2.5 rounded-full bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 overflow-hidden backdrop-blur-sm">
-        <div className="absolute top-0 h-full w-[30%] rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.7)] animate-indeterminate-bar-pingpong" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/10" />
+    <div style={{
+      width: "100%",
+      height,
+      borderRadius: 999,
+      background: "rgba(15,23,42,0.6)",
+      border: `1px solid ${border}`,
+      overflow: "hidden",
+      position: "relative",
+    }}>
+      {/* Barra de relleno */}
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0,
+        height: "100%",
+        width: `${fill}%`,
+        borderRadius: 999,
+        background: bar,
+        boxShadow: `0 0 12px 1px ${glow}`,
+        transition: "width 1s ease, background 1.5s ease, box-shadow 1.5s ease",
+      }}>
+        {/* Brillo deslizante sobre la barra */}
+        <div style={{
+          position: "absolute",
+          top: 0, right: 0,
+          width: "35%",
+          height: "100%",
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3))",
+          animation: "shimmerSlide 1.8s ease-in-out infinite",
+          borderRadius: 999,
+        }} />
       </div>
+      <style>{`
+        @keyframes shimmerSlide {
+          0%   { opacity: 0; transform: translateX(-60%); }
+          50%  { opacity: 1; }
+          100% { opacity: 0; transform: translateX(20%); }
+        }
+      `}</style>
     </div>
   );
 }
@@ -105,12 +184,14 @@ function ProcessDockPortal({ items }) {
             <div className="flex flex-col gap-3">
               {items.map(card => {
                 const start = startsRef.current.get(card.id) ?? now;
-                const percent = percentFrom(start, now);
+                const percent = percentFrom(start, now, card.tipo_consulta);
                 return (
                   <ElegantCard key={`${card.id}-${card.persona}`} className="gap-2">
                     <div className="flex items-center gap-3 mb-2">
-                      {/* loader circular elegante */}
-                      <span className="inline-block w-5 h-5 rounded-full border-2 border-slate-700/50 border-t-cyan-400 animate-spin shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+                      <span
+                        className="inline-block w-5 h-5 rounded-full border-2 border-slate-700/50 animate-spin"
+                        style={{ borderTopColor: barColors(percent).text, boxShadow: `0 0 10px ${barColors(percent).glow}` }}
+                      />
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-bold text-cyan-100 line-clamp-1">{card.persona}</div>
                         <div className="text-xs text-slate-400 mt-0.5">
@@ -118,8 +199,11 @@ function ProcessDockPortal({ items }) {
                           {card.fecha ? ` · ${new Date(card.fecha).toLocaleTimeString()}` : ""}
                         </div>
                       </div>
+                      <span className="text-xs font-mono font-bold" style={{ color: barColors(percent).text }}>
+                        {percent}%
+                      </span>
                     </div>
-                    <ElegantProgressBarIndeterminate />
+                    <ProgressBar percent={percent} />
                   </ElegantCard>
                 );
               })}
@@ -152,7 +236,7 @@ export default function TablaResultados({ data = [], onVerResultados }) {
         "Persona en proceso";
       const key = persona;
       if (!map.has(key)) {
-        map.set(key, { persona, id: it.id, cedula: it.cedula, fecha: it.fecha });
+        map.set(key, { persona, id: it.id, cedula: it.cedula, fecha: it.fecha, tipo_consulta: it.tipo_consulta });
       }
     }
     return Array.from(map.values());
@@ -196,7 +280,7 @@ export default function TablaResultados({ data = [], onVerResultados }) {
                 const isProcessing = estado === "en_proceso";
                 const isDone = estado === "completado";
                 const start = startsRef.current.get(item.id) ?? now;
-                const percent = percentFrom(start, now);
+                const percent = percentFrom(start, now, item.tipo_consulta);
 
                 return (
                   <tr 
@@ -219,7 +303,7 @@ export default function TablaResultados({ data = [], onVerResultados }) {
                     <td className="px-2 md:px-3 py-1.5 md:py-2">
                       {isProcessing ? (
                         <div className="max-w-[140px]">
-                          <ElegantProgressBarIndeterminate />
+                          <ProgressBar percent={percent} compact />
                         </div>
                       ) : isDone ? (
                         <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-semibold text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)]">
