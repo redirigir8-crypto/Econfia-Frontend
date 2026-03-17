@@ -69,7 +69,7 @@ const ConsultaSlide = ({ consultaId }) => {
     return (
       <div className="relative h-[78vh] md:h-[82vh] rounded-2xl overflow-hidden">
         <SkeletonVideoRight />
-        <div className="absolute inset-0 grid md:grid-cols-2">
+        <div className="absolute inset-0 grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
           <div className="p-5 md:p-8">
             <SkeletonCard />
           </div>
@@ -121,7 +121,7 @@ const ConsultaSlide = ({ consultaId }) => {
       </div>
 
       {/* PANEL IZQUIERDA (contenido) */}
-      <div className="relative z-10 h-full grid md:grid-cols-[minmax(460px,820px)_1fr]">
+      <div className="relative z-10 h-full grid" style={{ gridTemplateColumns: "minmax(460px, 820px) 1fr" }}>
         {/* Columna izquierda con datos + burbuja (lado a lado) */}
         <div className="h-full p-5 md:p-8">
           <div className={`rounded-2xl p-[1px] bg-gradient-to-br ${riskUI.ring} ${riskUI.glow}`}>
@@ -194,7 +194,7 @@ const ConsultaSlide = ({ consultaId }) => {
         </div>
 
         {/* Columna derecha (espacio del video, ya está absoluto detrás) */}
-        <div className="hidden md:block" />
+        <div />
       </div>
 
       <GridOverlay />
