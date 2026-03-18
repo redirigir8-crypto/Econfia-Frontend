@@ -233,6 +233,7 @@ export default function Consulta() {
     const bodyData = {
       tipo_doc: tipoDoc,
       cedula,
+      tipo_consulta: "essential",
     };
 
     if (fechaExpedicion) {

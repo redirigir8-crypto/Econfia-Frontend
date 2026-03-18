@@ -1,6 +1,25 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
+/* ===== Nombres legibles por plan ===== */
+const PLAN_LABELS = {
+  "econfiafast":         "EconfiaFast",
+  "essencial-express":   "Essencial Express",
+  "essential-express":   "Essential Express",
+  "basic-element":       "Basic Element",
+  "basic-elemnt":        "Basic Element",
+  "essential":           "Essential",
+  "empresa":             "Empresa",
+  "validacion-titulos":  "Validación Títulos",
+  "contratista":         "Contratista",
+  "ecorefull":           "E-corefull",
+};
+
+function getPlanLabel(tipo_consulta) {
+  if (!tipo_consulta) return "—";
+  return PLAN_LABELS[tipo_consulta.toLowerCase().trim()] ?? tipo_consulta;
+}
+
 /* ===== Duraciones por tipo de plan ===== */
 const DURATION_MAP = {
   "econfiafast":          2 * 60 * 1000,
@@ -266,9 +285,10 @@ export default function TablaResultados({ data = [], onVerResultados }) {
           <table className="min-w-full text-left text-sm">
             <thead>
             <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">ID</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">NIT/Documento</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Nombre</th>
+                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">ID</th>
+                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">NIT/Documento</th>
+                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Tipo de Consulta</th>
+                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Nombre</th>
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Estado</th>
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Fecha</th>
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Acción</th>
@@ -294,6 +314,9 @@ export default function TablaResultados({ data = [], onVerResultados }) {
                     </td>
                     <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm">
                       {item.tipo === "EMPRESA" ? item.nit : item.cedula}
+                    </td>
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-cyan-200 font-semibold text-xs md:text-sm">
+                      {getPlanLabel(item.tipo_consulta)}
                     </td>
                     <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-100 font-medium text-xs md:text-sm">
                       {item.tipo === "EMPRESA" ? item.nombre : (item.nombre || "—")}

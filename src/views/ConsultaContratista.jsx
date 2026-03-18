@@ -199,6 +199,7 @@ export default function ConsultaContratista() {
       fecha_expedicion: fechaExpedicion || undefined, // opcional
       profesion: [profesionNormalizada], // ✅ requerido para activar contratista (array)
       email: String(email).trim().toLowerCase(), // ✅ requerido para activar contratista
+      tipo_consulta: "contratista",
     };
 
     try {

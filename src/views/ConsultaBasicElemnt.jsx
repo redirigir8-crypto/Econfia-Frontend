@@ -195,7 +195,7 @@ export default function ConsultaBasicElemnt() {
                       : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
                     }`}
                 >
-                  {loading ? "Consultando..." : "Consultar Basic Elemnt"}
+                  {loading ? "Consultando..." : "Consultar Basic Element"}
                 </button>
               </form>
             </div>
