@@ -4,8 +4,8 @@ import { createPortal } from "react-dom";
 /* ===== Duraciones por tipo de plan ===== */
 const DURATION_MAP = {
   "econfiafast":          2 * 60 * 1000,
-  "essencial-express":    2 * 60 * 1000,
-  "essential-express":    2 * 60 * 1000,
+  "essencial-express":   80 * 1000,
+  "essential-express":   80 * 1000,
   "basic-element":        4 * 60 * 1000,
   "basic-elemnt":         4 * 60 * 1000,
   "essential":            5 * 60 * 1000,
@@ -55,16 +55,16 @@ function percentFrom(startTs, nowTs, tipo_consulta) {
    0–33 % → azul  |  33–66 % → amarillo  |  66–100 % → verde */
 function barColors(percent) {
   if (percent < 33) return {
-    bar:  "linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #0ea5e9 100%)",
-    glow: "rgba(59,130,246,0.65)",
-    text: "#60a5fa",
-    border: "rgba(59,130,246,0.35)",
+    bar:  "linear-gradient(90deg, #7f1d1d 0%, #dc2626 50%, #f87171 100%)",
+    glow: "rgba(239,68,68,0.55)",
+    text: "#fca5a5",
+    border: "rgba(239,68,68,0.30)",
   };
   if (percent < 66) return {
-    bar:  "linear-gradient(90deg, #1d4ed8 0%, #ca8a04 45%, #facc15 100%)",
-    glow: "rgba(234,179,8,0.65)",
-    text: "#fde047",
-    border: "rgba(234,179,8,0.35)",
+    bar:  "linear-gradient(90deg, #581c87 0%, #7e22ce 50%, #a855f7 100%)",
+    glow: "rgba(168,85,247,0.55)",
+    text: "#c084fc",
+    border: "rgba(168,85,247,0.30)",
   };
   return {
     bar:  "linear-gradient(90deg, #166534 0%, #16a34a 45%, #4ade80 100%)",
@@ -200,7 +200,6 @@ function ProcessDockPortal({ items }) {
                         </div>
                       </div>
                       <span className="text-xs font-mono font-bold" style={{ color: barColors(percent).text }}>
-                        {percent}%
                       </span>
                     </div>
                     <ProgressBar percent={percent} />

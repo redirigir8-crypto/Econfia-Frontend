@@ -16,6 +16,7 @@ export default function DetalleResultados({ consultaId }) {
   const [detalle, setDetalle] = useState([]);
   const [loading, setLoading] = useState(true);
   const [resultadoModal, setResultadoModal] = useState(null);
+  const [procesosModal, setProcesosModal] = useState(null);
   const [modalAnimating, setModalAnimating] = useState(false);
   const [modalOrigin, setModalOrigin] = useState({ x: 0, y: 0 });
   const [modalVector, setModalVector] = useState({ x: 0, y: 0 });
@@ -1018,6 +1019,30 @@ export default function DetalleResultados({ consultaId }) {
                       </pre>
                     </div>
                   </section>
+
+                  {/* Procesos Rama Judicial — lista compacta con botón Ver */}
+                  {resultadoModal.datos_extra?.procesos?.length > 0 && (
+                    <section className="space-y-2">
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">
+                        Procesos encontrados ({resultadoModal.datos_extra.procesos.length})
+                      </h4>
+                      {resultadoModal.datos_extra.procesos.map((proc, i) => (
+                        <div key={i} className="flex items-center justify-between rounded-xl border border-cyan-500/20 bg-black/30 px-4 py-3">
+                          <div className="space-y-0.5">
+                            <p className="text-cyan-300 font-mono text-xs font-bold">{proc.radicado || "Sin radicado"}</p>
+                            <p className="text-slate-400 text-[11px]">{proc.despacho || "—"}</p>
+                            <p className="text-slate-500 text-[10px]">{proc.fecha_radicacion || ""}{proc.ultima_actuacion ? ` · Últ. act: ${proc.ultima_actuacion}` : ""}</p>
+                          </div>
+                          <button
+                            onClick={() => setProcesosModal(proc)}
+                            className="ml-3 flex-shrink-0 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 text-cyan-300 text-xs font-semibold transition-all"
+                          >
+                            Ver detalle
+                          </button>
+                        </div>
+                      ))}
+                    </section>
+                  )}
                 </main>
 
                 <footer className="px-6 sm:px-8 py-4 bg-white/5 border-t border-white/5 flex items-center justify-between relative z-10">
@@ -1035,6 +1060,80 @@ export default function DetalleResultados({ consultaId }) {
             document.body
           );
         })()}
+
+      {/* ===== MODAL INDEPENDIENTE: Detalle de proceso ===== */}
+      {procesosModal && createPortal(
+        <div className="fixed inset-0 z-[13000] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setProcesosModal(null)} />
+          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-auto rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-cyan-500/30 shadow-[0_0_60px_rgba(6,182,212,0.2)]">
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-slate-900/90 border-b border-white/10 backdrop-blur">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Detalle del Proceso</p>
+                <p className="text-cyan-300 font-mono font-bold text-sm">{procesosModal.radicado}</p>
+              </div>
+              <button onClick={() => setProcesosModal(null)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Info básica */}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div><span className="text-slate-400 block mb-0.5">Fecha radicación</span><span className="text-white">{procesosModal.fecha_radicacion || "—"}</span></div>
+                <div><span className="text-slate-400 block mb-0.5">Última actuación</span><span className="text-white">{procesosModal.ultima_actuacion || "—"}</span></div>
+                <div className="col-span-2"><span className="text-slate-400 block mb-0.5">Despacho</span><span className="text-white">{procesosModal.despacho || "—"}</span></div>
+              </div>
+
+              {/* Datos del proceso */}
+              {procesosModal.datos_proceso && Object.keys(procesosModal.datos_proceso).length > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">Datos del Proceso</p>
+                  <div className="rounded-xl bg-black/30 border border-white/10 p-4 space-y-2">
+                    {Object.entries(procesosModal.datos_proceso).map(([k, v]) => (
+                      <div key={k} className="flex gap-2 text-xs">
+                        <span className="text-slate-400 min-w-[180px]">{k}:</span>
+                        <span className="text-white">{v || "—"}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sujetos procesales */}
+              {procesosModal.sujetos_procesales && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">Sujetos Procesales</p>
+                  <pre className="rounded-xl bg-black/30 border border-white/10 p-4 text-xs text-cyan-100/80 whitespace-pre-wrap">{procesosModal.sujetos_procesales}</pre>
+                </div>
+              )}
+
+              {/* Actuaciones */}
+              {procesosModal.actuaciones?.length > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">
+                    Actuaciones ({procesosModal.actuaciones.length})
+                  </p>
+                  <div className="rounded-xl bg-black/30 border border-white/10 divide-y divide-white/5">
+                    {procesosModal.actuaciones.map((a, j) => (
+                      <div key={j} className="px-4 py-3 space-y-1">
+                        <div className="flex gap-3 text-xs">
+                          <span className="text-slate-400 min-w-[90px]">{a.fecha}</span>
+                          <span className="text-white font-medium">{a.actuacion}</span>
+                        </div>
+                        {a.anotacion && (
+                          <p className="text-cyan-100/70 text-xs pl-[102px] italic">{a.anotacion}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
