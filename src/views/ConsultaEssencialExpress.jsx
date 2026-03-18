@@ -53,6 +53,7 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
         cedula: data.cedula,
         tipo_doc: data.tipo_doc,
         lista_nombres: seleccionadas,
+        tipo_consulta: "essencial-express",
       };
       if (data.fecha_expedicion) {
         bodyPayload.fecha_expedicion = data.fecha_expedicion;

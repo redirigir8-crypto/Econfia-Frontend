@@ -36,7 +36,7 @@ export default function ConsultaEmpresa() {
           "Content-Type": "application/json",
           Authorization: `Token ${token}`,
         },
-        body: JSON.stringify({ nit }),
+        body: JSON.stringify({ nit, tipo_consulta: "empresa" }),
       });
       const data = await res.json();
       if (!res.ok) {

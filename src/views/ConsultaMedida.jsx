@@ -273,6 +273,7 @@ export default function ConsultaMedida() {
     const bodyData = {
       tipo_doc: tipoDoc,
       cedula,
+      tipo_consulta: "ecorefull",
     };
 
     if (fechaExpedicion) {

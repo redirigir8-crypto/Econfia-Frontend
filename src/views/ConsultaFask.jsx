@@ -43,7 +43,7 @@ export default function ConsultaBasicElemnt() {
     const bodyData = {
       tipo_doc: tipoDoc,
       cedula,
-      tipo_consulta: "basic-elemnt",
+      tipo_consulta: "econfiafast",
     };
     if (fechaExpedicion) {
       bodyData.fecha_expedicion = fechaExpedicion;
