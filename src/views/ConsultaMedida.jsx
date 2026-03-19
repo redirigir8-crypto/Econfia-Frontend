@@ -163,6 +163,13 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
               </button>
             </div>
 
+            {/* Contador de fuentes seleccionadas */}
+            <div className="mb-2 flex items-center gap-2">
+              <span className="text-cyan-300 font-semibold text-sm">
+                {`Fuentes seleccionadas: ${seleccionadas.length}`}
+              </span>
+            </div>
+
             {/* Lista de fuentes */}
             <div className="max-h-72 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
               {filteredFuentes.length > 0 ? (
