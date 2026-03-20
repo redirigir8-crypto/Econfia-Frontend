@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Toast from "./Toast";
 import Modal from "./Modal";
+import { generarInformeAdminPDF } from "../pdf/InformeAdminPDF";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -25,9 +26,11 @@ const AdminUsuarios = () => {
   // ============================
   const [showConsultasModal, setShowConsultasModal] = useState(false);
   const [consultasValue, setConsultasValue] = useState(0);
+  const [consultasInfinitas, setConsultasInfinitas] = useState(false);
   const handleOpenConsultasModal = (user) => {
     setSelectedUser(user);
-    setConsultasValue(user.perfil?.consultas_disponibles || 0);
+    setConsultasValue(user.perfil?.consultas_infinitas ? 0 : (user.perfil?.consultas_disponibles || 0));
+    setConsultasInfinitas(!!user.perfil?.consultas_infinitas);
     setShowConsultasModal(true);
   };
   const handleSaveConsultas = async () => {
@@ -38,7 +41,10 @@ const AdminUsuarios = () => {
           Authorization: `Token ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ consultas_disponibles: consultasValue }),
+        body: JSON.stringify({ 
+          consultas_disponibles: consultasValue,
+          consultas_infinitas: consultasInfinitas
+        }),
       });
       if (!res.ok) throw new Error();
       setToast({ type: 'success', message: 'Consultas asignadas' });
@@ -265,7 +271,7 @@ const AdminUsuarios = () => {
 
       <div className="bg-slate-800/80 rounded-2xl shadow-2xl border border-cyan-900/40 p-6 mb-8 overflow-x-auto">
             {/* Filtro de búsqueda global alineado a la izquierda con ícono de lupa */}
-            <div className="w-full flex mb-6 animate-fade-in">
+            <div className="w-full flex items-center justify-between mb-6 animate-fade-in gap-4 flex-wrap">
               <div className="relative w-full max-w-xs">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400 pointer-events-none">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4-4m0 0A7 7 0 104 4a7 7 0 0013 13z" /></svg>
@@ -280,6 +286,18 @@ const AdminUsuarios = () => {
                   autoComplete="off"
                 />
               </div>
+              <button
+                onClick={() => {
+                  const adminName = localStorage.getItem("username") || "Administrador";
+                  generarInformeAdminPDF(users, adminName);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg transition whitespace-nowrap shadow"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Generar informe PDF
+              </button>
             </div>
         <table className="w-full text-sm md:text-base text-left text-white/90">
           <thead>
@@ -441,21 +459,33 @@ const AdminUsuarios = () => {
       {/* Modales fuera de la tabla para evitar problemas de nesting */}
       {showConsultasModal && (
         <Modal onClose={() => setShowConsultasModal(false)}>
-          <div className="bg-slate-900 rounded-xl p-6 flex flex-col gap-3 min-w-[300px]">
-            <h3 className="text-xl font-bold mb-4 text-cyan-300 text-center">Asignar consultas al perfil</h3>
-            <input
-              type="number"
-              min={0}
-              value={consultasValue === 0 ? '' : consultasValue}
-              onFocus={e => e.target.select()}
-              onChange={e => {
-                // Eliminar ceros a la izquierda
-                let val = e.target.value.replace(/^0+(?!$)/, '');
-                setConsultasValue(val === '' ? 0 : Number(val));
-              }}
-              className="rounded px-2 py-2 border border-cyan-700 bg-slate-800 text-cyan-100 placeholder-cyan-400 text-center text-lg"
-            />
-            <button onClick={handleSaveConsultas} className="mt-2 px-4 py-2 bg-cyan-600 text-white rounded font-semibold hover:bg-cyan-500 transition">Guardar</button>
+          <div className="bg-slate-900 rounded-xl p-6 flex flex-col gap-3 min-w-[320px]">
+            <h3 className="text-xl font-bold mb-2 text-cyan-300 text-center">Asignar consultas al perfil</h3>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-cyan-400 font-medium">Número de consultas</label>
+              <input
+                type="number"
+                min={0}
+                value={consultasValue}
+                onChange={e => setConsultasValue(e.target.value === '' ? '' : Number(e.target.value))}
+                onBlur={e => { if (e.target.value === '') setConsultasValue(0); }}
+                className="rounded px-3 py-2 border border-cyan-700 bg-slate-800 text-cyan-100 placeholder-cyan-400 focus:outline-none focus:border-cyan-400 transition disabled:opacity-40"
+                disabled={consultasInfinitas}
+              />
+            </div>
+            <label className="flex items-center gap-3 cursor-pointer rounded px-3 py-2 border border-cyan-700 bg-slate-800 hover:border-cyan-400 transition">
+              <input
+                type="checkbox"
+                checked={consultasInfinitas}
+                onChange={e => setConsultasInfinitas(e.target.checked)}
+                className="w-4 h-4 accent-cyan-400"
+              />
+              <span className="text-sm text-cyan-100 font-medium">Consultas infinitas (activar/desactivar)</span>
+            </label>
+            <button
+              className="mt-2 px-4 py-2 bg-cyan-600 text-white rounded font-semibold hover:bg-cyan-500 transition"
+              onClick={handleSaveConsultas}
+            >Guardar</button>
           </div>
         </Modal>
       )}
