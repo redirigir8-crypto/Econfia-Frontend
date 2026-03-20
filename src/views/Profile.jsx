@@ -393,7 +393,9 @@ export default function Profile() {
               <div className="rounded-lg px-4 py-3 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 hover:from-cyan-500/20 hover:to-blue-500/10 transition-all">
                 <div className="text-xs text-cyan-300 font-medium">Consultas</div>
                 <div className="text-white text-2xl font-black">
-                  {profile?.perfil?.consultas_disponibles ?? 0}
+                  {profile?.perfil?.consultas_infinitas
+                    ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'28px'}} />
+                    : (profile?.perfil?.consultas_disponibles ?? 0)}
                 </div>
               </div>
               <div className="rounded-lg px-4 py-3 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 hover:from-blue-500/20 hover:to-purple-500/10 transition-all">
@@ -427,7 +429,11 @@ export default function Profile() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="rounded-lg px-4 py-3 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 text-center">
               <div className="text-xs text-cyan-300 font-medium">Consultas cargadas</div>
-              <div className="text-white text-2xl font-black">{profile?.perfil?.consultas_cargadas_total ?? 0}</div>
+              <div className="text-white text-2xl font-black">
+                {profile?.perfil?.consultas_infinitas
+                  ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'28px', margin:'0 auto'}} />
+                  : (profile?.perfil?.consultas_cargadas_total ?? 0)}
+              </div>
             </div>
             <div className="rounded-lg px-4 py-3 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 text-center">
               <div className="text-xs text-blue-300 font-medium">Consultas consumidas</div>
@@ -435,14 +441,20 @@ export default function Profile() {
             </div>
             <div className="rounded-lg px-4 py-3 border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 text-center">
               <div className="text-xs text-emerald-300 font-medium">Saldo de consultas</div>
-              <div className="text-white text-2xl font-black">{profile?.perfil?.consultas_disponibles ?? 0}</div>
+              <div className="text-white text-2xl font-black">
+                {profile?.perfil?.consultas_infinitas
+                  ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'32px', margin:'0 auto'}} />
+                  : (profile?.perfil?.consultas_disponibles ?? 0)}
+              </div>
             </div>
             <div className="rounded-lg px-4 py-3 border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-pink-500/5 text-center">
               <div className="text-xs text-amber-300 font-medium">Estado de renovación</div>
-              <div className="text-white text-2xl font-black">
-                {profile?.perfil?.consultas_disponibles === 0
-                  ? '¡Renueva tu plan!'
-                  : 'Vigente'}
+              <div className="text-2xl font-black">
+                {profile?.perfil?.consultas_infinitas
+                  ? <span className="text-cyan-300">Plan ilimitado</span>
+                  : profile?.perfil?.consultas_disponibles === 0
+                    ? <span className="text-red-400">¡Renueva tu plan!</span>
+                    : <span className="text-white">Vigente</span>}
               </div>
             </div>
           </div>
