@@ -246,7 +246,7 @@ export function generarInformeAdminPDF(users, adminName) {
   doc.rect(10, y - 5, 190, 7, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
-  doc.setTextColor(11, 18, 32);
+  doc.setTextColor(255, 255, 255);
   cols2.forEach(c => doc.text(c.label, c.x, y - 0.5));
 
   y += 5;
@@ -273,7 +273,7 @@ export function generarInformeAdminPDF(users, adminName) {
       doc.rect(10, y - 5, 190, 7, "F");
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7);
-      doc.setTextColor(11, 18, 32);
+      doc.setTextColor(255, 255, 255);
       cols2.forEach(c => doc.text(c.label, c.x, y - 0.5));
       y += 5;
     }
@@ -393,7 +393,7 @@ export function generarInformeAdminPDF(users, adminName) {
       doc.rect(12, uy - 4, 186, 6, "F");
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7);
-      doc.setTextColor(11, 18, 32);
+      doc.setTextColor(255, 255, 255);
       doc.text("Fecha", 14, uy);
       doc.text("Cantidad cargada", 65, uy);
       doc.text("Saldo antes", 110, uy);
@@ -442,7 +442,7 @@ export function generarInformeAdminPDF(users, adminName) {
         doc.rect(12, uy - 4, 186, 6, "F");
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7);
-        doc.setTextColor(11, 18, 32);
+        doc.setTextColor(255, 255, 255);
         doc.text("Fecha y hora", 14, uy);
         doc.text("Consultas descontadas", 65, uy);
         doc.text("Saldo antes", 120, uy);
