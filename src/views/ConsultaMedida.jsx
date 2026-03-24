@@ -57,6 +57,7 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
       const bodyPayload = {
         cedula: data.cedula,
         tipo_doc: data.tipo_doc,
+        tipo_consulta: "essential",
         lista_nombres: seleccionadas,
       };
       if (data.fecha_expedicion) {
@@ -280,7 +281,7 @@ export default function ConsultaMedida() {
     const bodyData = {
       tipo_doc: tipoDoc,
       cedula,
-      tipo_consulta: "ecorefull",
+      tipo_consulta: "essential",
     };
 
     if (fechaExpedicion) {
@@ -409,7 +410,7 @@ export default function ConsultaMedida() {
                 <span className="text-cyan-300 text-xs font-medium">Consulta Personalizada</span>
               </div>
               <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
-                Econfia Essential 
+                Econfia Essential
               </h1>
             </div>
 

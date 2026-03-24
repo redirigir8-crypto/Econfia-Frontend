@@ -42,7 +42,40 @@ venv\Scripts\Activate.ps1
 ### **Paso 3** — Ejecutar Celery
 
 ```powershell
-celery -A backend worker -l info -P threads
+# NO levantar un worker genérico sin -Q, porque consume todas las colas.
+
+# Worker Essential / pipeline clásico
+celery -A backend worker -l info -Q essential --pool=threads --concurrency=4 -n essential@%h
+
+# Worker normal / legacy (solo tareas no ruteadas explícitamente)
+celery -A backend worker -l info -Q legacy --pool=solo --concurrency=1 -n legacy@%h
+
+# Worker de PDF
+celery -A backend worker -l info -Q pdf --pool=solo --concurrency=1 -n pdf@%h
+
+# Workers FULL (con captura) — completamente separados de Essential
+celery -A backend worker -l info -Q full_1 --pool=solo --concurrency=1 -n full1@%h
+celery -A backend worker -l info -Q full_2 --pool=solo --concurrency=1 -n full2@%h
+celery -A backend worker -l info -Q full_3 --pool=solo --concurrency=1 -n full3@%h
+celery -A backend worker -l info -Q full_4 --pool=solo --concurrency=1 -n full4@%h
+celery -A backend worker -l info -Q full_5 --pool=solo --concurrency=1 -n full5@%h
+celery -A backend worker -l info -Q full_6 --pool=solo --concurrency=1 -n full6@%h
+celery -A backend worker -l info -Q full_7 --pool=solo --concurrency=1 -n full7@%h
+celery -A backend worker -l info -Q full_8 --pool=solo --concurrency=1 -n full8@%h
+celery -A backend worker -l info -Q full_9 --pool=solo --concurrency=1 -n full9@%h
+celery -A backend worker -l info -Q full_10 --pool=solo --concurrency=1 -n full10@%h
+celery -A backend worker -l info -Q full_11 --pool=solo --concurrency=1 -n full11@%h
+celery -A backend worker -l info -Q full_12 --pool=solo --concurrency=1 -n full12@%h
+
+# Si vas a usar FASK, levanta también sus colas dedicadas
+celery -A backend worker -l info -Q fask_fast --pool=solo --concurrency=1 -n fask_fast@%h
+celery -A backend worker -l info -Q fask_slow --pool=solo --concurrency=1 -n fask_slow@%h
+celery -A backend worker -l info -Q fask_slow_heavy --pool=solo --concurrency=1 -n fask_slow_heavy@%h
+celery -A backend worker -l info -Q fask_medio --pool=solo --concurrency=1 -n fask_medio@%h
+celery -A backend worker -l info -Q fask_medio_heavy --pool=solo --concurrency=1 -n fask_medio_heavy@%h
+celery -A backend worker -l info -Q fask_mega --pool=solo --concurrency=1 -n fask_mega@%h
+celery -A backend worker -l info -Q fask_ultra --pool=solo --concurrency=1 -n fask_ultra@%h
+celery -A backend worker -l info -Q fask_ultra_heavy --pool=solo --concurrency=1 -n fask_ultra_heavy@%h
 ```
 
 ---

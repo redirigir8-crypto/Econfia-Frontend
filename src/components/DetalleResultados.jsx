@@ -17,6 +17,7 @@ export default function DetalleResultados({ consultaId }) {
   const [loading, setLoading] = useState(true);
   const [resultadoModal, setResultadoModal] = useState(null);
   const [procesosModal, setProcesosModal] = useState(null);
+  const [garantiasModal, setGarantiasModal] = useState(null);
   const [modalAnimating, setModalAnimating] = useState(false);
   const [modalOrigin, setModalOrigin] = useState({ x: 0, y: 0 });
   const [modalVector, setModalVector] = useState({ x: 0, y: 0 });
@@ -1020,8 +1021,31 @@ export default function DetalleResultados({ consultaId }) {
                     </div>
                   </section>
 
-                  {/* Procesos Rama Judicial — lista compacta con botón Ver */}
-                  {resultadoModal.datos_extra?.procesos?.length > 0 && (
+                  {/* Garantías Mobiliarias — lista de garantías */}
+                  {resultadoModal.datos_extra?.procesos?.length > 0 &&
+                  (resultadoModal.fuente_nombre || "").includes("garantias_mobiliarias") ? (
+                    <section className="space-y-2">
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-amber-400 px-1">
+                        Garantías Registradas ({resultadoModal.datos_extra.procesos.length})
+                      </h4>
+                      {resultadoModal.datos_extra.procesos.map((proc, i) => (
+                        <div key={i} className="flex items-center justify-between rounded-xl border border-amber-500/25 bg-amber-950/20 px-4 py-3">
+                          <div className="space-y-0.5">
+                            <p className="text-amber-300 font-mono text-xs font-bold">{proc.radicado || "Sin folio"}</p>
+                            <p className="text-slate-400 text-[11px]">Acreedor: {proc.despacho || "—"}</p>
+                            <p className="text-slate-500 text-[10px]">{proc.fecha_radicacion || ""}{proc.ultima_actuacion ? ` · ${proc.ultima_actuacion}` : ""}</p>
+                          </div>
+                          <button
+                            onClick={() => setGarantiasModal(proc)}
+                            className="ml-3 flex-shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-xs font-semibold transition-all"
+                          >
+                            Ver garantía
+                          </button>
+                        </div>
+                      ))}
+                    </section>
+                  ) : resultadoModal.datos_extra?.procesos?.length > 0 ? (
+                    /* Procesos Rama Judicial — lista compacta con botón Ver */
                     <section className="space-y-2">
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">
                         Procesos encontrados ({resultadoModal.datos_extra.procesos.length})
@@ -1042,7 +1066,7 @@ export default function DetalleResultados({ consultaId }) {
                         </div>
                       ))}
                     </section>
-                  )}
+                  ) : null}
                 </main>
 
                 <footer className="px-6 sm:px-8 py-4 bg-white/5 border-t border-white/5 flex items-center justify-between relative z-10">
@@ -1060,6 +1084,108 @@ export default function DetalleResultados({ consultaId }) {
             document.body
           );
         })()}
+
+      {/* ===== MODAL: Detalle de Garantía Mobiliaria ===== */}
+      {garantiasModal && createPortal(
+        <div className="fixed inset-0 z-[13000] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setGarantiasModal(null)} />
+          <div className="relative z-10 w-full max-w-2xl max-h-[92vh] overflow-auto rounded-3xl bg-gradient-to-br from-amber-950/90 via-slate-900 to-slate-900 border border-amber-500/30 shadow-[0_0_60px_rgba(245,158,11,0.15)]">
+
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-slate-900/90 border-b border-amber-500/20 backdrop-blur">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-amber-400/70 mb-1">Registro de Garantías Mobiliarias</p>
+                <p className="text-amber-300 font-mono font-bold text-sm tracking-wider">{garantiasModal.radicado}</p>
+              </div>
+              <button
+                onClick={() => setGarantiasModal(null)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-amber-500/20 flex items-center justify-center text-white transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+
+              {/* Tarjetas resumen */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-2xl bg-black/30 border border-amber-500/15 p-4">
+                  <span className="text-[10px] uppercase tracking-wider text-amber-400/60 block mb-1">Folio Electrónico</span>
+                  <span className="text-amber-200 font-mono font-bold text-sm">{garantiasModal.radicado || "—"}</span>
+                </div>
+                <div className="rounded-2xl bg-black/30 border border-amber-500/15 p-4">
+                  <span className="text-[10px] uppercase tracking-wider text-amber-400/60 block mb-1">Acreedor Principal</span>
+                  <span className="text-white font-semibold text-sm">{garantiasModal.despacho || "—"}</span>
+                </div>
+                <div className="rounded-2xl bg-black/30 border border-amber-500/15 p-4">
+                  <span className="text-[10px] uppercase tracking-wider text-amber-400/60 block mb-1">Fecha de Inscripción</span>
+                  <span className="text-white text-sm">{garantiasModal.fecha_radicacion || "—"}</span>
+                </div>
+                <div className="rounded-2xl bg-black/30 border border-amber-500/15 p-4">
+                  <span className="text-[10px] uppercase tracking-wider text-amber-400/60 block mb-1">Tipo de Formulario</span>
+                  <span className="text-white text-sm">{garantiasModal.ultima_actuacion || "—"}</span>
+                </div>
+              </div>
+
+              {/* Datos completos del proceso */}
+              {garantiasModal.datos_proceso && Object.keys(garantiasModal.datos_proceso).length > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-amber-400/70 font-bold mb-2">Datos del Registro</p>
+                  <div className="rounded-2xl bg-black/30 border border-amber-500/15 divide-y divide-white/5 overflow-hidden">
+                    {Object.entries(garantiasModal.datos_proceso)
+                      .filter(([, v]) => v && String(v).trim())
+                      .map(([k, v]) => (
+                        <div key={k} className="flex gap-3 px-4 py-2.5 text-xs hover:bg-amber-500/5 transition-colors">
+                          <span className="text-amber-300/60 min-w-[200px] shrink-0">{k}</span>
+                          <span className="text-white/90 break-words">{v}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Partes involucradas */}
+              {garantiasModal.sujetos_procesales && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-amber-400/70 font-bold mb-2">Partes Involucradas</p>
+                  <pre className="rounded-2xl bg-black/30 border border-amber-500/15 p-4 text-xs text-amber-100/75 whitespace-pre-wrap leading-relaxed font-mono">
+                    {garantiasModal.sujetos_procesales}
+                  </pre>
+                </div>
+              )}
+
+              {/* Historial de operaciones (si existe) */}
+              {garantiasModal.actuaciones?.length > 0 && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-amber-400/70 font-bold mb-2">
+                    Historial de Operaciones ({garantiasModal.actuaciones.length})
+                  </p>
+                  <div className="rounded-2xl bg-black/30 border border-amber-500/15 divide-y divide-white/5">
+                    {garantiasModal.actuaciones.map((a, j) => (
+                      <div key={j} className="px-4 py-3 space-y-1">
+                        <div className="flex gap-3 text-xs">
+                          <span className="text-amber-300/60 min-w-[90px]">{a.fecha}</span>
+                          <span className="text-white font-medium">{a.actuacion}</span>
+                        </div>
+                        {a.anotacion && (
+                          <p className="text-amber-100/60 text-xs pl-[102px] italic">{a.anotacion}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-3 border-t border-amber-500/15 bg-black/20 flex items-center justify-between">
+              <span className="text-[10px] text-amber-400/40 uppercase tracking-widest font-mono">RGM · Confecámaras</span>
+              <span className="text-[10px] text-slate-500 uppercase tracking-widest">Consulta Oficial</span>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* ===== MODAL INDEPENDIENTE: Detalle de proceso ===== */}
       {procesosModal && createPortal(

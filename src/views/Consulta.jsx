@@ -63,6 +63,7 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
         body: JSON.stringify({
           cedula: data.cedula,
           tipo_doc: data.tipo_doc,
+          tipo_consulta: "ecorefull",
           lista_nombres: seleccionadas,
         }),
       });
@@ -233,7 +234,7 @@ export default function Consulta() {
     const bodyData = {
       tipo_doc: tipoDoc,
       cedula,
-      tipo_consulta: "essential",
+      tipo_consulta: "ecorefull",
     };
 
     if (fechaExpedicion) {
