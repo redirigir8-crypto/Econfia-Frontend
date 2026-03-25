@@ -193,6 +193,7 @@ export default function Consulta() {
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL;
   const [showConsultaMedida, setShowConsultaMedida] = useState(false);
+  const [alcance, setAlcance] = useState("todas");
 
   useEffect(() => {
     const now = new Date();
@@ -240,6 +241,7 @@ export default function Consulta() {
     if (fechaExpedicion) {
       bodyData.fecha_expedicion = fechaExpedicion;
     }
+    bodyData.alcance = alcance;
 
     try {
       const token = localStorage.getItem("token");
@@ -445,6 +447,30 @@ export default function Consulta() {
                       onChange={(e) => setFechaExpedicion(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                     />
+                  </div>
+
+                  {/* Alcance de búsqueda */}
+                  <div>
+                    <label className="text-xs font-semibold text-white/70 mb-1 block">Alcance de Búsqueda</label>
+                    <div className="flex gap-4">
+                      {[
+                        { value: "todas", label: "Todas" },
+                        { value: "nacional", label: "Nacional" },
+                        { value: "internacional", label: "Internacional" },
+                      ].map(({ value, label }) => (
+                        <label key={value} className="flex items-center gap-1.5 cursor-pointer group">
+                          <input
+                            type="radio"
+                            name="alcance"
+                            value={value}
+                            checked={alcance === value}
+                            onChange={() => setAlcance(value)}
+                            className="accent-cyan-500 w-3.5 h-3.5 cursor-pointer"
+                          />
+                          <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">{label}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Checkboxes */}
