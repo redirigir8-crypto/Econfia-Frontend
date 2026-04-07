@@ -4,6 +4,7 @@ import Toast from "../components/Toast";
 import loginVideo from "../assets/login.mp4";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
+import { clearSession, isInactive, touchActivity } from "../utils/session";
 
 export default function Login() {
   const [user, setUser] = useState("");
@@ -27,7 +28,11 @@ export default function Login() {
 
 
   // si ya hay sesión, redirige a /profile
-  if (token) {
+  if (token && isInactive()) {
+    clearSession();
+  }
+
+  if (localStorage.getItem("token")) {
     return <Navigate to="/e9c4b2f7" replace />;
   }
 
@@ -82,6 +87,7 @@ export default function Login() {
       } else {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        touchActivity();
         setToast({
           type: "success",
           message: `Bienvenido ${data.user.username}!`,

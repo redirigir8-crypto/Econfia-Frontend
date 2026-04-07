@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { clearSession } from "../utils/session";
 
 export default function LogOut() {
   const [showConfirm, setShowConfirm] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     // Mostrar popup de confirmación
@@ -9,9 +12,8 @@ export default function LogOut() {
   };
 
   const confirmLogout = () => {
-    // Borrar localStorage y recargar la página
-    localStorage.clear();
-    window.location.reload();
+    clearSession();
+    navigate("/login", { replace: true });
   };
 
   const cancelLogout = () => {

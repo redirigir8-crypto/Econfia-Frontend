@@ -112,7 +112,7 @@ let menuItems = [
   { path: "/f1d8a5c3", icon: <LogOut size={28} strokeWidth={1.5} />,   label: "Cerrar Sesión" },
   ...consultaItems,
   { path: "/e9c4b2f7", icon: <img src={UserBaseIcon} alt="Perfil" style={{width:28,height:28}} />,     label: "Perfil" },
-  { path: "/d3b7f1e9", icon: <FileText size={28} strokeWidth={1.5} />, label: "Resultados" },
+  { path: "/d3b7f1e9", icon: <FileText size={28} strokeWidth={1.5} />, label: "Consultas" },
   { path: "/c2e6b9a4", icon: <HelpCircle size={28} strokeWidth={1.5} />,label: "Ayuda" },
 ];
 
