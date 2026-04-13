@@ -270,7 +270,7 @@ export default function Consulta() {
 
       setTimeout(() => {
         navigate("/d3b7f1e9");
-      }, 2000);
+      }, 5000);
     } catch (error) {
       console.error("Error en la consulta:", error);
       setToast({ type: "error", message: "Ocurrió un error en la consulta" });

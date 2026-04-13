@@ -3,7 +3,7 @@ import jsPDF from "jspdf";
 import { PDF_STYLE } from "./informe_usuario_pdf_style";
 import logoEconfiaWhite from "../assets/logo-econfia.png";
 
-export function generarInformeAdminPDF(users, adminName) {
+export function generarInformeAdminPDF(users, adminName, consultasPorUsuario = {}) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const C = PDF_STYLE.colors;
   const L = PDF_STYLE.layout;
@@ -328,6 +328,7 @@ export function generarInformeAdminPDF(users, adminName) {
   users.forEach((u) => {
     const recargas = u.perfil?.historial_recargas || [];
     const consumos = u.perfil?.historial_consumos || [];
+    const consultas = consultasPorUsuario[u.id] || [];
 
     pageNum++;
     doc.addPage();
@@ -473,6 +474,102 @@ export function generarInformeAdminPDF(users, adminName) {
         doc.setTextColor(...C.textMuted);
         doc.text("Sin consumos registrados.", 14, uy);
       }
+    }
+
+    // ---- CÉDULAS CONSULTADAS ----
+    uy += 6;
+    if (uy > 250) {
+      renderFooter(doc, C, F, pageNum);
+      doc.addPage();
+      pageNum++;
+      doc.setFillColor(...C.background);
+      doc.rect(0, 0, L.pageWidth, L.pageHeight, "F");
+      doc.setFillColor(...C.header);
+      doc.rect(0, 0, L.pageWidth, 16, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+      doc.text(`Cedulas consultadas: ${nombreUsuario}`, 15, 10);
+      uy = 24;
+    }
+
+    sectionTitle(doc, "Cedulas consultadas", uy, C, F);
+    uy += 8;
+
+    if (consultas.length) {
+      doc.setFillColor(20, 184, 166);
+      doc.rect(12, uy - 4, 186, 6, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(255, 255, 255);
+      doc.text("Cedula", 14, uy);
+      doc.text("Tipo", 48, uy);
+      doc.text("Nombre consultado", 65, uy);
+      doc.text("Fecha", 138, uy);
+      doc.text("Estado", 172, uy);
+      uy += 6;
+
+      consultas.forEach((c, i) => {
+        if (uy > 272) {
+          renderFooter(doc, C, F, pageNum);
+          doc.addPage();
+          pageNum++;
+          doc.setFillColor(...C.background);
+          doc.rect(0, 0, L.pageWidth, L.pageHeight, "F");
+          doc.setFillColor(...C.header);
+          doc.rect(0, 0, L.pageWidth, 16, "F");
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.setTextColor(255, 255, 255);
+          doc.text(`Cedulas consultadas: ${nombreUsuario} (cont.)`, 15, 10);
+          uy = 24;
+          doc.setFillColor(20, 184, 166);
+          doc.rect(12, uy - 4, 186, 6, "F");
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(7);
+          doc.setTextColor(255, 255, 255);
+          doc.text("Cedula", 14, uy);
+          doc.text("Tipo", 48, uy);
+          doc.text("Nombre consultado", 65, uy);
+          doc.text("Fecha", 138, uy);
+          doc.text("Estado", 172, uy);
+          uy += 6;
+        }
+
+        if (i % 2 === 0) {
+          doc.setFillColor(23, 33, 51);
+          doc.rect(12, uy - 4, 186, 7, "F");
+        }
+
+        const estadoColor = {
+          completado: [34, 197, 94],
+          en_proceso: [234, 179, 8],
+          no_encontrado: [239, 68, 68],
+          pendiente: [99, 102, 241],
+        }[c.estado] || C.textMuted;
+
+        const fechaStr = c.fecha
+          ? new Date(c.fecha).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" })
+          : "—";
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7.5);
+        doc.setTextColor(34, 211, 238);
+        doc.text(truncate(c.cedula || "—", 16), 14, uy);
+        doc.setTextColor(...C.textMuted);
+        doc.text(truncate(c.tipo_doc || "—", 6), 48, uy);
+        doc.setTextColor(...C.textPrimary);
+        doc.text(truncate(c.nombre_completo || "—", 36), 65, uy);
+        doc.setTextColor(...C.textMuted);
+        doc.text(fechaStr, 138, uy);
+        doc.setTextColor(...estadoColor);
+        doc.text(truncate(c.estado || "—", 14), 172, uy);
+        uy += 8;
+      });
+    } else {
+      doc.setFontSize(8);
+      doc.setTextColor(...C.textMuted);
+      doc.text("Sin consultas registradas.", 14, uy);
     }
 
     renderFooter(doc, C, F, pageNum);

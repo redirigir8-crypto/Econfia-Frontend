@@ -15,12 +15,48 @@ const AdminUsuarios = () => {
   const [users, setUsers] = useState([]);
   const [planes, setPlanes] = useState([]);
   const [toast, setToast] = useState(null);
+  const [generandoPDF, setGenerandoPDF] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedPlanes, setSelectedPlanes] = useState([]);
   const [editUserData, setEditUserData] = useState({ username: '', email: '', first_name: '', last_name: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
+  // ============================
+  // VER CONSULTAS REALIZADAS
+  // ============================
+  const [showConsultasRealizadasModal, setShowConsultasRealizadasModal] = useState(false);
+  const [consultasRealizadas, setConsultasRealizadas] = useState([]);
+  const [consultasRealizadasTotal, setConsultasRealizadasTotal] = useState(0);
+  const [consultasRealizadasPage, setConsultasRealizadasPage] = useState(1);
+  const [consultasRealizadasLoading, setConsultasRealizadasLoading] = useState(false);
+  const [consultasRealizadasUser, setConsultasRealizadasUser] = useState(null);
+
+  const fetchConsultasRealizadas = async (userId, page = 1) => {
+    setConsultasRealizadasLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/admin/users/${userId}/consultas/?page=${page}`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      const data = await res.json();
+      setConsultasRealizadas(data.results || []);
+      setConsultasRealizadasTotal(data.total || 0);
+      setConsultasRealizadasPage(page);
+    } catch {
+      setToast({ type: "error", message: "Error al cargar consultas del usuario" });
+    } finally {
+      setConsultasRealizadasLoading(false);
+    }
+  };
+
+  const handleVerConsultas = (user) => {
+    setConsultasRealizadasUser(user);
+    setConsultasRealizadas([]);
+    setConsultasRealizadasPage(1);
+    setShowConsultasRealizadasModal(true);
+    fetchConsultasRealizadas(user.id, 1);
+  };
+
   // ============================
   // ASIGNAR CONSULTAS AL PERFIL
   // ============================
@@ -287,16 +323,65 @@ const AdminUsuarios = () => {
                 />
               </div>
               <button
-                onClick={() => {
-                  const adminName = localStorage.getItem("username") || "Administrador";
-                  generarInformeAdminPDF(users, adminName);
+                onClick={async () => {
+                  setGenerandoPDF(true);
+                  try {
+                    const adminName = localStorage.getItem("username") || "Administrador";
+                    // Recargar usuarios frescos del servidor antes de generar el PDF
+                    let usersParaPDF = users;
+                    try {
+                      const resUsers = await fetch(`${API_URL}/api/admin/users/`, {
+                        headers: { Authorization: `Token ${token}` },
+                      });
+                      if (resUsers.ok) usersParaPDF = await resUsers.json();
+                    } catch {}
+                    // Cargar TODAS las consultas de cada usuario (todas las páginas)
+                    const consultasPorUsuario = {};
+                    await Promise.all(
+                      usersParaPDF.map(async (u) => {
+                        try {
+                          let todas = [];
+                          let page = 1;
+                          while (true) {
+                            const res = await fetch(`${API_URL}/api/admin/users/${u.id}/consultas/?page=${page}`, {
+                              headers: { Authorization: `Token ${token}` },
+                            });
+                            const data = await res.json();
+                            const resultados = data.results || [];
+                            todas = todas.concat(resultados);
+                            if (todas.length >= (data.total || 0) || resultados.length === 0) break;
+                            page++;
+                          }
+                          consultasPorUsuario[u.id] = todas;
+                        } catch {
+                          consultasPorUsuario[u.id] = [];
+                        }
+                      })
+                    );
+                    generarInformeAdminPDF(usersParaPDF, adminName, consultasPorUsuario);
+                  } finally {
+                    setGenerandoPDF(false);
+                  }
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg transition whitespace-nowrap shadow"
+                disabled={generandoPDF}
+                className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-60 disabled:cursor-wait text-white font-semibold rounded-lg transition whitespace-nowrap shadow"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Generar informe PDF
+                {generandoPDF ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>
+                    Generando...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Generar informe PDF
+                  </>
+                )}
               </button>
             </div>
         <table className="w-full text-sm md:text-base text-left text-white/90">
@@ -374,6 +459,15 @@ const AdminUsuarios = () => {
                   )}
                 </td>
                 <td className="px-3 py-2 flex gap-2 flex-wrap">
+                  <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-teal-500/40 to-transparent">
+                  <button
+                    onClick={() => handleVerConsultas(u)}
+                    className="px-3 py-2 rounded-lg bg-slate-700/50 text-white hover:bg-slate-700/100 transition shadow-none hover:shadow-[0_0_12px_2px_rgba(20,184,166,0.7)]"
+                    title="Ver cédulas y nombres consultados"
+                  >
+                    🔍 Ver consultas
+                  </button>
+                  </div>
                   <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent">
                   <button
                     onClick={() => handleOpenConsultasModal(u)}
@@ -556,6 +650,92 @@ const AdminUsuarios = () => {
             Guardar cambios
           </button>
         </Modal>
+      )}
+
+      {/* Modal: Ver consultas realizadas */}
+      {showConsultasRealizadasModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4">
+          <div className="bg-slate-900 rounded-xl shadow-2xl flex flex-col w-full max-w-3xl max-h-[80vh] relative overflow-hidden">
+            <button
+              onClick={() => setShowConsultasRealizadasModal(false)}
+              className="absolute top-2 right-3 text-slate-400 hover:text-white text-2xl font-bold z-10"
+              aria-label="Cerrar"
+            >×</button>
+            <div className="flex items-center justify-between px-4 pt-4 pb-2 border-b border-slate-700 shrink-0">
+              <h3 className="text-base font-bold text-cyan-300">
+                Consultas de <span className="text-white">{consultasRealizadasUser?.username}</span>
+              </h3>
+              <span className="text-slate-400 text-xs mr-6">{consultasRealizadasTotal} consulta{consultasRealizadasTotal !== 1 ? "s" : ""}</span>
+            </div>
+
+            <div className="flex flex-col gap-3 p-3 overflow-y-auto flex-1">
+            {consultasRealizadasLoading ? (
+              <div className="text-cyan-400 text-center py-8">Cargando...</div>
+            ) : consultasRealizadas.length === 0 ? (
+              <div className="text-slate-400 text-center py-8">Este usuario no tiene consultas registradas.</div>
+            ) : (
+              <>
+                <div className="overflow-x-auto rounded-lg border border-slate-700">
+                  <table className="w-full text-xs text-left text-white/90">
+                    <thead>
+                      <tr className="bg-slate-800 text-cyan-300 uppercase">
+                        <th className="px-2 py-1.5">#</th>
+                        <th className="px-2 py-1.5">Cédula</th>
+                        <th className="px-2 py-1.5">Tipo</th>
+                        <th className="px-2 py-1.5">Nombre consultado</th>
+                        <th className="px-2 py-1.5">Fecha</th>
+                        <th className="px-2 py-1.5">Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {consultasRealizadas.map((c, i) => {
+                        const estadoColores = {
+                          completado: "text-green-400",
+                          en_proceso: "text-yellow-400",
+                          no_encontrado: "text-red-400",
+                          pendiente: "text-indigo-400",
+                        };
+                        return (
+                          <tr key={c.consulta_id} className="border-t border-slate-700/50 hover:bg-slate-800/60 transition">
+                            <td className="px-2 py-1.5 text-slate-500">{(consultasRealizadasPage - 1) * 20 + i + 1}</td>
+                            <td className="px-2 py-1.5 font-mono font-semibold text-cyan-200">{c.cedula || "—"}</td>
+                            <td className="px-2 py-1.5 text-slate-400">{c.tipo_doc || "—"}</td>
+                            <td className="px-2 py-1.5">{c.nombre_completo || "—"}</td>
+                            <td className="px-2 py-1.5 text-slate-400 whitespace-nowrap">
+                              {c.fecha ? new Date(c.fecha).toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                            </td>
+                            <td className={`px-2 py-1.5 font-semibold ${estadoColores[c.estado] || "text-slate-300"}`}>
+                              {c.estado || "—"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {consultasRealizadasTotal > 20 && (
+                  <div className="flex justify-center gap-3 items-center py-1">
+                    <button
+                      className="px-3 py-1 rounded bg-slate-700 text-white text-xs hover:bg-cyan-700 transition disabled:opacity-40"
+                      disabled={consultasRealizadasPage === 1}
+                      onClick={() => fetchConsultasRealizadas(consultasRealizadasUser.id, consultasRealizadasPage - 1)}
+                    >◀ Anterior</button>
+                    <span className="text-cyan-200 text-xs">
+                      Página {consultasRealizadasPage} / {Math.ceil(consultasRealizadasTotal / 20)}
+                    </span>
+                    <button
+                      className="px-3 py-1 rounded bg-slate-700 text-white text-xs hover:bg-cyan-700 transition disabled:opacity-40"
+                      disabled={consultasRealizadasPage >= Math.ceil(consultasRealizadasTotal / 20)}
+                      onClick={() => fetchConsultasRealizadas(consultasRealizadasUser.id, consultasRealizadasPage + 1)}
+                    >Siguiente ▶</button>
+                  </div>
+                )}
+              </>
+            )}
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

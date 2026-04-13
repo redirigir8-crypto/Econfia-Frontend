@@ -70,7 +70,7 @@ export default function ConsultaBasicElemnt() {
       setShowResultados(true);
       setTimeout(() => {
         navigate("/d3b7f1e9");
-      }, 2000);
+      }, 5000);
     } catch (error) {
       setToast({ type: "error", message: "Ocurrió un error en la consulta" });
     } finally {

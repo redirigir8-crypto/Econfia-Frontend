@@ -26,7 +26,7 @@ export default function DetalleResultados({ consultaId }) {
   const closeTimerRef = useRef(null);
   const openRafRef = useRef(null);
   const openRaf2Ref = useRef(null);
-  const MODAL_ANIMATION_MS = 320;
+  const MODAL_ANIMATION_MS = 8000;
 
   
 

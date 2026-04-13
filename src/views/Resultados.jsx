@@ -298,6 +298,7 @@ export default function Resultados() {
       search === "" ||
       item.id.toString().includes(search) ||
       item.cedula?.toString().includes(search) ||
+      item.nombre?.toLowerCase().includes(search.toLowerCase()) ||
       item.estado?.toLowerCase().includes(search.toLowerCase());
 
     const matchEstado =
@@ -338,7 +339,7 @@ export default function Resultados() {
             <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center mb-3 md:mb-4 gap-2 md:gap-3">
               <input
                 type="text"
-                placeholder="Buscar por ID, Cédula o Estado..."
+                placeholder="Buscar por ID, Cédula, Nombre o Estado..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full md:w-1/2 px-3 py-1.5 md:py-2 rounded-lg bg-white/5 border border-white/15 text-sm text-white placeholder-white/40 focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/20 transition-all backdrop-blur-sm"
