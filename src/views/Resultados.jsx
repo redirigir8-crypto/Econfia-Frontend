@@ -271,11 +271,11 @@ function ExportBatchModal({
             Configuracion de exportacion
           </div>
           <h3 className="mt-3 text-lg font-bold text-white">
-            Tamano del lote de exportacion
+            Tamaño del lote de exportación
           </h3>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Define el volumen de registros completados que se incluira en el archivo {formatLabel} con los filtros actuales.
-            Se priorizan las consultas mas recientes.
+            Define el volumen de registros completados que se incluirá en el archivo {formatLabel} con los filtros actuales.
+            Se priorizan las consultas más recientes.
           </p>
         </div>
 

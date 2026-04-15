@@ -243,6 +243,20 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
    Página: Consulta
    =============== */
 export default function ConsultaMedida() {
+  const [puedeUsarMasivas, setPuedeUsarMasivas] = useState(false);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const API = process.env.REACT_APP_API_URL;
+    fetch(`${API}/api/profile/`, { headers: { Authorization: `Token ${token}` } })
+      .then((r) => r.json())
+      .then((data) => {
+        const ids = data.perfil?.planes_masivas_ids || [];
+        const planes = data.perfil?.planes || [];
+        const planActual = planes.find((p) => p.nombre === "essential");
+        setPuedeUsarMasivas(planActual ? ids.includes(planActual.id) : false);
+      })
+      .catch(() => {});
+  }, []);
   const [tipoDoc, setTipoDoc] = useState("");
   const [open, setOpen] = useState(false);
   const [cedula, setCedula] = useState("");
@@ -800,14 +814,16 @@ export default function ConsultaMedida() {
                   Consulta a la medida
                 </button>
 
-                {/* Botón: Consulta Masiva - SIEMPRE HABILITADO */}
-                <button
-                  type="button"
-                  onClick={() => setShowMasiva(true)}
-                  className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
-                >
-                  Consulta Masiva (hasta 50 documentos)
-                </button>
+                {/* Botón consulta masiva — solo si el admin lo habilitó */}
+                {puedeUsarMasivas && (
+                  <button
+                    type="button"
+                    onClick={() => setShowMasiva(true)}
+                    className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                  >
+                    Consulta Masiva (hasta 50 documentos)
+                  </button>
+                )}
                 </form>
               </div>
             </div>

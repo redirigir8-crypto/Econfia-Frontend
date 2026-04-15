@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -8,6 +8,20 @@ import { FaCogs } from "react-icons/fa";
 import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
 
 export default function ConsultaBasicElemnt() {
+  const [puedeUsarMasivas, setPuedeUsarMasivas] = useState(false);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const API = process.env.REACT_APP_API_URL;
+    fetch(`${API}/api/profile/`, { headers: { Authorization: `Token ${token}` } })
+      .then((r) => r.json())
+      .then((data) => {
+        const ids = data.perfil?.planes_masivas_ids || [];
+        const planes = data.perfil?.planes || [];
+        const planActual = planes.find((p) => p.nombre === "econfiafast");
+        setPuedeUsarMasivas(planActual ? ids.includes(planActual.id) : false);
+      })
+      .catch(() => {});
+  }, []);
   const [tipoDoc, setTipoDoc] = useState("");
   const [cedula, setCedula] = useState("");
   const [fechaExpedicion, setFechaExpedicion] = useState("");
@@ -200,14 +214,16 @@ export default function ConsultaBasicElemnt() {
                   {loading ? "Consultando..." : "Consultar EconfiaFast"}
                 </button>
 
-                {/* Botón consulta masiva */}
-                <button
-                  type="button"
-                  onClick={() => setShowMasiva(true)}
-                  className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
-                >
-                  Consulta Masiva (hasta 50 documentos)
-                </button>
+                {/* Botón consulta masiva — solo si el admin lo habilitó */}
+                {puedeUsarMasivas && (
+                  <button
+                    type="button"
+                    onClick={() => setShowMasiva(true)}
+                    className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                  >
+                    Consulta Masiva (hasta 50 documentos)
+                  </button>
+                )}
               </form>
             </div>
           </div>
