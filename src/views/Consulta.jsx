@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
 import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
+import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
 
 function ModalConsultaMedida({ isOpen, onClose, data }) {
   const [fuentes, setFuentes] = useState([]);
@@ -193,6 +194,7 @@ export default function Consulta() {
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL;
   const [showConsultaMedida, setShowConsultaMedida] = useState(false);
+  const [showMasiva, setShowMasiva] = useState(false);
   const [alcance, setAlcance] = useState("todas");
 
   useEffect(() => {
@@ -727,6 +729,15 @@ export default function Consulta() {
                   >
                     {loading ? "Procesando..." : "Consultar Ahora"}
                   </button>
+
+                  {/* Botón consulta masiva */}
+                  <button
+                    type="button"
+                    onClick={() => setShowMasiva(true)}
+                    className="w-full mt-1.5 px-6 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                  >
+                    Consulta Masiva (hasta 50 documentos)
+                  </button>
                 </form>
               </div>
             </div>
@@ -739,6 +750,13 @@ export default function Consulta() {
         isOpen={showConsultaMedida}
         onClose={() => setShowConsultaMedida(false)}
         data={datos}
+      />
+
+      {/* Modal: Consulta Masiva */}
+      <ConsultaMasivaModal
+        isOpen={showMasiva}
+        onClose={() => setShowMasiva(false)}
+        tipoConsulta="ecorefull"
       />
     </>
   );

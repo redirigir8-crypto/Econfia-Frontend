@@ -5,6 +5,7 @@ import Toast from "../components/Toast";
 import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
 import { FaCogs } from "react-icons/fa";
+import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
 
 export default function ConsultaBasicElemnt() {
   const [tipoDoc, setTipoDoc] = useState("");
@@ -13,6 +14,7 @@ export default function ConsultaBasicElemnt() {
   const [acepta, setAcepta] = useState(false);
   const [consentimiento, setConsentimiento] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showMasiva, setShowMasiva] = useState(false);
   const [datos, setDatos] = useState(null);
   const [toast, setToast] = useState(null);
   const [showResultados, setShowResultados] = useState(false);
@@ -197,6 +199,15 @@ export default function ConsultaBasicElemnt() {
                 >
                   {loading ? "Consultando..." : "Consultar Basic Element"}
                 </button>
+
+                {/* Botón consulta masiva */}
+                <button
+                  type="button"
+                  onClick={() => setShowMasiva(true)}
+                  className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                >
+                  Consulta Masiva (hasta 50 documentos)
+                </button>
               </form>
             </div>
           </div>
@@ -222,6 +233,13 @@ export default function ConsultaBasicElemnt() {
         </div>,
         document.body
       )}
+
+      {/* Modal: Consulta Masiva */}
+      <ConsultaMasivaModal
+        isOpen={showMasiva}
+        onClose={() => setShowMasiva(false)}
+        tipoConsulta="essential"
+      />
     </section>
   );
 }

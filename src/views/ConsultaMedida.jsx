@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
 import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
+import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
 
 function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
   const [fuentes, setFuentes] = useState([]);
@@ -44,9 +45,16 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
   });
 
   const handleCheckbox = (nombre) => {
-    setSeleccionadas((prev) =>
-      prev.includes(nombre) ? prev.filter((n) => n !== nombre) : [...prev, nombre]
-    );
+    setSeleccionadas((prev) => {
+      if (prev.includes(nombre)) {
+        return prev.filter((n) => n !== nombre);
+      }
+      // Si ya hay 45 seleccionadas, no agregar más
+      if (prev.length >= 45) {
+        return prev;
+      }
+      return [...prev, nombre];
+    });
   };
 
   const handleConsultar = async () => {
@@ -57,7 +65,7 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
       const bodyPayload = {
         cedula: data.cedula,
         tipo_doc: data.tipo_doc,
-        tipo_consulta: "essential",
+        tipo_consulta: "essencial",
         lista_nombres: seleccionadas,
       };
       if (data.fecha_expedicion) {
@@ -90,15 +98,16 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
     }
   };
 
-  // Seleccionar/deseleccionar todas las fuentes
+  // Seleccionar/deseleccionar todas las fuentes (máximo 45)
   const allSelected = filteredFuentes.length > 0 && filteredFuentes.every(f => seleccionadas.includes(f.nombre));
   const handleToggleAll = () => {
     if (allSelected) {
       // Deseleccionar todas
       setSeleccionadas([]);
     } else {
-      // Seleccionar todas
-      setSeleccionadas(filteredFuentes.map(f => f.nombre));
+      // Seleccionar todas respetando límite de 45
+      const nuevas = filteredFuentes.map(f => f.nombre);
+      setSeleccionadas(nuevas.slice(0, 45));
     }
   };
 
@@ -165,34 +174,42 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
             </div>
 
             {/* Contador de fuentes seleccionadas */}
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-2 flex items-center justify-between">
               <span className="text-cyan-300 font-semibold text-sm">
-                {`Fuentes seleccionadas: ${seleccionadas.length}`}
+                {`Fuentes seleccionadas: ${seleccionadas.length} / 45`}
               </span>
+              {seleccionadas.length >= 45 && (
+                <span className="text-xs text-orange-400 font-medium">⚠️ Límite máximo</span>
+              )}
             </div>
 
             {/* Lista de fuentes */}
             <div className="max-h-72 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
               {filteredFuentes.length > 0 ? (
-                filteredFuentes.map((fuente) => (
+                filteredFuentes.map((fuente) => {
+                  const isDisabled = seleccionadas.length >= 45 && !seleccionadas.includes(fuente.nombre);
+                  return (
                   <label
                     key={fuente.id}
-                    className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 cursor-pointer transition-all hover:shadow-md hover:shadow-cyan-500/10 group"
+                    className={`flex items-center gap-3 bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 transition-all hover:shadow-md hover:shadow-cyan-500/10 group ${
+                      isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                    }`}
                   >
                     <input
                       type="checkbox"
-                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      className={`accent-cyan-500 w-4 h-4 ${
+                        isDisabled ? "cursor-not-allowed" : "cursor-pointer"
+                      }`}
                       checked={seleccionadas.includes(fuente.nombre)}
                       onChange={() => handleCheckbox(fuente.nombre)}
+                      disabled={isDisabled}
                     />
                     <div className="flex flex-col">
                       <span className="font-medium text-white group-hover:text-cyan-300 transition-colors">{fuente.nombre_pila || fuente.nombre}</span>
-                      {fuente.nombre && (
-                        <span className="text-xs text-white/50">{fuente.nombre}</span>
-                      )}
                     </div>
                   </label>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-white/60 text-center py-4">
                   {fuentes.length === 0
@@ -240,6 +257,7 @@ export default function ConsultaMedida() {
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL;
   const [showConsultaMedida, setShowConsultaMedida] = useState(false);
+  const [showMasiva, setShowMasiva] = useState(false);
 
   useEffect(() => {
     const now = new Date();
@@ -781,6 +799,15 @@ export default function ConsultaMedida() {
                 >
                   Consulta a la medida
                 </button>
+
+                {/* Botón: Consulta Masiva - SIEMPRE HABILITADO */}
+                <button
+                  type="button"
+                  onClick={() => setShowMasiva(true)}
+                  className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                >
+                  Consulta Masiva (hasta 50 documentos)
+                </button>
                 </form>
               </div>
             </div>
@@ -804,6 +831,13 @@ export default function ConsultaMedida() {
             navigate("/d3b7f1e9");
           }, 2000);
         }}
+      />
+
+      {/* Modal: Consulta Masiva */}
+      <ConsultaMasivaModal
+        isOpen={showMasiva}
+        onClose={() => setShowMasiva(false)}
+        tipoConsulta="essencial"
       />
     </>
   );

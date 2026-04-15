@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
 import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
+import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
 
 // Lista de profesiones alineada con backend (PROFESION_BOT_MAP)
 const PROFESIONES = [
@@ -79,6 +80,7 @@ export default function ConsultaContratista() {
   const [toast, setToast] = useState(null);
   const [showResultados, setShowResultados] = useState(false);
   const [showHorarioAviso, setShowHorarioAviso] = useState(false);
+  const [showMasiva, setShowMasiva] = useState(false);
 
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL;
@@ -762,6 +764,15 @@ la finalidad del tratamiento y las obligaciones legales.`}
                     >
                       {loading ? "Procesando..." : "Consultar Contratista"}
                     </button>
+
+                    {/* Botón consulta masiva */}
+                    <button
+                      type="button"
+                      onClick={() => setShowMasiva(true)}
+                      className="mt-1.5 w-full px-6 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                    >
+                      Consulta Masiva (hasta 50 documentos)
+                    </button>
                   </form>
                 </div>
               </div>
@@ -775,6 +786,13 @@ la finalidad del tratamiento y las obligaciones legales.`}
           </div>
         </div>
       </section>
+
+      {/* Modal: Consulta Masiva */}
+      <ConsultaMasivaModal
+        isOpen={showMasiva}
+        onClose={() => setShowMasiva(false)}
+        tipoConsulta="ecorefull"
+      />
     </>
   );
 }
