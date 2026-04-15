@@ -470,7 +470,7 @@ export default function ConsultaEssencialExpress() {
           setShowResultados(true);
           setTimeout(() => {
             navigate("/d3b7f1e9");
-          }, 2000);
+          }, 5000);
         }}
       />
 

@@ -1,12 +1,41 @@
 import React from "react";
 
+const ITEMS = [
+  { key: "users",    icon: "👤", label: "Usuarios" },
+  { key: "planes",   icon: "📦", label: "Planes" },
+  { key: "fuentes",  icon: "🗂️",  label: "Fuentes" },
+];
+
 const AdminSidebar = ({ onSelect, selected }) => (
-  <aside style={{ width: 220, background: "#222", color: "#fff", height: "100vh", padding: 20 }}>
-    <h2>Admin</h2>
-    <ul style={{ listStyle: "none", padding: 0 }}>
-      <li style={{ margin: "16px 0", cursor: "pointer", fontWeight: selected === "users" ? "bold" : "normal" }} onClick={() => onSelect("users")}>Usuarios</li>
-      <li style={{ margin: "16px 0", cursor: "pointer", fontWeight: selected === "planes" ? "bold" : "normal" }} onClick={() => onSelect("planes")}>Planes</li>
-      <li style={{ margin: "16px 0", cursor: "pointer", fontWeight: selected === "fuentes" ? "bold" : "normal" }} onClick={() => onSelect("fuentes")}>Fuentes</li>
+  <aside style={{ width: 230, background: "#1e1b4b", color: "#fff", minHeight: "100vh", padding: "24px 0" }}>
+    <div style={{ padding: "0 20px 24px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+      <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: 1 }}>⚙️ Admin</div>
+    </div>
+    <ul style={{ listStyle: "none", padding: "12px 0", margin: 0 }}>
+      {ITEMS.map(({ key, icon, label }) => {
+        const activo = selected === key;
+        return (
+          <li
+            key={key}
+            onClick={() => onSelect(key)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "12px 20px",
+              cursor: "pointer",
+              fontWeight: activo ? 700 : 400,
+              fontSize: 15,
+              background: activo ? "rgba(255,255,255,0.12)" : "transparent",
+              borderLeft: activo ? "4px solid #818cf8" : "4px solid transparent",
+              transition: "background 0.15s",
+            }}
+          >
+            <span style={{ fontSize: 18 }}>{icon}</span>
+            {label}
+          </li>
+        );
+      })}
     </ul>
   </aside>
 );
