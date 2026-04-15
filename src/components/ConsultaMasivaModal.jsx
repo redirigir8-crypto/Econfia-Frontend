@@ -79,6 +79,9 @@ export default function ConsultaMasivaModal({
     }
   };
 
+  // Tipos de consulta que requieren selección de fuentes
+  const REQUIERE_FUENTES = ["essencial", "essencial-express", "essencial_express"];
+
   // ── Envío ────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     // Validar que acepte términos y consentimiento
@@ -106,20 +109,24 @@ export default function ConsultaMasivaModal({
       }
     }
 
-    // Guardar datos pendientes y mostrar modal de selección
-    setPendienteEnviar({
+    const datosPendientes = {
       modo,
       cedulas: modo === "manual" ? cedulas : null,
       archivo: modo === "archivo" ? archivo : null,
-    });
-    setShowSeleccionFuentes(true);
+    };
+
+    // Solo essencial y essencial-express piden selección de fuentes
+    if (REQUIERE_FUENTES.includes(tipoConsulta)) {
+      setPendienteEnviar(datosPendientes);
+      setShowSeleccionFuentes(true);
+    } else {
+      // Para ecorefull, econfiafast, basic-elemnt, etc. → enviar directo sin fuentes
+      await enviarConsulta(datosPendientes, []);
+    }
   };
 
-  // ── Callback cuando usuario confirma fuentes ───────────────────────────────
-  const handleFuentesSeleccionadas = async (fuentes) => {
-    if (!pendienteEnviar) return;
-
-    setShowSeleccionFuentes(false);
+  // ── Lógica de envío reutilizable ─────────────────────────────────────────
+  const enviarConsulta = async (datosPendientes, fuentes) => {
     setError(null);
     setResultado(null);
     setLoading(true);
@@ -130,7 +137,7 @@ export default function ConsultaMasivaModal({
     try {
       let res;
 
-      if (pendienteEnviar.modo === "manual") {
+      if (datosPendientes.modo === "manual") {
         res = await fetch(`${API_URL}/api/consultar-masivo/`, {
           method: "POST",
           headers: {
@@ -138,7 +145,7 @@ export default function ConsultaMasivaModal({
             Authorization: `Token ${token}`,
           },
           body: JSON.stringify({
-            cedulas: pendienteEnviar.cedulas,
+            cedulas: datosPendientes.cedulas,
             tipo_consulta: tipoConsulta,
             alcance: "todas",
             lista_nombres: fuentes,
@@ -146,7 +153,7 @@ export default function ConsultaMasivaModal({
         });
       } else {
         const formData = new FormData();
-        formData.append("file", pendienteEnviar.archivo);
+        formData.append("file", datosPendientes.archivo);
         formData.append("tipo_consulta", tipoConsulta);
         formData.append("alcance", "todas");
         formData.append("lista_nombres", JSON.stringify(fuentes));
@@ -172,6 +179,13 @@ export default function ConsultaMasivaModal({
       setLoading(false);
       setPendienteEnviar(null);
     }
+  };
+
+  // ── Callback cuando usuario confirma fuentes (solo essencial) ─────────────
+  const handleFuentesSeleccionadas = async (fuentes) => {
+    if (!pendienteEnviar) return;
+    setShowSeleccionFuentes(false);
+    await enviarConsulta(pendienteEnviar, fuentes);
   };
 
   // ── Reset al cerrar ──────────────────────────────────────────────────────
