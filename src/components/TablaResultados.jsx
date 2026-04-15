@@ -235,7 +235,16 @@ function ProcessDockPortal({ items }) {
 }
 
 /* ===== TABLA: Estado = solo barra + % (sin loader ni texto) ===== */
-export default function TablaResultados({ data = [], onVerResultados }) {
+export default function TablaResultados({
+  data = [],
+  onVerResultados,
+  onExportExcel,
+  onExportPdf,
+  exportingExcel = false,
+  exportingPdf = false,
+  exportDisabled = false,
+  exportCount = 0,
+}) {
   const [pagina, setPagina] = useState(1);
   const porPagina = 4;
 
@@ -271,12 +280,69 @@ export default function TablaResultados({ data = [], onVerResultados }) {
       <div className="backdrop-blur-xl bg-gradient-to-br from-slate-900/50 via-blue-950/30 to-slate-900/50 border border-cyan-500/20 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-xl md:rounded-2xl overflow-hidden">
         {/* Header elegante */}
         <div className="px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-b border-cyan-500/20">
-          <h3 className="text-sm md:text-base font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent flex items-center gap-1.5 md:gap-2">
-            <svg className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Historial de Consultas
-          </h3>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <h3 className="text-sm md:text-base font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent flex items-center gap-1.5 md:gap-2">
+              <svg className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Historial de Consultas
+            </h3>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={onExportExcel}
+                disabled={exportDisabled || exportingExcel || exportingPdf}
+                className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-emerald-400/30 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 px-3 py-2 text-[11px] md:text-xs font-semibold text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:from-emerald-500/30 hover:to-cyan-500/30 hover:border-emerald-300/50 hover:shadow-[0_0_24px_rgba(16,185,129,0.28)] disabled:cursor-not-allowed disabled:opacity-45"
+                title={
+                  exportDisabled
+                    ? "No hay consultas completadas en el filtro actual para exportar."
+                    : `Exportar ${exportCount} consulta${exportCount === 1 ? "" : "s"} al informe Excel`
+                }
+              >
+                {exportingExcel ? (
+                  <span className="inline-block h-4 w-4 rounded-full border-2 border-emerald-100/30 border-t-emerald-300 animate-spin" />
+                ) : (
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v12m0 0l4-4m-4 4l-4-4m-4 7h16" />
+                  </svg>
+                )}
+                <span>{exportingExcel ? "Generando Excel..." : "Descargar informe Excel"}</span>
+                {!exportDisabled && !exportingExcel && (
+                  <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-bold text-emerald-100">
+                    {exportCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={onExportPdf}
+                disabled={exportDisabled || exportingPdf || exportingExcel}
+                className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-3 py-2 text-[11px] md:text-xs font-semibold text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.18)] transition-all duration-300 hover:from-cyan-500/30 hover:to-blue-500/30 hover:border-cyan-300/50 hover:shadow-[0_0_24px_rgba(34,211,238,0.26)] disabled:cursor-not-allowed disabled:opacity-45"
+                title={
+                  exportDisabled
+                    ? "No hay consultas completadas en el filtro actual para exportar."
+                    : `Exportar ${exportCount} consulta${exportCount === 1 ? "" : "s"} al informe PDF`
+                }
+              >
+                {exportingPdf ? (
+                  <span className="inline-block h-4 w-4 rounded-full border-2 border-cyan-100/30 border-t-cyan-300 animate-spin" />
+                ) : (
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 3h6l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 3v5h5" />
+                  </svg>
+                )}
+                <span>{exportingPdf ? "Generando PDF..." : "Descargar informe PDF"}</span>
+                {!exportDisabled && !exportingPdf && (
+                  <span className="rounded-full bg-cyan-400/15 px-2 py-0.5 text-[10px] font-bold text-cyan-50">
+                    {exportCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Tabla con scroll */}

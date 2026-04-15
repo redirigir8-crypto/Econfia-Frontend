@@ -222,6 +222,141 @@ function FloatingActionsPortal({
   );
 }
 
+function ExportBatchModal({
+  isOpen,
+  format = "excel",
+  totalCount = 0,
+  initialCount = 0,
+  isSubmitting = false,
+  onClose,
+  onConfirm,
+}) {
+  const [requestedCount, setRequestedCount] = useState("");
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const safeInitial = Math.max(1, Math.min(totalCount || 1, initialCount || totalCount || 1));
+    setRequestedCount(String(safeInitial));
+  }, [isOpen, totalCount, initialCount, format]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape" && !isSubmitting) {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, isSubmitting, onClose]);
+
+  if (!isOpen) return null;
+
+  const normalizedCount = Math.max(
+    1,
+    Math.min(totalCount || 1, Number.parseInt(requestedCount, 10) || 1)
+  );
+  const formatLabel = format === "pdf" ? "PDF" : "Excel";
+  const quickOptions = Array.from(
+    new Set([25, 50, 100, totalCount].filter((value) => value > 0 && value <= totalCount))
+  );
+
+  return createPortal(
+    <div className="fixed inset-0 z-[11000] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm px-4">
+      <div className="w-full max-w-md rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-slate-900/95 via-blue-950/75 to-slate-900/95 shadow-[0_20px_60px_rgba(2,8,23,0.55)] overflow-hidden">
+        <div className="border-b border-cyan-400/15 px-5 py-4">
+          <div className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200">
+            Configuracion de exportacion
+          </div>
+          <h3 className="mt-3 text-lg font-bold text-white">
+            Tamano del lote de exportacion
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            Define el volumen de registros completados que se incluira en el archivo {formatLabel} con los filtros actuales.
+            Se priorizan las consultas mas recientes.
+          </p>
+        </div>
+
+        <div className="px-5 py-4 space-y-4">
+          <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+            <div className="text-xs uppercase tracking-[0.18em] text-slate-400">
+              Registros disponibles
+            </div>
+            <div className="mt-2 flex items-end justify-between gap-3">
+              <div className="text-3xl font-black text-cyan-200">{totalCount}</div>
+              <div className="text-right text-xs text-slate-400">
+                Archivo objetivo
+                <div className="mt-1 text-sm font-semibold text-white">{formatLabel}</div>
+              </div>
+            </div>
+          </div>
+
+          <label className="block">
+            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Cantidad a incluir
+            </span>
+            <input
+              type="number"
+              min="1"
+              max={totalCount}
+              value={requestedCount}
+              onChange={(event) => setRequestedCount(event.target.value)}
+              className="w-full rounded-xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 text-white outline-none transition focus:border-cyan-300/50 focus:ring-2 focus:ring-cyan-400/20"
+            />
+          </label>
+
+          <div>
+            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Lotes sugeridos
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {quickOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setRequestedCount(String(option))}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    normalizedCount === option
+                      ? "border-cyan-300/60 bg-cyan-400/20 text-cyan-100"
+                      : "border-white/10 bg-white/5 text-slate-300 hover:border-cyan-400/30 hover:text-cyan-100"
+                  }`}
+                >
+                  {option === totalCount ? `Todo (${option})` : option}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 border-t border-white/10 px-5 py-4">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={() => onConfirm?.(normalizedCount)}
+            disabled={isSubmitting || totalCount <= 0}
+            className="inline-flex items-center gap-2 rounded-xl border border-cyan-300/30 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 px-4 py-2 text-sm font-semibold text-white transition hover:from-cyan-500/40 hover:to-blue-500/40 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting && (
+              <span className="inline-block h-4 w-4 rounded-full border-2 border-white/25 border-t-white animate-spin" />
+            )}
+            {isSubmitting ? `Generando ${formatLabel}...` : `Generar ${formatLabel}`}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 export default function Resultados() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -230,6 +365,9 @@ export default function Resultados() {
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({ estado: "", fecha: "" });
   const [showModalIndividual, setShowModalIndividual] = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportModal, setExportModal] = useState({ open: false, format: "excel" });
   const API_URL = process.env.REACT_APP_API_URL;
   // ---- Obtener todas las consultas ----
   const fetchResultados = async () => {
@@ -309,6 +447,198 @@ export default function Resultados() {
 
     return matchSearch && matchEstado && matchFecha;
   });
+  const exportableData = [...filteredData]
+    .filter((item) => (item.estado || "").toLowerCase() === "completado")
+    .sort((left, right) => {
+      const leftTime = left.fecha ? new Date(left.fecha).getTime() : 0;
+      const rightTime = right.fecha ? new Date(right.fecha).getTime() : 0;
+      return rightTime - leftTime;
+    });
+
+  const openExportModal = (format) => {
+    if (!exportableData.length) return;
+    setExportModal({ open: true, format });
+  };
+
+  const closeExportModal = () => {
+    if (exportingExcel || exportingPdf) return;
+    setExportModal((prev) => ({ ...prev, open: false }));
+  };
+
+  const downloadExport = async (format, consultaIds) => {
+    if (!consultaIds.length) return false;
+
+    const isPdf = format === "pdf";
+    const setExporting = isPdf ? setExportingPdf : setExportingExcel;
+    const endpoint = isPdf ? "exportar-pdf" : "exportar-excel";
+    const defaultExtension = isPdf ? "pdf" : "xlsx";
+    const exportLabel = isPdf ? "PDF" : "Excel";
+
+    setExporting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/api/consultas/${endpoint}/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({
+          consulta_ids: consultaIds,
+        }),
+      });
+
+      if (!res.ok) {
+        let message = `No se pudo generar el informe ${exportLabel}.`;
+        try {
+          const errorData = await res.json();
+          message = errorData?.detail || errorData?.error || message;
+        } catch (_error) {
+          // Si el backend no respondio JSON, dejamos el mensaje por defecto.
+        }
+        throw new Error(message);
+      }
+
+      const blob = await res.blob();
+      const disposition = res.headers.get("content-disposition") || "";
+      const match = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
+      const filename = match?.[1]
+        ? decodeURIComponent(match[1])
+        : `control_informes_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.${defaultExtension}`;
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      return true;
+    } catch (error) {
+      console.error(`Error al exportar el informe ${exportLabel}:`, error);
+      alert(error.message || `No se pudo generar el informe ${exportLabel}.`);
+      return false;
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleConfirmExport = async (requestedCount) => {
+    const selectedIds = exportableData
+      .slice(0, requestedCount)
+      .map((item) => item.id);
+
+    const wasSuccessful = await downloadExport(exportModal.format, selectedIds);
+    if (wasSuccessful) {
+      setExportModal((prev) => ({ ...prev, open: false }));
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (!exportableData.length) return;
+
+    setExportingExcel(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/api/consultas/exportar-excel/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({
+          consulta_ids: exportableData.map((item) => item.id),
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "No se pudo generar el informe Excel.";
+        try {
+          const errorData = await res.json();
+          message = errorData?.detail || errorData?.error || message;
+        } catch (_error) {
+          // Si el backend no respondió JSON, dejamos el mensaje por defecto.
+        }
+        throw new Error(message);
+      }
+
+      const blob = await res.blob();
+      const disposition = res.headers.get("content-disposition") || "";
+      const match = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
+      const filename = match?.[1]
+        ? decodeURIComponent(match[1])
+        : `control_informes_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.xlsx`;
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error al exportar el informe Excel:", error);
+      alert(error.message || "No se pudo generar el informe Excel.");
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    if (!exportableData.length) return;
+
+    setExportingPdf(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/api/consultas/exportar-pdf/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({
+          consulta_ids: exportableData.map((item) => item.id),
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "No se pudo generar el informe PDF.";
+        try {
+          const errorData = await res.json();
+          message = errorData?.detail || errorData?.error || message;
+        } catch (_error) {
+          // Si el backend no respondió JSON, dejamos el mensaje por defecto.
+        }
+        throw new Error(message);
+      }
+
+      const blob = await res.blob();
+      const disposition = res.headers.get("content-disposition") || "";
+      const match = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
+      const filename = match?.[1]
+        ? decodeURIComponent(match[1])
+        : `control_informes_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.pdf`;
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error al exportar el informe PDF:", error);
+      alert(error.message || "No se pudo generar el informe PDF.");
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
+  void handleExportExcel;
+  void handleExportPdf;
 
   const consultaActual = data.find((c) => c.id === consultaSeleccionada) || null;
   const consultaTipoActual =
@@ -374,6 +704,12 @@ export default function Resultados() {
             <TablaResultados
               data={filteredData}
               onVerResultados={setConsultaSeleccionada}
+              onExportExcel={() => openExportModal("excel")}
+              onExportPdf={() => openExportModal("pdf")}
+              exportingExcel={exportingExcel}
+              exportingPdf={exportingPdf}
+              exportDisabled={!exportableData.length}
+              exportCount={exportableData.length}
             />
           </div>
         ) : (
@@ -442,6 +778,15 @@ export default function Resultados() {
         </div>
       )}
       </div>
+      <ExportBatchModal
+        isOpen={exportModal.open}
+        format={exportModal.format}
+        totalCount={exportableData.length}
+        initialCount={Math.min(exportableData.length, 50)}
+        isSubmitting={exportingExcel || exportingPdf}
+        onClose={closeExportModal}
+        onConfirm={handleConfirmExport}
+      />
     </section>
   );
 }

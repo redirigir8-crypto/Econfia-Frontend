@@ -3,7 +3,21 @@ import axios from 'axios';
 import { createPortal } from 'react-dom';
 import Toast from '../components/Toast';
 
-const API_URL = 'http://127.0.0.1:8000/api/validar_titulos/';
+const resolveApiBase = () => {
+  const envBase = (process.env.REACT_APP_API_URL || '').trim();
+  if (envBase) {
+    return envBase.replace(/\/$/, '');
+  }
+
+  if (typeof window !== 'undefined') {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    return isLocal ? 'http://127.0.0.1:8000' : window.location.origin.replace(/\/$/, '');
+  }
+
+  return 'http://127.0.0.1:8000';
+};
+
+const API_URL = `${resolveApiBase()}/api/validar_titulos/`;
 
 const TitulosValidationForm = () => {
   const [form, setForm] = useState({
