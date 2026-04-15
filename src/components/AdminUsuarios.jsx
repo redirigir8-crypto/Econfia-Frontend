@@ -114,6 +114,11 @@ const AdminUsuarios = () => {
   const [consultasValue, setConsultasValue]         = useState(0);
   const [consultasInfinitas, setConsultasInfinitas] = useState(false);
 
+  // Consultas masivas
+  const [showMasivasModal, setShowMasivasModal]   = useState(false);
+  const [masivasUser, setMasivasUser]             = useState(null);
+  const [masivasPlanId, setMasivasPlanId]         = useState("");
+
   const token = localStorage.getItem("token");
 
   // ── Fetch ──────────────────────────────────────────────────────
@@ -180,9 +185,13 @@ const AdminUsuarios = () => {
         body: JSON.stringify({ consultas_disponibles: consultasValue, consultas_infinitas: consultasInfinitas }),
       });
       if (!res.ok) throw new Error();
+      setUsers((prev) => prev.map((u) =>
+        u.id === selectedUser.id
+          ? { ...u, perfil: { ...u.perfil, consultas_disponibles: consultasValue, consultas_infinitas: consultasInfinitas } }
+          : u
+      ));
       setToast({ type: "success", message: "Consultas asignadas" });
       setShowConsultasModal(false);
-      fetchUsers();
     } catch {
       setToast({ type: "error", message: "Error al asignar consultas" });
     }
@@ -205,9 +214,13 @@ const AdminUsuarios = () => {
         body: JSON.stringify(dataToSend),
       });
       if (!res.ok) throw new Error();
+      setUsers((prev) => prev.map((u) =>
+        u.id === selectedUser.id
+          ? { ...u, username: editUserData.username, email: editUserData.email, first_name: editUserData.first_name, last_name: editUserData.last_name }
+          : u
+      ));
       setToast({ type: "success", message: "Usuario actualizado" });
       setShowEditModal(false);
-      fetchUsers();
     } catch {
       setToast({ type: "error", message: "Error al actualizar usuario" });
     }
@@ -252,11 +265,17 @@ const AdminUsuarios = () => {
         body: JSON.stringify({ planes: selectedPlanes }),
       });
       if (!res.ok) throw new Error();
+      // Actualizar planes del usuario en el estado local
+      const planesAsignados = planes.filter((p) => selectedPlanes.includes(p.id));
+      setUsers((prev) => prev.map((u) =>
+        u.id === selectedUser.id
+          ? { ...u, perfil: { ...u.perfil, planes: planesAsignados } }
+          : u
+      ));
       setToast({ type: "success", message: "Planes actualizados" });
       setShowModal(false);
       setSelectedPlanes([]);
       setSelectedUser(null);
-      fetchUsers();
       const userRes = await fetch(`${API_URL}/api/profile/`, { headers: { Authorization: `Token ${token}` } });
       if (userRes.ok) {
         const updatedUser = await userRes.json();
@@ -268,8 +287,83 @@ const AdminUsuarios = () => {
     }
   };
 
+  // ── Asignar plan a masivas ────────────────────────────────────
+  const handleAsignarPlanMasivas = async (user, planId) => {
+    if (!user.perfil || !planId) return;
+    const plan = (user.perfil?.planes || []).find((p) => String(p.id) === String(planId));
+    if (!plan) return;
+    const idsActuales = user.perfil?.planes_masivas_ids || [];
+    if (idsActuales.includes(plan.id)) return;
+    const nuevosIds = [...idsActuales, plan.id];
+    const nuevosPlanes = [...(user.perfil?.planes_masivas || []), plan];
+    const usuarioActualizado = { ...user, perfil: { ...user.perfil, planes_masivas_ids: nuevosIds, planes_masivas: nuevosPlanes, consultas_masivas: true } };
+    setUsers((prev) => prev.map((u) => u.id === user.id ? usuarioActualizado : u));
+    setMasivasUser(usuarioActualizado);
+    setMasivasPlanId("");
+    try {
+      const res = await fetch(`${API_URL}/api/perfiles/${user.perfil.id}/`, {
+        method: "PATCH",
+        headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ planes_masivas_ids: nuevosIds }),
+      });
+      if (!res.ok) throw new Error();
+      setToast({ type: "success", message: `Masivas asignadas al plan ${plan.nombre} para ${user.username}` });
+    } catch {
+      setUsers((prev) => prev.map((u) => u.id === user.id ? user : u));
+      setMasivasUser(user);
+      setToast({ type: "error", message: "Error al asignar masivas al plan" });
+    }
+  };
+
+  // ── Quitar plan de masivas ────────────────────────────────────
+  const handleQuitarPlanMasivas = async (user, planId) => {
+    if (!user.perfil) return;
+    const nuevosIds = (user.perfil?.planes_masivas_ids || []).filter((id) => id !== planId);
+    const nuevosPlanes = (user.perfil?.planes_masivas || []).filter((p) => p.id !== planId);
+    const usuarioActualizado = { ...user, perfil: { ...user.perfil, planes_masivas_ids: nuevosIds, planes_masivas: nuevosPlanes, consultas_masivas: nuevosIds.length > 0 } };
+    setUsers((prev) => prev.map((u) => u.id === user.id ? usuarioActualizado : u));
+    setMasivasUser(usuarioActualizado);
+    try {
+      const res = await fetch(`${API_URL}/api/perfiles/${user.perfil.id}/`, {
+        method: "PATCH",
+        headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ planes_masivas_ids: nuevosIds }),
+      });
+      if (!res.ok) throw new Error();
+      setToast({ type: "success", message: `Plan quitado de masivas para ${user.username}` });
+    } catch {
+      setUsers((prev) => prev.map((u) => u.id === user.id ? user : u));
+      setMasivasUser(user);
+      setToast({ type: "error", message: "Error al quitar plan de masivas" });
+    }
+  };
+
+  // ── Desactivar todas las masivas ──────────────────────────────
+  const handleDesactivarMasivas = async (user) => {
+    if (!user.perfil) return;
+    const usuarioActualizado = { ...user, perfil: { ...user.perfil, planes_masivas_ids: [], planes_masivas: [], consultas_masivas: false } };
+    setUsers((prev) => prev.map((u) => u.id === user.id ? usuarioActualizado : u));
+    setMasivasUser(usuarioActualizado);
+    try {
+      const res = await fetch(`${API_URL}/api/perfiles/${user.perfil.id}/`, {
+        method: "PATCH",
+        headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ planes_masivas_ids: [] }),
+      });
+      if (!res.ok) throw new Error();
+      setToast({ type: "success", message: `Masivas desactivadas para ${user.username}` });
+    } catch {
+      setUsers((prev) => prev.map((u) => u.id === user.id ? user : u));
+      setMasivasUser(user);
+      setToast({ type: "error", message: "Error al desactivar masivas" });
+    }
+  };
+
   // ── Activar / Desactivar ──────────────────────────────────────
   const handleToggleActive = async (user) => {
+    const nuevoEstado = !user.is_active;
+    // Actualización optimista
+    setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, is_active: nuevoEstado } : u));
     try {
       const endpoint = user.is_active
         ? `${API_URL}/api/usuarios/${user.id}/desactivar/`
@@ -279,9 +373,10 @@ const AdminUsuarios = () => {
         headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
       });
       if (!res.ok) throw new Error();
-      await fetchUsers();
-      setToast({ type: "success", message: `Usuario ${user.is_active ? "desactivado" : "activado"}` });
+      setToast({ type: "success", message: `Usuario ${nuevoEstado ? "activado" : "desactivado"}` });
     } catch {
+      // Revertir si falla
+      setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, is_active: user.is_active } : u));
       setToast({ type: "error", message: "Error al cambiar estado del usuario" });
     }
   };
@@ -421,8 +516,84 @@ const AdminUsuarios = () => {
           </div>
         </div>
 
-        {/* Tabla */}
-        <div className="overflow-x-auto">
+        {/* ── CARDS MOBILE (visible solo en pantallas pequeñas) ── */}
+        <div className="block lg:hidden divide-y divide-white/5">
+          {pagedUsers.length === 0 ? (
+            <div className="px-4 py-12 text-center text-white/30 text-sm">
+              No se encontraron usuarios con ese filtro.
+            </div>
+          ) : pagedUsers.map((u) => (
+            <div key={u.id} className="p-4 hover:bg-white/3 transition-colors">
+              {/* Cabecera de la card */}
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-white text-sm">{u.username}</span>
+                    <span className="text-white/30 text-xs font-mono">#{u.id}</span>
+                    {u.is_active ? <Badge color="green">● Activo</Badge> : <Badge color="red">● Inactivo</Badge>}
+                  </div>
+                  <p className="text-white/45 text-xs mt-0.5">{u.email || "Sin email"}</p>
+                  {u.full_name && <p className="text-white/60 text-xs">{u.full_name}</p>}
+                </div>
+                <div className="flex flex-wrap gap-1 shrink-0">
+                  {u.perfil?.tipo_registro === "empresa" ? <Badge color="violet">🏢</Badge> : <Badge color="cyan">👤</Badge>}
+                  {u.is_superuser && <Badge color="violet">Super</Badge>}
+                  {u.is_staff && !u.is_superuser && <Badge color="sky">Staff</Badge>}
+                </div>
+              </div>
+
+              {/* Info empresa */}
+              {u.perfil?.tipo_registro === "empresa" && (
+                <div className="mb-2 px-2 py-1.5 rounded-lg bg-violet-900/20 border border-violet-700/20 text-xs">
+                  <span className="text-white/70 font-semibold">{u.perfil.nombre_empresa || "Sin nombre"}</span>
+                  {u.perfil.nit && <span className="text-cyan-400/80 font-mono ml-2">NIT: {u.perfil.nit}</span>}
+                </div>
+              )}
+
+              {/* Planes */}
+              {(u.perfil?.planes || []).length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {u.perfil.planes.map((p) => (
+                    <span key={p.id} className="px-2 py-0.5 rounded-full text-xs bg-cyan-900/40 text-cyan-300 border border-cyan-700/30 font-medium">
+                      {p.nombre.charAt(0).toUpperCase() + p.nombre.slice(1)}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Acceso masivas (mobile) */}
+              {u.perfil && u.perfil.consultas_masivas && (
+                <div className="mb-3">
+                  <Badge color="violet">✓ Masivas activas</Badge>
+                </div>
+              )}
+
+              {/* Acciones */}
+              <div className="flex flex-wrap gap-1.5">
+                <ActionBtn color="teal"   onClick={() => handleVerConsultas(u)}      title="Ver cédulas consultadas">🔍 Consultas</ActionBtn>
+                <ActionBtn color="cyan"   onClick={() => handleOpenConsultasModal(u)}                               >+ Créditos</ActionBtn>
+                {u.perfil && <ActionBtn color="sky" onClick={() => handleEditPlanes(u)}>Planes</ActionBtn>}
+                {u.perfil && (
+                  <ActionBtn
+                    color="violet"
+                    onClick={() => { setMasivasUser(u); setMasivasPlanId(""); setShowMasivasModal(true); }}
+                    title="Asignar consultas masivas al usuario"
+                  >
+                    {u.perfil.consultas_masivas ? "✓ Masivas" : "Masivas"}
+                  </ActionBtn>
+                )}
+                <ActionBtn color="indigo" onClick={() => handleEditUser(u)}                                         >Editar</ActionBtn>
+                <ActionBtn color="red"    onClick={() => handleDeleteUser(u)}                                       >Eliminar</ActionBtn>
+                {u.is_active
+                  ? <ActionBtn color="red"   onClick={() => handleToggleActive(u)}>Desactivar</ActionBtn>
+                  : <ActionBtn color="green" onClick={() => handleToggleActive(u)}>Activar</ActionBtn>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── TABLA DESKTOP (visible solo en lg+) ── */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead>
               <tr className="border-b border-white/8 text-xs uppercase tracking-wider text-white/40 bg-slate-800/20">
@@ -448,63 +619,45 @@ const AdminUsuarios = () => {
               ) : pagedUsers.map((u) => (
                 <tr key={u.id} className="hover:bg-white/3 transition-colors group">
 
-                  {/* ID */}
                   <td className="px-4 py-3">
                     <span className="text-white/40 text-xs font-mono">#{u.id}</span>
                   </td>
 
-                  {/* Usuario */}
                   <td className="px-4 py-3">
                     <span className="font-semibold text-white/90 text-sm">{u.username}</span>
                   </td>
 
-                  {/* Email */}
                   <td className="px-4 py-3">
                     <span className="text-white/55 text-xs">{u.email || "—"}</span>
                   </td>
 
-                  {/* Nombre */}
                   <td className="px-4 py-3">
                     <span className="text-white/80 text-xs">{u.full_name || "—"}</span>
                   </td>
 
-                  {/* Tipo */}
                   <td className="px-4 py-3">
-                    {u.perfil?.tipo_registro === "empresa" ? (
-                      <Badge color="violet">🏢 Empresa</Badge>
-                    ) : (
-                      <Badge color="cyan">👤 Natural</Badge>
-                    )}
+                    {u.perfil?.tipo_registro === "empresa"
+                      ? <Badge color="violet">🏢 Empresa</Badge>
+                      : <Badge color="cyan">👤 Natural</Badge>}
                   </td>
 
-                  {/* Empresa / NIT */}
                   <td className="px-4 py-3">
                     {u.perfil?.tipo_registro === "empresa" ? (
                       <div className="flex flex-col gap-0.5">
                         <span className="text-white/85 text-xs font-semibold">
                           {u.perfil.nombre_empresa || <span className="text-white/30 italic">Sin nombre</span>}
                         </span>
-                        {u.perfil.nit ? (
-                          <span className="text-cyan-400/80 text-xs font-mono">NIT: {u.perfil.nit}</span>
-                        ) : (
-                          <span className="text-white/25 text-xs italic">Sin NIT</span>
-                        )}
+                        {u.perfil.nit
+                          ? <span className="text-cyan-400/80 text-xs font-mono">NIT: {u.perfil.nit}</span>
+                          : <span className="text-white/25 text-xs italic">Sin NIT</span>}
                       </div>
-                    ) : (
-                      <span className="text-white/25 text-xs">—</span>
-                    )}
+                    ) : <span className="text-white/25 text-xs">—</span>}
                   </td>
 
-                  {/* Estado */}
                   <td className="px-4 py-3">
-                    {u.is_active ? (
-                      <Badge color="green">● Activo</Badge>
-                    ) : (
-                      <Badge color="red">● Inactivo</Badge>
-                    )}
+                    {u.is_active ? <Badge color="green">● Activo</Badge> : <Badge color="red">● Inactivo</Badge>}
                   </td>
 
-                  {/* Roles */}
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {u.is_superuser && <Badge color="violet">Super</Badge>}
@@ -513,7 +666,6 @@ const AdminUsuarios = () => {
                     </div>
                   </td>
 
-                  {/* Planes */}
                   <td className="px-4 py-3">
                     {(u.perfil?.planes || []).length > 0 ? (
                       <div className="flex flex-wrap gap-1">
@@ -523,12 +675,9 @@ const AdminUsuarios = () => {
                           </span>
                         ))}
                       </div>
-                    ) : (
-                      <span className="text-white/25 text-xs italic">Sin plan</span>
-                    )}
+                    ) : <span className="text-white/25 text-xs italic">Sin plan</span>}
                   </td>
 
-                  {/* Acciones */}
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1.5">
                       <ActionBtn color="teal"   onClick={() => handleVerConsultas(u)}         title="Ver cédulas consultadas">🔍 Consultas</ActionBtn>
@@ -536,13 +685,20 @@ const AdminUsuarios = () => {
                       {u.perfil && (
                         <ActionBtn color="sky"  onClick={() => handleEditPlanes(u)}                                          >Planes</ActionBtn>
                       )}
+                      {u.perfil && (
+                        <ActionBtn
+                          color="violet"
+                          onClick={() => { setMasivasUser(u); setMasivasPlanId(""); setShowMasivasModal(true); }}
+                          title="Asignar consultas masivas al usuario"
+                        >
+                          {u.perfil.consultas_masivas ? "✓ Masivas" : "Masivas"}
+                        </ActionBtn>
+                      )}
                       <ActionBtn color="indigo" onClick={() => handleEditUser(u)}                                            >Editar</ActionBtn>
                       <ActionBtn color="red"    onClick={() => handleDeleteUser(u)}                                          >Eliminar</ActionBtn>
-                      {u.is_active ? (
-                        <ActionBtn color="red"    onClick={() => handleToggleActive(u)}>Desactivar</ActionBtn>
-                      ) : (
-                        <ActionBtn color="green"  onClick={() => handleToggleActive(u)}>Activar</ActionBtn>
-                      )}
+                      {u.is_active
+                        ? <ActionBtn color="red"    onClick={() => handleToggleActive(u)}>Desactivar</ActionBtn>
+                        : <ActionBtn color="green"  onClick={() => handleToggleActive(u)}>Activar</ActionBtn>}
                     </div>
                   </td>
                 </tr>
@@ -577,6 +733,97 @@ const AdminUsuarios = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Modal: Consultas Masivas ── */}
+      {showMasivasModal && masivasUser && (
+        <Modal onClose={() => setShowMasivasModal(false)}>
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 flex flex-col gap-4 min-w-[340px] border border-white/10 shadow-2xl">
+            <div>
+              <h3 className="text-lg font-bold text-white">Consultas Masivas</h3>
+              <p className="text-xs text-white/40 mt-0.5">
+                Usuario: <span className="text-violet-300">{masivasUser.username}</span>
+              </p>
+            </div>
+
+            {/* Estado actual */}
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/5 border border-white/10">
+              <span className="text-xs text-white/50">Estado actual:</span>
+              {(masivasUser.perfil?.planes_masivas_ids || []).length > 0
+                ? <Badge color="violet">✓ Masivas activas</Badge>
+                : <Badge color="slate">Sin acceso</Badge>}
+            </div>
+
+            {/* Selector de plan + botón Asignar */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-violet-400 font-medium tracking-wide">
+                Asignar masivas a un plan
+              </label>
+              <div className="flex gap-2">
+                <select
+                  value={masivasPlanId}
+                  onChange={(e) => setMasivasPlanId(e.target.value)}
+                  className="flex-1 rounded-lg px-3 py-2 border border-slate-600 bg-slate-800/80 text-white focus:outline-none focus:border-violet-500 transition text-sm appearance-none cursor-pointer"
+                >
+                  <option value="">— Seleccione un plan —</option>
+                  {(masivasUser.perfil?.planes || [])
+                    .filter((p) => !(masivasUser.perfil?.planes_masivas_ids || []).includes(p.id))
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nombre.charAt(0).toUpperCase() + p.nombre.slice(1)}
+                      </option>
+                    ))}
+                </select>
+                <button
+                  disabled={!masivasPlanId}
+                  onClick={() => handleAsignarPlanMasivas(masivasUser, masivasPlanId)}
+                  className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-semibold text-xs transition whitespace-nowrap"
+                >
+                  Asignar
+                </button>
+              </div>
+            </div>
+
+            {/* Lista de planes con masivas asignadas */}
+            {(masivasUser.perfil?.planes_masivas_ids || []).length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-white/40">Planes con masivas activas:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {(masivasUser.perfil?.planes || [])
+                    .filter((p) => (masivasUser.perfil?.planes_masivas_ids || []).includes(p.id))
+                    .map((p) => (
+                      <span key={p.id} className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-violet-900/40 text-violet-300 border border-violet-700/30 font-medium">
+                        {p.nombre.charAt(0).toUpperCase() + p.nombre.slice(1)}
+                        <button
+                          onClick={() => handleQuitarPlanMasivas(masivasUser, p.id)}
+                          className="ml-0.5 text-violet-400 hover:text-red-400 transition font-bold leading-none"
+                          title="Quitar"
+                        >×</button>
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Acciones: Desactivar todo + Cancelar */}
+            <div className="flex gap-2 pt-1">
+              {(masivasUser.perfil?.planes_masivas_ids || []).length > 0 && (
+                <button
+                  onClick={() => handleDesactivarMasivas(masivasUser)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold text-sm transition border border-slate-600"
+                >
+                  Desactivar todas
+                </button>
+              )}
+              <button
+                onClick={() => setShowMasivasModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-sm transition"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* ── Modal: Asignar créditos ── */}
       {showConsultasModal && (
