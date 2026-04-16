@@ -6,6 +6,7 @@ import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
 import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
 
+
 function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
   const [fuentes, setFuentes] = useState([]);
   const [seleccionadas, setSeleccionadas] = useState([]);
@@ -484,9 +485,7 @@ export default function ConsultaEssencialExpress() {
         onSuccess={(datosConsulta) => {
           setDatos(datosConsulta);
           setShowResultados(true);
-          setTimeout(() => {
-            navigate("/d3b7f1e9");
-          }, 5000);
+          setTimeout(() => navigate("/d3b7f1e9"), 5000);
         }}
       />
 

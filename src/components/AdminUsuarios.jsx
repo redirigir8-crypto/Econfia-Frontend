@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Toast from "./Toast";
 import Modal from "./Modal";
-import { generarInformeAdminPDF } from "../pdf/InformeAdminPDF";
+import { generarInformeAdminPDF, generarInformeAdminIndividualPDF } from "../pdf/InformeAdminPDFV2";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -34,7 +34,7 @@ const EyeOffIcon = () => (
 );
 
 // ─── Botón de acción reutilizable ─────────────────────────────────
-const ActionBtn = ({ onClick, title, color, children }) => {
+const ActionBtn = ({ onClick, title, color, children, className = "", disabled = false }) => {
   const colors = {
     teal:   "border-teal-500/40 text-teal-300 hover:bg-teal-900/40 hover:border-teal-400/60 hover:text-teal-200",
     cyan:   "border-cyan-500/40 text-cyan-300 hover:bg-cyan-900/40 hover:border-cyan-400/60 hover:text-cyan-200",
@@ -48,7 +48,8 @@ const ActionBtn = ({ onClick, title, color, children }) => {
     <button
       onClick={onClick}
       title={title}
-      className={`px-2.5 py-1.5 rounded-lg border bg-white/5 text-xs font-semibold transition-all duration-200 whitespace-nowrap ${colors[color] || colors.cyan}`}
+      disabled={disabled}
+      className={`inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg border bg-white/5 text-xs font-semibold transition-all duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-wait ${colors[color] || colors.cyan} ${className}`}
     >
       {children}
     </button>
@@ -82,6 +83,14 @@ const Badge = ({ children, color }) => {
   );
 };
 
+const formatPlanName = (name = "") => name ? name.charAt(0).toUpperCase() + name.slice(1) : "Sin plan";
+
+const getRoleSummary = (user) => {
+  if (user.is_superuser) return "Superusuario";
+  if (user.is_staff) return "Staff";
+  return "Usuario";
+};
+
 
 const AdminUsuarios = () => {
   const [filter, setFilter]     = useState("");
@@ -92,6 +101,7 @@ const AdminUsuarios = () => {
   const [planes, setPlanes]     = useState([]);
   const [toast, setToast]       = useState(null);
   const [generandoPDF, setGenerandoPDF] = useState(false);
+  const [generandoPDFUserId, setGenerandoPDFUserId] = useState(null);
 
   // Modales
   const [showModal, setShowModal]           = useState(false);
@@ -170,6 +180,37 @@ const AdminUsuarios = () => {
   };
 
   // ── Asignar consultas ─────────────────────────────────────────
+  const fetchAllConsultasByUser = async (userId) => {
+    const todas = [];
+    let page = 1;
+
+    while (true) {
+      const res = await fetch(`${API_URL}/api/admin/users/${userId}/consultas/?page=${page}`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+      const data = await res.json();
+      const resultados = data.results || [];
+      todas.push(...resultados);
+      if (todas.length >= (data.total || 0) || resultados.length === 0) break;
+      page += 1;
+    }
+
+    return todas;
+  };
+
+  const handleGenerateIndividualPDF = async (user) => {
+    setGenerandoPDFUserId(user.id);
+    try {
+      const adminName = localStorage.getItem("username") || "Administrador";
+      const consultas = await fetchAllConsultasByUser(user.id);
+      generarInformeAdminIndividualPDF(user, adminName, consultas);
+    } catch {
+      setToast({ type: "error", message: "No se pudo generar el informe individual" });
+    } finally {
+      setGenerandoPDFUserId(null);
+    }
+  };
+
   const handleOpenConsultasModal = (user) => {
     setSelectedUser(user);
     setConsultasValue(user.perfil?.consultas_infinitas ? 0 : (user.perfil?.consultas_disponibles || 0));
@@ -405,6 +446,12 @@ const AdminUsuarios = () => {
 
   const totalPages  = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
   const pagedUsers  = filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
+  const usuariosActivos = users.filter((u) => u.is_active).length;
+  const usuariosEmpresa = users.filter((u) => u.perfil?.tipo_registro === "empresa").length;
+  const usuariosConPlanes = users.filter((u) => (u.perfil?.planes || []).length > 0).length;
+  const usuariosMasivos = users.filter((u) => u.perfil?.consultas_masivas).length;
+  const visibleFrom = filteredUsers.length === 0 ? 0 : (currentPage - 1) * usersPerPage + 1;
+  const visibleTo = filteredUsers.length === 0 ? 0 : Math.min(currentPage * usersPerPage, filteredUsers.length);
 
   const estadoColores = {
     completado:    "text-green-400",
@@ -415,7 +462,7 @@ const AdminUsuarios = () => {
 
   // ── RENDER ─────────────────────────────────────────────────────
   return (
-    <section className="p-6 min-h-screen">
+    <section className="min-h-screen px-3 py-4 pb-28 sm:px-5 sm:py-6 sm:pb-32 lg:px-6 lg:pb-36">
       {/* Toast */}
       {toast && (
         <Toast
@@ -425,315 +472,413 @@ const AdminUsuarios = () => {
         />
       )}
 
-      {/* Encabezado */}
-      <div className="mb-8 text-center">
-        <h2 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent tracking-tight">
-          Administración de Usuarios
-        </h2>
-        <p className="mt-1 text-sm text-white/50">Gestión completa de cuentas, planes y consultas</p>
-      </div>
-
-      {/* Panel principal */}
-      <div className="bg-gradient-to-br from-slate-900/90 via-blue-950/20 to-slate-900/90 rounded-2xl border border-white/10 shadow-2xl shadow-cyan-500/5 overflow-hidden">
-
-        {/* Barra de herramientas */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b border-white/8 bg-slate-800/30">
-          {/* Buscador */}
-          <div className="relative flex-1 min-w-[220px] max-w-sm">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-cyan-400/70 pointer-events-none">
-              <SearchIcon />
-            </span>
-            <input
-              type="text"
-              value={filter}
-              onChange={(e) => { setFilter(e.target.value); setCurrentPage(1); }}
-              placeholder="Buscar por usuario, email, empresa..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-800/60 text-white/90 border border-white/10 focus:border-cyan-500/60 focus:bg-slate-800 focus:outline-none text-sm transition placeholder-white/30"
-              autoComplete="off"
-            />
-          </div>
-
-          {/* Controles derecha */}
-          <div className="flex items-center gap-2">
-            {/* Orden */}
-            <button
-              onClick={() => setOrderAsc((v) => !v)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
-                orderAsc
-                  ? "bg-cyan-900/50 border-cyan-600/40 text-cyan-300 hover:bg-cyan-900/70"
-                  : "bg-blue-900/50 border-blue-600/40 text-blue-300 hover:bg-blue-900/70"
-              }`}
-            >
-              {orderAsc ? "ID ▲" : "ID ▼"}
-            </button>
-
-            {/* Contador */}
-            <span className="px-3 py-2 rounded-xl bg-slate-800/60 border border-white/8 text-xs text-white/50 font-medium select-none">
-              {filteredUsers.length} usuarios
-            </span>
-
-            {/* PDF */}
-            <button
-              onClick={async () => {
-                setGenerandoPDF(true);
-                try {
-                  const adminName = localStorage.getItem("username") || "Administrador";
-                  let usersParaPDF = users;
-                  try {
-                    const resUsers = await fetch(`${API_URL}/api/admin/users/`, { headers: { Authorization: `Token ${token}` } });
-                    if (resUsers.ok) usersParaPDF = await resUsers.json();
-                  } catch {}
-                  const consultasPorUsuario = {};
-                  await Promise.all(
-                    usersParaPDF.map(async (u) => {
-                      try {
-                        let todas = [];
-                        let page  = 1;
-                        while (true) {
-                          const res  = await fetch(`${API_URL}/api/admin/users/${u.id}/consultas/?page=${page}`, { headers: { Authorization: `Token ${token}` } });
-                          const data = await res.json();
-                          const resultados = data.results || [];
-                          todas = todas.concat(resultados);
-                          if (todas.length >= (data.total || 0) || resultados.length === 0) break;
-                          page++;
-                        }
-                        consultasPorUsuario[u.id] = todas;
-                      } catch {
-                        consultasPorUsuario[u.id] = [];
-                      }
-                    })
-                  );
-                  generarInformeAdminPDF(usersParaPDF, adminName, consultasPorUsuario);
-                } finally {
-                  setGenerandoPDF(false);
-                }
-              }}
-              disabled={generandoPDF}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-wait text-white text-xs font-semibold transition-all shadow-lg shadow-cyan-500/20"
-            >
-              {generandoPDF ? <><SpinIcon /> Generando...</> : <><DownloadIcon /> Informe PDF</>}
-            </button>
-          </div>
-        </div>
-
-        {/* ── CARDS MOBILE (visible solo en pantallas pequeñas) ── */}
-        <div className="block lg:hidden divide-y divide-white/5">
-          {pagedUsers.length === 0 ? (
-            <div className="px-4 py-12 text-center text-white/30 text-sm">
-              No se encontraron usuarios con ese filtro.
+      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
+        <div className="overflow-hidden rounded-[28px] border border-cyan-500/10 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_34%),linear-gradient(135deg,rgba(8,15,30,0.98),rgba(10,18,36,0.92)_55%,rgba(8,12,24,0.98))] px-4 py-5 shadow-[0_30px_80px_rgba(8,145,178,0.08)] sm:px-6 sm:py-6 lg:px-8">
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+            <div className="max-w-3xl">
+              <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-200/90">
+                Centro administrativo
+              </span>
+              <h2 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-4xl xl:text-[2.65rem]">
+                Administracion de usuarios
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300 sm:text-[15px]">
+                Supervisa cuentas, planes, credito operativo y exportes desde una vista mucho mas comoda para escritorio, tablet y movil.
+              </p>
             </div>
-          ) : pagedUsers.map((u) => (
-            <div key={u.id} className="p-4 hover:bg-white/3 transition-colors">
-              {/* Cabecera de la card */}
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-white text-sm">{u.username}</span>
-                    <span className="text-white/30 text-xs font-mono">#{u.id}</span>
-                    {u.is_active ? <Badge color="green">● Activo</Badge> : <Badge color="red">● Inactivo</Badge>}
-                  </div>
-                  <p className="text-white/45 text-xs mt-0.5">{u.email || "Sin email"}</p>
-                  {u.full_name && <p className="text-white/60 text-xs">{u.full_name}</p>}
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:min-w-[560px]">
+              {[
+                { label: "Usuarios activos", value: usuariosActivos, tone: "from-emerald-400/20 to-transparent text-emerald-300" },
+                { label: "Cuentas empresa", value: usuariosEmpresa, tone: "from-violet-400/20 to-transparent text-violet-300" },
+                { label: "Con planes", value: usuariosConPlanes, tone: "from-sky-400/20 to-transparent text-sky-300" },
+                { label: "Masivas activas", value: usuariosMasivos, tone: "from-amber-400/20 to-transparent text-amber-300" },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className={`rounded-2xl border border-white/10 bg-gradient-to-br ${item.tone} px-4 py-4 backdrop-blur-sm`}
+                >
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{item.label}</div>
+                  <div className="mt-3 text-2xl font-black text-white">{item.value}</div>
                 </div>
-                <div className="flex flex-wrap gap-1 shrink-0">
-                  {u.perfil?.tipo_registro === "empresa" ? <Badge color="violet">🏢</Badge> : <Badge color="cyan">👤</Badge>}
-                  {u.is_superuser && <Badge color="violet">Super</Badge>}
-                  {u.is_staff && !u.is_superuser && <Badge color="sky">Staff</Badge>}
-                </div>
-              </div>
-
-              {/* Info empresa */}
-              {u.perfil?.tipo_registro === "empresa" && (
-                <div className="mb-2 px-2 py-1.5 rounded-lg bg-violet-900/20 border border-violet-700/20 text-xs">
-                  <span className="text-white/70 font-semibold">{u.perfil.nombre_empresa || "Sin nombre"}</span>
-                  {u.perfil.nit && <span className="text-cyan-400/80 font-mono ml-2">NIT: {u.perfil.nit}</span>}
-                </div>
-              )}
-
-              {/* Planes */}
-              {(u.perfil?.planes || []).length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {u.perfil.planes.map((p) => (
-                    <span key={p.id} className="px-2 py-0.5 rounded-full text-xs bg-cyan-900/40 text-cyan-300 border border-cyan-700/30 font-medium">
-                      {p.nombre.charAt(0).toUpperCase() + p.nombre.slice(1)}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Acceso masivas (mobile) */}
-              {u.perfil && u.perfil.consultas_masivas && (
-                <div className="mb-3">
-                  <Badge color="violet">✓ Masivas activas</Badge>
-                </div>
-              )}
-
-              {/* Acciones */}
-              <div className="flex flex-wrap gap-1.5">
-                <ActionBtn color="teal"   onClick={() => handleVerConsultas(u)}      title="Ver cédulas consultadas">🔍 Consultas</ActionBtn>
-                <ActionBtn color="cyan"   onClick={() => handleOpenConsultasModal(u)}                               >+ Créditos</ActionBtn>
-                {u.perfil && <ActionBtn color="sky" onClick={() => handleEditPlanes(u)}>Planes</ActionBtn>}
-                {u.perfil && (
-                  <ActionBtn
-                    color="violet"
-                    onClick={() => { setMasivasUser(u); setMasivasPlanId(""); setShowMasivasModal(true); }}
-                    title="Asignar consultas masivas al usuario"
-                  >
-                    {u.perfil.consultas_masivas ? "✓ Masivas" : "Masivas"}
-                  </ActionBtn>
-                )}
-                <ActionBtn color="indigo" onClick={() => handleEditUser(u)}                                         >Editar</ActionBtn>
-                <ActionBtn color="red"    onClick={() => handleDeleteUser(u)}                                       >Eliminar</ActionBtn>
-                {u.is_active
-                  ? <ActionBtn color="red"   onClick={() => handleToggleActive(u)}>Desactivar</ActionBtn>
-                  : <ActionBtn color="green" onClick={() => handleToggleActive(u)}>Activar</ActionBtn>}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* ── TABLA DESKTOP (visible solo en lg+) ── */}
-        <div className="hidden lg:block overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead>
-              <tr className="border-b border-white/8 text-xs uppercase tracking-wider text-white/40 bg-slate-800/20">
-                <th className="px-4 py-3 font-semibold">ID</th>
-                <th className="px-4 py-3 font-semibold">Usuario</th>
-                <th className="px-4 py-3 font-semibold">Email</th>
-                <th className="px-4 py-3 font-semibold">Nombre</th>
-                <th className="px-4 py-3 font-semibold">Tipo</th>
-                <th className="px-4 py-3 font-semibold">Empresa / NIT</th>
-                <th className="px-4 py-3 font-semibold">Estado</th>
-                <th className="px-4 py-3 font-semibold">Roles</th>
-                <th className="px-4 py-3 font-semibold">Planes</th>
-                <th className="px-4 py-3 font-semibold">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {pagedUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="px-4 py-12 text-center text-white/30 text-sm">
-                    No se encontraron usuarios con ese filtro.
-                  </td>
-                </tr>
-              ) : pagedUsers.map((u) => (
-                <tr key={u.id} className="hover:bg-white/3 transition-colors group">
-
-                  <td className="px-4 py-3">
-                    <span className="text-white/40 text-xs font-mono">#{u.id}</span>
-                  </td>
-
-                  <td className="px-4 py-3">
-                    <span className="font-semibold text-white/90 text-sm">{u.username}</span>
-                  </td>
-
-                  <td className="px-4 py-3">
-                    <span className="text-white/55 text-xs">{u.email || "—"}</span>
-                  </td>
-
-                  <td className="px-4 py-3">
-                    <span className="text-white/80 text-xs">{u.full_name || "—"}</span>
-                  </td>
-
-                  <td className="px-4 py-3">
-                    {u.perfil?.tipo_registro === "empresa"
-                      ? <Badge color="violet">🏢 Empresa</Badge>
-                      : <Badge color="cyan">👤 Natural</Badge>}
-                  </td>
-
-                  <td className="px-4 py-3">
-                    {u.perfil?.tipo_registro === "empresa" ? (
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-white/85 text-xs font-semibold">
-                          {u.perfil.nombre_empresa || <span className="text-white/30 italic">Sin nombre</span>}
-                        </span>
-                        {u.perfil.nit
-                          ? <span className="text-cyan-400/80 text-xs font-mono">NIT: {u.perfil.nit}</span>
-                          : <span className="text-white/25 text-xs italic">Sin NIT</span>}
-                      </div>
-                    ) : <span className="text-white/25 text-xs">—</span>}
-                  </td>
-
-                  <td className="px-4 py-3">
-                    {u.is_active ? <Badge color="green">● Activo</Badge> : <Badge color="red">● Inactivo</Badge>}
-                  </td>
-
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {u.is_superuser && <Badge color="violet">Super</Badge>}
-                      {u.is_staff && !u.is_superuser && <Badge color="sky">Staff</Badge>}
-                      {!u.is_superuser && !u.is_staff && <span className="text-white/25 text-xs">—</span>}
-                    </div>
-                  </td>
-
-                  <td className="px-4 py-3">
-                    {(u.perfil?.planes || []).length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {u.perfil.planes.map((p) => (
-                          <span key={p.id} className="px-2 py-0.5 rounded-full text-xs bg-cyan-900/40 text-cyan-300 border border-cyan-700/30 font-medium">
-                            {p.nombre.charAt(0).toUpperCase() + p.nombre.slice(1)}
-                          </span>
-                        ))}
-                      </div>
-                    ) : <span className="text-white/25 text-xs italic">Sin plan</span>}
-                  </td>
-
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1.5">
-                      <ActionBtn color="teal"   onClick={() => handleVerConsultas(u)}         title="Ver cédulas consultadas">🔍 Consultas</ActionBtn>
-                      <ActionBtn color="cyan"   onClick={() => handleOpenConsultasModal(u)}                                  >+ Créditos</ActionBtn>
-                      {u.perfil && (
-                        <ActionBtn color="sky"  onClick={() => handleEditPlanes(u)}                                          >Planes</ActionBtn>
-                      )}
-                      {u.perfil && (
-                        <ActionBtn
-                          color="violet"
-                          onClick={() => { setMasivasUser(u); setMasivasPlanId(""); setShowMasivasModal(true); }}
-                          title="Asignar consultas masivas al usuario"
-                        >
-                          {u.perfil.consultas_masivas ? "✓ Masivas" : "Masivas"}
-                        </ActionBtn>
-                      )}
-                      <ActionBtn color="indigo" onClick={() => handleEditUser(u)}                                            >Editar</ActionBtn>
-                      <ActionBtn color="red"    onClick={() => handleDeleteUser(u)}                                          >Eliminar</ActionBtn>
-                      {u.is_active
-                        ? <ActionBtn color="red"    onClick={() => handleToggleActive(u)}>Desactivar</ActionBtn>
-                        : <ActionBtn color="green"  onClick={() => handleToggleActive(u)}>Activar</ActionBtn>}
-                    </div>
-                  </td>
-                </tr>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
 
-        {/* Paginación */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-white/8 bg-slate-800/20">
-          <span className="text-xs text-white/30 select-none">
-            Mostrando {Math.min((currentPage - 1) * usersPerPage + 1, filteredUsers.length)}–{Math.min(currentPage * usersPerPage, filteredUsers.length)} de {filteredUsers.length}
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg border border-white/10 bg-slate-800/60 text-white/70 text-xs font-semibold hover:bg-cyan-900/40 hover:border-cyan-600/40 hover:text-cyan-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
-            >
-              ← Anterior
-            </button>
-            <span className="px-3 py-1.5 rounded-lg bg-cyan-900/30 border border-cyan-700/30 text-cyan-200 text-xs font-bold select-none">
-              {currentPage} / {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage >= totalPages}
-              className="px-3 py-1.5 rounded-lg border border-white/10 bg-slate-800/60 text-white/70 text-xs font-semibold hover:bg-cyan-900/40 hover:border-cyan-600/40 hover:text-cyan-300 disabled:opacity-30 disabled:cursor-not-allowed transition"
-            >
-              Siguiente →
-            </button>
+        <div className="overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-slate-950/95 via-slate-900/95 to-slate-950/95 shadow-2xl shadow-cyan-500/5">
+          <div className="border-b border-white/8 bg-[linear-gradient(180deg,rgba(18,33,59,0.82),rgba(10,18,34,0.88))] px-4 py-4 sm:px-5 lg:px-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                <div className="relative w-full xl:max-w-xl">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-cyan-300/70">
+                    <SearchIcon />
+                  </span>
+                  <input
+                    type="text"
+                    value={filter}
+                    onChange={(e) => { setFilter(e.target.value); setCurrentPage(1); }}
+                    placeholder="Buscar por usuario, email, empresa, NIT o rol..."
+                    className="w-full rounded-2xl border border-white/10 bg-slate-900/70 py-3 pl-10 pr-4 text-sm text-white/90 shadow-inner shadow-black/20 transition placeholder:text-white/30 focus:border-cyan-400/60 focus:bg-slate-900 focus:outline-none"
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row xl:justify-end">
+                  <button
+                    onClick={() => setOrderAsc((v) => !v)}
+                    className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition-all ${
+                      orderAsc
+                        ? "border-cyan-500/30 bg-cyan-500/12 text-cyan-200 hover:bg-cyan-500/20"
+                        : "border-blue-500/30 bg-blue-500/12 text-blue-200 hover:bg-blue-500/20"
+                    }`}
+                  >
+                    {orderAsc ? "Orden ID asc" : "Orden ID desc"}
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      setGenerandoPDF(true);
+                      try {
+                        const adminName = localStorage.getItem("username") || "Administrador";
+                        let usersParaPDF = users;
+                        try {
+                          const resUsers = await fetch(`${API_URL}/api/admin/users/`, { headers: { Authorization: `Token ${token}` } });
+                          if (resUsers.ok) usersParaPDF = await resUsers.json();
+                        } catch {}
+                        const consultasPorUsuario = {};
+                        await Promise.all(
+                          usersParaPDF.map(async (u) => {
+                            try {
+                              consultasPorUsuario[u.id] = await fetchAllConsultasByUser(u.id);
+                            } catch {
+                              consultasPorUsuario[u.id] = [];
+                            }
+                          })
+                        );
+                        generarInformeAdminPDF(usersParaPDF, adminName, consultasPorUsuario);
+                      } finally {
+                        setGenerandoPDF(false);
+                      }
+                    }}
+                    disabled={generandoPDF}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-lg shadow-cyan-500/20 transition-all hover:brightness-110 disabled:cursor-wait disabled:opacity-50"
+                  >
+                    {generandoPDF ? <><SpinIcon /> Generando...</> : <><DownloadIcon /> Informe PDF</>}
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Resultados visibles</div>
+                  <div className="mt-2 text-xl font-bold text-white">{filteredUsers.length}</div>
+                </div>
+                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Rango mostrado</div>
+                  <div className="mt-2 text-xl font-bold text-white">{visibleFrom} - {visibleTo}</div>
+                </div>
+                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Pagina actual</div>
+                  <div className="mt-2 text-xl font-bold text-white">{currentPage} / {totalPages}</div>
+                </div>
+                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Cobertura</div>
+                  <div className="mt-2 text-sm font-semibold text-cyan-200">
+                    {filter.trim() ? "Listado filtrado por busqueda activa" : "Vista completa del padron de usuarios"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="block xl:hidden px-3 py-3 sm:px-4 sm:py-4">
+            {pagedUsers.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-14 text-center text-sm text-white/35">
+                No se encontraron usuarios con ese filtro.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pagedUsers.map((u) => (
+                  <article
+                    key={u.id}
+                    className="overflow-hidden rounded-[26px] border border-white/8 bg-[linear-gradient(180deg,rgba(17,27,47,0.95),rgba(7,14,26,0.98))] shadow-[0_20px_45px_rgba(2,8,23,0.35)]"
+                  >
+                    <div className="border-b border-white/6 bg-[linear-gradient(120deg,rgba(14,165,233,0.12),transparent_40%,rgba(59,130,246,0.08))] px-4 py-4 sm:px-5">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/12 text-lg font-black uppercase text-cyan-200">
+                          {(u.username || "U").slice(0, 1)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="truncate text-base font-bold text-white sm:text-lg">{u.username}</h3>
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] font-mono text-white/45">#{u.id}</span>
+                            {u.is_active ? <Badge color="green">Activo</Badge> : <Badge color="red">Inactivo</Badge>}
+                          </div>
+                          <p className="mt-1 break-all text-xs text-slate-300">{u.email || "Sin email registrado"}</p>
+                          <p className="mt-1 text-sm text-white/70">{u.full_name || "Sin nombre completo"}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
+                          <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">Tipo</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{u.perfil?.tipo_registro === "empresa" ? "Empresa" : "Natural"}</div>
+                        </div>
+                        <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
+                          <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">Rol</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{getRoleSummary(u)}</div>
+                        </div>
+                        <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
+                          <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">Planes</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{(u.perfil?.planes || []).length}</div>
+                        </div>
+                        <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
+                          <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">Creditos</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{u.perfil?.consultas_infinitas ? "Ilimitados" : (u.perfil?.consultas_disponibles ?? 0)}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="px-4 py-4 sm:px-5">
+                      {u.perfil?.tipo_registro === "empresa" && (
+                        <div className="mb-4 rounded-2xl border border-violet-500/15 bg-violet-500/8 px-4 py-3">
+                          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-200/60">Entidad asociada</div>
+                          <div className="mt-1 text-sm font-semibold text-white">{u.perfil.nombre_empresa || "Sin nombre de empresa"}</div>
+                          <div className="mt-1 text-xs font-mono text-violet-200/70">{u.perfil.nit ? `NIT ${u.perfil.nit}` : "Sin NIT registrado"}</div>
+                        </div>
+                      )}
+
+                      {(u.perfil?.planes || []).length > 0 ? (
+                        <div className="mb-4 flex flex-wrap gap-2">
+                          {u.perfil.planes.map((p) => (
+                            <span
+                              key={p.id}
+                              className="rounded-full border border-cyan-400/15 bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-200"
+                            >
+                              {formatPlanName(p.nombre)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="mb-4 rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 text-xs text-white/40">
+                          Este usuario no tiene planes asignados.
+                        </div>
+                      )}
+
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {u.is_superuser && <Badge color="violet">Super</Badge>}
+                        {u.is_staff && !u.is_superuser && <Badge color="cyan">Staff</Badge>}
+                        {u.perfil?.consultas_masivas && <Badge color="violet">Masivas activas</Badge>}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        <ActionBtn className="w-full justify-center" color="teal" onClick={() => handleVerConsultas(u)} title="Ver cedulas consultadas">Consultas</ActionBtn>
+                        <ActionBtn className="w-full justify-center" color="cyan" onClick={() => handleOpenConsultasModal(u)}>Creditos</ActionBtn>
+                        <ActionBtn
+                          className="w-full justify-center"
+                          color="green"
+                          onClick={() => handleGenerateIndividualPDF(u)}
+                          title="Descargar informe individual"
+                          disabled={generandoPDFUserId === u.id}
+                        >
+                          {generandoPDFUserId === u.id ? "Generando..." : "PDF usuario"}
+                        </ActionBtn>
+                        {u.perfil && <ActionBtn className="w-full justify-center" color="sky" onClick={() => handleEditPlanes(u)}>Planes</ActionBtn>}
+                        {u.perfil && (
+                          <ActionBtn
+                            className="w-full justify-center"
+                            color="violet"
+                            onClick={() => { setMasivasUser(u); setMasivasPlanId(""); setShowMasivasModal(true); }}
+                            title="Asignar consultas masivas al usuario"
+                          >
+                            {u.perfil.consultas_masivas ? "Masivas on" : "Masivas"}
+                          </ActionBtn>
+                        )}
+                        <ActionBtn className="w-full justify-center" color="indigo" onClick={() => handleEditUser(u)}>Editar</ActionBtn>
+                        <ActionBtn className="w-full justify-center" color="red" onClick={() => handleDeleteUser(u)}>Eliminar</ActionBtn>
+                        {u.is_active
+                          ? <ActionBtn className="w-full justify-center" color="red" onClick={() => handleToggleActive(u)}>Desactivar</ActionBtn>
+                          : <ActionBtn className="w-full justify-center" color="green" onClick={() => handleToggleActive(u)}>Activar</ActionBtn>}
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="hidden xl:block px-4 py-4">
+            <div className="overflow-hidden rounded-[24px] border border-white/8 bg-slate-950/40">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1320px] text-left text-sm">
+                  <thead className="bg-[linear-gradient(180deg,rgba(20,35,64,0.98),rgba(16,28,50,0.95))] text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                    <tr className="border-b border-white/8">
+                      <th className="px-4 py-4 font-semibold">ID</th>
+                      <th className="px-4 py-4 font-semibold">Usuario</th>
+                      <th className="px-4 py-4 font-semibold">Email</th>
+                      <th className="px-4 py-4 font-semibold">Nombre</th>
+                      <th className="px-4 py-4 font-semibold">Tipo</th>
+                      <th className="px-4 py-4 font-semibold">Empresa / NIT</th>
+                      <th className="px-4 py-4 font-semibold">Estado</th>
+                      <th className="px-4 py-4 font-semibold">Roles</th>
+                      <th className="px-4 py-4 font-semibold">Planes</th>
+                      <th className="px-4 py-4 font-semibold">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {pagedUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={10} className="px-4 py-16 text-center text-sm text-white/30">
+                          No se encontraron usuarios con ese filtro.
+                        </td>
+                      </tr>
+                    ) : (
+                      pagedUsers.map((u) => (
+                        <tr key={u.id} className="align-top transition-colors hover:bg-cyan-500/[0.04]">
+                          <td className="px-4 py-4">
+                            <span className="rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-xs font-mono text-white/55">
+                              #{u.id}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-4">
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/10 text-sm font-black uppercase text-cyan-200">
+                                {(u.username || "U").slice(0, 1)}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="truncate text-sm font-bold text-white">{u.username}</div>
+                                <div className="mt-1 text-xs text-white/45">{getRoleSummary(u)}</div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-4">
+                            <span className="break-all text-xs leading-5 text-slate-300">{u.email || "Sin email"}</span>
+                          </td>
+
+                          <td className="px-4 py-4">
+                            <span className="text-xs font-medium text-white/80">{u.full_name || "Sin nombre completo"}</span>
+                          </td>
+
+                          <td className="px-4 py-4">
+                            {u.perfil?.tipo_registro === "empresa"
+                              ? <Badge color="violet">Empresa</Badge>
+                              : <Badge color="cyan">Natural</Badge>}
+                          </td>
+
+                          <td className="px-4 py-4">
+                            {u.perfil?.tipo_registro === "empresa" ? (
+                              <div className="max-w-[220px] rounded-2xl border border-violet-400/10 bg-violet-500/[0.06] px-3 py-2">
+                                <div className="truncate text-xs font-semibold text-white">{u.perfil.nombre_empresa || "Sin nombre"}</div>
+                                <div className="mt-1 text-xs font-mono text-violet-200/70">{u.perfil.nit ? `NIT ${u.perfil.nit}` : "Sin NIT"}</div>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-white/25">No aplica</span>
+                            )}
+                          </td>
+
+                          <td className="px-4 py-4">
+                            {u.is_active ? <Badge color="green">Activo</Badge> : <Badge color="red">Inactivo</Badge>}
+                          </td>
+
+                          <td className="px-4 py-4">
+                            <div className="flex max-w-[180px] flex-wrap gap-1.5">
+                              {u.is_superuser && <Badge color="violet">Super</Badge>}
+                              {u.is_staff && !u.is_superuser && <Badge color="cyan">Staff</Badge>}
+                              {u.perfil?.consultas_masivas && <Badge color="violet">Masivas</Badge>}
+                              {!u.is_superuser && !u.is_staff && !u.perfil?.consultas_masivas && (
+                                <span className="text-xs text-white/25">Sin distintivos</span>
+                              )}
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-4">
+                            {(u.perfil?.planes || []).length > 0 ? (
+                              <div className="flex max-w-[220px] flex-wrap gap-1.5">
+                                {u.perfil.planes.map((p) => (
+                                  <span
+                                    key={p.id}
+                                    className="rounded-full border border-cyan-400/15 bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-200"
+                                  >
+                                    {formatPlanName(p.nombre)}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-xs italic text-white/25">Sin plan</span>
+                            )}
+                          </td>
+
+                          <td className="px-4 py-4">
+                            <div className="grid max-w-[280px] grid-cols-2 gap-2">
+                              <ActionBtn className="w-full justify-center" color="teal" onClick={() => handleVerConsultas(u)} title="Ver cedulas consultadas">Consultas</ActionBtn>
+                              <ActionBtn className="w-full justify-center" color="cyan" onClick={() => handleOpenConsultasModal(u)}>Creditos</ActionBtn>
+                              <ActionBtn
+                                className="w-full justify-center"
+                                color="green"
+                                onClick={() => handleGenerateIndividualPDF(u)}
+                                title="Descargar informe individual"
+                                disabled={generandoPDFUserId === u.id}
+                              >
+                                {generandoPDFUserId === u.id ? "Generando..." : "PDF usuario"}
+                              </ActionBtn>
+                              {u.perfil && <ActionBtn className="w-full justify-center" color="sky" onClick={() => handleEditPlanes(u)}>Planes</ActionBtn>}
+                              {u.perfil && (
+                                <ActionBtn
+                                  className="w-full justify-center"
+                                  color="violet"
+                                  onClick={() => { setMasivasUser(u); setMasivasPlanId(""); setShowMasivasModal(true); }}
+                                  title="Asignar consultas masivas al usuario"
+                                >
+                                  {u.perfil.consultas_masivas ? "Masivas on" : "Masivas"}
+                                </ActionBtn>
+                              )}
+                              <ActionBtn className="w-full justify-center" color="indigo" onClick={() => handleEditUser(u)}>Editar</ActionBtn>
+                              <ActionBtn className="w-full justify-center" color="red" onClick={() => handleDeleteUser(u)}>Eliminar</ActionBtn>
+                              {u.is_active
+                                ? <ActionBtn className="w-full justify-center" color="red" onClick={() => handleToggleActive(u)}>Desactivar</ActionBtn>
+                                : <ActionBtn className="w-full justify-center" color="green" onClick={() => handleToggleActive(u)}>Activar</ActionBtn>}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-white/8 bg-slate-950/60 px-4 py-4 sm:px-5 lg:px-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-xs text-white/35">
+                Mostrando <span className="font-semibold text-white/70">{visibleFrom} - {visibleTo}</span> de <span className="font-semibold text-cyan-200">{filteredUsers.length}</span> usuarios.
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="rounded-xl border border-white/10 bg-slate-800/60 px-3.5 py-2 text-xs font-semibold text-white/70 transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  Anterior
+                </button>
+                <span className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3.5 py-2 text-xs font-bold text-cyan-200">
+                  Pagina {currentPage} de {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  className="rounded-xl border border-white/10 bg-slate-800/60 px-3.5 py-2 text-xs font-semibold text-white/70 transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
       {/* ── Modal: Consultas Masivas ── */}
       {showMasivasModal && masivasUser && (
         <Modal onClose={() => setShowMasivasModal(false)}>
@@ -1038,3 +1183,5 @@ const AdminUsuarios = () => {
 };
 
 export default AdminUsuarios;
+
+

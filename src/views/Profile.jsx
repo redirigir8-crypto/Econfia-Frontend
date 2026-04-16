@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import { Modal } from "antd";
 import jsPDF from "jspdf";
-import { generarInformeUsuarioPDF } from "../pdf/InformeUsuarioPDF";
+import { generarInformeUsuarioPDF } from "../pdf/InformeUsuarioPDFV2";
 
 /** Paleta y helpers de estilo elegante */
 const THEME = {
@@ -324,6 +324,8 @@ export default function Profile() {
 
     doc.save("informe_usuario.pdf");
   }
+
+  void handleGeneratePDF;
 
   return (
     <section className="relative h-screen py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">

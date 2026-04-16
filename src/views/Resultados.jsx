@@ -1,4 +1,5 @@
 import TablaResultados from "../components/TablaResultados";
+import LiveQueryModal from "../components/LiveQueryModal";
 import CardDni from "../components/CardDni";
 import DetalleResultados from "../components/DetalleResultados";
 import RadarRiesgo from "../components/RadarRiesgo";
@@ -275,7 +276,8 @@ function ExportBatchModal({
           </h3>
           <p className="mt-2 text-sm leading-6 text-slate-300">
             Define el volumen de registros completados que se incluirá en el archivo {formatLabel} con los filtros actuales.
-            Se priorizan las consultas más recientes.
+            Se priorizan las consultas más
+             recientes.
           </p>
         </div>
 
@@ -368,7 +370,29 @@ export default function Resultados() {
   const [exportingExcel, setExportingExcel] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportModal, setExportModal] = useState({ open: false, format: "excel" });
+  const [liveConsultaId, setLiveConsultaId] = useState(null);
+  const [dismissedLiveConsultaId, setDismissedLiveConsultaId] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
+    // Abrir automáticamente el modal para la consulta en proceso más reciente
+    useEffect(() => {
+      if (!data.length) return;
+      // Busca la consulta en proceso más reciente
+      const enProceso = data.filter((item) => (item.estado || "").toLowerCase() === "en_proceso");
+      if (enProceso.length > 0) {
+        // Ordena por fecha descendente
+        enProceso.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+        if (dismissedLiveConsultaId !== enProceso[0].id && liveConsultaId !== enProceso[0].id) {
+          setLiveConsultaId(enProceso[0].id);
+        }
+      } else {
+        if (liveConsultaId) {
+          setLiveConsultaId(null);
+        }
+        if (dismissedLiveConsultaId !== null) {
+          setDismissedLiveConsultaId(null);
+        }
+      }
+  }, [data, dismissedLiveConsultaId, liveConsultaId]);
   // ---- Obtener todas las consultas ----
   const fetchResultados = async () => {
     try {
@@ -704,6 +728,7 @@ export default function Resultados() {
             <TablaResultados
               data={filteredData}
               onVerResultados={setConsultaSeleccionada}
+              onOpenLive={setLiveConsultaId}
               onExportExcel={() => openExportModal("excel")}
               onExportPdf={() => openExportModal("pdf")}
               exportingExcel={exportingExcel}
@@ -711,6 +736,20 @@ export default function Resultados() {
               exportDisabled={!exportableData.length}
               exportCount={exportableData.length}
             />
+                {/* Modal de fuentes en vivo */}
+      <LiveQueryModal
+        consultaId={liveConsultaId}
+        onClose={() => {
+          if (liveConsultaId) {
+            setDismissedLiveConsultaId(liveConsultaId);
+          }
+          setLiveConsultaId(null);
+        }}
+        onFinished={() => {
+          setLiveConsultaId(null);
+          setDismissedLiveConsultaId(null);
+        }}
+      />
           </div>
         ) : (
         <div className="w-full max-w-7xl mx-auto h-[75vh]">

@@ -238,6 +238,7 @@ function ProcessDockPortal({ items }) {
 export default function TablaResultados({
   data = [],
   onVerResultados,
+  onOpenLive,
   onExportExcel,
   onExportPdf,
   exportingExcel = false,
@@ -429,10 +430,18 @@ export default function TablaResultados({
                           Ver resultados
                         </button>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-cyan-400 text-[10px] md:text-xs">
-                          <span className="inline-block w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                          Procesando…
-                        </span>
+                        <button
+                          title="Ver fuentes en vivo"
+                          onClick={() => onOpenLive?.(item.id)}
+                          className="inline-flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-cyan-900/60 to-blue-900/60 border border-cyan-500/30 rounded-lg text-cyan-300 hover:text-cyan-100 hover:border-cyan-400/60 shadow-[0_0_8px_rgba(6,182,212,0.2)] transition-all duration-200 text-[10px] md:text-xs"
+                          style={{ minWidth: 0 }}
+                        >
+                          <svg className="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" strokeWidth="2" className="text-cyan-400" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l2.5 2.5" className="text-cyan-400" />
+                          </svg>
+                          Fuentes
+                        </button>
                       )}
                     </td>
                   </tr>
