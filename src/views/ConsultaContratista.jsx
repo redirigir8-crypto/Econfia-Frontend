@@ -7,6 +7,7 @@ import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
 import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
 
+
 // Lista de profesiones alineada con backend (PROFESION_BOT_MAP)
 const PROFESIONES = [
   "Ingeniero/a",
@@ -240,10 +241,7 @@ export default function ConsultaContratista() {
 
       setDatos(data.datos || data);
       setShowResultados(true);
-
-      setTimeout(() => {
-        navigate("/d3b7f1e9");
-      }, 5000);
+      setTimeout(() => navigate("/d3b7f1e9"), 5000);
     } catch (error) {
       console.error("Error en la consulta:", error);
       setToast({ type: "error", message: "Ocurrió un error en la consulta" });

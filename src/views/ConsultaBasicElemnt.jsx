@@ -7,6 +7,7 @@ import Terminos from "../components/Terminos";
 import { FaCogs } from "react-icons/fa";
 import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
 
+
 export default function ConsultaBasicElemnt() {
   const [puedeUsarMasivas, setPuedeUsarMasivas] = useState(false);
   useEffect(() => {
@@ -84,9 +85,7 @@ export default function ConsultaBasicElemnt() {
       }
       setDatos(data.datos || data);
       setShowResultados(true);
-      setTimeout(() => {
-        navigate("/d3b7f1e9");
-      }, 5000);
+      setTimeout(() => navigate("/d3b7f1e9"), 5000);
     } catch (error) {
       setToast({ type: "error", message: "Ocurrió un error en la consulta" });
     } finally {

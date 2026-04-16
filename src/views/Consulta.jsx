@@ -6,6 +6,7 @@ import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
 import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
 
+
 function ModalConsultaMedida({ isOpen, onClose, data }) {
   const [fuentes, setFuentes] = useState([]);
   const [seleccionadas, setSeleccionadas] = useState([]);
@@ -283,10 +284,7 @@ export default function Consulta() {
 
       setDatos(data.datos || data);
       setShowResultados(true);
-
-      setTimeout(() => {
-        navigate("/d3b7f1e9");
-      }, 5000);
+      setTimeout(() => navigate("/d3b7f1e9"), 5000);
     } catch (error) {
       console.error("Error en la consulta:", error);
       setToast({ type: "error", message: "Ocurrió un error en la consulta" });
