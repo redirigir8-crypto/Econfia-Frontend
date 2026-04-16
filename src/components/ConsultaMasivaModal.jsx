@@ -57,7 +57,7 @@ export default function ConsultaMasivaModal({
     setFilas(nuevas);
   };
 
-  // ── Descarga de plantilla CSV ────────────────────────────────────────────
+  // ── Descarga de plantilla Excel ────────────────────────────────────────────
   const descargarPlantilla = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -69,7 +69,7 @@ export default function ConsultaMasivaModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "plantilla_consulta_masiva.csv";
+      a.download = "plantilla_consulta_masiva.xlsx";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -104,7 +104,7 @@ export default function ConsultaMasivaModal({
       }
     } else {
       if (!archivo) {
-        setError("Selecciona un archivo CSV antes de continuar.");
+        setError("Selecciona un archivo Excel (.xlsx) antes de continuar.");
         return;
       }
     }
@@ -236,7 +236,7 @@ export default function ConsultaMasivaModal({
           <div className="flex gap-2">
             {[
               { id: "manual", label: `Ingreso Manual (máx. ${MAX_MANUAL})` },
-              { id: "archivo", label: "Cargar Archivo CSV" },
+              { id: "archivo", label: "Cargar Archivo Excel" },
             ].map(({ id, label }) => (
               <button
                 key={id}
@@ -310,30 +310,30 @@ export default function ConsultaMasivaModal({
             </div>
           )}
 
-          {/* ── Modo: Archivo CSV ─────────────────────────────────────────── */}
+          {/* ── Modo: Archivo Excel ─────────────────────────────────────────── */}
           {modo === "archivo" && (
             <div className="space-y-3">
               {/* Paso 1: descargar plantilla */}
               <div className="bg-blue-500/8 border border-blue-500/20 rounded-xl p-3 space-y-2">
                 <p className="text-xs text-blue-200 leading-relaxed">
-                  <span className="font-semibold">Paso 1:</span> Descarga la plantilla, llena las cédulas en Excel y guarda como CSV.
+                  <span className="font-semibold">Paso 1:</span> Descarga la plantilla Excel, llena las cédulas y guarda.
                 </p>
                 <button
                   onClick={descargarPlantilla}
                   className="w-full py-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-cyan-600/80 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-semibold transition-all"
                 >
-                  Descargar Plantilla CSV
+                  Descargar Plantilla Excel
                 </button>
               </div>
 
               {/* Paso 2: subir archivo */}
               <div>
                 <label className="block text-xs text-white/55 mb-1.5 font-semibold">
-                  Paso 2: Cargar archivo CSV completado (máx. 50 cédulas)
+                  Paso 2: Cargar archivo Excel (.xlsx) completado (máx. 50 cédulas)
                 </label>
                 <input
                   type="file"
-                  accept=".csv,.txt"
+                  accept=".xlsx,.xls"
                   onChange={(e) => setArchivo(e.target.files[0] || null)}
                   className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white/80 text-xs cursor-pointer
                              file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0

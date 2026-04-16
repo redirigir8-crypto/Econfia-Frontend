@@ -51,6 +51,8 @@ import EmpresaRuesForm from "./components/EmpresaRuesForm";
 import ConsultaEmpresa from "./views/ConsultaEmpresa";
 import ConsultaFask from "./views/ConsultaFask";
 import ConsultaEssencialExpress from "./views/ConsultaEssencialExpress";
+import VerificarReporte from "./pages/VerificarReporte";
+// import ChatbotFlotante from "./components/ChatbotFlotante"; // Deshabilitado temporalmente
 
 // Estilos CSS para el efecto libro
 const bookStyles = `
@@ -437,6 +439,9 @@ export default function App() {
             <Route path="/servicio-contratista" element={<ServicioContratista />} />
             <Route path="/servicio-seguridad" element={<ServicioSeguridad />} />
 
+            {/* Verificación pública de reporte — accesible al escanear QR del PDF */}
+            <Route path="/econfia/resumen-consulta/:consultaId" element={<VerificarReporte />} />
+
             {/* Protegidas (Dashboard como layout) */}
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
               {/* Hijas protegidas */}
@@ -463,6 +468,9 @@ export default function App() {
             {/* Panel de administración general (si lo usas) */}
             <Route path="/a8e3c7b2" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
           </Routes>
+          
+          {/* Chatbot de soporte flotante - Deshabilitado temporalmente */}
+          {/* <ChatbotFlotante /> */}
         </Router>
       </CardProvider>
     </ConfigProvider>
