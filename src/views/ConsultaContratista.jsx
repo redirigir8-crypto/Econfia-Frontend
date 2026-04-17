@@ -88,7 +88,6 @@ export default function ConsultaContratista() {
   const [profesionSugerencias, setProfesionSugerencias] = useState([]);
   const [showSugerencias, setShowSugerencias] = useState(false);
   const [profesionLoading, setProfesionLoading] = useState(false);
-  const [open, setOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [datos, setDatos] = useState(null);
@@ -241,7 +240,7 @@ export default function ConsultaContratista() {
 
       setDatos(data.datos || data);
       setShowResultados(true);
-      setTimeout(() => navigate("/d3b7f1e9"), 5000);
+      setTimeout(() => navigate("/d3b7f1e9"), 6500);
     } catch (error) {
       console.error("Error en la consulta:", error);
       setToast({ type: "error", message: "Ocurrió un error en la consulta" });
@@ -308,12 +307,24 @@ export default function ConsultaContratista() {
           style={{ animationDelay: "1s" }}
         />
 
+        {/* Logo hero circular grande — esquina superior izquierda */}
+        <div className="hidden md:block absolute md:top-6 md:left-6 z-20">
+          <div className="relative">
+            <div className="absolute -inset-2 md:-inset-4 rounded-full bg-gradient-to-br from-cyan-500/25 via-blue-600/15 to-transparent animate-pulse blur-2xl" />
+            <div className="absolute -inset-1 md:-inset-2 rounded-full border border-cyan-400/15" />
+            <div className="absolute -inset-2 md:-inset-4 rounded-full border border-cyan-300/8" />
+            <div className="relative flex items-center justify-center w-20 h-20 sm:w-28 sm:h-28 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-slate-800 via-slate-850 to-slate-950 border border-white/10 shadow-[0_0_60px_rgba(6,182,212,0.2)]">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/[0.02] to-white/[0.06]" />
+              <img src="/1-e9a7e544.ico" alt="Econfía" className="w-14 sm:w-20 md:w-20 h-auto relative z-10 drop-shadow-[0_0_20px_rgba(239,68,68,0.7)]" />
+            </div>
+          </div>
+        </div>
         <div className="max-w-5xl mx-auto px-4 w-full relative z-10">
-          <div className="grid md:grid-cols-2 gap-4 items-center">
+          <div className="grid md:grid-cols-2 gap-6 items-center">
             {/* Hero copy (izquierda) */}
-            <div className="text-center md:text-left space-y-3">
+            <div className="text-center md:text-left space-y-5">
               <div>
-                <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 flex items-center gap-2">
+                <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 items-center gap-2">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
@@ -323,7 +334,7 @@ export default function ConsultaContratista() {
                   </span>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
-                  Econfia Contratista 
+                  Econfia Contratista
                 </h1>
               </div>
 
@@ -527,227 +538,12 @@ export default function ConsultaContratista() {
                         />
                         <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
                           Acepto los{" "}
-                          <button
-                            type="button"
-                            onClick={() => setOpen(true)}
-                            className="text-cyan-400 hover:text-cyan-300 underline font-medium"
-                          >
-                            términos y condiciones
-                          </button>
+                          <Terminos
+                            inline
+                            triggerClassName="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium transition-colors"
+                          />
                         </span>
                       </label>
-
-                      <Terminos isOpen={open} onClose={() => setOpen(false)}>
-                        <h2 className="text-xl font-bold">
-                          Términos y Condiciones
-                        </h2>
-                        <p
-                          className="mt-4 text-sm"
-                          style={{
-                            textAlign: "justify",
-                            lineHeight: "1.7",
-                            whiteSpace: "pre-line",
-                            padding: "1.5rem",
-                            borderRadius: "12px",
-                            background: "rgba(255,255,255,0.97)",
-                            color: "#222",
-                            maxHeight: "60vh",
-                            overflowY: "auto",
-                            fontSize: "1rem",
-                            boxShadow: "0 2px 16px 0 rgba(0,0,0,0.08)",
-                            margin: "0.5rem 0",
-                          }}
-                        >
-                          {`Aplicativo ECONFIA
-1. Objeto
-Los presentes Términos y Condiciones regulan el acceso, uso y consulta de
-información a través del aplicativo ECONFIA, destinado a la verificación de
-personas naturales y jurídicas en listas restrictivas, vinculantes, informativas y
-bases de datos públicas y privadas, con fines de debida diligencia, conocimiento
-de contrapartes, gestión del riesgo y cumplimiento normativo.
-2. Marco normativo aplicable
-El uso del aplicativo ECONFIA se rige, entre otras, por las siguientes disposiciones
-legales y regulatorias vigentes en la República de Colombia:
- Constitución Política de Colombia, artículo 15 (derecho al habeas data).
- Ley 1581 de 2012 y sus decretos reglamentarios (protección de datos
-personales).
- Ley 1266 de 2008 (hábeas data financiero, crediticio, comercial y de
-servicios).
- Decreto 1377 de 2013.
- Normas relacionadas con SARLAFT, SAGRILAFT, SIPLAFT,
-LA/FT/FPADM, según el sector aplicable.
- Circulares y lineamientos expedidos por la Superintendencia Financiera de
-Colombia, Superintendencia de Sociedades y demás autoridades
-competentes.
-3. Naturaleza de la información
-La información consultada a través de ECONFIA:
- Proviene de fuentes públicas, abiertas, oficiales o de terceros legalmente
-autorizados.
- Tiene carácter referencial, informativo y de apoyo para los procesos
-internos de análisis de riesgo.
- No constituye por sí sola prueba concluyente, sanción, acusación o
-declaración de responsabilidad sobre las personas consultadas.
-
-4. Finalidad del tratamiento de datos
-El tratamiento de los datos personales consultados mediante ECONFIA tiene
-como finalidades principales:
- Cumplir obligaciones legales y regulatorias en materia de prevención de
-riesgos.
- Realizar procesos de debida diligencia y conocimiento de clientes,
-proveedores, contratistas, aliados o empleados.
- Prevenir riesgos legales, reputacionales, financieros y operativos.
-En ningún caso la información será utilizada para fines distintos a los aquí
-establecidos.
-5. Responsabilidad del usuario
-El usuario del aplicativo ECONFIA se obliga a:
- Utilizar la información consultada únicamente para fines lícitos y
-autorizados por la ley.
- Garantizar que cuenta con la base legal correspondiente para realizar las
-consultas.
- Interpretar los resultados como un insumo de análisis, complementándolos
-con otros mecanismos de verificación.
- Abstenerse de divulgar, comercializar o reutilizar la información de manera
-no autorizada.
-6. Limitación de responsabilidad
-ECONFIA no garantiza que la información consultada se encuentre libre de
-errores, actualizada en tiempo real o completa en todos los casos, dado que
-depende de la actualización de las fuentes de origen.
-En consecuencia, ECONFIA no será responsable por decisiones tomadas
-exclusivamente con base en los resultados de las consultas.
-7. Protección de datos personales
-ECONFIA actúa como encargado del tratamiento, conforme a la Ley 1581 de
-2012, y adopta medidas técnicas, administrativas y organizacionales razonables
-para proteger la información contra acceso no autorizado, pérdida o uso indebido.
-Los titulares de los datos podrán ejercer sus derechos de conocimiento,
-actualización, rectificación y supresión, conforme a la política de tratamiento de
-datos personales vigente.
-8. Confidencialidad
-
-La información obtenida a través del aplicativo ECONFIA es confidencial y de uso
-restringido. El usuario se compromete a no divulgarla a terceros no autorizados ni
-a utilizarla de forma contraria a la ley.
-9. Aceptación de los términos
-El acceso y uso del aplicativo ECONFIA implica la aceptación expresa e
-irrevocable de los presentes Términos y Condiciones. En caso de no estar de
-acuerdo, el usuario deberá abstenerse de utilizar la plataforma.
-10. Modificaciones
-ECONFIA se reserva el derecho de modificar los presentes Términos y
-Condiciones en cualquier momento, en atención a cambios normativos, operativos
-o tecnológicos. Las modificaciones serán aplicables desde su publicación.
-
-POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES
-Aplicativo ECONFIA
-1. Identificación del responsable del tratamiento
-El aplicativo ECONFIA actúa como Responsable y/o Encargado del
-Tratamiento de Datos Personales, según corresponda, en los términos definidos
-por la Ley 1581 de 2012 y sus decretos reglamentarios, para la información
-tratada en el marco de la consulta de listas restrictivas y bases de datos.
-2. Marco legal
-La presente Política se rige principalmente por:
- Artículo 15 de la Constitución Política de Colombia.
- Ley 1581 de 2012 – Régimen General de Protección de Datos Personales.
- Decreto 1377 de 2013.
- Decreto 1074 de 2015.
- Ley 1266 de 2008 (cuando aplique).
- Circulares de la Superintendencia de Industria y Comercio (SIC).
-3. Definiciones
-Para efectos de la presente Política, se adoptan las definiciones previstas en la
-Ley 1581 de 2012, entre ellas:
- Dato personal
-
- Dato público
- Dato sensible
- Titular
- Tratamiento
- Responsable del tratamiento
- Encargado del tratamiento
-4. Principios aplicables
-ECONFIA garantiza que el tratamiento de los datos personales se realizará bajo
-los principios de:
- Legalidad
- Finalidad
- Libertad
- Veracidad o calidad
- Transparencia
- Acceso y circulación restringida
- Seguridad
- Confidencialidad
-5. Tipo de datos tratados
-En desarrollo de su objeto, ECONFIA podrá tratar:
- Datos de identificación de personas naturales y jurídicas.
- Datos de contacto.
- Información contenida en listas restrictivas, sancionatorias, vinculantes
-o informativas.
- Datos públicos provenientes de fuentes abiertas, oficiales o legalmente
-habilitadas.
-ECONFIA no recolecta ni trata datos sensibles, salvo cuando la ley lo autorice
-expresamente o sea estrictamente necesario para el cumplimiento de obligaciones
-legales.
-6. Finalidades del tratamiento
-Los datos personales tratados a través del aplicativo ECONFIA serán utilizados
-para:
- Realizar consultas en listas restrictivas y bases de datos.
- Cumplir obligaciones legales y regulatorias en materia de prevención de
-riesgos.
- Apoyar procesos de debida diligencia, conocimiento de contrapartes y
-análisis de riesgo.
-
- Prevenir riesgos legales, reputacionales, financieros y operativos.
- Atender requerimientos de autoridades competentes.
-En ningún caso los datos serán utilizados con fines distintos a los aquí descritos.
-7. Autorización del titular
-El tratamiento de los datos personales se realizará previa autorización expresa,
-previa e informada del titular, salvo las excepciones previstas en la ley,
-especialmente cuando se trate de datos públicos.
-El usuario del aplicativo declara que cuenta con la autorización correspondiente
-para realizar las consultas a través de ECONFIA.
-8. Derechos de los titulares
-De conformidad con el artículo 8 de la Ley 1581 de 2012, los titulares tienen
-derecho a:
- Conocer, actualizar y rectificar sus datos personales.
- Solicitar prueba de la autorización otorgada.
- Ser informados sobre el uso dado a sus datos.
- Presentar quejas ante la Superintendencia de Industria y Comercio.
- Revocar la autorización y/o solicitar la supresión del dato, cuando sea
-procedente.
- Acceder de forma gratuita a sus datos personales.
-9. Procedimiento para el ejercicio de derechos
-Las consultas, reclamos o solicitudes relacionadas con datos personales deberán
-realizarse a través de los canales definidos por ECONFIA, indicando:
- Identificación del titular.
- Descripción clara de la solicitud.
- Documentos que la soporten, si aplica.
-Los plazos de atención se ajustarán a lo establecido en la Ley 1581 de 2012 y
-normas concordantes.
-10. Deberes de ECONFIA
-ECONFIA se compromete a:
- Garantizar al titular el pleno y efectivo ejercicio de sus derechos.
- Conservar la información bajo condiciones de seguridad adecuadas.
- Actualizar y rectificar la información cuando sea necesario.
-
- Tramitar consultas y reclamos conforme a la ley.
- Adoptar medidas técnicas, administrativas y organizacionales para proteger
-los datos.
-11. Seguridad de la información
-ECONFIA implementa medidas razonables de seguridad para evitar la
-adulteración, pérdida, consulta, uso o acceso no autorizado de los datos
-personales.
-12. Transferencia y transmisión de datos
-Los datos personales podrán ser transmitidos o transferidos a terceros únicamente
-cuando:
- Sea necesario para el cumplimiento de la finalidad del servicio.
- Exista autorización legal o contractual.
- Se garantice el cumplimiento de los estándares de protección exigidos por
-la ley colombiana.
-13. Vigencia
-La presente Política de Tratamiento de Datos Personales rige a partir de su
-publicación y permanecerá vigente mientras ECONFIA desarrolle las actividades
-descritas.
-
-Los datos personales serán conservados durante el tiempo necesario para cumplir
-la finalidad del tratamiento y las obligaciones legales.`}
-                        </p>
-                      </Terminos>
 
                       <label className="flex items-center gap-2 cursor-pointer group">
                         <input
