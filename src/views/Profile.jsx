@@ -5,8 +5,10 @@ import {
   PieChart, Pie, Cell
 } from "recharts";
 import { Modal } from "antd";
+import { FiLogOut } from "react-icons/fi";
 import jsPDF from "jspdf";
 import { generarInformeUsuarioPDF } from "../pdf/InformeUsuarioPDFV2";
+import { clearSession } from "../utils/session";
 
 /** Paleta y helpers de estilo elegante */
 const THEME = {
@@ -80,6 +82,11 @@ export default function Profile() {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
+
+  const handleLogout = () => {
+    clearSession();
+    window.location.replace("/login");
+  };
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -337,7 +344,15 @@ export default function Profile() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Card izquierda: perfil */}
           <ElegantCard className="lg:col-span-1">
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center relative">
+            {/* Icono cerrar sesión — esquina superior derecha del card */}
+            <button
+              onClick={handleLogout}
+              title="Cerrar sesión"
+              className="absolute top-0 right-0 p-1.5 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all z-10"
+            >
+              <FiLogOut className="w-4 h-4" />
+            </button>
             <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3">
               <span className="text-cyan-300 text-xs font-medium">Mi Perfil</span>
             </div>
@@ -413,10 +428,10 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-            {/* Botón para generar informe PDF */}
+            {/* Botón PDF */}
             <div className="w-full flex justify-center mt-6">
               <button
-                className="px-6 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg shadow-cyan-500/30 hover:from-cyan-600 hover:to-blue-600 transition-all"
+                className="w-full px-6 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg shadow-cyan-500/30 hover:from-cyan-600 hover:to-blue-600 transition-all"
                 onClick={() => generarInformeUsuarioPDF(profile, stats)}
               >
                 Generar informe PDF

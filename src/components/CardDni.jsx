@@ -1,3 +1,7 @@
+import fingerprintScan from "../assets/icons8-fingerprint-scan-100.png";
+import imagenDNIF from "../assets/imagenDNIF.png";
+import imagenDNIM from "../assets/imagenDNIM.png";
+
 function formatDate(value) {
   if (!value) return "No disponible";
   const parsed = new Date(value);
@@ -11,6 +15,17 @@ function getInitials(nombre, apellido) {
     .toUpperCase() || "ID";
 }
 
+function resolveGenderPortrait(sexo) {
+  const normalized = String(sexo || "").trim().toLowerCase();
+  if (["f", "femenino", "female", "mujer"].includes(normalized)) {
+    return imagenDNIF;
+  }
+  if (["m", "masculino", "male", "hombre"].includes(normalized)) {
+    return imagenDNIM;
+  }
+  return null;
+}
+
 export default function CardDni({ data }) {
   const apellido = data?.last_name || data?.apellido || "No registrado";
   const nombre = data?.first_name || data?.nombre || "No registrado";
@@ -20,11 +35,44 @@ export default function CardDni({ data }) {
   const tipoDoc = data?.doc_type || data?.tipo_doc || "";
   const fechaExpedicion = data?.fecha_expedicion || "";
   const documentoLabel = tipoDoc === "CC" ? "Cedula de ciudadania" : tipoDoc || "Documento";
+  const logoEconfia = "/1-e9a7e544.ico";
+  const portraitFallback = resolveGenderPortrait(sexo);
 
   return (
     <div className="relative w-full max-w-[36rem] overflow-hidden rounded-[20px] border border-cyan-200/25 bg-[linear-gradient(180deg,#e7edf4_0%,#f5f7fa_44%,#dce4ee_100%)] shadow-[0_20px_48px_rgba(2,12,27,0.38)]">
       <div className="absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.11),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(37,99,235,0.10),transparent_24%)]" />
       <div className="absolute inset-x-0 top-0 h-10 bg-[linear-gradient(90deg,#0f2e4f_0%,#123c67_26%,#1c5d8f_52%,#0f436d_76%,#0b2f4d_100%)] opacity-90" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <svg
+          viewBox="0 0 900 520"
+          aria-hidden="true"
+          className="absolute left-1/2 top-1/2 h-[120%] w-[120%] -translate-x-1/2 -translate-y-1/2 opacity-[0.12]"
+          preserveAspectRatio="none"
+        >
+          <g fill="none" strokeLinecap="round">
+            <path d="M-40 345C68 285 138 283 220 318c77 33 146 40 233 1 95-42 170-37 260 4 77 35 136 30 247-28" stroke="#6ea6d9" strokeWidth="2.1" />
+            <path d="M-20 360C84 301 150 300 229 334c77 33 144 40 229 1 94-43 169-40 258 2 78 36 140 33 248-24" stroke="#7cb2e3" strokeWidth="1.8" />
+            <path d="M0 375c100-58 164-59 241-25 75 33 140 39 224 0 93-43 168-40 257 0 78 35 142 34 248-20" stroke="#7db0d8" strokeWidth="1.6" />
+            <path d="M20 390c96-57 158-58 232-24 74 34 138 39 220 0 92-43 166-41 254 0 79 36 144 35 247-16" stroke="#88b8e2" strokeWidth="1.4" />
+            <path d="M40 405c92-56 153-57 224-23 73 35 135 40 216 1 91-44 164-42 250 0 79 37 146 37 246-12" stroke="#9ec5ea" strokeWidth="1.2" />
+            <path d="M-55 205c86-37 145-39 210-12 60 25 118 31 183 0 72-34 130-30 198 0 62 28 118 25 204-11 73-31 140-31 215 0" stroke="#8ebbe2" strokeWidth="1.2" />
+            <path d="M-40 218c84-36 142-37 205-11 59 24 115 30 178 0 71-34 129-31 196 0 61 27 118 25 202-10 73-30 140-30 214 0" stroke="#9fc7ea" strokeWidth="1" />
+            <path d="M-20 230c81-35 137-36 197-10 58 25 112 30 174 0 70-33 127-31 194 0 61 28 118 26 200-8 71-30 138-30 211 0" stroke="#b4d3ef" strokeWidth="0.9" />
+            <ellipse cx="440" cy="262" rx="172" ry="126" stroke="#8db8de" strokeWidth="1.2" />
+            <ellipse cx="440" cy="262" rx="154" ry="112" stroke="#a9cae6" strokeWidth="1" />
+            <ellipse cx="440" cy="262" rx="136" ry="99" stroke="#bdd8ee" strokeWidth="0.9" />
+          </g>
+        </svg>
+      </div>
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <img
+          src={logoEconfia}
+          alt=""
+          aria-hidden="true"
+          className="h-52 w-52 select-none object-contain opacity-[0.1] sm:h-60 sm:w-60"
+        />
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-8 h-24 opacity-30 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.08),transparent_58%)]" />
 
       <div className="relative z-10 p-4 pt-[3.35rem] sm:p-5 sm:pt-[3.5rem]">
         <div className="mb-4 flex items-start justify-between gap-4 border-b border-slate-400/15 pb-3">
@@ -57,6 +105,13 @@ export default function CardDni({ data }) {
                   alt={`${nombre} ${apellido}`}
                   className="h-full w-full object-cover"
                 />
+              ) : portraitFallback ? (
+                <img
+                  src={portraitFallback}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-full w-full object-cover opacity-90"
+                />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.72),transparent_55%)] text-slate-500">
                   <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/80 bg-white/40 text-lg font-bold">
@@ -74,6 +129,15 @@ export default function CardDni({ data }) {
               <p className="mt-1 text-[13px] font-bold text-slate-700">
                 {formatDate(fechaExpedicion)}
               </p>
+            </div>
+
+            <div className="flex justify-center rounded-[10px] border border-cyan-100/20 bg-white/20 px-3 py-2.5">
+              <img
+                src={fingerprintScan}
+                alt=""
+                aria-hidden="true"
+                className="h-20 w-20 object-contain opacity-50 grayscale"
+              />
             </div>
           </div>
 
@@ -106,7 +170,7 @@ export default function CardDni({ data }) {
               </p>
               <div className="mt-2 flex items-center justify-between gap-3">
                 <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-slate-600">
-                  Titular registrado
+                  Titular Registrado  Archivo Nacional de Identificación. (ANI)
                 </span>
                 <span className="rounded-full border border-cyan-200/30 bg-white/50 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-700">
                   Econfia
