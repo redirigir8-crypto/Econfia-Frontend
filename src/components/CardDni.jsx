@@ -42,6 +42,42 @@ export default function CardDni({ data }) {
     <div className="relative w-full max-w-[36rem] overflow-hidden rounded-[20px] border border-cyan-200/25 bg-[linear-gradient(180deg,#e7edf4_0%,#f5f7fa_44%,#dce4ee_100%)] shadow-[0_20px_48px_rgba(2,12,27,0.38)]">
       <div className="absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.11),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(37,99,235,0.10),transparent_24%)]" />
       <div className="absolute inset-x-0 top-0 h-10 bg-[linear-gradient(90deg,#0f2e4f_0%,#123c67_26%,#1c5d8f_52%,#0f436d_76%,#0b2f4d_100%)] opacity-90" />
+      {/* Marca de agua — franja azul superior */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-10 overflow-hidden">
+        <svg
+          viewBox="0 0 576 40"
+          aria-hidden="true"
+          preserveAspectRatio="none"
+          className="absolute inset-0 h-full w-full"
+        >
+          <defs>
+            <linearGradient id="wm-fade-h" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stopColor="white" stopOpacity="0"   />
+              <stop offset="12%"  stopColor="white" stopOpacity="0.55"/>
+              <stop offset="50%"  stopColor="white" stopOpacity="0.65"/>
+              <stop offset="88%"  stopColor="white" stopOpacity="0.55"/>
+              <stop offset="100%" stopColor="white" stopOpacity="0"   />
+            </linearGradient>
+            <linearGradient id="wm-fade-v" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stopColor="white" stopOpacity="1" />
+              <stop offset="60%"  stopColor="white" stopOpacity="0.5"/>
+              <stop offset="100%" stopColor="white" stopOpacity="0" />
+            </linearGradient>
+            <mask id="wm-mask">
+              <rect width="576" height="40" fill="url(#wm-fade-h)" />
+            </mask>
+          </defs>
+          {/* Líneas diagonales — 45° */}
+          <g mask="url(#wm-mask)" stroke="url(#wm-fade-v)" strokeWidth="1.6">
+            {Array.from({ length: 28 }).map((_, i) => {
+              const x = i * 22 - 10;
+              return <line key={i} x1={x} y1="0" x2={x + 46} y2="40" />;
+            })}
+          </g>
+          {/* Línea horizontal borde inferior */}
+          <line x1="0" y1="39.2" x2="576" y2="39.2" stroke="rgba(255,255,255,0.30)" strokeWidth="0.8" />
+        </svg>
+      </div>
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <svg
           viewBox="0 0 900 520"
@@ -131,12 +167,18 @@ export default function CardDni({ data }) {
               </p>
             </div>
 
-            <div className="flex justify-center rounded-[10px] border border-cyan-100/20 bg-white/20 px-3 py-2.5">
+            <div className="flex justify-center rounded-[10px] border border-cyan-100/20 bg-white/20 px-3 py-2.5"
+              style={{ perspective: "800px" }}
+            >
               <img
                 src={fingerprintScan}
                 alt=""
                 aria-hidden="true"
                 className="h-20 w-20 object-contain opacity-50 grayscale"
+                style={{
+                  animation: "flipY 2.5s linear infinite",
+                  transformStyle: "preserve-3d",
+                }}
               />
             </div>
           </div>
