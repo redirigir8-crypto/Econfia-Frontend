@@ -428,12 +428,11 @@ export default function ConsultaMedida() {
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
         {/* Logo — esquina superior izquierda */}
-        <div className="hidden md:block absolute md:top-6 md:left-6 z-20" style={{ perspective: "800px" }}>
+        <div className="hidden md:block absolute md:top-6 md:left-6 z-20">
           <img
             src="/1-e9a7e544.ico"
             alt="Econfía"
-            className="w-20 h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_20px_rgba(239,68,68,0.7)]"
-            style={{ animation: "flipY 2.5s linear infinite", transformStyle: "preserve-3d" }}
+            className="w-12 h-12 object-contain opacity-70"
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-5xl w-full px-4 relative z-10">
