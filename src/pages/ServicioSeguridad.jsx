@@ -142,7 +142,7 @@ export default function ServicioSeguridad() {
         {/* Call to Action */}
         <div className="text-center">
           <a
-            href="https://conecta.econfia.co/"
+            href="https://econfia.store/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-8 py-4 bg-green-500 text-white font-semibold rounded-full hover:bg-green-400 transition transform hover:scale-105 shadow-lg shadow-green-500/50"

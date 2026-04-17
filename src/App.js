@@ -1,12 +1,12 @@
-// App.jsx
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+// App.js
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import ParticlesBackground from "./components/ParticlesBackground";
 import "react-horizontal-scrolling-menu/dist/styles.css";
-import React from 'react';
-import { ConfigProvider } from 'antd';
-import { antdTheme } from './theme/antdTheme';
-import './theme/global.css';
+import React from "react";
+import { ConfigProvider } from "antd";
+import { antdTheme } from "./theme/antdTheme";
+import "./theme/global.css";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import PrivateRoute from "./components/PrivateRoute";
@@ -21,8 +21,6 @@ import Ayuda from "./views/Ayuda";
 import Profile from "./views/Profile";
 import { CardProvider } from "./context/CardContext";
 import Register from "./pages/Register";
-import SlideDinamicLists from "./components/services/SlideDinamicLists";
-import ContratistaView from "./components/services/ContratistaView";
 import Nosotros from "./pages/Nosotros";
 import Contacto from "./pages/Contacto";
 import Blog from "./pages/Blog";
@@ -32,389 +30,589 @@ import ResetPassword from "./pages/ResetPassword";
 import ServicioEconfia from "./pages/ServicioEconfia";
 import ServicioContratista from "./pages/ServicioContratista";
 import ServicioSeguridad from "./pages/ServicioSeguridad";
+import ServicioTitulos from "./pages/ServicioTitulos";
 import TitulosValidationForm from "./views/TitulosValidationForm";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Keyboard } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import networkGif from "./assets/GIF by São Paulo City.gif";
-import codingGif from "./assets/coding internet security GIF by Matthew Butler.gif";
-import connectionGif from "./assets/GIF by TQI - Tecnologia, Qualidade em Informação.gif";
 import AdminPanel from "./pages/AdminPanel";
 import AdminUsuarios from "./components/AdminUsuarios";
 import AdminPlanes from "./components/AdminPlanes";
 import AdminFuentes from "./components/AdminFuentes";
-import EmpresaRuesView from "./components/EmpresaRuesView";
-import EmpresaRuesPage from "./pages/EmpresaRuesPage";
 import EmpresaRuesResult from "./components/EmpresaRuesResult";
-import EmpresaRuesForm from "./components/EmpresaRuesForm";
 import ConsultaEmpresa from "./views/ConsultaEmpresa";
 import ConsultaFask from "./views/ConsultaFask";
 import ConsultaEssencialExpress from "./views/ConsultaEssencialExpress";
 import VerificarReporte from "./pages/VerificarReporte";
-// import ChatbotFlotante from "./components/ChatbotFlotante"; // Deshabilitado temporalmente
+import {
+  ShieldCheck,
+  Zap,
+  BarChart3,
+  FileSpreadsheet,
+  Search,
+  Briefcase,
+  Building2,
+  CreditCard,
+  BadgeCheck,
+  FileText,
+  Globe2,
+  GraduationCap,
+  Sparkles,
+  Activity,
+  ScanSearch,
+} from "lucide-react";
+import networkGif from "./assets/GIF by São Paulo City.gif";
 
-// Estilos CSS para el efecto libro
-const bookStyles = `
-  .book-card:hover .book-cover {
-    transform: rotateY(-80deg);
+/* ─────────────────────────────────────────────────────────────
+   Estilos premium inyectados una sola vez
+───────────────────────────────────────────────────────────── */
+const premiumStyles = `
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-8px); }
   }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0   rgba(34,211,238,0.0); }
+    50%      { box-shadow: 0 0 40px rgba(34,211,238,0.18); }
   }
-  
-  @keyframes fadeInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @keyframes gridMove {
+    0%   { transform: translateY(0);   }
+    100% { transform: translateY(40px); }
   }
-  
-  @keyframes fadeInLeft {
-    from {
-      opacity: 0;
-      transform: translateX(-30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
+
+  /* Grid animado detrás del hero */
+  .hero-grid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
+    animation: gridMove 7s linear infinite alternate;
+    pointer-events: none;
   }
-  
-  @keyframes fadeInRight {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
+
+  /* Panel de vidrio */
+  .glass-panel {
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 80px rgba(2,8,23,0.45);
   }
-  
-  @keyframes slideInScale {
-    from {
-      opacity: 0;
-      transform: scale(0.9) translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
+
+  /* Tarjeta premium */
+  .premium-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    background: linear-gradient(180deg, rgba(15,23,42,0.82) 0%, rgba(2,6,23,0.88) 100%);
+    border: 1px solid rgba(148,163,184,0.12);
+    transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease;
   }
-  
-  .animate-fade-in-up {
-    animation: fadeInUp 0.8s ease-out forwards;
+  .premium-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(34,211,238,0.34);
+    box-shadow: 0 24px 80px rgba(8,145,178,0.18);
   }
-  
-  .animate-fade-in-down {
-    animation: fadeInDown 0.8s ease-out forwards;
+  .premium-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(34,211,238,0.14), transparent 35%);
+    pointer-events: none;
   }
-  
-  .animate-fade-in-left {
-    animation: fadeInLeft 0.8s ease-out forwards;
+
+  /* Métrica pequeña */
+  .metric-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    transition: all .3s ease;
   }
-  
-  .animate-fade-in-right {
-    animation: fadeInRight 0.8s ease-out forwards;
+  .metric-card:hover {
+    background: rgba(34,211,238,0.08);
+    border-color: rgba(34,211,238,0.28);
+    transform: translateY(-4px);
   }
-  
-  .animate-slide-in-scale {
-    animation: slideInScale 0.8s ease-out forwards;
-  }
-  
-  .animation-delay-100 { animation-delay: 0.1s; opacity: 0; }
-  .animation-delay-200 { animation-delay: 0.2s; opacity: 0; }
-  .animation-delay-300 { animation-delay: 0.3s; opacity: 0; }
-  .animation-delay-400 { animation-delay: 0.4s; opacity: 0; }
-  .animation-delay-500 { animation-delay: 0.5s; opacity: 0; }
+
+  .floating-soft { animation: floatY    5s ease-in-out infinite; }
+  .glow-soft     { animation: pulseGlow 4s ease-in-out infinite; }
 `;
 
-// Insertar estilos para el efecto libro
-if (typeof document !== 'undefined') {
-  const styleTag = document.createElement('style');
-  styleTag.innerHTML = bookStyles;
-  document.head.appendChild(styleTag);
+if (typeof document !== "undefined" && !document.getElementById("econfia-premium-styles")) {
+  const tag = document.createElement("style");
+  tag.id = "econfia-premium-styles";
+  tag.innerHTML = premiumStyles;
+  document.head.appendChild(tag);
 }
 
-function WordSlide({ word, bg }) {
+/* ─────────────────────────────────────────────────────────────
+   Micro-componentes reutilizables
+───────────────────────────────────────────────────────────── */
+function Badge({ children }) {
   return (
-    <div
-      className="relative w-full h-[90vh] md:h-[100vh] flex items-center justify-center text-white"
-      style={{ backgroundImage: bg, backgroundSize: "cover", backgroundPosition: "center" }}
-    >
-      <div className="absolute inset-0 bg-black/30" />
-      <h2 className="relative z-10 text-5xl md:text-6xl font-semibold drop-shadow-lg">
-        {word}
-      </h2>
+    <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-200">
+      <span className="h-2 w-2 rounded-full bg-cyan-400 glow-soft" />
+      {children}
+    </span>
+  );
+}
+
+function SectionTitle({ eyebrow, title, description, center = false }) {
+  return (
+    <div className={center ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
+      {eyebrow && (
+        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+          {eyebrow}
+        </p>
+      )}
+      <h2 className="text-3xl font-bold leading-tight text-white md:text-5xl">{title}</h2>
+      {description && (
+        <p className="mt-4 text-base leading-7 text-slate-300 md:text-lg">{description}</p>
+      )}
     </div>
   );
 }
 
+/* Tarjeta de GIF con overlay */
+function HeroVisualCard({ src, title, subtitle, className = "" }) {
+  return (
+    <div className={`premium-card ${className}`}>
+      <div className="relative h-full min-h-[220px] overflow-hidden">
+        <img src={src} alt={title} className="h-full w-full object-cover opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
+          <p className="text-lg font-semibold text-white md:text-xl">{title}</p>
+          <p className="mt-1 text-sm text-slate-300">{subtitle}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Tarjeta: niveles de riesgo SARLAFT */
+function RiskScoreCard({ className = "" }) {
+  const levels = [
+    { label: "Bajo",    color: "#22c55e", pct: 25  },
+    { label: "Medio",   color: "#facc15", pct: 50  },
+    { label: "Alto",    color: "#f97316", pct: 75  },
+    { label: "Extremo", color: "#ef4444", pct: 100 },
+  ];
+  return (
+    <div className={`premium-card p-5 flex flex-col gap-4 ${className}`}>
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold text-cyan-300 uppercase tracking-wider">Score de Riesgo</p>
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/10 border border-cyan-400/20 text-cyan-300">
+          SARLAFT
+        </span>
+      </div>
+      <div className="space-y-2.5">
+        {levels.map((r) => (
+          <div key={r.label} className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 w-14 flex-shrink-0">{r.label}</span>
+            <div className="flex-1 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <div
+                className="h-1.5 rounded-full transition-all duration-700"
+                style={{ width: `${r.pct}%`, background: r.color }}
+              />
+            </div>
+            <span className="text-[10px] text-slate-500 w-6 text-right">{r.pct}</span>
+          </div>
+        ))}
+      </div>
+      <p className="text-[11px] text-slate-500">Metodología aplicada en cada consulta</p>
+    </div>
+  );
+}
+
+/* Tarjeta: estado del sistema en tiempo real */
+function LiveStatusCard({ className = "" }) {
+  const metrics = [
+    { label: "Fuentes activas",   val: "200+",    color: "#22d3ee" },
+    { label: "Tiempo promedio",   val: "< 5 min", color: "#a78bfa" },
+    { label: "Precisión global",  val: "99.9 %",  color: "#34d399" },
+    { label: "Disponibilidad",    val: "24 / 7",  color: "#fb923c" },
+  ];
+  return (
+    <div className={`premium-card p-5 flex flex-col gap-4 ${className}`}>
+      <div className="flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
+        </span>
+        <p className="text-xs font-bold text-green-300 uppercase tracking-wider">Sistema operativo</p>
+      </div>
+      <div className="space-y-3">
+        {metrics.map((m) => (
+          <div key={m.label} className="flex justify-between items-center">
+            <span className="text-xs text-slate-400">{m.label}</span>
+            <span className="text-sm font-bold" style={{ color: m.color }}>{m.val}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Home — página principal
+───────────────────────────────────────────────────────────── */
 function Home() {
+  const highlights = [
+    { value: "200+", label: "Fuentes conectadas" },
+    { value: "24/7", label: "Monitoreo continuo" },
+    { value: "PDF + Excel", label: "Reportes exportables" },
+    { value: "SARLAFT", label: "Scoring metodológico" },
+  ];
+
+  const capabilities = [
+    {
+      icon: ShieldCheck,
+      title: "Validación y cumplimiento",
+      text: "Consulta antecedentes, listas restrictivas, PEP, sanciones, boletines y validaciones críticas en una sola operación.",
+    },
+    {
+      icon: ScanSearch,
+      title: "Investigación inteligente",
+      text: "Cruce de información nacional e internacional con respaldo visual, trazabilidad y estructura profesional.",
+    },
+    {
+      icon: FileSpreadsheet,
+      title: "Reportes ejecutivos",
+      text: "Exporta resultados en PDF y Excel listos para auditoría, análisis interno y procesos de vinculación.",
+    },
+    {
+      icon: Zap,
+      title: "Consultas masivas",
+      text: "Procesa grandes volúmenes de registros de forma más rápida y ordenada para equipos operativos y analíticos.",
+    },
+  ];
+
+  const services = [
+    { label: "Consulta de antecedentes", href: "/consulta", Icon: Search },
+    { label: "Consulta de contratistas", href: "/6c1b9f3d", Icon: Briefcase },
+    { label: "Empresas y RUES", href: "/4a7e2b8f", Icon: Building2 },
+    { label: "Econfia Títulos", href: "/servicio-titulos", Icon: GraduationCap },
+    { label: "Validación de títulos", href: "/2b7d5e9c", Icon: GraduationCap },
+    { label: "Consulta Express", href: "/a1e6c4b8", Icon: Sparkles },
+    { label: "Planes y precios", href: "/precios", Icon: CreditCard },
+  ];
+
+  const advantages = [
+    "Evidencia visual y soporte verificable en cada resultado.",
+    "Scoring de riesgo orientado a SARLAFT y SACRILAFT.",
+    "Consultas individuales y masivas desde un mismo ecosistema.",
+    "Arquitectura orientada a velocidad, trazabilidad y cumplimiento.",
+  ];
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen text-white">
       <Header />
-      <Swiper
-        modules={[Navigation, Keyboard]}
-        navigation
-        keyboard={{ enabled: true }}
-        loop
-        className="w-full"
-        style={{ height: 'auto' }}
-      >
-        {/* Slide 1: Hero mejorado */}
-        <SwiperSlide>
-          <section className="relative w-full min-h-screen flex items-center justify-center pt-20 md:pt-24">
-            <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-blue-900/20 to-black/40" />
-            
-            {/* Elementos decorativos animados */}
-            <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse animation-delay-1000" />
-            
-            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 w-full">
-              <div className="transform-gpu origin-center">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 items-center">
-                  {/* Columna izquierda: texto mejorado */}
-                  <div className="text-left flex flex-col gap-4 md:gap-5">
-                    {/* Badge superior */}
-                    <div className="inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 animate-fade-in-down">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-                      </span>
-                      <span className="text-cyan-300 text-sm font-medium">Verificación en tiempo real</span>
-                    </div>
 
-                    <h1 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight text-white animate-fade-in-left animation-delay-100" >
-                      Verifica en <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">segundos</span>,
-                      <br />decide con <span className="text-cyan-400">confianza</span>
-                    </h1>
-                    
-                    <p className="text-sm md:text-base lg:text-lg text-slate-300 max-w-xl leading-relaxed animate-fade-in-left animation-delay-200">
-                      Plataforma líder en Colombia para verificación de antecedentes y análisis de riesgo. 
-                      <span className="text-cyan-300 font-semibold"> Más de 200 fuentes oficiales</span> en una sola consulta.
+      <main className="relative overflow-hidden">
+        {/* HERO */}
+        <section className="hero-grid relative overflow-hidden pt-28 md:pt-32">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.18),transparent_32%),radial-gradient(circle_at_center,rgba(14,165,233,0.10),transparent_45%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/10 via-slate-950/20 to-slate-950/70" />
+
+          <div className="relative mx-auto grid min-h-[95vh] max-w-7xl grid-cols-1 items-center gap-14 px-4 pb-16 md:px-6 lg:grid-cols-[1.1fr_.9fr]">
+            {/* Left */}
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-200 shadow-[0_0_25px_rgba(34,211,238,0.08)]">
+                <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+                Plataforma de verificación, riesgo y cumplimiento
+              </div>
+
+              <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[1.02] text-white md:text-6xl xl:text-7xl">
+                Inteligencia para
+                <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
+                  {" "}verificar, analizar{" "}
+                </span>
+                y decidir con confianza.
+              </h1>
+
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl">
+                ECONFIA transforma procesos de validación en una experiencia visual,
+                sólida y ejecutiva. Centraliza consultas, evidencia, scoring de riesgo
+                y reportes profesionales en una sola plataforma.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                <a
+                  href="/consulta"
+                  className="group rounded-full bg-cyan-500 px-8 py-4 text-center text-base font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:bg-cyan-400 hover:shadow-[0_12px_40px_rgba(34,211,238,0.25)]"
+                >
+                  Iniciar consulta
+                </a>
+                <a
+                  href="/precios"
+                  className="rounded-full border border-white/15 bg-white/5 px-8 py-4 text-center text-base font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-400/40 hover:bg-white/10"
+                >
+                  Ver planes
+                </a>
+              </div>
+
+              <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
+                {highlights.map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-2xl border border-white/10 bg-white/[0.05] p-4 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/25 hover:bg-cyan-400/[0.08]"
+                  >
+                    <p className="text-xl font-bold text-cyan-300 md:text-2xl">{item.value}</p>
+                    <p className="mt-1 text-sm text-slate-400">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right */}
+            <div className="relative">
+              <div className="absolute -left-12 top-8 h-28 w-28 rounded-full bg-cyan-400/20 blur-3xl" />
+              <div className="absolute -right-10 bottom-10 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
+
+              <div className="grid grid-cols-2 gap-5">
+                <div className="premium-card col-span-2 overflow-hidden">
+                  <div className="relative min-h-[320px]">
+                    <img
+                      src={networkGif}
+                      alt="Econfia monitoreo"
+                      className="h-full w-full object-cover opacity-80"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-6 md:p-7">
+                      <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                        Monitoreo activo
+                      </div>
+                      <h3 className="text-2xl font-bold text-white md:text-3xl">
+                        Verificación avanzada en tiempo real
+                      </h3>
+                      <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300 md:text-base">
+                        Integración de múltiples fuentes, evidencia estructurada y resultados
+                        listos para análisis operativo, comercial y de cumplimiento.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="premium-card p-5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">
+                      Riesgo y scoring
                     </p>
+                    <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-1 text-[10px] text-cyan-300">
+                      SARLAFT
+                    </span>
+                  </div>
 
-                    {/* Características destacadas */}
-                    <div className="grid grid-cols-2 gap-3 md:gap-4 animate-fade-in-up animation-delay-250">
-                      <div className="flex items-center gap-2 group cursor-pointer">
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-cyan-500/20 group-hover:bg-cyan-500/40 flex items-center justify-center flex-shrink-0 transition-all group-hover:scale-110">
-                          <span className="text-cyan-400 group-hover:text-cyan-300 text-base md:text-lg transition-colors">⚡</span>
+                  <div className="mt-5 space-y-3">
+                    {[
+                      { label: "Bajo", width: "28%", color: "bg-emerald-400" },
+                      { label: "Medio", width: "55%", color: "bg-yellow-400" },
+                      { label: "Alto", width: "76%", color: "bg-orange-400" },
+                      { label: "Crítico", width: "95%", color: "bg-red-500" },
+                    ].map((item) => (
+                      <div key={item.label}>
+                        <div className="mb-1 flex items-center justify-between text-xs text-slate-400">
+                          <span>{item.label}</span>
+                          <span>{item.width}</span>
                         </div>
-                        <span className="text-white text-xs md:text-sm font-medium group-hover:text-cyan-300 transition-colors">Resultados instantáneos</span>
-                      </div>
-                      <div className="flex items-center gap-2 group cursor-pointer">
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-cyan-500/20 group-hover:bg-cyan-500/40 flex items-center justify-center flex-shrink-0 transition-all group-hover:scale-110">
-                          <span className="text-cyan-400 group-hover:text-cyan-300 text-base md:text-lg transition-colors">🛡️</span>
+                        <div className="h-2 rounded-full bg-white/10">
+                          <div className={`h-2 rounded-full ${item.color}`} style={{ width: item.width }} />
                         </div>
-                        <span className="text-white text-xs md:text-sm font-medium group-hover:text-cyan-300 transition-colors">100% Verificable</span>
                       </div>
-                      <div className="flex items-center gap-2 group cursor-pointer">
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-cyan-500/20 group-hover:bg-cyan-500/40 flex items-center justify-center flex-shrink-0 transition-all group-hover:scale-110">
-                          <span className="text-cyan-400 group-hover:text-cyan-300 text-base md:text-lg transition-colors">📊</span>
-                        </div>
-                        <span className="text-white text-xs md:text-sm font-medium group-hover:text-cyan-300 transition-colors">Reportes claros</span>
-                      </div>
-                      <div className="flex items-center gap-2 group cursor-pointer">
-                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-cyan-500/20 group-hover:bg-cyan-500/40 flex items-center justify-center flex-shrink-0 transition-all group-hover:scale-110">
-                          <span className="text-cyan-400 group-hover:text-cyan-300 text-base md:text-lg transition-colors">🔒</span>
-                        </div>
-                        <span className="text-white text-xs md:text-sm font-medium group-hover:text-cyan-300 transition-colors">Datos seguros</span>
-                      </div>
-                    </div>
+                    ))}
+                  </div>
 
-                    <div className="mt-2 md:mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-4 animate-fade-in-up animation-delay-300">
-                      <a 
-                        className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-medium py-3 md:py-3.5 px-6 md:px-8 rounded-full text-sm md:text-base transition-all border border-white/20 hover:border-cyan-400/50 text-center"
-                        href="/precios"
+                  <p className="mt-4 text-xs leading-5 text-slate-500">
+                    Evaluación estructurada para priorización y toma de decisiones.
+                  </p>
+                </div>
+
+                <div className="premium-card p-5">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                    </span>
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
+                      Estado de plataforma
+                    </p>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    {[
+                      ["Fuentes activas", "200+"],
+                      ["Reportes", "PDF / Excel"],
+                      ["Consultas masivas", "Disponibles"],
+                      ["Disponibilidad", "24/7"],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex items-center justify-between">
+                        <span className="text-sm text-slate-400">{label}</span>
+                        <span className="text-sm font-semibold text-white">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="mt-4 text-xs leading-5 text-slate-500">
+                    Arquitectura pensada para trazabilidad, velocidad y cumplimiento.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CAPABILITIES */}
+        <section className="relative py-24">
+          <div className="mx-auto max-w-7xl px-4 md:px-6">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+                ¿Por qué ECONFIA?
+              </p>
+              <h2 className="mt-3 text-3xl font-bold text-white md:text-5xl">
+                Un ecosistema de verificación con presencia, claridad y valor corporativo
+              </h2>
+              <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
+                Pensado para procesos de vinculación, debida diligencia, análisis de terceros,
+                cumplimiento y revisión documental con una estética más ejecutiva y confiable.
+              </p>
+            </div>
+
+            <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+              {capabilities.map((item) => (
+                <div key={item.title} className="premium-card p-6">
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-300 ring-1 ring-cyan-400/20 shadow-[0_0_30px_rgba(34,211,238,0.10)]">
+                    <item.icon className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white">{item.title}</h3>
+                  <p className="mt-3 leading-7 text-slate-300">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SERVICES + VALUE */}
+        <section className="relative py-24">
+          <div className="mx-auto max-w-7xl px-4 md:px-6">
+            <div className="glass-panel rounded-[2rem] p-8 md:p-12">
+              <div className="grid gap-12 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+                    Soluciones ECONFIA
+                  </p>
+                  <h2 className="mt-3 text-3xl font-bold text-white md:text-5xl">
+                    Diferentes consultas, una sola experiencia premium
+                  </h2>
+                  <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
+                    Integra procesos de consulta, validación y análisis desde un mismo panel,
+                    con una navegación limpia, moderna y mucho más elegante.
+                  </p>
+
+                  <div className="mt-8 grid gap-4 md:grid-cols-2">
+                    {services.map(({ label, href, Icon }) => (
+                      <a
+                        key={label}
+                        href={href}
+                        className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/35 hover:bg-cyan-400/10"
                       >
-                        Ver planes
+                        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300 ring-1 ring-cyan-400/15 transition group-hover:scale-105 group-hover:bg-cyan-400/15">
+                          <Icon className="h-5 w-5" />
+                        </span>
+                        <span>{label}</span>
                       </a>
-                    </div>
+                    ))}
+                  </div>
+                </div>
 
-                    {/* Trust badges */}
-                    <div className="mt-4 md:mt-6 flex flex-wrap items-center gap-4 md:gap-6 text-xs md:text-sm text-slate-400 animate-fade-in-up animation-delay-400">
-                      <div className="flex items-center gap-2 group cursor-pointer">
-                        <span className="text-cyan-400 group-hover:text-cyan-300 group-hover:scale-110 transition-all">✓</span>
-                        <span className="group-hover:text-white transition-colors">Fuentes oficiales</span>
+                <div className="premium-card p-7 md:p-8">
+                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+                    Valor diferencial
+                  </p>
+
+                  <div className="mt-6 space-y-5">
+                    {advantages.map((point) => (
+                      <div key={point} className="flex items-start gap-3">
+                        <div className="mt-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-400/10 ring-1 ring-cyan-400/20">
+                          <BadgeCheck className="h-3.5 w-3.5 text-cyan-300" />
+                        </div>
+                        <p className="text-slate-300 leading-relaxed">{point}</p>
                       </div>
-                      <div className="flex items-center gap-2 group cursor-pointer">
-                        <span className="text-cyan-400 group-hover:text-cyan-300 group-hover:scale-110 transition-all">✓</span>
-                        <span className="group-hover:text-white transition-colors">GDPR Compliant</span>
-                      </div>
-                      <div className="flex items-center gap-2 group cursor-pointer">
-                        <span className="text-cyan-400 group-hover:text-cyan-300 group-hover:scale-110 transition-all">✓</span>
-                        <span className="group-hover:text-white transition-colors">ISO 27001</span>
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
-                  {/* Columna derecha: grid de imágenes mejorado */}
-                  <div className="grid grid-cols-1 gap-3 md:gap-4 w-full max-w-md lg:max-w-lg mx-auto">
-                    {/* GIF grande superior con efecto libro y borde brillante */}
-                    <div className="relative aspect-video rounded-xl md:rounded-2xl animate-fade-in-right animation-delay-200" style={{ perspective: '2000px' }}>
-                      <div className="book-card relative w-full h-full rounded-xl md:rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 hover:shadow-cyan-400/60 hover:scale-105" style={{ transformStyle: 'preserve-3d' }}>
-                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/50 to-blue-900/50 flex items-center justify-center">
-                          <div className="text-center px-4">
-                            <p className="text-white text-xl md:text-2xl font-bold mb-1 md:mb-2">Red Global</p>
-                            <p className="text-cyan-300 text-xs md:text-sm">Conexión en tiempo real</p>
-                          </div>
+                  <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5">
+                    <p className="text-sm font-semibold text-white">
+                      Diseñado para empresas que necesitan:
+                    </p>
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      {[
+                        "Cumplimiento",
+                        "Debida diligencia",
+                        "Trazabilidad",
+                        "Auditoría",
+                        "Rapidez",
+                        "Confianza",
+                      ].map((tag) => (
+                        <div
+                          key={tag}
+                          className="rounded-xl border border-white/10 bg-slate-900/50 px-3 py-2 text-center text-sm text-slate-300"
+                        >
+                          {tag}
                         </div>
-                        <div className="book-cover absolute inset-0 rounded-xl md:rounded-2xl shadow-2xl transition-transform duration-500 cursor-pointer border-2 border-cyan-500/30" 
-                             style={{ 
-                               transformOrigin: 'left',
-                               transformStyle: 'preserve-3d'
-                             }}>
-                          <img
-                            className="w-full h-full object-cover rounded-xl md:rounded-2xl"
-                            src={networkGif}
-                            alt="Network animation"
-                            style={{ filter: 'brightness(1.3) contrast(1.1)' }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/30 to-transparent pointer-events-none"></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 md:gap-4">
-                      {/* Imagen pequeña izquierda mejorada */}
-                      <div className="relative aspect-square rounded-xl md:rounded-2xl animate-fade-in-left animation-delay-300" style={{ perspective: '2000px' }}>
-                        <div className="book-card relative w-full h-full rounded-xl md:rounded-2xl overflow-hidden shadow-xl transition-all duration-500 hover:shadow-cyan-400/50 hover:scale-105" style={{ transformStyle: 'preserve-3d' }}>
-                          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/50 to-blue-900/50 flex items-center justify-center p-2 md:p-4">
-                            <div className="text-center">
-                              <p className="text-white text-sm md:text-lg font-bold mb-0.5 md:mb-1">Seguridad</p>
-                              <p className="text-purple-300 text-[10px] md:text-xs">Encriptación total</p>
-                            </div>
-                          </div>
-                          <div className="book-cover absolute inset-0 rounded-xl md:rounded-2xl shadow-xl transition-transform duration-500 cursor-pointer border-2 border-purple-500/30" 
-                               style={{ 
-                                 transformOrigin: 'left',
-                                 transformStyle: 'preserve-3d'
-                               }}>
-                            <img
-                              className="w-full h-full object-cover rounded-xl md:rounded-2xl"
-                              src={codingGif}
-                              alt="Security animation"
-                              style={{ filter: 'brightness(1.2) contrast(1.1)' }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-purple-900/30 to-transparent pointer-events-none"></div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Imagen pequeña derecha mejorada */}
-                      <div className="relative aspect-square rounded-xl md:rounded-2xl animate-fade-in-right animation-delay-400" style={{ perspective: '2000px' }}>
-                        <div className="book-card relative w-full h-full rounded-xl md:rounded-2xl overflow-hidden shadow-xl transition-all duration-500 hover:shadow-cyan-400/50 hover:scale-105" style={{ transformStyle: 'preserve-3d' }}>
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/50 to-cyan-900/50 flex items-center justify-center p-2 md:p-4">
-                            <div className="text-center">
-                              <p className="text-white text-sm md:text-lg font-bold mb-0.5 md:mb-1">Conexiones</p>
-                              <p className="text-blue-300 text-[10px] md:text-xs">Multi-fuente</p>
-                            </div>
-                          </div>
-                          <div className="book-cover absolute inset-0 rounded-xl md:rounded-2xl shadow-xl transition-transform duration-500 cursor-pointer border-2 border-blue-500/30" 
-                               style={{ 
-                                 transformOrigin: 'left',
-                                 transformStyle: 'preserve-3d'
-                               }}>
-                            <img
-                              className="w-full h-full object-cover rounded-xl md:rounded-2xl"
-                              src={connectionGif}
-                              alt="Connection network animation"
-                              style={{ filter: 'brightness(1.2) contrast(1.1)' }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/30 to-transparent pointer-events-none"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Estadísticas flotantes */}
-                    <div className="grid grid-cols-3 gap-2 md:gap-3 animate-fade-in-up animation-delay-500">
-                      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg md:rounded-xl p-2 md:p-3 text-center hover:bg-white/10 transition-all">
-                        <p className="text-xl md:text-2xl font-bold text-cyan-400">200+</p>
-                        <p className="text-[10px] md:text-xs text-slate-400">Fuentes</p>
-                      </div>
-                      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg md:rounded-xl p-2 md:p-3 text-center hover:bg-white/10 transition-all">
-                        <p className="text-xl md:text-2xl font-bold text-cyan-400">&lt;5 Min</p>
-                        <p className="text-[10px] md:text-xs text-slate-400">Respuesta</p>
-                      </div>
-                      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg md:rounded-xl p-2 md:p-3 text-center hover:bg-white/10 transition-all">
-                        <p className="text-xl md:text-2xl font-bold text-cyan-400">99.9%</p>
-                        <p className="text-[10px] md:text-xs text-slate-400">Precisión</p>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </section>
-        </SwiperSlide>
+          </div>
+        </section>
 
-        {/* Slide 2: Servicios dinámicos (innovador) */}
-        <SwiperSlide>
-          <section className="relative w-full min-h-screen flex items-center justify-center pt-20 md:pt-24">
-            <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-blue-900/20 to-black/40" />
-            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 w-full flex flex-col items-center justify-center">
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-8 text-center animate-fade-in-down">Servicios Econfiá</h2>
-              <div className="flex flex-wrap justify-center gap-10 w-full">
-                <div className="bg-gradient-to-tr from-cyan-500/30 to-blue-500/30 rounded-2xl shadow-2xl p-8 flex flex-col items-center w-80 hover:scale-105 transition-transform duration-300 animate-fade-in-up animation-delay-100">
-                  <span className="text-cyan-400 text-5xl mb-4 animate-pulse">🔍</span>
-                  <h3 className="text-xl font-bold text-white mb-2">Consulta de antecedentes</h3>
-                  <p className="text-slate-200 text-center mb-4">Verifica antecedentes en segundos con fuentes oficiales.</p>
-                  <a href="/consulta" className="px-8 py-3 rounded-full bg-cyan-500 text-white font-semibold shadow-lg hover:bg-cyan-600 transition">Consultar</a>
+        {/* FINAL CTA */}
+        <section className="relative py-24">
+          <div className="mx-auto max-w-7xl px-4 md:px-6">
+            <div className="premium-card rounded-[2rem] p-8 md:p-14">
+              <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+                    Empieza ahora
+                  </p>
+                  <h2 className="mt-4 text-3xl font-bold text-white md:text-5xl">
+                    Haz que la verificación se vea tan sólida como tu servicio.
+                  </h2>
+                  <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+                    Una interfaz más elegante genera más confianza, comunica más valor y
+                    posiciona mejor a ECONFIA frente a clientes, aliados y equipos corporativos.
+                  </p>
                 </div>
-                <div className="bg-gradient-to-tr from-blue-500/30 to-cyan-500/30 rounded-2xl shadow-2xl p-8 flex flex-col items-center w-80 hover:scale-105 transition-transform duration-300 animate-fade-in-up animation-delay-200">
-                  <span className="text-blue-400 text-5xl mb-4 animate-pulse">📊</span>
-                  <h3 className="text-xl font-bold text-white mb-2">Reportes y análisis</h3>
-                  <p className="text-slate-200 text-center mb-4">Obtén reportes claros y análisis de riesgo personalizados.</p>
-                  <a href="/d3b7f1e9" className="px-8 py-3 rounded-full bg-blue-500 text-white font-semibold shadow-lg hover:bg-blue-600 transition">Ver reportes</a>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <a
+                    href="/register"
+                    className="rounded-2xl bg-cyan-500 px-6 py-5 text-center font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-1 hover:bg-cyan-400 hover:shadow-[0_14px_40px_rgba(34,211,238,0.25)]"
+                  >
+                    Comenzar gratis
+                  </a>
+                  <a
+                    href="/contacto"
+                    className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5 text-center font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/35 hover:bg-white/10"
+                  >
+                    Hablar con nosotros
+                  </a>
                 </div>
               </div>
             </div>
-          </section>
-        </SwiperSlide>
-
-        {/* Slide 3: Vista contratista (innovador) */}
-        <SwiperSlide>
-          <section className="relative w-full min-h-screen flex items-center justify-center pt-20 md:pt-24">
-            <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-blue-900/20 to-black/40" />
-            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 w-full flex flex-col items-center justify-center">
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-8 text-center animate-fade-in-down">Para contratistas</h2>
-              <div className="flex flex-wrap justify-center gap-10 w-full">
-                <div className="bg-gradient-to-tr from-green-400/30 to-blue-500/30 rounded-2xl shadow-2xl p-8 flex flex-col items-center w-80 hover:scale-105 transition-transform duration-300 animate-fade-in-up animation-delay-100">
-                  <span className="text-green-400 text-5xl mb-4 animate-pulse">🧑‍💼</span>
-                  <h3 className="text-xl font-bold text-white mb-2">Verificación contratista</h3>
-                  <p className="text-slate-200 text-center mb-4">Soluciones especializadas para contratistas y empresas.</p>
-                  <a href="/consulta-contratista" className="px-8 py-3 rounded-full bg-green-500 text-white font-semibold shadow-lg hover:bg-green-600 transition">Consultar</a>
-                </div>
-                <div className="bg-gradient-to-tr from-yellow-400/30 to-blue-500/30 rounded-2xl shadow-2xl p-8 flex flex-col items-center w-80 hover:scale-105 transition-transform duration-300 animate-fade-in-up animation-delay-200">
-                  <span className="text-yellow-400 text-5xl mb-4 animate-pulse">💼</span>
-                  <h3 className="text-xl font-bold text-white mb-2">Gestión de perfil</h3>
-                  <p className="text-slate-200 text-center mb-4">Administra tu perfil y accede a tus reportes fácilmente.</p>
-                  <a href="/e9c4b2f7" className="px-8 py-3 rounded-full bg-yellow-500 text-white font-semibold shadow-lg hover:bg-yellow-600 transition">Ir al perfil</a>
-                </div>
-              </div>
-            </div>
-          </section>
-        </SwiperSlide>
-      </Swiper>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
 
+/* ─────────────────────────────────────────────────────────────
+   App — router raíz
+───────────────────────────────────────────────────────────── */
 export default function App() {
   return (
     <ConfigProvider theme={antdTheme}>
@@ -423,54 +621,47 @@ export default function App() {
           <ParticlesBackground />
           <Routes>
             {/* Públicas */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/precios" element={<Pricing />} />
-            <Route path="/nosotros" element={<Nosotros />} />
-            <Route path="/contacto" element={<Contacto />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/forgot" element={<ForgotPassword />} />
-            <Route path="/reset" element={<ResetPassword />} />
-            
-            {/* Páginas de servicios públicas */}
-            <Route path="/servicio-econfia" element={<ServicioEconfia />} />
-            <Route path="/servicio-contratista" element={<ServicioContratista />} />
-            <Route path="/servicio-seguridad" element={<ServicioSeguridad />} />
-
-            {/* Verificación pública de reporte — accesible al escanear QR del PDF */}
+            <Route path="/"                  element={<Home />}             />
+            <Route path="/login"             element={<Login />}            />
+            <Route path="/register"          element={<Register />}         />
+            <Route path="/precios"           element={<Pricing />}          />
+            <Route path="/nosotros"          element={<Nosotros />}         />
+            <Route path="/contacto"          element={<Contacto />}         />
+            <Route path="/blog"              element={<Blog />}             />
+            <Route path="/blog/:slug"        element={<BlogPost />}         />
+            <Route path="/forgot"            element={<ForgotPassword />}   />
+            <Route path="/reset"             element={<ResetPassword />}    />
+            <Route path="/servicio-econfia"      element={<ServicioEconfia />}      />
+            <Route path="/servicio-contratista"  element={<ServicioContratista />}  />
+            <Route path="/servicio-seguridad"    element={<ServicioSeguridad />}    />
+            <Route path="/servicio-titulos"      element={<ServicioTitulos />}      />
+            {/* Verificación pública QR */}
             <Route path="/econfia/resumen-consulta/:consultaId" element={<VerificarReporte />} />
 
-            {/* Protegidas (Dashboard como layout) */}
+            {/* Protegidas */}
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
-              {/* Hijas protegidas */}
-              <Route path="/3c8f1a2e" element={<Consulta />} />
-              <Route path="/consulta" element={<Consulta />} />
-              <Route path="/a1e6c4b8" element={<ConsultaEssencialExpress />} />
-              <Route path="/7f3a9e2b" element={<ConsultaFask />} />
-              <Route path="/2b7d5e9c" element={<TitulosValidationForm />} />
-              <Route path="/9e3a6c1f" element={<ConsultaMedida />} />
-              <Route path="/b4f8d2e7" element={<ConsultaBasicElemnt />} />
-              <Route path="/6c1b9f3d" element={<ConsultaContratista />} />
-              <Route path="/4a7e2b8f" element={<ConsultaEmpresa />} />
-              <Route path="/8f5c3a1b/:nit" element={<EmpresaRuesResult />} />
-              <Route path="/d3b7f1e9" element={<Resultados />} />
-              <Route path="/d3b7f1e9/:consultaId" element={<Resultados />} />
-              <Route path="/e9c4b2f7" element={<Profile />} />
-              <Route path="/f1d8a5c3" element={<LogOut />} />
-              <Route path="/c2e6b9a4" element={<Ayuda />} />
-              {/* CRUD admin dentro del layout para mostrar TaskBar */}
-              <Route path="/7b3f9d1e" element={<AdminUsuarios />} />
-              <Route path="/1e5c8a4b" element={<AdminPlanes />} />
-              <Route path="/4d9b2f6e" element={<AdminFuentes />} />
+              <Route path="/3c8f1a2e"          element={<Consulta />}                />
+              <Route path="/consulta"           element={<Consulta />}                />
+              <Route path="/a1e6c4b8"          element={<ConsultaEssencialExpress />} />
+              <Route path="/7f3a9e2b"          element={<ConsultaFask />}             />
+              <Route path="/2b7d5e9c"          element={<TitulosValidationForm />}    />
+              <Route path="/9e3a6c1f"          element={<ConsultaMedida />}           />
+              <Route path="/b4f8d2e7"          element={<ConsultaBasicElemnt />}      />
+              <Route path="/6c1b9f3d"          element={<ConsultaContratista />}      />
+              <Route path="/4a7e2b8f"          element={<ConsultaEmpresa />}          />
+              <Route path="/8f5c3a1b/:nit"     element={<EmpresaRuesResult />}        />
+              <Route path="/d3b7f1e9"          element={<Resultados />}               />
+              <Route path="/d3b7f1e9/:consultaId" element={<Resultados />}            />
+              <Route path="/e9c4b2f7"          element={<Profile />}                  />
+              <Route path="/f1d8a5c3"          element={<LogOut />}                   />
+              <Route path="/c2e6b9a4"          element={<Ayuda />}                    />
+              <Route path="/7b3f9d1e"          element={<AdminUsuarios />}            />
+              <Route path="/1e5c8a4b"          element={<AdminPlanes />}              />
+              <Route path="/4d9b2f6e"          element={<AdminFuentes />}             />
             </Route>
-            {/* Panel de administración general (si lo usas) */}
+
             <Route path="/a8e3c7b2" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
           </Routes>
-          
-          {/* Chatbot de soporte flotante - Deshabilitado temporalmente */}
-          {/* <ChatbotFlotante /> */}
         </Router>
       </CardProvider>
     </ConfigProvider>

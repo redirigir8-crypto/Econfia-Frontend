@@ -86,12 +86,22 @@ export default function Header() {
                 </Link>
                 <Link
                   to="/servicio-seguridad"
-                  className="block px-4 py-3 hover:bg-gray-100 rounded-b-lg transition border-t border-gray-100"
+                  className="block px-4 py-3 hover:bg-gray-100 transition border-t border-gray-100"
                   onClick={() => setIsServiciosOpen(false)}
                 >
                   <span className="font-semibold">Econfia Estudios de seguridad</span>
                   <p className="text-xs text-gray-600 mt-1">
                     Selección de personal especializada
+                  </p>
+                </Link>
+                <Link
+                  to="/servicio-titulos"
+                  className="block px-4 py-3 hover:bg-gray-100 rounded-b-lg transition border-t border-gray-100"
+                  onClick={() => setIsServiciosOpen(false)}
+                >
+                  <span className="font-semibold">Econfia Títulos</span>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Validación documental y soportes académicos
                   </p>
                 </Link>
               </div>
@@ -200,6 +210,17 @@ export default function Header() {
                   >
                     <span className="font-semibold">Econfia Seguridad</span>
                     <p className="text-xs text-white/60 mt-1">Estudios de personal</p>
+                  </Link>
+                  <Link
+                    to="/servicio-titulos"
+                    className="block text-white/80 hover:text-cyan-300 transition py-2"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setIsServiciosOpen(false);
+                    }}
+                  >
+                    <span className="font-semibold">Econfia Títulos</span>
+                    <p className="text-xs text-white/60 mt-1">Validación documental</p>
                   </Link>
                 </div>
               )}
