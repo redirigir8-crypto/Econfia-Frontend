@@ -295,7 +295,7 @@ function Home() {
 
   const advantages = [
     "Evidencia visual y soporte verificable en cada resultado.",
-    "Scoring de riesgo orientado a SARLAFT y SACRILAFT.",
+    "Scoring de riesgo orientado a SARLAFT y SAGRILAFT.",
     "Consultas individuales y masivas desde un mismo ecosistema.",
     "Arquitectura orientada a velocidad, trazabilidad y cumplimiento.",
   ];
