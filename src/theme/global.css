@@ -41,6 +41,12 @@ body::before {
   to   { transform: rotateY(360deg) translateZ(20px); }
 }
 
+@keyframes scanLine {
+  0%   { top: 0%; }
+  50%  { top: calc(100% - 3px); }
+  100% { top: 0%; }
+}
+
 /* Barra indeterminada tipo Android */
 @keyframes indeterminate-bar-pingpong {
   0% {

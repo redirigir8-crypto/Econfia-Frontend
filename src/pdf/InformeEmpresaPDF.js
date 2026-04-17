@@ -14,6 +14,16 @@ const C = {
   headerGreen: [10, 143, 64],
   headerDark: [7, 33, 52],
   footerBlue: [8, 39, 124],
+  brandStart: [12, 146, 83],
+  brandMid: [8, 97, 112],
+  brandEnd: [5, 20, 44],
+  bgTop: [1, 12, 34],
+  bgMid: [2, 22, 49],
+  bgBottom: [2, 6, 23],
+  panelStart: [12, 36, 75],
+  panelEnd: [6, 20, 48],
+  footerStart: [7, 47, 137],
+  footerEnd: [8, 22, 77],
   panel: [8, 25, 55],
   panel2: [10, 30, 64],
   glass: [12, 35, 73],
@@ -108,8 +118,7 @@ function drawCover(ctx) {
   doc.setDrawColor(...accent);
   doc.setLineWidth(2);
   doc.circle(PAGE_W / 2, infoY + 25, 26, "S");
-  doc.setFillColor(4, 26, 12);
-  doc.circle(PAGE_W / 2, infoY + 25, 22, "F");
+  drawGradientCircle(doc, PAGE_W / 2, infoY + 25, 22, [2, 22, 30], [7, 73, 36], 18);
   doc.setFont("times", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...accent);
@@ -337,14 +346,12 @@ function drawShell(ctx, label) {
   const { doc } = ctx;
   drawPageBackground(doc);
 
-  doc.setFillColor(...C.headerGreen);
-  doc.roundedRect(0, 0, PAGE_W * 0.56, 39, 0, 0, "F");
-  doc.setFillColor(...C.headerDark);
-  doc.rect(PAGE_W * 0.56, 0, PAGE_W * 0.44, 39, "F");
-  doc.setFillColor(...C.headerGreen);
-  doc.roundedRect(0, 0, PAGE_W, 39, 0, 0, "F");
-  doc.setFillColor(...C.headerDark);
-  doc.triangle(PAGE_W * 0.56, 0, PAGE_W, 0, PAGE_W, 39, "F");
+  drawGradientRect(doc, 0, 0, PAGE_W, 39, C.brandStart, C.brandEnd, 36, "horizontal");
+  doc.setFillColor(5, 18, 41);
+  doc.rect(PAGE_W - 45, 0, 45, 39, "F");
+  doc.setDrawColor(89, 209, 170);
+  doc.setLineWidth(0.35);
+  doc.line(0, 38.6, PAGE_W, 38.6);
 
   drawLogoPlate(doc, MARGIN + 6, 8, 33, 17);
 
@@ -368,18 +375,13 @@ function drawShell(ctx, label) {
 }
 
 function drawPageBackground(doc) {
-  doc.setFillColor(...C.navy);
-  doc.rect(0, 0, PAGE_W, PAGE_H, "F");
-  doc.setFillColor(1, 14, 36);
-  doc.rect(0, 39, PAGE_W, 115, "F");
-  doc.setFillColor(2, 7, 25);
-  doc.rect(0, 154, PAGE_W, PAGE_H - 154, "F");
+  drawGradientRect(doc, 0, 0, PAGE_W, 155, C.bgTop, C.bgMid, 34, "vertical");
+  drawGradientRect(doc, 0, 155, PAGE_W, PAGE_H - 155, C.bgMid, C.bgBottom, 34, "vertical");
 }
 
 function drawFooter(ctx) {
   const { doc, page } = ctx;
-  doc.setFillColor(...C.footerBlue);
-  doc.rect(0, FOOTER_Y - 2, PAGE_W, 19, "F");
+  drawGradientRect(doc, 0, FOOTER_Y - 2, PAGE_W, 19, C.footerStart, C.footerEnd, 28, "horizontal");
   doc.setDrawColor(...C.softLine);
   doc.setLineWidth(0.2);
   doc.line(MARGIN, FOOTER_Y + 13.2, PAGE_W - MARGIN, FOOTER_Y + 13.2);
@@ -410,8 +412,7 @@ function sectionTitle(ctx, title, color = C.sky, size = 12) {
   ensureSpace(ctx, 12);
   const { doc } = ctx;
   ctx.section += 1;
-  doc.setFillColor(...C.panel);
-  doc.roundedRect(MARGIN, ctx.y - 6, CONTENT_W, 14, 4, 4, "F");
+  drawGradientRect(doc, MARGIN, ctx.y - 6, CONTENT_W, 14, C.panelStart, C.panelEnd, 14, "horizontal");
   doc.setDrawColor(...C.softLine);
   doc.setLineWidth(0.16);
   doc.roundedRect(MARGIN, ctx.y - 6, CONTENT_W, 14, 4, 4, "S");
@@ -436,8 +437,7 @@ function paragraph(ctx, text, options = {}) {
   ensureSpace(ctx, height + 2);
 
   if (box) {
-    doc.setFillColor(...C.panel);
-    doc.roundedRect(MARGIN, ctx.y, CONTENT_W, height, 6, 6, "F");
+    drawGradientRect(doc, MARGIN, ctx.y, CONTENT_W, height, C.panelStart, C.panelEnd, 18, "vertical");
     doc.setDrawColor(...C.softLine);
     doc.setLineWidth(0.16);
     doc.roundedRect(MARGIN, ctx.y, CONTENT_W, height, 6, 6, "S");
@@ -463,8 +463,7 @@ function bulletList(ctx, items, color) {
     const lines = doc.splitTextToSize(String(item), CONTENT_W - 12);
     const height = Math.max(13, lines.length * 4.5 + 7);
     ensureSpace(ctx, height);
-    doc.setFillColor(...C.panel);
-    doc.roundedRect(MARGIN, ctx.y, CONTENT_W, height, 5, 5, "F");
+    drawGradientRect(doc, MARGIN, ctx.y, CONTENT_W, height, C.panelStart, C.panelEnd, 14, "horizontal");
     doc.setDrawColor(...C.softLine);
     doc.setLineWidth(0.16);
     doc.roundedRect(MARGIN, ctx.y, CONTENT_W, height, 5, 5, "S");
@@ -497,8 +496,7 @@ function keyValueGrid(ctx, entries) {
 
 function drawKvCell(ctx, label, value, x, y, w) {
   const { doc } = ctx;
-  doc.setFillColor(...C.panel);
-  doc.roundedRect(x, y, w, 17, 4, 4, "F");
+  drawGradientRect(doc, x, y, w, 17, C.panelStart, C.panelEnd, 10, "horizontal");
   doc.setDrawColor(...C.softLine);
   doc.setLineWidth(0.16);
   doc.roundedRect(x, y, w, 17, 4, 4, "S");
@@ -518,8 +516,7 @@ function card(ctx, title, body, color) {
   const height = Math.max(20, bodyLines.length * 4.4 + 14);
   ensureSpace(ctx, height + 2);
 
-  doc.setFillColor(...C.panel);
-  doc.roundedRect(MARGIN, ctx.y, CONTENT_W, height, 6, 6, "F");
+  drawGradientRect(doc, MARGIN, ctx.y, CONTENT_W, height, C.panelStart, C.panelEnd, 18, "horizontal");
   doc.setDrawColor(...C.softLine);
   doc.setLineWidth(0.16);
   doc.roundedRect(MARGIN, ctx.y, CONTENT_W, height, 6, 6, "S");
@@ -544,8 +541,7 @@ function drawMetricGrid(ctx, metrics, startY) {
 
   metrics.forEach(([label, value], index) => {
     const x = MARGIN + index * (boxW + 3);
-    doc.setFillColor(...C.panel);
-    doc.roundedRect(x, ctx.y, boxW, 31, 6, 6, "F");
+    drawGradientRect(doc, x, ctx.y, boxW, 31, C.panelStart, C.panelEnd, 12, "vertical");
     doc.setDrawColor(...C.softLine);
     doc.setLineWidth(0.16);
     doc.roundedRect(x, ctx.y, boxW, 31, 6, 6, "S");
@@ -570,8 +566,7 @@ function drawRiskPanel(ctx, alertaDian) {
     ? "Prioridad alta: revisar soportes fiscales, autorizaciones, facturas y trazabilidad comercial antes de aprobar operaciones."
     : "Lectura favorable: no se encontraron coincidencias en el listado consultado. Mantener verificacion periodica y debida diligencia documental.";
 
-  doc.setFillColor(...C.panel);
-  doc.roundedRect(MARGIN, ctx.y, CONTENT_W, 30, 7, 7, "F");
+  drawGradientRect(doc, MARGIN, ctx.y, CONTENT_W, 30, C.panelStart, C.panelEnd, 18, "horizontal");
   doc.setDrawColor(...(alertaDian ? C.amber : C.softLine));
   doc.setLineWidth(0.18);
   doc.roundedRect(MARGIN, ctx.y, CONTENT_W, 30, 7, 7, "S");
@@ -587,6 +582,35 @@ function drawRiskPanel(ctx, alertaDian) {
   doc.text(doc.splitTextToSize(body, 140), MARGIN + 8, ctx.y + 18);
 
   ctx.y += 38;
+}
+
+function drawGradientRect(doc, x, y, w, h, from, to, steps = 18, direction = "horizontal") {
+  const total = Math.max(2, steps);
+  for (let i = 0; i < total; i += 1) {
+    const t = total === 1 ? 0 : i / (total - 1);
+    const color = mixColor(from, to, t);
+    doc.setFillColor(...color);
+    if (direction === "vertical") {
+      const stepH = h / total + 0.15;
+      doc.rect(x, y + (h / total) * i, w, stepH, "F");
+    } else {
+      const stepW = w / total + 0.15;
+      doc.rect(x + (w / total) * i, y, stepW, h, "F");
+    }
+  }
+}
+
+function drawGradientCircle(doc, cx, cy, radius, outer, inner, steps = 18) {
+  const total = Math.max(2, steps);
+  for (let i = total; i >= 1; i -= 1) {
+    const t = (total - i) / (total - 1);
+    doc.setFillColor(...mixColor(outer, inner, t));
+    doc.circle(cx, cy, (radius * i) / total, "F");
+  }
+}
+
+function mixColor(from, to, t) {
+  return from.map((channel, index) => Math.round(channel + (to[index] - channel) * t));
 }
 
 function drawStatusBadge(doc, x, y, text, color, width = 52) {
