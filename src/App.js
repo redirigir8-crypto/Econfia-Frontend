@@ -41,21 +41,18 @@ import ConsultaEmpresa from "./views/ConsultaEmpresa";
 import ConsultaFask from "./views/ConsultaFask";
 import ConsultaEssencialExpress from "./views/ConsultaEssencialExpress";
 import VerificarReporte from "./pages/VerificarReporte";
+import Beneficios from "./pages/Beneficios";
 import {
   ShieldCheck,
   Zap,
-  BarChart3,
   FileSpreadsheet,
   Search,
   Briefcase,
   Building2,
   CreditCard,
   BadgeCheck,
-  FileText,
-  Globe2,
   GraduationCap,
   Sparkles,
-  Activity,
   ScanSearch,
 } from "lucide-react";
 import networkGif from "./assets/GIF by São Paulo City.gif";
@@ -291,7 +288,6 @@ function Home() {
     { label: "Consulta de antecedentes", href: "/consulta", Icon: Search },
     { label: "Consulta de contratistas", href: "/6c1b9f3d", Icon: Briefcase },
     { label: "Empresas y RUES", href: "/4a7e2b8f", Icon: Building2 },
-    { label: "Econfia Títulos", href: "/servicio-titulos", Icon: GraduationCap },
     { label: "Validación de títulos", href: "/2b7d5e9c", Icon: GraduationCap },
     { label: "Consulta Express", href: "/a1e6c4b8", Icon: Sparkles },
     { label: "Planes y precios", href: "/precios", Icon: CreditCard },
@@ -592,7 +588,7 @@ function Home() {
                     href="/register"
                     className="rounded-2xl bg-cyan-500 px-6 py-5 text-center font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-1 hover:bg-cyan-400 hover:shadow-[0_14px_40px_rgba(34,211,238,0.25)]"
                   >
-                    Comenzar gratis
+                    Comenzar 
                   </a>
                   <a
                     href="/contacto"
@@ -637,6 +633,7 @@ export default function App() {
             <Route path="/servicio-titulos"      element={<ServicioTitulos />}      />
             {/* Verificación pública QR */}
             <Route path="/econfia/resumen-consulta/:consultaId" element={<VerificarReporte />} />
+            <Route path="/beneficios" element={<Beneficios />} />
 
             {/* Protegidas */}
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>

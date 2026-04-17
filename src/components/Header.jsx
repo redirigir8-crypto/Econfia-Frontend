@@ -109,6 +109,15 @@ export default function Header() {
           </div>
 
           <NavLink
+            to="/beneficios"
+            className={({ isActive }) =>
+              `${linkBase} ${isActive ? linkActive : ""}`
+            }
+          >
+            Beneficios
+          </NavLink>
+
+          <NavLink
             to="/blog"
             className={({ isActive }) =>
               `${linkBase} ${isActive ? linkActive : ""}`
@@ -117,8 +126,8 @@ export default function Header() {
             Blog
           </NavLink>
 
-          <Link 
-            to="/nosotros" 
+          <Link
+            to="/nosotros"
             className="hover:text-cyan-300 transition"
           >
             Nosotros
@@ -225,6 +234,16 @@ export default function Header() {
                 </div>
               )}
             </div>
+
+            <NavLink
+              to="/beneficios"
+              className={({ isActive }) =>
+                `text-white font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition`
+              }
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Beneficios
+            </NavLink>
 
             <NavLink
               to="/blog"

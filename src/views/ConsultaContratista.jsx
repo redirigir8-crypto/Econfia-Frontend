@@ -307,17 +307,14 @@ export default function ConsultaContratista() {
           style={{ animationDelay: "1s" }}
         />
 
-        {/* Logo hero circular grande — esquina superior izquierda */}
-        <div className="hidden md:block absolute md:top-6 md:left-6 z-20">
-          <div className="relative">
-            <div className="absolute -inset-2 md:-inset-4 rounded-full bg-gradient-to-br from-cyan-500/25 via-blue-600/15 to-transparent animate-pulse blur-2xl" />
-            <div className="absolute -inset-1 md:-inset-2 rounded-full border border-cyan-400/15" />
-            <div className="absolute -inset-2 md:-inset-4 rounded-full border border-cyan-300/8" />
-            <div className="relative flex items-center justify-center w-20 h-20 sm:w-28 sm:h-28 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-slate-800 via-slate-850 to-slate-950 border border-white/10 shadow-[0_0_60px_rgba(6,182,212,0.2)]">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/[0.02] to-white/[0.06]" />
-              <img src="/1-e9a7e544.ico" alt="Econfía" className="w-14 sm:w-20 md:w-20 h-auto relative z-10 drop-shadow-[0_0_20px_rgba(239,68,68,0.7)]" />
-            </div>
-          </div>
+        {/* Logo — esquina superior izquierda */}
+        <div className="hidden md:block absolute md:top-6 md:left-6 z-20" style={{ perspective: "800px" }}>
+          <img
+            src="/1-e9a7e544.ico"
+            alt="Econfía"
+            className="w-20 h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+            style={{ animation: "flipY 2.5s linear infinite", transformStyle: "preserve-3d" }}
+          />
         </div>
         <div className="max-w-5xl mx-auto px-4 w-full relative z-10">
           <div className="grid md:grid-cols-2 gap-6 items-center">

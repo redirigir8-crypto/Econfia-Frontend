@@ -36,6 +36,11 @@ body::before {
   100% { transform: translate(20px, 20px) scale(1.05); }
 }
 
+@keyframes flipY {
+  from { transform: rotateY(0deg)   translateZ(20px); }
+  to   { transform: rotateY(360deg) translateZ(20px); }
+}
+
 /* Barra indeterminada tipo Android */
 @keyframes indeterminate-bar-pingpong {
   0% {
