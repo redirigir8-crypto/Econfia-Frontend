@@ -1,334 +1,419 @@
 // src/pages/Pricing.jsx
 import React, { useState } from "react";
 import Header from "../components/Header";
-import FullPageSlider from "../components/FullPageSlider";
 import { FaDatabase, FaBolt, FaShieldAlt, FaHeadset } from "react-icons/fa";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-// Agregar estilos de animación
-const animationStyles = `
-  @keyframes fadeInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
+/* ─── Estilos globales ─── */
+const STYLE_ID = "econfia-pricing-styles";
+const pricingStyles = `
   @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-  
-  .animate-fade-in-down {
-    animation: fadeInDown 0.8s ease-out forwards;
+  .plan-card {
+    position: relative;
+    overflow: visible;
+    border-radius: 1.5rem;
+    background: linear-gradient(160deg, rgba(15,23,42,0.85) 0%, rgba(2,6,23,0.92) 100%);
+    border: 1px solid rgba(148,163,184,0.12);
+    transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+    height: 100%;
   }
-  
-  .animate-fade-in-up {
-    animation: fadeInUp 0.8s ease-out forwards;
+  .plan-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(34,211,238,0.35);
+    box-shadow: 0 20px 60px rgba(8,145,178,0.2);
   }
-  
-  .animation-delay-100 { animation-delay: 0.1s; opacity: 0; }
-  .animation-delay-200 { animation-delay: 0.2s; opacity: 0; }
+  .plan-card.featured {
+    border-color: rgba(34,211,238,0.45);
+    box-shadow: 0 0 0 1px rgba(34,211,238,0.2), 0 20px 60px rgba(8,145,178,0.25);
+  }
+  .plan-card.featured:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0 0 1px rgba(34,211,238,0.4), 0 28px 80px rgba(8,145,178,0.3);
+  }
+  .plan-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 1.5rem;
+    background: radial-gradient(circle at top right, rgba(34,211,238,0.08), transparent 40%);
+    pointer-events: none;
+  }
+  .fade-up { animation: fadeInUp .6s ease-out both; }
 `;
 
-if (typeof document !== 'undefined') {
-  const styleTag = document.createElement('style');
-  styleTag.innerHTML = animationStyles;
-  if (!document.head.querySelector('style[data-pricing-animations]')) {
-    styleTag.setAttribute('data-pricing-animations', 'true');
-    document.head.appendChild(styleTag);
-  }
+if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
+  const tag = document.createElement("style");
+  tag.id = STYLE_ID;
+  tag.innerHTML = pricingStyles;
+  document.head.appendChild(tag);
 }
 
-const LOGO = "/img/logo-econfia-1.png";
-/* --- Tarjeta de plan --- */
-/* --- Tarjeta de plan --- */
-const PlanCard = ({
-  title,
-  subtitle,
-  badge,
-  features = [],
-  cta = "Empezar",
-  highlight = false,
-}) => {
-  const navigate = useNavigate();
-  return (
-    <div
-      className={[
-        "relative rounded-2xl border bg-gradient-to-br from-white/5 to-white/[0.02] border-white/10",
-        "p-6 md:p-7 shadow-3xl transition-all duration-500",
-        "hover:shadow-[0_0_35px_rgba(34,211,238,0.3)] hover:border-cyan-300/50 hover:scale-105 hover:from-white/10 hover:to-white/5",
-        highlight ? "outline outline-2 outline-cyan-400/50 shadow-[0_0_25px_rgba(34,211,238,0.25)]" : "",
-        "m-0 h-full group cursor-pointer",
-      ].join(" ")}
-    >
-      {badge && (
-        <div className="absolute -top-3 right-4 px-4 py-1.5 text-xs rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg animate-pulse">
-          {badge}
-        </div>
-      )}
-
-      <div className="flex flex-col h-full m-0">
-        {/* Logo + Título */}
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-all group-hover:scale-110">
-            <img
-              src={LOGO}
-              alt="Econfia Logo"
-              className="w-6 h-6 object-contain"
-            />
-          </div>
-
-          <h3
-            className="text-[clamp(1.25rem,1.7vw,1.55rem)] font-bold leading-tight m-0 group-hover:text-cyan-300 transition-colors"
-            style={{ fontFamily: "poppins, sans-serif" }}
-          >
-            {title}
-          </h3>
-        </div>
-
-        <p className="text-gray-300 group-hover:text-gray-200 mt-1.5 m-0 text-[1rem] leading-relaxed transition-colors">{subtitle}</p>
-
-        {/* Bullets */}
-        <ul className="mt-5 mb-6 space-y-3 text-gray-200 text-[1rem] leading-[1.65] m-0 flex-grow">
-          {features.map((f, idx) => (
-            <li key={f} className="flex items-start gap-3 m-0 group/item hover:translate-x-1 transition-transform" style={{ animationDelay: `${idx * 50}ms` }}>
-              <span className="w-5 h-5 mt-0.5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shrink-0 flex items-center justify-center group-hover/item:scale-125 transition-transform">
-                <span className="text-white text-xs font-bold">✓</span>
-              </span>
-              <span className="m-0 group-hover/item:text-white transition-colors">{f}</span>
-            </li>
-          ))}
-        </ul>
-
-        {/* Botón */}
-        <button
-          className="mt-auto self-center px-8 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold border-2 border-transparent hover:from-transparent hover:to-transparent hover:border-cyan-400 hover:text-cyan-400 transition-all shadow-lg hover:shadow-cyan-400/50 transform hover:scale-105"
-          style={{ fontFamily: "poppins, sans-serif" }}
-          onClick={() => navigate('/contacto')}
-        >
-          {cta}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-
-/* --- Datos de planes (4 en total) --- */
+/* ─── Datos de planes ─── */
 const PLANS = [
   {
-    title: "E-CoreFull",
-    subtitle: "Ideal para organizaciones que necesitan máxima cobertura.",
+    id: "essential",
+    title: "E-ssential",
+    subtitle: "Consultas puntuales a fuentes clave. Ideal para validaciones ocasionales.",
+    color: "cyan",
     features: [
       "1 validación = 1 consulta",
-      "Acceso a +200 fuentes",
-      "Resultados en minutos",
-      "Reporte en PDF",
+      "Acceso a fuentes esenciales",
+      "Antecedentes básicos (Policía, Procuraduría, Contraloría)",
+      "Reporte PDF individual",
+      "Soporte estándar",
     ],
     cta: "Empezar ahora",
-    highlight: false,
+    featured: false,
   },
   {
-    title: "E-Contratista",
-    subtitle: "Ideal para Contratistas, que busca optimizar su tiempo de busqueda en documentos importantes.",
+    id: "essential-express",
+    title: "Essential Express",
+    subtitle: "Validación rápida con las fuentes más consultadas. Resultados en segundos.",
+    color: "teal",
+    features: [
+      "1 validación = 1 consulta",
+      "Fuentes de alta velocidad seleccionadas",
+      "Resultados optimizados en segundos",
+      "Reporte PDF individual",
+      "Ideal para procesos de alta rotación",
+    ],
+    cta: "Empezar ahora",
+    featured: false,
+  },
+  {
+    id: "basic-element",
+    title: "Basic Element",
+    subtitle: "El punto de entrada a ECONFIA. Validación esencial a bajo costo.",
+    color: "slate",
+    features: [
+      "1 validación = 1 consulta",
+      "Fuentes básicas de verificación",
+      "Reporte PDF individual",
+      "Soporte estándar",
+    ],
+    cta: "Empezar ahora",
+    featured: false,
+  },
+  {
+    id: "fask",
+    title: "EconfiaFast",
+    subtitle: "El plan más completo y veloz. Cobertura total con prioridad máxima.",
+    color: "blue",
     badge: "Popular",
     features: [
       "1 validación = 1 consulta",
-      "Acceso a 15 fuentes",
-      "Reportes y auditoría",
+      "Acceso a +200 fuentes nacionales e internacionales",
+      "Listas OFAC, ONU, Interpol, PEP y SARLAFT",
+      "Reporte PDF individual",
+      "Reporte PDF resumen (sin capturas)",
+      "Reporte PDF consolidado con capturas",
+      "Resultados en tiempo real con prioridad",
       "Soporte prioritario",
-      "Reporte en PDF"
     ],
     cta: "Empezar ahora",
-    highlight: true,
+    featured: true,
   },
   {
-    title: "E-ssential",
-    subtitle: "Idial para consultar fuentes especificas y necesarias.",
+    id: "corefull",
+    title: "E-CoreFull",
+    subtitle: "Máxima cobertura para organizaciones con procesos de cumplimiento exigentes.",
+    color: "indigo",
     features: [
       "1 validación = 1 consulta",
       "Acceso a +200 fuentes",
-      "Soporte estándar",
-      "Reporte en PDF"
+      "Listas restrictivas nacionales e internacionales",
+      "Reporte PDF individual y consolidado",
+      "Exportación Excel para análisis BI",
+      "Resultados en tiempo real",
+      "Soporte prioritario",
     ],
     cta: "Empezar ahora",
-    highlight: false,
-  }
+    featured: false,
+  },
+  {
+    id: "contratista",
+    title: "E-Contratista",
+    subtitle: "Centraliza los documentos que necesita un contratista antes de contratar.",
+    color: "purple",
+    features: [
+      "1 validación = 1 consulta",
+      "Certificados: Contraloría, Procuraduría, Policía",
+      "Medidas Correctivas y Sanciones Disciplinarias",
+      "Constancias de afiliación y soportes contractuales",
+      "Reporte PDF individual y auditoría",
+      "Soporte prioritario",
+    ],
+    cta: "Empezar ahora",
+    featured: false,
+  },
+  {
+    id: "titulos",
+    title: "Validación de Títulos",
+    subtitle: "Verifica la autenticidad de títulos y documentos académicos para RRHH y cumplimiento.",
+    color: "amber",
+    features: [
+      "Revisión de títulos y soportes académicos",
+      "Validación documental para selección y vinculación",
+      "Evidencia organizada para auditoría interna",
+      "Soporte para equipos de talento humano",
+      "Reporte con contexto claro para decisiones",
+    ],
+    cta: "Empezar ahora",
+    featured: false,
+  },
+  {
+    id: "empresa",
+    title: "Empresa (RUES)",
+    subtitle: "Consulta y valida información empresarial desde el registro oficial colombiano.",
+    color: "emerald",
+    features: [
+      "Consulta desde el RUES (Registro Único Empresarial)",
+      "Razón social, NIT, estado y representantes legales",
+      "Validación de proveedores, aliados y terceros",
+      "Reporte PDF formato ejecutivo A4",
+      "Ideal para due diligence corporativo",
+    ],
+    cta: "Empezar ahora",
+    featured: false,
+  },
 ];
 
-/* --- Slide de precios con navegación --- */
-function PricingSlide() {
-  const perPage = 2;
+const colorText = {
+  cyan:   "text-cyan-300",
+  teal:   "text-teal-300",
+  slate:  "text-slate-300",
+  blue:   "text-blue-300",
+  indigo: "text-indigo-300",
+  purple: "text-purple-300",
+  emerald:"text-emerald-300",
+  amber:  "text-amber-300",
+};
+const colorBadgeBg = {
+  cyan:   "from-cyan-500 to-blue-500",
+  teal:   "from-teal-500 to-cyan-500",
+  slate:  "from-slate-500 to-slate-600",
+  blue:   "from-blue-500 to-indigo-500",
+  indigo: "from-indigo-500 to-violet-500",
+  purple: "from-purple-500 to-pink-500",
+  emerald:"from-emerald-500 to-teal-500",
+  amber:  "from-amber-500 to-orange-500",
+};
+const colorCheckBg = {
+  cyan:   "bg-cyan-400/15 text-cyan-300",
+  teal:   "bg-teal-400/15 text-teal-300",
+  slate:  "bg-slate-400/15 text-slate-300",
+  blue:   "bg-blue-400/15 text-blue-300",
+  indigo: "bg-indigo-400/15 text-indigo-300",
+  purple: "bg-purple-400/15 text-purple-300",
+  emerald:"bg-emerald-400/15 text-emerald-300",
+  amber:  "bg-amber-400/15 text-amber-300",
+};
+const colorCtaBorder = {
+  cyan:   "hover:border-cyan-400/50",
+  teal:   "hover:border-teal-400/50",
+  slate:  "hover:border-slate-400/50",
+  blue:   "hover:border-blue-400/50",
+  indigo: "hover:border-indigo-400/50",
+  purple: "hover:border-purple-400/50",
+  emerald:"hover:border-emerald-400/50",
+  amber:  "hover:border-amber-400/50",
+};
+
+/* ─── Tarjeta de plan ─── */
+function PlanCard({ title, subtitle, color, badge, features, cta, featured }) {
+  const navigate = useNavigate();
+  return (
+    <div className={`plan-card p-7 flex flex-col gap-5 ${featured ? "featured" : ""}`}>
+      {/* Badge */}
+      {badge && (
+        <div className={`absolute -top-3.5 left-1/2 -translate-x-1/2 flex items-center gap-1 px-4 py-1 rounded-full bg-gradient-to-r ${colorBadgeBg[color]} text-white text-[11px] font-bold shadow-lg whitespace-nowrap`}>
+          <Star className="w-3 h-3 fill-white" /> {badge}
+        </div>
+      )}
+
+      {/* Encabezado */}
+      <div className="mt-1">
+        <h3 className={`text-xl font-bold ${colorText[color]}`} style={{ fontFamily: "poppins, sans-serif" }}>
+          {title}
+        </h3>
+        <p className="text-slate-400 text-sm mt-1 leading-relaxed">{subtitle}</p>
+      </div>
+
+      {/* Divider */}
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+      {/* Features */}
+      <ul className="flex flex-col gap-3 flex-1">
+        {features.map((f) => (
+          <li key={f} className="flex items-start gap-3">
+            <span className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${colorCheckBg[color]}`}>
+              <Check className="w-3 h-3" strokeWidth={3} />
+            </span>
+            <span className="text-slate-300 text-sm leading-snug">{f}</span>
+          </li>
+        ))}
+      </ul>
+
+      {/* CTA */}
+      <button
+        onClick={() => navigate("/contacto")}
+        className={`mt-2 w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+          featured
+            ? `bg-gradient-to-r ${colorBadgeBg[color]} text-white hover:opacity-90 hover:shadow-lg`
+            : `border border-white/15 bg-white/5 text-white hover:bg-white/10 ${colorCtaBorder[color]}`
+        }`}
+        style={{ fontFamily: "poppins, sans-serif" }}
+      >
+        {cta}
+      </button>
+    </div>
+  );
+}
+
+/* ─── Carrusel de planes ─── */
+const PER_PAGE = 3;
+
+function PricingCarousel() {
   const [page, setPage] = useState(0);
-  const [dir, setDir] = useState(1); // 1→ derecha, -1→ izquierda
-  const totalPages = Math.ceil(PLANS.length / perPage);
+  const [dir, setDir] = useState(1);
+  const totalPages = Math.ceil(PLANS.length / PER_PAGE);
 
-  const sliceStart = page * perPage;
-  const current = PLANS.slice(sliceStart, sliceStart + perPage);
-
-  const canPrev = page > 0;
-  const canNext = page < totalPages - 1;
-
-  const goPrev = () => {
-    if (!canPrev) return;
-    setDir(-1);
-    setPage((p) => p - 1);
+  const go = (d) => {
+    setDir(d);
+    setPage((p) => p + d);
   };
-  const goNext = () => {
-    if (!canNext) return;
-    setDir(1);
-    setPage((p) => p + 1);
-  };
+
+  const current = PLANS.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
 
   return (
-    <section className="w-screen h-full text-white flex-1 flex justify-center">
-      <style>{`.pricing, .pricing * { margin: 0 !important; }`}</style>
-
-      <div
-        className="
-          pricing mx-auto max-w-[1200px] px-6
-          h-[calc(100vh-80px)]
-          grid grid-rows-[auto_auto_1fr]
-          gap-5 pt-24 pb-4 overflow-visible
-        "
+    <div className="relative">
+      {/* Flechas */}
+      <button
+        onClick={() => go(-1)}
+        disabled={page === 0}
+        className={`absolute -left-5 md:-left-12 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full border border-white/15 bg-white/5 backdrop-blur flex items-center justify-center text-white transition-all hover:border-cyan-400/50 hover:bg-white/10 ${page === 0 ? "opacity-25 cursor-not-allowed" : ""}`}
       >
-        {/* Título + copy */}
-        <header className="m-0 grid place-items-center">
-          <div className="w-full max-w-[880px] text-center">
+        <ChevronLeft size={18} />
+      </button>
+
+      <button
+        onClick={() => go(1)}
+        disabled={page === totalPages - 1}
+        className={`absolute -right-5 md:-right-12 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full border border-white/15 bg-white/5 backdrop-blur flex items-center justify-center text-white transition-all hover:border-cyan-400/50 hover:bg-white/10 ${page === totalPages - 1 ? "opacity-25 cursor-not-allowed" : ""}`}
+      >
+        <ChevronRight size={18} />
+      </button>
+
+      {/* Cards */}
+      <AnimatePresence mode="wait" initial={false} custom={dir}>
+        <motion.div
+          key={page}
+          custom={dir}
+          initial={{ opacity: 0, x: dir === 1 ? 50 : -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: dir === 1 ? -50 : 50 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch"
+        >
+          {current.map((plan) => (
+            <PlanCard key={plan.id} {...plan} />
+          ))}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Dots */}
+      <div className="flex items-center justify-center gap-2 mt-8">
+        {Array.from({ length: totalPages }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setDir(i > page ? 1 : -1); setPage(i); }}
+            className={`rounded-full transition-all duration-300 ${
+              i === page
+                ? "w-6 h-2.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]"
+                : "w-2.5 h-2.5 bg-white/20 hover:bg-white/40"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Contador */}
+      <p className="text-center text-slate-500 text-xs mt-3">
+        {page * PER_PAGE + 1}–{Math.min((page + 1) * PER_PAGE, PLANS.length)} de {PLANS.length} planes
+      </p>
+    </div>
+  );
+}
+
+/* ─── Componente principal ─── */
+export default function Pricing() {
+  return (
+    <div className="min-h-screen text-white">
+      <Header />
+
+      <main className="relative overflow-x-hidden pt-24 pb-20">
+        {/* Fondos decorativos */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,0.10),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(99,102,241,0.10),transparent_40%)]" />
+        <div className="pointer-events-none absolute top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-3xl" />
+
+        <div className="relative mx-auto max-w-6xl px-6 md:px-10">
+
+          {/* ── Encabezado ── */}
+          <div className="text-center mb-10 fade-up">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90 mb-3">
+              Planes y precios
+            </p>
             <h1
-              className="text-[clamp(2rem,3.5vw,3rem)] font-bold leading-tight tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent animate-fade-in-down"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent"
               style={{ fontFamily: "poppins, sans-serif" }}
             >
               Elige el plan perfecto para ti
             </h1>
-
-            <p className="text-gray-300 mt-4 text-[1.05rem] leading-relaxed animate-fade-in-up animation-delay-100">
+            <p className="mt-5 text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed">
               Accede a más de{" "}
-              <span className="text-cyan-300 font-semibold">200 fuentes oficiales</span> en
-              tiempo real. Reportes profesionales, cumplimiento garantizado y 
-              <span className="text-cyan-300 font-semibold"> resultados instantáneos</span>.
+              <span className="text-cyan-300 font-semibold">200 fuentes oficiales</span> en tiempo real.
+              Reportes profesionales, cumplimiento garantizado y{" "}
+              <span className="text-cyan-300 font-semibold">resultados instantáneos</span>.
             </p>
           </div>
-        </header>
 
-        {/* Ventajas compactas */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 m-0 animate-fade-in-up animation-delay-200">
-          <div className="group rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] hover:bg-white/10 transition-all cursor-pointer transform hover:scale-105">
-            <div className="flex items-center gap-3">
-              <FaDatabase className="text-cyan-400 text-xl group-hover:text-cyan-300 transition-colors" />
-              <div>
-                <div className="font-semibold group-hover:text-cyan-300 transition-colors">200+ fuentes</div>
-                <div className="text-gray-300 text-sm">Listas restrictivas y más.</div>
+          {/* ── Ventajas ── */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-12 fade-up">
+            {[
+              { icon: FaDatabase,  label: "200+ fuentes", sub: "Listas restrictivas y más." },
+              { icon: FaBolt,      label: "Tiempo real",  sub: "Resultados en segundos."   },
+              { icon: FaShieldAlt, label: "Cumplimiento", sub: "Soporte a normativas."     },
+              { icon: FaHeadset,   label: "Soporte",      sub: "Acompañamiento experto."   },
+            ].map(({ icon: Icon, label, sub }) => (
+              <div
+                key={label}
+                className="rounded-xl border border-white/10 bg-white/[0.04] p-4 flex items-center gap-3 hover:border-cyan-400/30 hover:bg-white/[0.07] transition-all duration-300"
+              >
+                <Icon className="text-cyan-400 text-xl shrink-0" />
+                <div>
+                  <p className="font-semibold text-white text-sm">{label}</p>
+                  <p className="text-slate-400 text-xs">{sub}</p>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
 
-          <div className="group rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] hover:bg-white/10 transition-all cursor-pointer transform hover:scale-105">
-            <div className="flex items-center gap-3">
-              <FaBolt className="text-cyan-400 text-xl group-hover:text-cyan-300 transition-colors" />
-              <div>
-                <div className="font-semibold group-hover:text-cyan-300 transition-colors">Tiempo real</div>
-                <div className="text-gray-300 text-sm">Resultados en segundos.</div>
-              </div>
-            </div>
-          </div>
+          {/* ── Carrusel ── */}
+          <PricingCarousel />
 
-          <div className="group rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] hover:bg-white/10 transition-all cursor-pointer transform hover:scale-105">
-            <div className="flex items-center gap-3">
-              <FaShieldAlt className="text-cyan-400 text-xl group-hover:text-cyan-300 transition-colors" />
-              <div>
-                <div className="font-semibold group-hover:text-cyan-300 transition-colors">Cumplimiento</div>
-                <div className="text-gray-300 text-sm">Soporte a normativas.</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="group rounded-xl border border-white/10 bg-white/5 p-3 shadow-3xl hover:border-cyan-300/40 hover:shadow-[0_0_22px_rgba(34,211,238,0.20)] hover:bg-white/10 transition-all cursor-pointer transform hover:scale-105">
-            <div className="flex items-center gap-3">
-              <FaHeadset className="text-cyan-400 text-xl group-hover:text-cyan-300 transition-colors" />
-              <div>
-                <div className="font-semibold group-hover:text-cyan-300 transition-colors">Soporte</div>
-                <div className="text-gray-300 text-sm">Acompañamiento experto.</div>
-              </div>
-            </div>
-          </div>
+          {/* ── Nota inferior ── */}
+          <p className="text-center text-slate-500 text-sm mt-10">
+            ¿Necesitas un plan personalizado para tu empresa?{" "}
+            <a href="/contacto" className="text-cyan-400 hover:text-cyan-300 underline underline-offset-2 transition-colors">
+              Contáctanos
+            </a>
+          </p>
         </div>
-
-        {/* Planes + flechas */}
-          <div className="relative min-h-0 overflow-visible">
-            {/* Flecha izquierda */}
-            <button
-              onClick={goPrev}
-              disabled={!canPrev}
-              className={[
-                "hidden md:flex absolute -left-12 lg:-left-16 top-1/2 -translate-y-1/2",
-                "z-20 items-center justify-center h-11 w-11 rounded-full border",
-                "backdrop-blur bg-white/5 border-white/15",
-                "hover:border-cyan-300/40 hover:bg-white/10",
-                !canPrev ? "opacity-30 cursor-not-allowed" : "",
-              ].join(" ")}
-            >
-              <ChevronLeft className="text-white" size={18} />
-            </button>
-
-            {/* Flecha derecha */}
-            <button
-              onClick={goNext}
-              disabled={!canNext}
-              className={[
-                "hidden md:flex absolute -right-12 lg:-right-16 top-1/2 -translate-y-1/2",
-                "z-20 items-center justify-center h-11 w-11 rounded-full border",
-                "backdrop-blur bg-white/5 border-white/15",
-                "hover:border-cyan-300/40 hover:bg-white/10",
-                !canNext ? "opacity-30 cursor-not-allowed" : "",
-              ].join(" ")}
-            >
-              <ChevronRight className="text-white" size={18} />
-            </button>
-
-          <AnimatePresence mode="wait" initial={false} custom={dir}>
-            <motion.div
-              key={page}
-              custom={dir}
-              initial={{ opacity: 0, x: dir === 1 ? 20 : -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: dir === 1 ? -20 : 20 }}
-              transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch content-start m-0"
-            >
-              {current.map((p) => (
-                <PlanCard key={p.title} {...p} />
-              ))}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export default function Pricing() {
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <div className="">
-        <FullPageSlider>
-          <PricingSlide />
-        </FullPageSlider>
-      </div>
+      </main>
     </div>
   );
 }
