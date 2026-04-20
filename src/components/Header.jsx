@@ -95,7 +95,7 @@ export default function Header() {
                   </p>
                 </Link>
                 <Link
-                  to="/servicio-titulos"
+                  to="/contacto"
                   className="block px-4 py-3 hover:bg-gray-100 rounded-b-lg transition border-t border-gray-100"
                   onClick={() => setIsServiciosOpen(false)}
                 >
@@ -221,7 +221,7 @@ export default function Header() {
                     <p className="text-xs text-white/60 mt-1">Estudios de personal</p>
                   </Link>
                   <Link
-                    to="/servicio-titulos"
+                    to="/contacto"
                     className="block text-white/80 hover:text-cyan-300 transition py-2"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
