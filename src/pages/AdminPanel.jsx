@@ -5,6 +5,7 @@ import AdminUsers from "../components/AdminUsers";
 import AdminFuentes from "../components/AdminFuentes";
 import AdminPlanes from "../components/AdminPlanes";
 import AdminUsuarios from "../components/AdminUsuarios";
+import AdminSoporte from "../views/AdminSoporte";
 
 const AdminPanel = () => {
   const [selected, setSelected] = useState("users");
@@ -17,6 +18,7 @@ const AdminPanel = () => {
         {selected === "usuarios" && <AdminUsuarios />}
         {selected === "planes" && <AdminPlanes />}
         {selected === "fuentes" && <AdminFuentes />}
+        {selected === "soporte" && <AdminSoporte />}
       </main>
     </div>
   );

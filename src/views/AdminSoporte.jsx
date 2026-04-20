@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { AlertCircle, CheckCircle, Clock, Inbox, TrendingUp, MessageSquare, Filter, Eye, Send } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, Inbox, MessageSquare, Send } from "lucide-react";
 import soporteService from "../services/soporteService";
 
-export default function AdminSoporte() {
+export default function AdminSoporte({ embedded = false }) {
 	const [tickets, setTickets] = useState([]);
 	const [estadisticas, setEstadisticas] = useState(null);
 	const [ticketSeleccionado, setTicketSeleccionado] = useState(null);
@@ -22,7 +22,7 @@ export default function AdminSoporte() {
 		setLoading(true);
 		try {
 			const [ticketsData, estadisticasData] = await Promise.all([
-				soporteService.obtenerTicketsAbiertos(),
+				soporteService.obtenerTodosTickets(),
 				soporteService.obtenerEstadisticas()
 			]);
 			setTickets(ticketsData);
@@ -31,6 +31,16 @@ export default function AdminSoporte() {
 			console.error("Error al cargar datos:", error);
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const seleccionarTicket = async (ticket) => {
+		setTicketSeleccionado(ticket);
+		try {
+			const detalle = await soporteService.obtenerTicket(ticket.id);
+			setTicketSeleccionado(detalle);
+		} catch (error) {
+			console.error("Error al cargar detalle del ticket:", error);
 		}
 	};
 
@@ -54,6 +64,14 @@ export default function AdminSoporte() {
 			setEnviando(false);
 		}
 	};
+
+	const ticketsFiltrados = tickets.filter((ticket) => {
+		if (filtroEstado === "todos") return true;
+		if (filtroEstado === "abierto") {
+			return ["abierto", "en_progreso", "reabierto"].includes(ticket.estado);
+		}
+		return ticket.estado === filtroEstado;
+	});
 
 	const handleCambiarEstado = async (nuevoEstado) => {
 		try {
@@ -98,11 +116,11 @@ export default function AdminSoporte() {
 	};
 
 	return (
-		<section className="w-screen min-h-screen bg-gradient-to-br from-slate-900 to-slate-950 text-white pt-20 pb-20">
-			<div className="max-w-7xl mx-auto px-6">
+		<section className={`${embedded ? "w-full text-white" : "w-screen min-h-screen bg-gradient-to-br from-slate-900 to-slate-950 text-white pt-20 pb-20"}`}>
+			<div className={`${embedded ? "w-full" : "max-w-7xl mx-auto px-6"}`}>
 				{/* Header */}
-				<div className="mb-8">
-					<h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2">
+				<div className={embedded ? "mb-5" : "mb-8"}>
+					<h1 className={`${embedded ? "text-2xl" : "text-4xl"} font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2`}>
 						Panel de Soporte Técnico
 					</h1>
 					<p className="text-gray-400">Gestiona todos los tickets de soporte de usuarios</p>
@@ -174,20 +192,41 @@ export default function AdminSoporte() {
 							{/* Header de lista */}
 							<div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 px-4 py-3 border-b border-cyan-500/20">
 								<h2 className="font-bold text-cyan-300">Tickets Abiertos</h2>
+								<div className="flex flex-wrap gap-2 mt-3">
+									{[
+										["abierto", "Activos"],
+										["resuelto", "Resueltos"],
+										["cerrado", "Cerrados"],
+										["todos", "Todos"],
+									].map(([key, label]) => (
+										<button
+											key={key}
+											type="button"
+											onClick={() => setFiltroEstado(key)}
+											className={`text-xs px-2 py-1 rounded-full border transition ${
+												filtroEstado === key
+													? "bg-cyan-500/25 border-cyan-400/60 text-cyan-100"
+													: "bg-white/5 border-white/10 text-gray-400 hover:text-cyan-200"
+											}`}
+										>
+											{label}
+										</button>
+									))}
+								</div>
 							</div>
 
 							{/* Items */}
 							<div className="divide-y divide-cyan-500/10 max-h-96 overflow-y-auto">
 								{loading ? (
 									<div className="p-4 text-center text-gray-500">Cargando...</div>
-								) : tickets.length === 0 ? (
+								) : ticketsFiltrados.length === 0 ? (
 									<div className="p-4 text-center text-gray-500">No hay tickets abiertos</div>
 								) : (
-									tickets.map((ticket) => (
+									ticketsFiltrados.map((ticket) => (
 										<motion.div
 											key={ticket.id}
 											whileHover={{ backgroundColor: "rgba(34, 211, 238, 0.1)" }}
-											onClick={() => setTicketSeleccionado(ticket)}
+											onClick={() => seleccionarTicket(ticket)}
 											className={`p-3 cursor-pointer transition ${
 												ticketSeleccionado?.id === ticket.id
 													? "bg-cyan-500/20 border-l-2 border-cyan-400"
@@ -233,6 +272,22 @@ export default function AdminSoporte() {
 										<span className={`text-xs px-2 py-1 rounded border ${getPrioridadColor(ticketSeleccionado.prioridad)}`}>
 											{ticketSeleccionado.prioridad}
 										</span>
+									</div>
+									<div className="flex flex-wrap gap-2 mt-3">
+										{[
+											["en_progreso", "En progreso"],
+											["resuelto", "Resuelto"],
+											["cerrado", "Cerrado"],
+										].map(([estado, label]) => (
+											<button
+												key={estado}
+												type="button"
+												onClick={() => handleCambiarEstado(estado)}
+												className="text-xs px-3 py-1 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:border-cyan-400/50 hover:text-cyan-100 transition"
+											>
+												{label}
+											</button>
+										))}
 									</div>
 								</div>
 

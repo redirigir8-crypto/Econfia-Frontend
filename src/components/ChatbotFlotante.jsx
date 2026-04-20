@@ -1,10 +1,22 @@
 // src/components/ChatbotFlotante.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Phone, AlertCircle, Check } from "lucide-react";
+import { MessageCircle, X, Send, Phone, Loader2 } from "lucide-react";
+import soporteService from "../services/soporteService";
+
+const SUGERENCIAS_CHAT = [
+	"¿Qué puedo preguntar?",
+	"Tengo un error en una consulta",
+	"¿Cómo descargo mi PDF?",
+	"¿Cómo funcionan las consultas masivas?"
+];
 
 // Base de conocimientos para respuestas automáticas
 const KNOWLEDGE_BASE = [
+	{
+		palabras_clave: ["que puedo preguntar", "qué puedo preguntar", "preguntas", "ayuda", "opciones"],
+		respuesta: "Puedes preguntarme por planes, errores en consultas, reportes PDF, pagos, consultas masivas, API, seguridad de datos o pedir soporte técnico con un agente."
+	},
 	{
 		palabras_clave: ["precio", "costo", "pagar", "tarifa"],
 		respuesta: "Tenemos planes flexibles: Por Consulta (paga por validación) e Ilimitado (consultas sin límite al mes). ¿Necesitas más detalles?"
@@ -26,6 +38,14 @@ const KNOWLEDGE_BASE = [
 		respuesta: "Las facturas se envían automáticamente por email. Si no la recibiste, te conectaré con nuestro equipo de billing."
 	},
 	{
+		palabras_clave: ["pdf", "reporte", "descargar", "informe"],
+		respuesta: "Puedes descargar los reportes desde la vista de resultados o desde la ficha de la consulta. Si el botón falla, dime qué consulta hiciste y qué error aparece."
+	},
+	{
+		palabras_clave: ["masiva", "masivas", "excel", "lote", "archivo"],
+		respuesta: "Las consultas masivas procesan registros por archivo en lote. Puedo orientarte con la plantilla, errores de carga o estado del procesamiento."
+	},
+	{
 		palabras_clave: ["validación", "búsqueda", "consulta", "resultado"],
 		respuesta: "¿Tienes una consulta específica? Puedo ayudarte a entender cómo funciona o transferirte a un agente especializado."
 	},
@@ -36,14 +56,16 @@ export default function ChatbotFlotante() {
 	const [messages, setMessages] = useState([
 		{
 			id: 1,
-			texto: "¡Hola! Soy el asistente de ECONFIA. ¿En qué puedo ayudarte? 😊",
+			texto: "Hola. Soy el asistente de ECONFIA. Puedes preguntarme por planes, errores, consultas, reportes, pagos o solicitar soporte técnico.",
 			sender: "bot",
 			timestamp: new Date()
 		}
 	]);
 	const [inputValue, setInputValue] = useState("");
 	const [isEscalated, setIsEscalated] = useState(false);
-	const [ticketId, setTicketId] = useState(null);
+	const [ticketPk, setTicketPk] = useState(null);
+	const [ticketCode, setTicketCode] = useState(null);
+	const [isSending, setIsSending] = useState(false);
 	const messagesEndRef = useRef(null);
 
 	// Auto-scroll al último mensaje
@@ -70,12 +92,13 @@ export default function ChatbotFlotante() {
 
 	// Enviar mensaje del usuario
 	const handleSendMessage = async () => {
-		if (!inputValue.trim()) return;
+		const texto = inputValue.trim();
+		if (!texto || isSending) return;
 
 		// Agregar mensaje del usuario
 		const newUserMessage = {
 			id: messages.length + 1,
-			texto: inputValue,
+			texto,
 			sender: "user",
 			timestamp: new Date()
 		};
@@ -83,13 +106,27 @@ export default function ChatbotFlotante() {
 		setMessages(prev => [...prev, newUserMessage]);
 		setInputValue("");
 
-		if (isEscalated) {
-			// Si hay ticket abierto, simular envío a servidor
-			console.log("Mensaje enviado al ticket:", ticketId);
+		if (isEscalated && ticketPk) {
+			setIsSending(true);
+			try {
+				await soporteService.agregarMensaje(ticketPk, texto);
+			} catch (error) {
+				setMessages(prev => [
+					...prev,
+					{
+						id: Date.now(),
+						texto: "No fue posible enviar el mensaje al ticket. Intenta nuevamente en unos segundos.",
+						sender: "bot",
+						timestamp: new Date()
+					}
+				]);
+			} finally {
+				setIsSending(false);
+			}
 		} else {
 			// Generar respuesta automática después de 500ms
 			setTimeout(() => {
-				const respuestaBot = obtenerRespuestaAutomatica(inputValue);
+				const respuestaBot = obtenerRespuestaAutomatica(texto);
 				const newBotMessage = {
 					id: messages.length + 2,
 					texto: respuestaBot,
@@ -102,19 +139,47 @@ export default function ChatbotFlotante() {
 	};
 
 	// Escalar a soporte técnico
-	const handleEscalar = () => {
-		const ticketId = `TKT-${Date.now()}`;
-		setTicketId(ticketId);
-		setIsEscalated(true);
+	const handleEscalar = async () => {
+		if (isSending) return;
+		setIsSending(true);
 
-		const escaladoMessage = {
-			id: messages.length + 1,
-			texto: `✅ Ticket creado: ${ticketId}\n\nUn agente de soporte te responderá en breve. Tu conversación es privada y segura.`,
-			sender: "bot",
-			timestamp: new Date()
-		};
+		const descripcion = messages
+			.map((msg) => `${msg.sender === "user" ? "Usuario" : "Asistente"}: ${msg.texto}`)
+			.join("\n");
 
-		setMessages(prev => [...prev, escaladoMessage]);
+		try {
+			const ticket = await soporteService.crearTicket(
+				"Soporte técnico solicitado desde el chat",
+				descripcion || "El usuario solicitó soporte técnico desde el chat.",
+				"tecnico",
+				"media"
+			);
+
+			setTicketPk(ticket.id);
+			setTicketCode(ticket.ticket_id);
+			setIsEscalated(true);
+
+			const escaladoMessage = {
+				id: Date.now(),
+				texto: `Ticket creado: ${ticket.ticket_id}\n\nUn agente de soporte podrá ver esta conversación y responder desde el panel administrativo.`,
+				sender: "bot",
+				timestamp: new Date()
+			};
+
+			setMessages(prev => [...prev, escaladoMessage]);
+		} catch (error) {
+			setMessages(prev => [
+				...prev,
+				{
+					id: Date.now(),
+					texto: "No fue posible crear el ticket. Verifica que hayas iniciado sesión e intenta nuevamente.",
+					sender: "bot",
+					timestamp: new Date()
+				}
+			]);
+		} finally {
+			setIsSending(false);
+		}
 	};
 
 	// Cerrar chat
@@ -154,7 +219,7 @@ export default function ChatbotFlotante() {
 							<div>
 								<h3 className="font-bold text-white">Soporte ECONFIA</h3>
 								<p className="text-xs text-cyan-100">
-									{isEscalated ? `Ticket: ${ticketId}` : "Respuestas automáticas"}
+									{isEscalated ? `Ticket: ${ticketCode}` : "Respuestas automáticas"}
 								</p>
 							</div>
 							<button
@@ -194,14 +259,36 @@ export default function ChatbotFlotante() {
 							<div ref={messagesEndRef} />
 						</div>
 
+						{!isEscalated && messages.length <= 2 && (
+							<div className="px-4 pb-3">
+								<p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300/70">
+									Puedes preguntar
+								</p>
+								<div className="flex flex-wrap gap-2">
+									{SUGERENCIAS_CHAT.map((pregunta) => (
+										<button
+											key={pregunta}
+											type="button"
+											onClick={() => setInputValue(pregunta)}
+											className="rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-100 transition hover:bg-cyan-500/20"
+										>
+											{pregunta}
+										</button>
+									))}
+								</div>
+							</div>
+						)}
+
 						{/* Opciones de acción */}
 						{!isEscalated && (
 							<div className="px-4 py-3 border-t border-cyan-500/20 space-y-2">
 								<button
 									onClick={handleEscalar}
+									disabled={isSending}
 									className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-300 rounded-lg hover:bg-orange-600/30 transition text-sm font-semibold"
 								>
-									<Phone size={16} /> Hablar con soporte técnico
+									{isSending ? <Loader2 size={16} className="animate-spin" /> : <Phone size={16} />}
+									Hablar con soporte técnico
 								</button>
 							</div>
 						)}
@@ -219,9 +306,10 @@ export default function ChatbotFlotante() {
 								/>
 								<button
 									onClick={handleSendMessage}
+									disabled={isSending || !inputValue.trim()}
 									className="bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg px-3 py-2 transition"
 								>
-									<Send size={16} />
+									{isSending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
 								</button>
 							</div>
 						</div>

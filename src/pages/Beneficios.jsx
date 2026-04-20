@@ -21,6 +21,7 @@ import {
   MousePointerClick,
   Scale,
   Network,
+  Layers,
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────
@@ -116,6 +117,35 @@ const reportes = [
     desc: "Descarga un resumen completo de tu actividad: consultas disponibles, consumidas, planes activos, historial de recargas y estadísticas por estado — todo en un PDF personalizado.",
     tags: ["Estadísticas", "Historial recargas", "Planes activos", "Por usuario"],
   },
+  {
+    icon: Layers,
+    color: "teal",
+    badge: "3 formatos",
+    title: "Tipos de reporte PDF",
+    desc: "Elige el nivel de detalle que necesitas: desde un resumen ejecutivo por persona hasta un informe consolidado con capturas de pantalla de cada fuente consultada.",
+    tags: ["Individual", "Resumen", "Consolidado con capturas"],
+    isMultiFormat: true,
+    formats: [
+      {
+        label: "PDF Individual",
+        sub: "Un PDF por persona con score SARLAFT, fuentes y resultado por consulta. Ideal para validaciones puntuales.",
+        icon: "1",
+        color: "cyan",
+      },
+      {
+        label: "PDF Resumen",
+        sub: "Sin capturas de pantalla. Compila múltiples consultas en un solo documento ejecutivo, ligero y de rápida lectura.",
+        icon: "2",
+        color: "emerald",
+      },
+      {
+        label: "PDF Consolidado",
+        sub: "Completo con capturas. Incluye evidencia visual de cada fuente consultada, ideal para auditorías y cumplimiento regulatorio.",
+        icon: "3",
+        color: "purple",
+      },
+    ],
+  },
 ];
 
 const colorMap = {
@@ -128,6 +158,17 @@ const colorMap = {
   yellow:  { ring: "ring-yellow-400/20",  bg: "bg-yellow-400/10",  text: "text-yellow-300",  border: "border-yellow-400/20",  badgeText: "text-yellow-300"  },
   orange:  { ring: "ring-orange-400/20",  bg: "bg-orange-400/10",  text: "text-orange-300",  border: "border-orange-400/20",  badgeText: "text-orange-300"  },
   teal:    { ring: "ring-teal-400/20",    bg: "bg-teal-400/10",    text: "text-teal-300",    border: "border-teal-400/20",    badgeText: "text-teal-300"    },
+};
+
+const formatColorText = {
+  cyan:    "text-cyan-300",
+  emerald: "text-emerald-300",
+  purple:  "text-purple-300",
+};
+const formatColorBg = {
+  cyan:    "bg-cyan-400/15 border-cyan-400/20",
+  emerald: "bg-emerald-400/15 border-emerald-400/20",
+  purple:  "bg-purple-400/15 border-purple-400/20",
 };
 
 const beneficios = [
@@ -262,8 +303,57 @@ export default function Beneficios() {
 
             {/* Grid de tarjetas */}
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {reportes.map(({ icon: Icon, color, badge, title, desc, tags }) => {
+              {reportes.map(({ icon: Icon, color, badge, title, desc, tags, isMultiFormat, formats }) => {
                 const c = colorMap[color];
+                if (isMultiFormat) {
+                  return (
+                    <div key={title} className="premium-card p-7 flex flex-col gap-5 md:col-span-2 xl:col-span-3">
+                      <div className="flex items-start justify-between">
+                        <div
+                          className={`flex items-center justify-center rounded-2xl ${c.bg} ${c.text} ring-1 ${c.ring}`}
+                          style={{ height: 52, width: 52 }}
+                        >
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <span
+                          className={`rounded-full border ${c.border} ${c.bg} px-3 py-1 text-[11px] font-semibold ${c.badgeText} uppercase tracking-wide`}
+                        >
+                          {badge}
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">{title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-400">{desc}</p>
+                      </div>
+                      <div className="grid gap-4 sm:grid-cols-3 mt-1">
+                        {formats.map((f) => (
+                          <div
+                            key={f.label}
+                            className={`rounded-2xl border p-4 flex flex-col gap-2 ${formatColorBg[f.color]}`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-white/10 ${formatColorText[f.color]}`}>
+                                {f.icon}
+                              </span>
+                              <p className={`text-sm font-semibold ${formatColorText[f.color]}`}>{f.label}</p>
+                            </div>
+                            <p className="text-xs leading-5 text-slate-400">{f.sub}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-auto">
+                        {tags.map((t) => (
+                          <span
+                            key={t}
+                            className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-slate-300"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
                 return (
                   <div key={title} className="premium-card p-7 flex flex-col gap-5">
                     <div className="flex items-start justify-between">

@@ -42,6 +42,8 @@ import ConsultaFask from "./views/ConsultaFask";
 import ConsultaEssencialExpress from "./views/ConsultaEssencialExpress";
 import VerificarReporte from "./pages/VerificarReporte";
 import Beneficios from "./pages/Beneficios";
+import ChatbotFlotante from "./components/ChatbotFlotante";
+import AdminSoporte from "./views/AdminSoporte";
 import {
   ShieldCheck,
   Zap,
@@ -615,6 +617,7 @@ export default function App() {
       <CardProvider>
         <Router>
           <ParticlesBackground />
+          <ChatbotFlotante />
           <Routes>
             {/* Públicas */}
             <Route path="/"                  element={<Home />}             />
@@ -655,6 +658,7 @@ export default function App() {
               <Route path="/7b3f9d1e"          element={<AdminUsuarios />}            />
               <Route path="/1e5c8a4b"          element={<AdminPlanes />}              />
               <Route path="/4d9b2f6e"          element={<AdminFuentes />}             />
+              <Route path="/5d2a9c8e"          element={<AdminSoporte />}             />
             </Route>
 
             <Route path="/a8e3c7b2" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
