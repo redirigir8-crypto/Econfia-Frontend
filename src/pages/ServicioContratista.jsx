@@ -294,17 +294,17 @@ export default function ServicioContratista() {
 
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
-                to="/login"
+                to="/contacto"
                 className="inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-purple-500 to-fuchsia-500 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:from-purple-400 hover:to-fuchsia-400"
               >
-                Comenzar con Econfia Contratista
+                Solicitar información
                 <FaArrowRight />
               </Link>
               <Link
-                to="/register"
+                to="/contacto"
                 className="inline-flex items-center justify-center gap-3 rounded-full border border-white/15 bg-slate-950/30 px-8 py-4 font-semibold text-white transition-all duration-300 hover:bg-slate-950/45"
               >
-                Registrarme ahora
+                Contáctanos
               </Link>
             </div>
           </div>
