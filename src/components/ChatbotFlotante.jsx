@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Phone, Loader2 } from "lucide-react";
 import soporteService from "../services/soporteService";
+import polarBear from "../assets/polar-bear.svg";
 
 const SUGERENCIAS_CHAT = [
 	"¿Qué puedo preguntar?",
@@ -200,7 +201,19 @@ export default function ChatbotFlotante() {
 						onClick={() => setIsOpen(true)}
 						className="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 shadow-2xl flex items-center justify-center text-white hover:shadow-cyan-500/50 transition-all"
 					>
-						<MessageCircle size={24} />
+						<div className="relative w-10 h-10 flex items-center justify-center">
+							<img
+								src={polarBear}
+								alt="Oso polar"
+								className="w-10 h-10 drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
+								onError={(e) => {
+									e.currentTarget.style.display = "none";
+								}}
+							/>
+							<span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-950/80 border border-white/15 flex items-center justify-center">
+								<MessageCircle size={14} className="text-cyan-200" />
+							</span>
+						</div>
 					</motion.button>
 				)}
 			</AnimatePresence>
@@ -216,11 +229,23 @@ export default function ChatbotFlotante() {
 					>
 						{/* Header */}
 						<div className="bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-4 flex items-center justify-between">
-							<div>
-								<h3 className="font-bold text-white">Soporte ECONFIA</h3>
+							<div className="flex items-center gap-3 min-w-0">
+								<div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
+									<img
+										src={polarBear}
+										alt="Oso polar"
+										className="w-10 h-10"
+										onError={(e) => {
+											e.currentTarget.style.display = "none";
+										}}
+									/>
+								</div>
+								<div className="min-w-0">
+									<h3 className="font-bold text-white leading-tight">Soporte ECONFIA</h3>
 								<p className="text-xs text-cyan-100">
 									{isEscalated ? `Ticket: ${ticketCode}` : "Respuestas automáticas"}
 								</p>
+							</div>
 							</div>
 							<button
 								onClick={handleClose}

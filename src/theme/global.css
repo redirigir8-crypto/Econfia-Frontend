@@ -47,6 +47,31 @@ body::before {
   100% { top: 0%; }
 }
 
+/* Cuadrícula con movimiento tipo ondas (login) */
+@keyframes econfia-grid-wave {
+  0% {
+    background-position: 0px 0px, 0px 0px;
+    opacity: 0.46;
+  }
+  35% {
+    background-position: 48px 22px, -34px -18px;
+    opacity: 0.56;
+  }
+  70% {
+    background-position: 84px 40px, -62px -32px;
+    opacity: 0.50;
+  }
+  100% {
+    background-position: 0px 0px, 0px 0px;
+    opacity: 0.46;
+  }
+}
+
+.econfia-grid-wave {
+  will-change: background-position, opacity;
+  animation: econfia-grid-wave 16s ease-in-out infinite;
+}
+
 /* Barra indeterminada tipo Android */
 @keyframes indeterminate-bar-pingpong {
   0% {
