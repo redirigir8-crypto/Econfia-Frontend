@@ -31,7 +31,13 @@ export default function DetalleResultados({ consultaId }) {
   const closeTimerRef = useRef(null);
   const openRafRef = useRef(null);
   const openRaf2Ref = useRef(null);
-  const MODAL_ANIMATION_MS = 8000;
+  const isMountedRef = useRef(true);
+  const MODAL_ANIMATION_MS = 300;
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   
 
@@ -611,6 +617,7 @@ export default function DetalleResultados({ consultaId }) {
       });
       if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
       const json = await res.json();
+      if (!isMountedRef.current) return;
       setDetalle(json);
 
       // Reconciliar overlay local con lo que venga del backend
@@ -619,13 +626,9 @@ export default function DetalleResultados({ consultaId }) {
         for (const it of json) {
           const est = (it.estado || "").toLowerCase();
           if (next.has(it.id)) {
-            // Si el backend ya pasó a un estado final (ni offline ni revalidando),
-            // quitamos el overlay local.
             if (est !== "offline" && est !== "revalidando") {
               next.delete(it.id);
             }
-            // Si el backend YA muestra "revalidando", podemos quitar el overlay y
-            // dejar que el servidor gobierne la UI.
             if (est === "revalidando") {
               next.delete(it.id);
             }
@@ -636,7 +639,7 @@ export default function DetalleResultados({ consultaId }) {
     } catch (error) {
       console.error("Error al obtener detalle:", error);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) setLoading(false);
     }
   };
 
