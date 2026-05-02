@@ -85,7 +85,7 @@ export default function ConsultaBasicElemnt() {
       }
       setDatos(data.datos || data);
       setShowResultados(true);
-      setTimeout(() => navigate("/d3b7f1e9"), 6500);
+      setTimeout(() => navigate("/d3b7f1e9"), 10000);
     } catch (error) {
       setToast({ type: "error", message: "Ocurrió un error en la consulta" });
     } finally {
@@ -94,14 +94,19 @@ export default function ConsultaBasicElemnt() {
   };
 
   return (
-    <section className="relative h-screen flex items-center justify-center py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+    <section className="relative min-h-screen flex items-center justify-center pt-24 pb-32 md:pb-36 overflow-hidden bg-transparent">
       {/* Logo — esquina superior izquierda */}
-      <div className="hidden md:block absolute md:top-6 md:left-6 z-20">
-        <img
-          src="/1-e9a7e544.ico"
-          alt="Econfía"
-          className="w-12 h-12 object-contain opacity-70"
-        />
+      <div className="hidden md:flex absolute md:top-6 md:left-6 z-20 items-center gap-3 group">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-red-500/30 blur-xl scale-125 group-hover:bg-red-500/50 transition-all duration-500" />
+          <div className="relative w-14 h-14 rounded-full bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_24px_rgba(220,38,38,0.3)] group-hover:shadow-[0_0_36px_rgba(220,38,38,0.5)] transition-all duration-500 group-hover:scale-105">
+            <img src="/img/logo-econfia-1.png" alt="Econfía" className="w-9 h-9 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
+          </div>
+        </div>
+        <div>
+          <p className="text-transparent bg-clip-text font-black text-base tracking-[0.3em] uppercase" style={{backgroundImage:"linear-gradient(to right, #ffffff, #bae6fd, #38bdf8, #0ea5e9)", filter:"drop-shadow(0 0 8px rgba(56,189,248,0.9)) drop-shadow(0 0 18px rgba(56,189,248,0.5))"}}>Econfia</p>
+          <p className="text-white/40 text-[9px] tracking-[0.2em] uppercase font-light mt-0.5">Una marca de Grupo Soluciones</p>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-5xl w-full px-4 relative z-10">
         <div className="text-center md:text-left space-y-5">

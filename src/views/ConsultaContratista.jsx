@@ -82,6 +82,8 @@ export default function ConsultaContratista() {
       );
     }, [profesionInput]);
   const [email, setEmail] = useState("");
+  const [nombreEmpresa, setNombreEmpresa] = useState("");
+  const [nitEmpresa, setNitEmpresa] = useState("");
   const [acepta, setAcepta] = useState(false);
   const [consentimiento, setConsentimiento] = useState(false);
   // Estado para el modal de Términos
@@ -212,9 +214,11 @@ export default function ConsultaContratista() {
     const bodyData = {
       tipo_doc: tipoDoc,
       cedula: String(cedula).trim(),
-      fecha_expedicion: fechaExpedicion || undefined, // opcional
-      profesion: [profesionNormalizada], // ✅ requerido para activar contratista (array)
-      email: String(email).trim().toLowerCase(), // ✅ requerido para activar contratista
+      fecha_expedicion: fechaExpedicion || undefined,
+      profesion: [profesionNormalizada],
+      email: String(email).trim().toLowerCase(),
+      empresa: nombreEmpresa.trim(),
+      nit: (() => { const n = nitEmpresa.trim(); return n && !n.includes("-") ? `${n}-0` : n; })(),
       tipo_consulta: "contratista",
     };
 
@@ -240,7 +244,7 @@ export default function ConsultaContratista() {
 
       setDatos(data.datos || data);
       setShowResultados(true);
-      setTimeout(() => navigate("/d3b7f1e9"), 6500);
+      setTimeout(() => navigate("/d3b7f1e9"), 10000);
     } catch (error) {
       console.error("Error en la consulta:", error);
       setToast({ type: "error", message: "Ocurrió un error en la consulta" });
@@ -273,12 +277,12 @@ export default function ConsultaContratista() {
         showResultados &&
         datos &&
         createPortal(
-          <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/10 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-8 w-full max-w-2xl text-center">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-2">
+          <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-2xl text-center">
+              <h2 className="text-2xl font-semibold text-white mb-2">
                 Consulta enviada
               </h2>
-              <p className="text-slate-600 mb-6">
+              <p className="text-white/60 mb-6">
                 Estamos preparando tus resultados. Te redirigiremos
                 automáticamente.
               </p>
@@ -299,7 +303,7 @@ export default function ConsultaContratista() {
       )}
 
       {/* Home - Tema oscuro con hero + formulario elegante */}
-      <section className="relative h-screen flex items-center justify-center py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+      <section className="relative min-h-screen flex items-center justify-center pt-24 pb-32 md:pb-36 overflow-hidden bg-transparent">
         {/* Elementos decorativos de fondo */}
         <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
         <div
@@ -308,12 +312,21 @@ export default function ConsultaContratista() {
         />
 
         {/* Logo — esquina superior izquierda */}
-        <div className="hidden md:block absolute md:top-6 md:left-6 z-20">
-          <img
-            src="/1-e9a7e544.ico"
-            alt="Econfía"
-            className="w-12 h-12 object-contain opacity-70"
-          />
+        <div className="hidden md:flex absolute md:top-6 md:left-6 z-20 items-center gap-3 group">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-red-500/30 blur-xl scale-125 group-hover:bg-red-500/50 transition-all duration-500" />
+            <div className="relative w-14 h-14 rounded-full bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_24px_rgba(220,38,38,0.3)] group-hover:shadow-[0_0_36px_rgba(220,38,38,0.5)] transition-all duration-500 group-hover:scale-105">
+              <img
+                src="/img/logo-econfia-1.png"
+                alt="Econfía"
+                className="w-9 h-9 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]"
+              />
+            </div>
+          </div>
+          <div>
+            <p className="text-transparent bg-clip-text font-black text-base tracking-[0.3em] uppercase" style={{backgroundImage:"linear-gradient(to right, #ffffff, #bae6fd, #38bdf8, #0ea5e9)", filter:"drop-shadow(0 0 8px rgba(56,189,248,0.9)) drop-shadow(0 0 18px rgba(56,189,248,0.5))"}}>Econfia</p>
+            <p className="text-white/40 text-[9px] tracking-[0.2em] uppercase font-light mt-0.5">Una marca de Grupo Soluciones</p>
+          </div>
         </div>
         <div className="max-w-5xl mx-auto px-4 w-full relative z-10">
           <div className="grid md:grid-cols-2 gap-6 items-center">
@@ -329,7 +342,7 @@ export default function ConsultaContratista() {
                     Consulta Contratista
                   </span>
                 </div>
-                <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
+                <h1 className="text-3xl md:text-4xl font-black bg-clip-text text-transparent leading-tight tracking-tight" style={{backgroundImage:"linear-gradient(to right, #ffffff, #bae6fd, #38bdf8, #0ea5e9)"}}>
                   Econfia Contratista
                 </h1>
               </div>
@@ -521,6 +534,36 @@ export default function ConsultaContratista() {
                           Formato de correo no válido
                         </span>
                       )}
+                    </div>
+
+                    {/* Nombre empresa */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-white/70">
+                        Nombre de la Entidad  *
+                      </label>
+                      <input
+                        required
+                        type="text"
+                        value={nombreEmpresa}
+                        onChange={(e) => setNombreEmpresa(e.target.value)}
+                        placeholder="Razón social de la empresa"
+                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      />
+                    </div>
+
+                    {/* NIT empresa */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-white/70">
+                        NIT de la Entidad *
+                      </label>
+                      <input
+                        required
+                        type="text"
+                        value={nitEmpresa}
+                        onChange={(e) => setNitEmpresa(e.target.value)}
+                        placeholder="Ej: 830512262-1"
+                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      />
                     </div>
 
                     {/* Checkboxes */}

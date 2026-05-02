@@ -1,25 +1,37 @@
 import { useState } from "react";
 import {
   FaBuilding,
+  FaBalanceScale,
+  FaChartLine,
   FaCheckCircle,
+  FaClipboardCheck,
+  FaExclamationTriangle,
   FaFilePdf,
+  FaIdCard,
   FaIndustry,
+  FaShieldAlt,
   FaStore,
+  FaUserTie,
 } from "react-icons/fa";
 import Terminos from "../components/Terminos";
 import { generarInformeEmpresaPDF } from "../pdf/InformeEmpresaPDF";
 
-function SectionCard({ title, children, accent = "emerald" }) {
+function SectionCard({ title, children, accent = "emerald", description }) {
   const accentMap = {
-    emerald: "border-emerald-400/20 shadow-[0_18px_60px_rgba(16,185,129,0.08)]",
-    sky: "border-sky-400/20 shadow-[0_18px_60px_rgba(56,189,248,0.08)]",
-    amber: "border-amber-400/20 shadow-[0_18px_60px_rgba(245,158,11,0.08)]",
-    violet: "border-violet-400/20 shadow-[0_18px_60px_rgba(139,92,246,0.08)]",
+    emerald: "border-emerald-400/20 shadow-[0_18px_60px_rgba(16,185,129,0.08)] before:bg-emerald-400",
+    sky: "border-sky-400/20 shadow-[0_18px_60px_rgba(56,189,248,0.08)] before:bg-sky-400",
+    amber: "border-amber-400/20 shadow-[0_18px_60px_rgba(245,158,11,0.08)] before:bg-amber-400",
+    violet: "border-violet-400/20 shadow-[0_18px_60px_rgba(139,92,246,0.08)] before:bg-violet-400",
   };
 
   return (
-    <div className={`rounded-[1.75rem] border bg-slate-950/75 p-6 backdrop-blur-xl ${accentMap[accent] || accentMap.emerald}`}>
-      <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
+    <div className={`relative overflow-hidden rounded-[1.75rem] border bg-slate-950/78 p-6 backdrop-blur-xl before:absolute before:left-0 before:top-0 before:h-full before:w-1 ${accentMap[accent] || accentMap.emerald}`}>
+      <div className="mb-5">
+        <h3 className="text-xl font-bold text-white">{title}</h3>
+        {description && (
+          <p className="mt-2 text-sm leading-6 text-slate-300">{description}</p>
+        )}
+      </div>
       {children}
     </div>
   );
@@ -27,11 +39,11 @@ function SectionCard({ title, children, accent = "emerald" }) {
 
 function FieldRow({ label, value }) {
   return (
-    <div className="flex flex-col gap-1 border-b border-white/6 pb-3 last:border-b-0 last:pb-0">
-      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+    <div className="flex flex-col gap-1 rounded-2xl border border-white/8 bg-white/[0.035] px-4 py-3">
+      <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
         {label}
       </span>
-      <span className="text-sm md:text-base text-white">
+      <span className="break-words text-base font-semibold leading-6 text-white">
         {value || "No disponible"}
       </span>
     </div>
@@ -107,6 +119,153 @@ function FinancialMetric({ label, value, tone = "sky" }) {
       </div>
       <div className="mt-2 text-base font-bold text-white">
         {value}
+      </div>
+    </div>
+  );
+}
+
+function isActiveStatus(value) {
+  return /activa|activo|vigente/i.test(String(value || ""));
+}
+
+function getAssessmentTone(proveedoresFicticios, estado) {
+  if (proveedoresFicticios?.aparece) return "critical";
+  if (isActiveStatus(estado)) return "strong";
+  return "review";
+}
+
+function getAssessmentData(resultadoEmpresa) {
+  if (!resultadoEmpresa) return null;
+
+  const proveedoresFicticios = resultadoEmpresa.proveedores_ficticios_dian || {};
+  const camaraAfiliados = resultadoEmpresa.camara_comercio_afiliados || {};
+  const actividad = resultadoEmpresa.actividad_economica || [];
+  const representante = resultadoEmpresa.representante_legal || {};
+  const representanteCount = representante.registros?.length || 0;
+  const estado = resultadoEmpresa.estado || resultadoEmpresa.informacion_general?.["Estado de la matrícula"];
+  const tone = getAssessmentTone(proveedoresFicticios, estado);
+
+  const signals = [
+    {
+      label: "Estado mercantil",
+      value: estado || "No disponible",
+      detail: isActiveStatus(estado) ? "La matrícula se encuentra activa o vigente." : "Requiere revisión del estado reportado.",
+      tone: isActiveStatus(estado) ? "emerald" : "amber",
+      icon: FaShieldAlt,
+    },
+    {
+      label: "Lista DIAN ficticios",
+      value: proveedoresFicticios?.aparece ? "Coincidencia" : "Sin coincidencia",
+      detail: proveedoresFicticios?.aparece
+        ? "Existe alerta en proveedores ficticios DIAN."
+        : "No se reporta coincidencia en la validación disponible.",
+      tone: proveedoresFicticios?.aparece ? "amber" : "emerald",
+      icon: FaExclamationTriangle,
+    },
+    {
+      label: "Actividad económica",
+      value: actividad.length ? `${actividad.length} actividades` : "Sin actividad",
+      detail: actividad[0]?.descripcion || "No se encontraron actividades económicas estructuradas.",
+      tone: actividad.length ? "sky" : "violet",
+      icon: FaIndustry,
+    },
+    {
+      label: "Representación legal",
+      value: representanteCount ? `${representanteCount} registro(s)` : "Texto disponible",
+      detail: representanteCount
+        ? "Se extrajeron cargos, nombres e identificaciones."
+        : representante.mensaje || "No se encontró información estructurada.",
+      tone: representanteCount || representante.mensaje ? "sky" : "amber",
+      icon: FaUserTie,
+    },
+    {
+      label: "Cámara afiliados",
+      value: camaraAfiliados?.aparece ? "Encontrado" : "Sin coincidencia",
+      detail: camaraAfiliados?.mensaje || "Validación complementaria no disponible.",
+      tone: camaraAfiliados?.aparece ? "emerald" : "violet",
+      icon: FaBuilding,
+    },
+  ];
+
+  const toneCopy = {
+    critical: {
+      eyebrow: "Alerta prioritaria",
+      title: "Proveedor con coincidencia sensible",
+      summary: "Antes de avanzar, revisa la coincidencia DIAN y documenta la decisión comercial, tributaria y de cumplimiento.",
+      classes: "border-amber-300/30 from-amber-500/18 via-slate-950 to-red-950/40",
+      badge: "bg-amber-400 text-slate-950",
+    },
+    strong: {
+      eyebrow: "Lectura inicial favorable",
+      title: "Proveedor con señales operativas positivas",
+      summary: "La información principal permite perfilar la empresa con estado activo y fuentes complementarias para análisis.",
+      classes: "border-emerald-300/30 from-emerald-500/18 via-slate-950 to-sky-950/35",
+      badge: "bg-emerald-400 text-slate-950",
+    },
+    review: {
+      eyebrow: "Revisión recomendada",
+      title: "Proveedor con información incompleta o no concluyente",
+      summary: "La ficha trae datos útiles, pero conviene revisar estado, renovación y evidencia antes de calificarlo.",
+      classes: "border-sky-300/25 from-sky-500/16 via-slate-950 to-violet-950/35",
+      badge: "bg-sky-400 text-slate-950",
+    },
+  };
+
+  return {
+    ...toneCopy[tone],
+    signals,
+    tone,
+  };
+}
+
+function AssessmentSignal({ signal }) {
+  const Icon = signal.icon;
+  const toneMap = {
+    emerald: "border-emerald-400/18 bg-emerald-500/10 text-emerald-200",
+    sky: "border-sky-400/18 bg-sky-500/10 text-sky-200",
+    amber: "border-amber-400/20 bg-amber-500/10 text-amber-100",
+    violet: "border-violet-400/18 bg-violet-500/10 text-violet-200",
+  };
+
+  return (
+    <div className={`rounded-2xl border p-4 ${toneMap[signal.tone] || toneMap.sky}`}>
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
+          <Icon className="text-lg" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-300">
+            {signal.label}
+          </div>
+          <div className="mt-1 text-lg font-bold leading-tight text-white">
+            {signal.value}
+          </div>
+          <div className="mt-2 line-clamp-3 text-sm leading-6 text-slate-300">
+            {signal.detail}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DecisionStep({ icon: Icon, title, text, tone = "sky" }) {
+  const toneMap = {
+    sky: "border-sky-400/15 bg-sky-500/10 text-sky-200",
+    emerald: "border-emerald-400/15 bg-emerald-500/10 text-emerald-200",
+    amber: "border-amber-400/15 bg-amber-500/10 text-amber-200",
+  };
+
+  return (
+    <div className={`rounded-2xl border p-4 ${toneMap[tone] || toneMap.sky}`}>
+      <div className="flex gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10">
+          <Icon />
+        </div>
+        <div>
+          <div className="font-bold text-white">{title}</div>
+          <div className="mt-1 text-sm leading-6 text-slate-300">{text}</div>
+        </div>
       </div>
     </div>
   );
@@ -289,10 +448,15 @@ export default function ConsultaEmpresa() {
     }
   };
 
+  const handleNuevaConsulta = () => {
+    setResultadoEmpresa(null);
+    setToast(null);
+    setNit("");
+  };
+
   const perfil = resultadoEmpresa?.empresa_resumen?.perfil || {};
   const metricas = resultadoEmpresa?.empresa_resumen?.metricas || {};
   const historia = resultadoEmpresa?.empresa_resumen?.historia_empresarial || [];
-  const actividadPrincipal = resultadoEmpresa?.empresa_resumen?.actividad_principal || {};
   const propietarioData = resultadoEmpresa?.propietario_establecimiento || {};
   const propietarioRegistros = propietarioData?.registros || [];
   const proveedoresFicticios = resultadoEmpresa?.proveedores_ficticios_dian || {};
@@ -321,61 +485,58 @@ export default function ConsultaEmpresa() {
       .map((key) => [key, generalEntriesMap[key]]),
     ...Object.entries(generalEntriesMap).filter(([key]) => !generalPreferredOrder.includes(key)),
   ];
+  const assessment = getAssessmentData(resultadoEmpresa);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 md:px-6 py-8 md:py-10">
-      <div className="grid gap-8 xl:grid-cols-[360px_1fr]">
-        <aside className="h-fit rounded-[2rem] border border-sky-400/15 bg-[linear-gradient(180deg,rgba(7,13,34,0.98),rgba(20,41,102,0.98))] p-6 shadow-[0_30px_80px_rgba(2,6,23,0.35)] xl:sticky xl:top-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-sm font-medium text-sky-200">
-            <FaBuilding className="text-sky-300" />
-            Consulta de Empresa
-          </div>
-
-          <h2 className="mt-6 text-2xl font-bold text-white">
-            Consulta mercantil y perfil empresarial
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
-            Consulta información de RUES y organízala en una ficha más clara para validación operativa, revisión comercial y lectura registral.
-          </p>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <InfoChip label="Fuente" value="RUES" />
-            <InfoChip label="Cobertura" value="Perfil mercantil y detalle registral" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+    <>
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-40 h-16 border-b border-white/10 bg-slate-950/96 backdrop-blur-xl md:h-20" />
+    <div className="relative z-0 mx-auto max-w-7xl px-4 pb-8 pt-24 md:px-6 md:pb-10 md:pt-28">
+      <div className="space-y-8">
+        <div className="rounded-[2.25rem] border border-sky-400/15 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_34%),linear-gradient(135deg,rgba(7,13,34,0.98),rgba(20,41,102,0.95))] p-5 shadow-[0_30px_80px_rgba(2,6,23,0.35)]">
+          <div className="grid gap-5 xl:grid-cols-[280px_1fr] xl:items-center">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-sky-100">
-                Tipo de documento
-              </label>
-              <select
-                className="w-full rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 text-white"
-                value={tipoDoc}
-                disabled
-              >
-                <option value="NIT">NIT</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-sky-100">
-                NIT de la empresa
-              </label>
-              <input
-                type="text"
-                className="w-full rounded-xl border border-white/10 bg-slate-950/35 px-4 py-3 text-white placeholder:text-slate-500"
-                placeholder="Ej: 0000000000"
-                value={nit}
-                onChange={(e) => setNit(e.target.value)}
-                autoComplete="off"
-              />
-              <p className="mt-2 text-xs leading-5 text-slate-400">
-                Usa el NIT tal como aparece en la cámara de comercio o en el certificado mercantil.
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-xs font-semibold text-sky-200">
+                <FaBuilding className="text-sky-300" />
+                Consulta de Empresa
+              </div>
+              <h2 className="mt-4 text-xl font-bold leading-tight text-white">
+                Consulta mercantil y perfil empresarial
+              </h2>
+              <p className="mt-2 text-xs leading-5 text-slate-300">
+                Ingresa el NIT para validar RUES, Cámara, actividad económica y señales de proveedor.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-slate-950/30 p-4">
-              <div className="flex items-start gap-2">
+            <form onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[140px_1fr_1.25fr_180px] lg:items-end">
+              <div>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-sky-100">
+                  Documento
+                </label>
+                <select
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-white"
+                  value={tipoDoc}
+                  disabled
+                >
+                  <option value="NIT">NIT</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-sky-100">
+                  NIT de la empresa
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-white placeholder:text-slate-500"
+                  placeholder="Ej: 0000000000"
+                  value={nit}
+                  onChange={(e) => setNit(e.target.value)}
+                  autoComplete="off"
+                />
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3">
+                <div className="flex items-start gap-2">
                 <input
                   type="checkbox"
                   id="acepta"
@@ -386,9 +547,9 @@ export default function ConsultaEmpresa() {
                 <label htmlFor="acepta" className="text-sm text-slate-300">
                   Acepto los <Terminos inline />.
                 </label>
-              </div>
+                </div>
 
-              <div className="mt-3 flex items-start gap-2">
+                <div className="mt-2 flex items-start gap-2">
                 <input
                   type="checkbox"
                   id="consentimiento"
@@ -399,120 +560,161 @@ export default function ConsultaEmpresa() {
                 <label htmlFor="consentimiento" className="text-sm text-slate-300">
                   Confirmo que cuento con autorización para consultar esta información.
                 </label>
+                </div>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-gradient-to-r from-sky-500 to-blue-500 px-4 py-3 font-semibold text-white transition-all duration-300 hover:from-sky-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {loading ? "Consultando..." : "Consultar Empresa"}
-            </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="h-[48px] w-full rounded-xl bg-gradient-to-r from-sky-500 to-blue-500 px-4 font-semibold text-white transition-all duration-300 hover:from-sky-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loading ? "Consultando..." : "Consultar Empresa"}
+              </button>
 
-            <div className="rounded-2xl border border-sky-400/15 bg-sky-500/10 px-4 py-4 text-sm leading-6 text-sky-100">
-              La consulta prioriza la información estructurada de RUES y, si la empresa ya fue revisada, reutiliza la ficha guardada solo cuando está completa.
-            </div>
-
-            {toast && (
-              <div className={`rounded-xl border px-4 py-3 text-sm ${
-                toast.type === "error"
-                  ? "border-red-400/20 bg-red-500/10 text-red-200"
-                  : "border-emerald-400/20 bg-emerald-500/10 text-emerald-200"
-              }`}>
-                {toast.message}
-              </div>
-            )}
-          </form>
-        </aside>
+              {toast && (
+                <div className={`lg:col-span-4 rounded-xl border px-4 py-3 text-sm ${
+                  toast.type === "error"
+                    ? "border-red-400/20 bg-red-500/10 text-red-200"
+                    : "border-emerald-400/20 bg-emerald-500/10 text-emerald-200"
+                }`}>
+                  {toast.message}
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
 
         <section className="space-y-6">
-          {!resultadoEmpresa ? (
-            <div className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-10 text-center backdrop-blur-xl">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-400/10 text-sky-300">
+          <div className="rounded-[2rem] border border-white/10 bg-slate-950/82 px-6 py-6 text-center shadow-[0_24px_80px_rgba(2,6,23,0.3)] backdrop-blur-xl">
+            {!resultadoEmpresa ? (
+              <>
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-400/10 text-sky-300">
                 <FaIndustry className="text-2xl" />
               </div>
-              <h3 className="mt-5 text-2xl font-bold text-white">
+              <h3 className="mt-4 text-xl font-bold text-white">
                 Resultado de empresa
               </h3>
-              <p className="mt-3 max-w-2xl mx-auto text-slate-300 leading-7">
+              <p className="mt-2 max-w-2xl mx-auto text-sm leading-6 text-slate-300">
                 Aquí verás la ficha empresarial con información general, actividad económica, representación legal, historia registral y captura de consulta.
               </p>
-            </div>
-          ) : (
+              </>
+            ) : (
+              <>
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300">
+                  <FaClipboardCheck className="text-2xl" />
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-white">
+                  Resultado listo
+                </h3>
+                <p className="mt-2 max-w-2xl mx-auto text-sm leading-6 text-slate-300">
+                  La ficha empresarial se muestra debajo del formulario para que puedas conservar la consulta y revisar el resultado completo.
+                </p>
+              </>
+            )}
+          </div>
+        </section>
+
+        {resultadoEmpresa && (
             <>
-              <div className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-950/95 to-slate-900/95 p-6 md:p-8 shadow-[0_30px_80px_rgba(2,6,23,0.35)]">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className={`overflow-hidden rounded-[2.25rem] border bg-gradient-to-br p-6 md:p-8 shadow-[0_30px_100px_rgba(2,6,23,0.42)] backdrop-blur-xl ${assessment?.classes || "border-white/10 from-slate-950 to-slate-900"}`}>
+                <div className="space-y-6">
                   <div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-                      <FaCheckCircle className="text-emerald-300" />
-                      Fuente RUES
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.18em] ${assessment?.badge || "bg-sky-400 text-slate-950"}`}>
+                        <FaClipboardCheck />
+                        {assessment?.eyebrow || "Evaluación empresarial"}
+                      </div>
+                      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-200">
+                        <FaCheckCircle className="text-emerald-300" />
+                        Fuente RUES
+                      </div>
                     </div>
-                    <h3 className="mt-4 text-2xl md:text-3xl font-bold text-white">
+
+                    <h3 className="mt-5 max-w-4xl text-3xl font-black leading-tight text-white md:text-5xl">
                       {resultadoEmpresa.nombre || "Empresa consultada"}
                     </h3>
-                    <p className="mt-2 text-slate-300">
-                      NIT: <span className="font-semibold text-white">{resultadoEmpresa.nit}</span>
-                    </p>
-                    <p className="mt-1 text-slate-300">
-                      Estado: <span className="font-semibold text-white">{resultadoEmpresa.estado || "No disponible"}</span>
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleDescargarPdf}
-                      disabled={generandoPdf}
-                      className="mt-5 inline-flex items-center gap-2 rounded-xl border border-sky-400/20 bg-sky-500/15 px-4 py-3 text-sm font-semibold text-sky-100 transition-all duration-300 hover:border-sky-300/40 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      <FaFilePdf className="text-sky-300" />
-                      {generandoPdf ? "Generando PDF..." : "Descargar PDF empresarial"}
-                    </button>
+
+                    <div className="mt-5 rounded-3xl border border-white/10 bg-slate-950/38 p-5">
+                      <div className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">
+                        Lectura ejecutiva
+                      </div>
+                      <h4 className="mt-2 text-2xl font-bold text-white">
+                        {assessment?.title}
+                      </h4>
+                      <p className="mt-3 text-base leading-8 text-slate-300">
+                        {assessment?.summary}
+                      </p>
+                    </div>
+
+                    <div className="mt-6 grid gap-3 md:grid-cols-2">
+                      <InfoChip label="NIT consultado" value={resultadoEmpresa.nit || "No disponible"} />
+                      <InfoChip label="Estado reportado" value={resultadoEmpresa.estado || "No disponible"} />
+                      <InfoChip label="Cámara de comercio" value={resultadoEmpresa.camara_comercio || "No disponible"} />
+                      <InfoChip label="Matrícula" value={resultadoEmpresa.matricula || "No disponible"} />
+                    </div>
+
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={handleDescargarPdf}
+                        disabled={generandoPdf}
+                        className="inline-flex items-center gap-3 rounded-2xl border border-sky-300/25 bg-sky-400/15 px-5 py-4 text-sm font-bold text-sky-50 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200/50 hover:bg-sky-400/25 disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        <FaFilePdf className="text-lg text-sky-200" />
+                        {generandoPdf ? "Generando PDF..." : "Descargar informe empresarial"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNuevaConsulta}
+                        className="inline-flex items-center gap-3 rounded-2xl border border-white/12 bg-white/[0.06] px-5 py-4 text-sm font-bold text-slate-100 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/[0.1]"
+                      >
+                        Nueva consulta
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 md:min-w-[320px]">
-                    <MetricTile label="Año de matrícula" value={metricas.anio_fundacion} tone="sky" />
-                    <MetricTile label="Antigüedad" value={metricas.antiguedad_anos != null ? `${metricas.antiguedad_anos} años` : "—"} tone="emerald" />
-                    <MetricTile label="Actividades" value={metricas.total_actividades} tone="amber" />
-                    <MetricTile
-                      label="DIAN ficticios"
-                      value={proveedoresFicticios?.aparece ? "Alerta" : "Validado"}
-                      tone={proveedoresFicticios?.aparece ? "amber" : "emerald"}
-                    />
+                  <div className="rounded-[2rem] border border-white/10 bg-slate-950/42 p-5 md:p-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                          Resumen para calificación
+                        </div>
+                        <div className="mt-1 text-xl font-black text-white">
+                          Señales clave
+                        </div>
+                      </div>
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-sky-200">
+                        <FaBalanceScale />
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <MetricTile label="Año matrícula" value={metricas.anio_fundacion} tone="sky" />
+                      <MetricTile label="Antigüedad" value={metricas.antiguedad_anos != null ? `${metricas.antiguedad_anos} años` : "—"} tone="emerald" />
+                      <MetricTile label="Actividades" value={metricas.total_actividades} tone="amber" />
+                      <MetricTile
+                        label="DIAN"
+                        value={proveedoresFicticios?.aparece ? "Alerta" : "Sin alerta"}
+                        tone={proveedoresFicticios?.aparece ? "amber" : "emerald"}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4">
-                    <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Cámara</div>
-                    <div className="mt-2 text-white font-semibold">{resultadoEmpresa.camara_comercio || "No disponible"}</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4">
-                    <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Matrícula</div>
-                    <div className="mt-2 text-white font-semibold">{resultadoEmpresa.matricula || "No disponible"}</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4">
-                    <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Actividad principal</div>
-                    <div className="mt-2 text-white font-semibold">
-                      {actividadPrincipal.codigo || "No disponible"}
-                    </div>
-                    <div className="mt-1 text-sm text-slate-300">
-                      {actividadPrincipal.descripcion || "No disponible"}
-                    </div>
-                  </div>
-                  <div className="rounded-2xl border border-white/8 bg-white/[0.04] p-4">
-                    <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Último año renovado</div>
-                    <div className="mt-2 text-white font-semibold">
-                      {perfil.ultimo_anio_renovado || "No disponible"}
-                    </div>
-                    <div className="mt-1 text-sm text-slate-300">
-                      {perfil.fecha_renovacion || "Sin fecha"}
-                    </div>
-                  </div>
+                <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {assessment?.signals.map((signal) => (
+                    <AssessmentSignal key={signal.label} signal={signal} />
+                  ))}
                 </div>
               </div>
 
               <div className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
                 <div className="space-y-6">
-                  <SectionCard title="Información general" accent="sky">
+                  <SectionCard
+                    title="Información general"
+                    accent="sky"
+                    description="Datos registrales base para confirmar identidad, tipo de sociedad, estado, matrícula y renovación."
+                  >
                     <div className="grid gap-4 md:grid-cols-2">
                       {generalEntries.length > 0 ? (
                         generalEntries.map(([label, value]) => (
@@ -524,7 +726,11 @@ export default function ConsultaEmpresa() {
                     </div>
                   </SectionCard>
 
-                  <SectionCard title="Actividades económicas" accent="emerald">
+                  <SectionCard
+                    title="Actividades económicas"
+                    accent="emerald"
+                    description="Permite validar si el objeto comercial declarado corresponde con el producto o servicio que se va a contratar."
+                  >
                     <div className="space-y-3">
                       {(resultadoEmpresa.actividad_economica || []).length > 0 ? (
                         resultadoEmpresa.actividad_economica.map((item, index) => (
@@ -546,7 +752,11 @@ export default function ConsultaEmpresa() {
                     </div>
                   </SectionCard>
 
-                  <SectionCard title="Proveedores ficticios DIAN" accent={proveedoresFicticios?.aparece ? "amber" : "emerald"}>
+                  <SectionCard
+                    title="Proveedores ficticios DIAN"
+                    accent={proveedoresFicticios?.aparece ? "amber" : "emerald"}
+                    description="Señal crítica para revisar riesgos tributarios, costos no deducibles y exposición por operaciones simuladas."
+                  >
                     <div className={`rounded-2xl border px-4 py-4 text-sm leading-6 ${
                       proveedoresFicticios?.aparece
                         ? "border-amber-400/20 bg-amber-500/10 text-amber-100"
@@ -586,7 +796,11 @@ export default function ConsultaEmpresa() {
                     )}
                   </SectionCard>
 
-                  <SectionCard title="Afiliados Cámara de Comercio" accent={camaraAfiliados?.aparece ? "sky" : "violet"}>
+                  <SectionCard
+                    title="Afiliados Cámara de Comercio"
+                    accent={camaraAfiliados?.aparece ? "sky" : "violet"}
+                    description="Fuente complementaria para enriquecer contacto, actividad económica, representante y capacidad financiera reportada."
+                  >
                     <div className={`rounded-2xl border px-4 py-4 text-sm leading-6 ${
                       camaraAfiliados?.aparece
                         ? "border-sky-400/20 bg-sky-500/10 text-sky-100"
@@ -618,7 +832,11 @@ export default function ConsultaEmpresa() {
                     )}
                   </SectionCard>
 
-                  <SectionCard title="Propietario / Establecimiento" accent="amber">
+                  <SectionCard
+                    title="Propietario / Establecimiento"
+                    accent="amber"
+                    description="Ayuda a entender si existen establecimientos asociados, sedes o registros vinculados a la empresa consultada."
+                  >
                     <div className="space-y-4">
                       {propietarioRegistros.length > 0 ? (
                         propietarioRegistros.map((item, index) => (
@@ -644,7 +862,11 @@ export default function ConsultaEmpresa() {
                 </div>
 
                 <div className="space-y-6">
-                  <SectionCard title="Perfil empresarial" accent="violet">
+                  <SectionCard
+                    title="Perfil empresarial"
+                    accent="violet"
+                    description="Resumen rápido de clasificación jurídica y datos que ayudan a entender la naturaleza del proveedor."
+                  >
                     <div className="space-y-3">
                       <FieldRow label="Tipo de sociedad" value={perfil.tipo_sociedad} />
                       <FieldRow label="Tipo de organización" value={perfil.tipo_organizacion} />
@@ -653,7 +875,11 @@ export default function ConsultaEmpresa() {
                     </div>
                   </SectionCard>
 
-                  <SectionCard title="Representante legal" accent="sky">
+                  <SectionCard
+                    title="Representante legal"
+                    accent="sky"
+                    description="Identifica quién representa a la empresa y permite cruzar cargos, nombres e identificaciones en revisión interna."
+                  >
                     {(resultadoEmpresa.representante_legal?.registros || []).length > 0 ? (
                       <div className="space-y-3">
                         {resultadoEmpresa.representante_legal.registros.map((item, index) => (
@@ -684,7 +910,11 @@ export default function ConsultaEmpresa() {
                     )}
                   </SectionCard>
 
-                  <SectionCard title="Historia registral" accent="amber">
+                  <SectionCard
+                    title="Historia registral"
+                    accent="amber"
+                    description="Fechas y señales de continuidad que ayudan a interpretar trayectoria, renovación y vigencia."
+                  >
                     <div className="space-y-3">
                       {historia.map((item, index) => (
                         <div key={`${item.titulo}-${index}`} className="rounded-2xl border border-white/8 bg-slate-950/35 p-4">
@@ -697,7 +927,11 @@ export default function ConsultaEmpresa() {
                   </SectionCard>
 
                   {resultadoEmpresa.captura_principal && (
-                    <SectionCard title="Captura de la consulta" accent="emerald">
+                    <SectionCard
+                      title="Captura de la consulta"
+                      accent="emerald"
+                      description="Evidencia visual de la fuente consultada para soporte del análisis."
+                    >
                       <img
                         src={resultadoEmpresa.captura_principal}
                         alt="Captura de la empresa"
@@ -706,22 +940,44 @@ export default function ConsultaEmpresa() {
                     </SectionCard>
                   )}
 
-                  <SectionCard title="Lectura operativa" accent="sky">
-                    <div className="space-y-3 text-sm leading-7 text-slate-300">
-                      <p>
-                        Esta vista está pensada para que el equipo entienda rápido la situación registral de la empresa sin revisar bloques largos de texto.
-                      </p>
-                      <p>
-                        Si una empresa ya estaba guardada pero con información pobre, el backend ahora intenta refrescarla antes de responder.
-                      </p>
+                  <SectionCard
+                    title="Guía de calificación"
+                    accent="sky"
+                    description="Orden recomendado para que el analista tome una decisión con evidencia y no solo con datos aislados."
+                  >
+                    <div className="space-y-3">
+                      <DecisionStep
+                        icon={FaIdCard}
+                        title="1. Validar identidad"
+                        text="Confirma que NIT, razón social, matrícula y cámara coincidan con el proveedor que se va a contratar."
+                        tone="sky"
+                      />
+                      <DecisionStep
+                        icon={FaExclamationTriangle}
+                        title="2. Revisar alertas"
+                        text="Si aparece en DIAN ficticios o el estado mercantil no es activo, escala la revisión antes de aprobar."
+                        tone={proveedoresFicticios?.aparece ? "amber" : "emerald"}
+                      />
+                      <DecisionStep
+                        icon={FaChartLine}
+                        title="3. Evaluar capacidad"
+                        text="Contrasta actividad económica, antigüedad, renovación, personal ocupado e indicadores financieros disponibles."
+                        tone="emerald"
+                      />
+                      <DecisionStep
+                        icon={FaBalanceScale}
+                        title="4. Documentar decisión"
+                        text="Usa el PDF como soporte de la calificación y deja observaciones si la información es incompleta."
+                        tone="sky"
+                      />
                     </div>
                   </SectionCard>
                 </div>
               </div>
             </>
           )}
-        </section>
       </div>
     </div>
+    </>
   );
 }

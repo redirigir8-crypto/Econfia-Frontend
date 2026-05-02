@@ -35,7 +35,36 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
     fetchFuentes();
   }, [isOpen, API_URL]);
 
+  const FUENTES_EDUCATIVAS = new Set([
+    "biologia_consulta", "biologia_validacion_certificados",
+    "colpsic_validar_documento", "colpsic_verificacion_tarjetas",
+    "cnb_carnet_afiliacion", "cnb_consulta_matriculados",
+    "conalpe_certificado", "conalpe_consulta_inscritos",
+    "conaltel_consulta_matriculados",
+    "conpucol_certificados", "conpucol_verificacion_colegiados",
+    "conte_consulta_matricula", "conte_consulta_vigencia",
+    "copnia_certificado",
+    "cp_certificado_busqueda", "cp_validar_certificado", "cp_validar_matricula",
+    "cpaa_generar_certificado",
+    "cpae_certificado", "cpae_verify_certification", "cpae_verify_licensure",
+    "cpip_verif_matricula",
+    "cpiq_certificado_vigencia", "cpiq_validacion_certificado_vigencia",
+    "cpiq_validacion_matricula", "cpiq_validacion_tarjeta",
+    "cpnaa_certificado_vigencia", "cpnaa_matricula_arquitecto",
+    "cpnt_consulta_licencia", "cpnt_vigencia_externa_form", "cpnt_vigenciapdf",
+    "cpqcol_antecedentes", "cpqcol_verificar",
+    "cndj_antecedentes_disciplinarios",
+    "rama_abogado_certificado",
+    "rethus", "rethus_identificacion",
+    "pruebas_icfes",
+    "tnem_certificados",
+    "sideap_comprobante",
+    "mintransporte_capacitaciones",
+    "colelectro_directorio",
+  ]);
+
   const filteredFuentes = fuentes.filter((f) => {
+    if (FUENTES_EDUCATIVAS.has(f?.nombre)) return false;
     const texto = `${f?.nombre ?? ""} ${f?.nombre_pila ?? ""}`.toLowerCase();
     return texto.includes(query.toLowerCase());
   });
@@ -44,10 +73,6 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
     setSeleccionadas((prev) => {
       if (prev.includes(nombre)) {
         return prev.filter((n) => n !== nombre);
-      }
-      // Si ya hay 45 seleccionadas, no agregar más
-      if (prev.length >= 45) {
-        return prev;
       }
       return [...prev, nombre];
     });
@@ -98,8 +123,7 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
     if (allSelected) {
       setSeleccionadas([]);
     } else {
-      const nuevas = filteredFuentes.map(f => f.nombre);
-      setSeleccionadas(nuevas.slice(0, 45));
+      setSeleccionadas(filteredFuentes.map(f => f.nombre));
     }
   };
 
@@ -159,16 +183,13 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
             {/* Contador de fuentes seleccionadas */}
             <div className="mb-2 flex items-center justify-between">
               <span className="text-cyan-300 font-semibold text-sm">
-                {`Fuentes seleccionadas: ${seleccionadas.length} / 45`}
+                {`Fuentes seleccionadas: ${seleccionadas.length}`}
               </span>
-              {seleccionadas.length >= 45 && (
-                <span className="text-xs text-orange-400 font-medium">⚠️ Límite máximo</span>
-              )}
             </div>
             <div className="max-h-72 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
               {filteredFuentes.length > 0 ? (
                 filteredFuentes.map((fuente) => {
-                  const isDisabled = seleccionadas.length >= 45 && !seleccionadas.includes(fuente.nombre);
+                  const isDisabled = false;
                   return (
                   <label
                     key={fuente.id}
@@ -324,16 +345,21 @@ export default function ConsultaEssencialExpress() {
           sound="sounds/error-011-352286.mp3"
         />
       )}
-      <section className="relative h-screen flex items-center justify-center py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+      <section className="relative min-h-screen flex items-center justify-center pt-24 pb-32 md:pb-36 overflow-hidden bg-transparent">
         <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         {/* Logo — esquina superior izquierda */}
-        <div className="hidden md:block absolute md:top-6 md:left-6 z-20">
-          <img
-            src="/1-e9a7e544.ico"
-            alt="Econfía"
-            className="w-12 h-12 object-contain opacity-70"
-          />
+        <div className="hidden md:flex absolute md:top-6 md:left-6 z-20 items-center gap-3 group">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-red-500/30 blur-xl scale-125 group-hover:bg-red-500/50 transition-all duration-500" />
+            <div className="relative w-14 h-14 rounded-full bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_24px_rgba(220,38,38,0.3)] group-hover:shadow-[0_0_36px_rgba(220,38,38,0.5)] transition-all duration-500 group-hover:scale-105">
+              <img src="/img/logo-econfia-1.png" alt="Econfía" className="w-9 h-9 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
+            </div>
+          </div>
+          <div>
+            <p className="text-transparent bg-clip-text font-black text-base tracking-[0.3em] uppercase" style={{backgroundImage:"linear-gradient(to right, #ffffff, #bae6fd, #38bdf8, #0ea5e9)", filter:"drop-shadow(0 0 8px rgba(56,189,248,0.9)) drop-shadow(0 0 18px rgba(56,189,248,0.5))"}}>Econfia</p>
+            <p className="text-white/40 text-[9px] tracking-[0.2em] uppercase font-light mt-0.5">Una marca de Grupo Soluciones</p>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-5xl w-full px-4 relative z-10">
           <div className="text-center md:text-left space-y-5">
@@ -485,7 +511,7 @@ export default function ConsultaEssencialExpress() {
         onSuccess={(datosConsulta) => {
           setDatos(datosConsulta);
           setShowResultados(true);
-          setTimeout(() => navigate("/d3b7f1e9"), 6500);
+          setTimeout(() => navigate("/d3b7f1e9"), 10000);
         }}
       />
 

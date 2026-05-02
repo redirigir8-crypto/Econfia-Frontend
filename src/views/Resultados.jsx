@@ -180,38 +180,6 @@ function FloatingActionsPortal({
                     <FileText size={16} className="group-hover:text-purple-400 transition-colors" />
                     <span className="group-hover:text-purple-300">Descarga individual</span>
                   </button>
-                  <button
-                    onClick={async () => {
-                      setDownloading(true);
-                      try {
-                        const token = localStorage.getItem("token");
-                        const url = `${apiUrl}/api/descargar_pdf_validacion_titulo/${consultaId}/`;
-                        const res = await fetch(url, {
-                          method: "GET",
-                          headers: { Authorization: `Token ${token}` },
-                        });
-                        if (!res.ok) throw new Error("No se pudo descargar el PDF");
-                        const blob = await res.blob();
-                        const link = document.createElement("a");
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = `validacion_titulo_${consultaId}.pdf`;
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                        setOpen(false);
-                      } catch (e) {
-                        alert("No se pudo descargar el PDF de validación de título");
-                      } finally {
-                        setDownloading(false);
-                      }
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-green-500/20 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
-                    disabled={downloading}
-                  >
-                    <FileText size={16} className="group-hover:text-green-400 transition-colors" />
-                    <span className="group-hover:text-green-300">Descargar PDF Validación Título</span>
-                    {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-green-400 rounded-full animate-spin" />}
-                  </button>
                 </>
               )}
             </div>
@@ -671,7 +639,7 @@ export default function Resultados() {
     (consultaActual?.es_econfiafask ? "econfiafask" : "");
 
   return (
-    <section className="relative h-screen py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+    <section className="relative min-h-screen py-4 md:py-6 pb-32 md:pb-36 overflow-hidden bg-transparent">
       {/* Elementos decorativos de fondo */}
       <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />

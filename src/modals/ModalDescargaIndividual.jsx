@@ -6,22 +6,19 @@ export default function ModalDescargaIndividual({ isOpen, onClose, data }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [seleccionados, setSeleccionados] = useState([]);
+  const [descargando, setDescargando] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
   const consultaId = data?.consultaId;
 
   const fetchResultados = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(
-        `${API_URL}/api/resultados/${consultaId}/`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-        }
-      );
-
+      const res = await fetch(`${API_URL}/api/resultados/${consultaId}/`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+      });
       if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
       const json = await res.json();
       setResultados(json);
@@ -41,10 +38,7 @@ export default function ModalDescargaIndividual({ isOpen, onClose, data }) {
   if (!isOpen) return null;
 
   const datosFiltrados = resultados.filter((item) =>
-    Object.values(item)
-      .join(" ")
-      .toLowerCase()
-      .includes(search.toLowerCase())
+    Object.values(item).join(" ").toLowerCase().includes(search.toLowerCase())
   );
 
   const toggleSeleccion = (id) => {
@@ -53,106 +47,162 @@ export default function ModalDescargaIndividual({ isOpen, onClose, data }) {
     );
   };
 
-const handleDescargar = async () => {
-  if (seleccionados.length === 0) {
-    alert("Selecciona al menos un resultado para descargar.");
-    return;
-  }
+  const toggleTodos = () => {
+    if (seleccionados.length === datosFiltrados.length) {
+      setSeleccionados([]);
+    } else {
+      setSeleccionados(datosFiltrados.map((r) => r.id));
+    }
+  };
 
-  try {
+  const handleDescargar = async () => {
+    if (seleccionados.length === 0) return;
+    setDescargando(true);
     const token = localStorage.getItem("token");
-    const ids = seleccionados.join(",");
-    const url = `${API_URL}/api/unificar-resultados/?ids=${ids}`;
+    const errores = [];
 
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: `Token ${token}`,
-      },
-    });
+    for (const id of seleccionados) {
+      try {
+        const resultado = resultados.find((r) => r.id === id);
+        const fuente = resultado?.fuente?.replace(/[^a-zA-Z0-9_-]/g, "_") || String(id);
 
-    if (!res.ok) {
-      throw new Error(`Error al descargar: ${res.status}`);
+        const res = await fetch(`${API_URL}/api/descargar-resultado/${id}/`, {
+          method: "GET",
+          headers: { Authorization: `Token ${token}` },
+        });
+
+        if (!res.ok) {
+          errores.push(`${fuente}: HTTP ${res.status}`);
+          continue;
+        }
+
+        const blob = await res.blob();
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${fuente}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(link.href);
+
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      } catch (error) {
+        console.error(`Error descargando resultado ${id}:`, error);
+        errores.push(`ID ${id}: error de red`);
+      }
     }
 
-    // ✅ Descargar como archivo
-    const blob = await res.blob();
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = "resultados_unificados.pdf";
-    link.click();
-    link.remove();
-  } catch (error) {
-    console.error("Error en la descarga:", error);
-    alert("Ocurrió un error al descargar el PDF");
-  }
-};
+    setDescargando(false);
+    if (errores.length > 0) {
+      alert(`Algunos archivos no se pudieron descargar:\n${errores.join("\n")}`);
+    }
+  };
 
+  const todosSeleccionados = datosFiltrados.length > 0 && seleccionados.length === datosFiltrados.length;
 
   const modalContent = (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
-      <div className="bg-white rounded-2xl shadow-lg p-6 relative max-h-[90vh] w-[800px] flex flex-col">
-        {/* Botón cerrar */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600"
-        >
-          ✕
-        </button>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+      <div className="relative w-full max-w-2xl bg-gradient-to-br from-slate-900/95 via-blue-900/20 to-slate-900/95 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl shadow-cyan-500/10 flex flex-col max-h-[88vh]">
 
-        {/* Título */}
-        <h2 className="text-xl font-bold mb-4 text-gray-800">
-          Descarga Individual
-        </h2>
+        {/* Glow decorativo */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
-        {/* 🔎 Filtro global */}
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar en todas las columnas..."
-          className="mb-3 px-2 py-1 w-full rounded border border-gray-300 text-sm"
-        />
+        {/* Header */}
+        <div className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+            <h2 className="text-base font-bold text-white tracking-wide">Descarga Individual</h2>
+            {seleccionados.length > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-medium">
+                {seleccionados.length} seleccionado{seleccionados.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-red-500/20 hover:border-red-500/40 transition-all duration-200 flex items-center justify-center text-sm"
+          >
+            ✕
+          </button>
+        </div>
 
-        {/* Tabla con scroll */}
-        <div className="flex-1 overflow-y-auto overflow-x-auto border rounded-lg">
+        {/* Buscador */}
+        <div className="relative z-10 px-6 pt-4 pb-2">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por fuente, tipo..."
+            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/30 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+          />
+        </div>
+
+        {/* Tabla */}
+        <div className="relative z-10 flex-1 overflow-y-auto mx-6 mb-2 rounded-xl border border-white/10 overflow-hidden">
           {loading ? (
-            <p className="text-gray-500 text-sm p-2">Cargando resultados...</p>
+            <div className="flex items-center justify-center py-12 gap-3">
+              <div className="w-4 h-4 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+              <span className="text-white/50 text-sm">Cargando resultados...</span>
+            </div>
           ) : (
-            <table className="table-auto text-left text-sm min-w-full">
-              <thead className="bg-gray-100 text-gray-700 sticky top-0 z-10">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-white/5 border-b border-white/10 sticky top-0 z-10 backdrop-blur-sm">
                 <tr>
-                  <th className="px-2 py-1">Fuente</th>
-                  <th className="px-2 py-1">Tipo de Fuente</th>
-                  <th className="px-2 py-1">Score</th>
-                  <th className="px-2 py-1 text-center">Seleccionar</th>
+                  <th className="px-4 py-2.5 text-white/60 font-semibold uppercase tracking-wider">Fuente</th>
+                  <th className="px-4 py-2.5 text-white/60 font-semibold uppercase tracking-wider">Tipo</th>
+                  <th className="px-4 py-2.5 text-white/60 font-semibold uppercase tracking-wider text-center">Score</th>
+                  <th className="px-4 py-2.5 text-center">
+                    <button
+                      onClick={toggleTodos}
+                      className="text-cyan-400 hover:text-cyan-300 text-[10px] font-semibold uppercase tracking-wider transition-colors"
+                    >
+                      {todosSeleccionados ? "Ninguno" : "Todos"}
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {datosFiltrados.length > 0 ? (
-                  datosFiltrados.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-gray-200 hover:bg-gray-50 transition"
-                    >
-                      <td className="px-2 py-1">{item.fuente}</td>
-                      <td className="px-2 py-1">{item.tipo_fuente}</td>
-                      <td className="px-2 py-1">{item.score}</td>
-                      <td className="px-2 py-1 text-center">
-                        <input
-                          type="checkbox"
-                          checked={seleccionados.includes(item.id)}
-                          onChange={() => toggleSeleccion(item.id)}
-                        />
-                      </td>
-                    </tr>
-                  ))
+                  datosFiltrados.map((item, i) => {
+                    const seleccionado = seleccionados.includes(item.id);
+                    return (
+                      <tr
+                        key={item.id}
+                        onClick={() => toggleSeleccion(item.id)}
+                        className={`border-b border-white/5 cursor-pointer transition-all duration-150
+                          ${seleccionado ? "bg-cyan-500/10" : i % 2 === 0 ? "bg-white/[0.02]" : ""}
+                          hover:bg-white/5`}
+                      >
+                        <td className="px-4 py-2.5 text-white/90 font-medium">{item.fuente}</td>
+                        <td className="px-4 py-2.5">
+                          <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/60 text-[10px]">
+                            {item.tipo_fuente}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5 text-center">
+                          <span className={`font-bold text-sm ${item.score > 0 ? "text-emerald-400" : "text-white/40"}`}>
+                            {item.score}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5 text-center">
+                          <div className={`w-4 h-4 rounded border mx-auto transition-all duration-150 flex items-center justify-center
+                            ${seleccionado
+                              ? "bg-cyan-500 border-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]"
+                              : "border-white/20 bg-white/5"}`}
+                          >
+                            {seleccionado && (
+                              <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 8">
+                                <path d="M1 4l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="text-center text-gray-400 py-2 italic"
-                    >
+                    <td colSpan={4} className="text-center text-white/30 py-8 italic text-xs">
                       No se encontraron resultados
                     </td>
                   </tr>
@@ -162,19 +212,28 @@ const handleDescargar = async () => {
           )}
         </div>
 
-        {/* Botón descargar siempre visible */}
-        <div className="flex justify-end mt-4">
+        {/* Footer */}
+        <div className="relative z-10 flex items-center justify-between px-6 py-4 border-t border-white/10">
+          <span className="text-white/40 text-xs">
+            {datosFiltrados.length} resultado{datosFiltrados.length !== 1 ? "s" : ""}
+          </span>
           <button
             onClick={handleDescargar}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition"
+            disabled={seleccionados.length === 0 || descargando}
+            className={`px-5 py-2 rounded-lg font-semibold text-xs transition-all duration-300
+              ${seleccionados.length === 0 || descargando
+                ? "bg-white/10 text-white/30 cursor-not-allowed"
+                : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/40 transform hover:scale-105"
+              }`}
           >
-            Descargar seleccionados
+            {descargando
+              ? "Descargando..."
+              : `Descargar${seleccionados.length > 0 ? ` (${seleccionados.length})` : ""}`}
           </button>
         </div>
       </div>
     </div>
   );
 
-  // 👇 Aquí ocurre la magia: el modal se monta directo en <body>
   return createPortal(modalContent, document.body);
 }

@@ -115,7 +115,7 @@ export default function Dashboard() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col pt-8">
+    <div className="min-h-screen flex flex-col bg-transparent">
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
