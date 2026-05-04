@@ -178,7 +178,14 @@ export default function Login() {
 
         {/* Lado izquierdo: formulario */}
         <div className="w-1/2 flex flex-col justify-center items-start px-8 z-10 relative overflow-y-auto">
-          <div className="space-y-1 mb-5">
+          {/* Cuadrícula sutil de fondo */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute inset-0 econfia-grid-wave bg-[linear-gradient(0deg,transparent_24%,rgba(255,255,255,0.12)_25%,rgba(255,255,255,0.12)_26%,transparent_27%,transparent_74%,rgba(255,255,255,0.12)_75%,rgba(255,255,255,0.12)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,rgba(255,255,255,0.12)_25%,rgba(255,255,255,0.12)_26%,transparent_27%,transparent_74%,rgba(255,255,255,0.12)_75%,rgba(255,255,255,0.12)_76%,transparent_77%,transparent)] bg-[length:56px_56px]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-blue-500/10" />
+          </div>
+
+          <div className="relative z-10 w-full">
+            <div className="space-y-1 mb-5">
             <div className="inline-block">
               <div className="px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
@@ -194,9 +201,9 @@ export default function Login() {
             <p className="mt-2 text-sm text-white/70 leading-relaxed max-w-md">
               Accede a tu cuenta para gestionar tus verificaciones
             </p>
-          </div>
+            </div>
 
-          <form onSubmit={handleSubmit} className="w-full max-w-md space-y-2 mt-4">
+            <form onSubmit={handleSubmit} className="w-full max-w-md space-y-2 mt-4">
             {/* Usuario */}
             <div>
               <label className="text-xs font-semibold text-white/70 mb-2 block">Usuario o Email</label>
@@ -245,10 +252,10 @@ export default function Login() {
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? "Validando..." : "Iniciar sesión"}
             </button>
-          </form>
+            </form>
 
-          {/* Acciones secundarias */}
-          <div className="mt-6 space-y-3 w-full">
+            {/* Acciones secundarias */}
+            <div className="mt-6 space-y-3 w-full">
             <p className="text-xs text-white/70">
               ¿No tienes una cuenta?{" "}
               <a
@@ -264,6 +271,7 @@ export default function Login() {
             >
               ¿Olvidaste tu contraseña?
             </a>
+            </div>
           </div>
         </div>
 

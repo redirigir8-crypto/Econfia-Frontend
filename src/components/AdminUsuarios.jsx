@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Toast from "./Toast";
 import Modal from "./Modal";
 import { generarInformeAdminPDF, generarInformeAdminIndividualPDF } from "../pdf/InformeAdminPDFV2";
+import AdminSoporte from "../views/AdminSoporte";
+import soporteService from "../services/soporteService";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -129,6 +131,11 @@ const AdminUsuarios = () => {
   const [masivasUser, setMasivasUser]             = useState(null);
   const [masivasPlanId, setMasivasPlanId]         = useState("");
 
+  // Soporte técnico
+  const [showSoporteModal, setShowSoporteModal] = useState(false);
+  const [ticketsSoporteActivos, setTicketsSoporteActivos] = useState(0);
+  const [loadingSoporte, setLoadingSoporte] = useState(false);
+
   const token = localStorage.getItem("token");
 
   // ── Fetch ──────────────────────────────────────────────────────
@@ -144,6 +151,26 @@ const AdminUsuarios = () => {
   };
 
   useEffect(() => { fetchUsers(); }, [token]);
+
+  const fetchSoporteActivos = async () => {
+    if (!token) return;
+    setLoadingSoporte(true);
+    try {
+      const tickets = await soporteService.obtenerTicketsAbiertos();
+      setTicketsSoporteActivos(Array.isArray(tickets) ? tickets.length : 0);
+    } catch {
+      setTicketsSoporteActivos(0);
+    } finally {
+      setLoadingSoporte(false);
+    }
+  };
+
+  useEffect(() => { fetchSoporteActivos(); }, [token]);
+
+  const handleOpenSoporteModal = async () => {
+    await fetchSoporteActivos();
+    setShowSoporteModal(true);
+  };
 
   useEffect(() => {
     const fetchPlanes = async () => {
@@ -526,6 +553,23 @@ const AdminUsuarios = () => {
 
                 <div className="flex flex-col gap-3 sm:flex-row xl:justify-end">
                   <button
+                    onClick={handleOpenSoporteModal}
+                    className="relative inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-400/35 bg-amber-500/12 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100 transition-all hover:bg-amber-500/20"
+                    title="Ver tickets de soporte técnico"
+                  >
+                    <span>Tickets</span>
+                    <span className="rounded-full bg-amber-300 px-2 py-0.5 text-[10px] font-black text-slate-950">
+                      {loadingSoporte ? "..." : ticketsSoporteActivos}
+                    </span>
+                    {ticketsSoporteActivos > 0 && (
+                      <span className="absolute -right-1 -top-1 flex h-3 w-3">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
+                      </span>
+                    )}
+                  </button>
+
+                  <button
                     onClick={() => setOrderAsc((v) => !v)}
                     className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition-all ${
                       orderAsc
@@ -879,6 +923,35 @@ const AdminUsuarios = () => {
           </div>
         </div>
       </div>
+      {/* ── Modal: Soporte técnico ── */}
+      {showSoporteModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="flex max-h-[88vh] w-full max-w-7xl flex-col overflow-hidden rounded-[28px] border border-cyan-500/20 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-2xl shadow-cyan-950/40">
+            <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-4">
+              <div>
+                <h3 className="text-lg font-black text-white">Centro de soporte técnico</h3>
+                <p className="mt-1 text-xs text-white/45">
+                  Tickets activos: <span className="font-bold text-amber-300">{ticketsSoporteActivos}</span>
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowSoporteModal(false);
+                  fetchSoporteActivos();
+                }}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xl font-bold text-white/60 transition hover:bg-white/10 hover:text-white"
+                aria-label="Cerrar soporte"
+              >
+                ×
+              </button>
+            </div>
+            <div className="max-h-[calc(88vh-72px)] overflow-y-auto p-5">
+              <AdminSoporte embedded />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Modal: Consultas Masivas ── */}
       {showMasivasModal && masivasUser && (
         <Modal onClose={() => setShowMasivasModal(false)}>

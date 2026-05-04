@@ -9,6 +9,10 @@ import {
   Database,
   ShieldCheck,
   ShieldAlert,
+  ExternalLink,
+  Globe2,
+  Search,
+  Users,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 
@@ -18,6 +22,7 @@ export default function DetalleResultados({ consultaId }) {
   const [resultadoModal, setResultadoModal] = useState(null);
   const [procesosModal, setProcesosModal] = useState(null);
   const [garantiasModal, setGarantiasModal] = useState(null);
+  const [socialPage, setSocialPage] = useState(1);
   const [modalAnimating, setModalAnimating] = useState(false);
   const [modalOrigin, setModalOrigin] = useState({ x: 0, y: 0 });
   const [modalVector, setModalVector] = useState({ x: 0, y: 0 });
@@ -26,7 +31,13 @@ export default function DetalleResultados({ consultaId }) {
   const closeTimerRef = useRef(null);
   const openRafRef = useRef(null);
   const openRaf2Ref = useRef(null);
-  const MODAL_ANIMATION_MS = 8000;
+  const isMountedRef = useRef(true);
+  const MODAL_ANIMATION_MS = 300;
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   
 
@@ -189,6 +200,82 @@ export default function DetalleResultados({ consultaId }) {
     return cleaned;
   };
 
+  const isSocialSearchResult = (item) => {
+    const fuente = `${item?.fuente || ""} ${item?.fuente_nombre || ""}`.toLowerCase();
+    const mensaje = normalizeMensaje(item?.mensaje).toLowerCase();
+    return (
+      fuente.includes("social") ||
+      fuente.includes("búsqueda social") ||
+      fuente.includes("busqueda social") ||
+      mensaje.includes("búsqueda social") ||
+      mensaje.includes("busqueda social")
+    );
+  };
+
+  const parseSocialSearchMessage = (mensaje) => {
+    const text = normalizeMensaje(mensaje);
+    const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+
+    const titleLine = lines.find((line) => /b[uú]squeda social/i.test(line)) || "";
+    const nameFromTitle = titleLine.match(/b[uú]squeda social:\s*(.+)$/i)?.[1]?.trim();
+    const nameFromText = text.match(/para ['"]([^'"]+)['"]/i)?.[1]?.trim();
+    const score = Number(text.match(/score de similitud:\s*(\d+)/i)?.[1] || text.match(/score=(\d+)/i)?.[1] || 0);
+    const total = Number(text.match(/total de perfiles:\s*(\d+)/i)?.[1] || 0);
+    const networksLine = lines.find((line) => /redes encontradas:/i.test(line)) || "";
+    const networks = networksLine
+      .replace(/^.*redes encontradas:\s*/i, "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    const resultBlocks = text
+      .split(/\n(?=\d+\.\s)/)
+      .filter((block) => /^\d+\.\s/.test(block.trim()));
+
+    const results = resultBlocks.map((block) => {
+      const blockLines = block.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const first = blockLines[0] || "";
+      const networkMatch = first.match(/\[(.*?)\]/);
+      const network = networkMatch?.[1]?.trim() || "Web";
+      const title = first
+        .replace(/^\d+\.\s*/, "")
+        .replace(/^[^[]*\[/, "[")
+        .replace(/\[[^\]]+\]\s*/, "")
+        .trim();
+      const url = block.match(/URL:\s*(https?:\/\/\S+)/i)?.[1] || "";
+      const itemScore = Number(block.match(/Score:\s*(\d+)/i)?.[1] || block.match(/score=(\d+)/i)?.[1] || 0);
+      const detail = block.match(/Detalle:\s*(.+)/i)?.[1]?.trim() || block.match(/Fragmento:\s*(.+)/i)?.[1]?.trim() || "";
+
+      return {
+        network,
+        title,
+        url,
+        score: itemScore,
+        detail,
+      };
+    });
+
+    return {
+      name: nameFromTitle || nameFromText || "Persona consultada",
+      score,
+      total: total || results.length,
+      networks,
+      results,
+      hasRelevant: /se detectaron|posibles perfiles sociales relevantes/i.test(text),
+      rawText: text,
+    };
+  };
+
+  const getNetworkStyle = (network = "Web") => {
+    const normalized = network.toLowerCase();
+    if (normalized.includes("linkedin")) return "border-sky-400/30 bg-sky-500/10 text-sky-200";
+    if (normalized.includes("instagram")) return "border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-200";
+    if (normalized.includes("facebook")) return "border-blue-400/30 bg-blue-500/10 text-blue-200";
+    if (normalized.includes("tiktok")) return "border-teal-400/30 bg-teal-500/10 text-teal-200";
+    if (normalized.includes("youtube")) return "border-red-400/30 bg-red-500/10 text-red-200";
+    return "border-slate-400/30 bg-slate-500/10 text-slate-200";
+  };
+
   const toTitleCase = (value) => {
     if (!value) return "Sin estado";
     const txt = String(value).trim();
@@ -277,6 +364,211 @@ export default function DetalleResultados({ consultaId }) {
     };
   };
 
+  const renderSocialSearchDetail = (item) => {
+    const parsed = parseSocialSearchMessage(item?.mensaje);
+    const pageSize = 8;
+    const totalPages = Math.max(1, Math.ceil((parsed.results?.length || 0) / pageSize));
+    const safePage = Math.min(totalPages, Math.max(1, socialPage));
+    const startIdx = (safePage - 1) * pageSize;
+    const endIdx = Math.min(startIdx + pageSize, parsed.results.length);
+    const pageResults = parsed.results.slice(startIdx, endIdx);
+    const exactMatches = parsed.results.filter((result) => result.score >= 80).length;
+    const mediumMatches = parsed.results.filter((result) => result.score >= 40 && result.score < 80).length;
+
+    return (
+      <section className="space-y-5">
+        <div className="rounded-2xl border border-cyan-300/20 bg-gradient-to-br from-cyan-500/10 via-white/[0.03] to-emerald-500/10 p-5 sm:p-6 overflow-hidden relative">
+          <div className="absolute right-0 top-0 h-full w-44 bg-cyan-300/5 skew-x-12 translate-x-10 pointer-events-none" />
+          <div className="relative grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-5">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-200">
+                <Search size={13} />
+                Búsqueda OSINT
+              </div>
+              <h4 className="mt-4 text-2xl sm:text-3xl font-black text-white leading-tight">
+                {parsed.name}
+              </h4>
+              <p className="mt-3 text-sm text-slate-300 max-w-2xl">
+                Resultados por similitud de nombre. Requiere revisión manual antes de asociar cualquier perfil a una identidad.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-xl border border-white/10 bg-black/25 p-3">
+                <p className="text-[9px] uppercase tracking-widest text-slate-400">Similitud</p>
+                <p className="text-2xl font-black text-emerald-300">{parsed.score || "N/A"}</p>
+                <p className="text-[10px] text-slate-400">sobre 100</p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-black/25 p-3">
+                <p className="text-[9px] uppercase tracking-widest text-slate-400">Perfiles</p>
+                <p className="text-2xl font-black text-white">{parsed.total}</p>
+                <p className="text-[10px] text-slate-400">detectados</p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-black/25 p-3">
+                <p className="text-[9px] uppercase tracking-widest text-slate-400">Estado</p>
+                <p className="text-sm font-black text-amber-200 leading-tight">Revisión</p>
+                <p className="text-[10px] text-slate-400">manual</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-4">
+            <p className="text-[10px] uppercase tracking-widest text-emerald-200/70">Alta coincidencia</p>
+            <p className="text-2xl font-black text-emerald-200">{exactMatches}</p>
+          </div>
+          <div className="rounded-xl border border-amber-400/20 bg-amber-500/10 p-4">
+            <p className="text-[10px] uppercase tracking-widest text-amber-200/70">Coincidencia media</p>
+            <p className="text-2xl font-black text-amber-200">{mediumMatches}</p>
+          </div>
+          <div className="rounded-xl border border-slate-400/20 bg-white/[0.03] p-4">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400">Redes rastreadas</p>
+            <p className="text-2xl font-black text-white">{parsed.networks.length || "N/A"}</p>
+          </div>
+        </div>
+
+        {parsed.networks.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {parsed.networks.map((network) => (
+              <span
+                key={network}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${getNetworkStyle(network)}`}
+              >
+                {network}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="rounded-2xl border border-amber-300/20 bg-amber-500/10 p-4">
+          <div className="flex items-start gap-3">
+            <Users size={18} className="mt-0.5 text-amber-200" />
+            <div>
+              <p className="text-sm font-bold text-amber-100">Validación requerida</p>
+              <p className="mt-1 text-xs sm:text-sm text-amber-50/75">
+                El hallazgo no confirma identidad por sí solo. Debe compararse con foto, cargo, empresa, ubicación u otra evidencia documental.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              Perfiles encontrados
+            </h4>
+            <span className="text-[9px] text-white/30 font-mono">
+              CODE: RES_{item.id || "N/A"}
+            </span>
+          </div>
+
+          {pageResults.length > 0 ? (
+            <div className="grid grid-cols-1 gap-3">
+              {pageResults.map((result, index) => {
+                const scoreTone =
+                  result.score >= 80
+                    ? "text-emerald-200 bg-emerald-500/10 border-emerald-400/20"
+                    : result.score >= 40
+                    ? "text-amber-200 bg-amber-500/10 border-amber-400/20"
+                    : "text-slate-200 bg-white/[0.03] border-white/10";
+
+                return (
+                  <article
+                    key={`${result.url || result.title}-${startIdx + index}`}
+                    className="rounded-2xl border border-white/10 bg-black/25 p-4 hover:border-cyan-300/30 transition-colors"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-slate-200">
+                            #{startIdx + index + 1}
+                          </span>
+                          <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold ${getNetworkStyle(result.network)}`}>
+                            {result.network}
+                          </span>
+                          <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold ${scoreTone}`}>
+                            Score {result.score}/100
+                          </span>
+                        </div>
+                        <h5 className="text-base sm:text-lg font-bold text-white leading-snug">
+                          {result.title || "Resultado sin título"}
+                        </h5>
+                        {result.detail && (
+                          <p className="mt-2 text-sm text-slate-300 leading-relaxed">
+                            {result.detail}
+                          </p>
+                        )}
+                      </div>
+
+                      {result.url ? (
+                        <a
+                          href={result.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs font-bold text-cyan-100 hover:bg-cyan-300/15 transition-colors"
+                        >
+                          Abrir
+                          <ExternalLink size={14} />
+                        </a>
+                      ) : (
+                        <Globe2 size={18} className="text-slate-500" />
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-slate-300">
+              No hay perfiles estructurados para mostrar. El detalle original queda disponible en el registro técnico.
+            </div>
+          )}
+
+          {parsed.results.length > pageSize && (
+            <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="text-xs text-slate-300">
+                Mostrando <span className="font-bold text-white">{startIdx + 1}</span> a{" "}
+                <span className="font-bold text-white">{endIdx}</span> de{" "}
+                <span className="font-bold text-white">{parsed.results.length}</span>
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-end gap-2">
+                <button
+                  onClick={() => setSocialPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage <= 1}
+                  className={`px-3 py-2 rounded-lg border text-xs font-bold transition-colors ${
+                    safePage <= 1
+                      ? "border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
+                      : "border-cyan-300/25 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/15"
+                  }`}
+                >
+                  Anterior
+                </button>
+
+                <div className="px-3 py-2 rounded-lg border border-white/10 bg-white/[0.03] text-xs font-bold text-white">
+                  Página {safePage}/{totalPages}
+                </div>
+
+                <button
+                  onClick={() => setSocialPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage >= totalPages}
+                  className={`px-3 py-2 rounded-lg border text-xs font-bold transition-colors ${
+                    safePage >= totalPages
+                      ? "border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
+                      : "border-cyan-300/25 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/15"
+                  }`}
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  };
+
   const openResultadoModal = (item, event) => {
     const rect = event?.currentTarget?.getBoundingClientRect?.();
     const fallbackX = typeof window !== "undefined" ? window.innerWidth / 2 : 0;
@@ -291,6 +583,7 @@ export default function DetalleResultados({ consultaId }) {
         : { x: fallbackX, y: fallbackY }
     );
 
+    setSocialPage(1);
     setResultadoModal(item);
   };
 
@@ -324,6 +617,7 @@ export default function DetalleResultados({ consultaId }) {
       });
       if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
       const json = await res.json();
+      if (!isMountedRef.current) return;
       setDetalle(json);
 
       // Reconciliar overlay local con lo que venga del backend
@@ -332,13 +626,9 @@ export default function DetalleResultados({ consultaId }) {
         for (const it of json) {
           const est = (it.estado || "").toLowerCase();
           if (next.has(it.id)) {
-            // Si el backend ya pasó a un estado final (ni offline ni revalidando),
-            // quitamos el overlay local.
             if (est !== "offline" && est !== "revalidando") {
               next.delete(it.id);
             }
-            // Si el backend YA muestra "revalidando", podemos quitar el overlay y
-            // dejar que el servidor gobierne la UI.
             if (est === "revalidando") {
               next.delete(it.id);
             }
@@ -349,7 +639,7 @@ export default function DetalleResultados({ consultaId }) {
     } catch (error) {
       console.error("Error al obtener detalle:", error);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) setLoading(false);
     }
   };
 
@@ -988,38 +1278,42 @@ export default function DetalleResultados({ consultaId }) {
                     </div>
                   </section>
 
-                  <section className="space-y-3">
-                    <div className="flex items-center justify-between px-1">
-                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        Detalle Técnico del Registro
-                      </h4>
-                      <span className="text-[9px] text-white/30 font-mono">
-                        CODE: RES_{resultadoModal.id || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="w-full p-5 rounded-2xl bg-black/40 border border-white/10 font-mono relative overflow-hidden">
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-300/40" />
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 pl-3">
-                        <div className="text-xs">
-                          <p className="text-slate-400 uppercase tracking-wider mb-1">Tipo</p>
-                          <p className="text-slate-100 font-semibold">
-                            {resultadoModal.tipo_fuente || "Sin categoría"}
-                          </p>
-                        </div>
-                        <div className="text-xs sm:text-right">
-                          <p className="text-slate-400 uppercase tracking-wider mb-1">Score registrado</p>
-                          <p className={`font-bold ${visual.scoreTone}`}>
-                            {resultadoModal.score ?? "N/A"}
-                          </p>
-                        </div>
+                  {isSocialSearchResult(resultadoModal) ? (
+                    renderSocialSearchDetail(resultadoModal)
+                  ) : (
+                    <section className="space-y-3">
+                      <div className="flex items-center justify-between px-1">
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                          Detalle Técnico del Registro
+                        </h4>
+                        <span className="text-[9px] text-white/30 font-mono">
+                          CODE: RES_{resultadoModal.id || "N/A"}
+                        </span>
                       </div>
 
-                      <pre className="pl-3 text-xs md:text-sm text-cyan-100/90 whitespace-pre-wrap break-words max-h-[32vh] overflow-auto leading-relaxed">
-                        {normalizeMensaje(resultadoModal.mensaje)}
-                      </pre>
-                    </div>
-                  </section>
+                      <div className="w-full p-5 rounded-2xl bg-black/40 border border-white/10 font-mono relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-300/40" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 pl-3">
+                          <div className="text-xs">
+                            <p className="text-slate-400 uppercase tracking-wider mb-1">Tipo</p>
+                            <p className="text-slate-100 font-semibold">
+                              {resultadoModal.tipo_fuente || "Sin categoría"}
+                            </p>
+                          </div>
+                          <div className="text-xs sm:text-right">
+                            <p className="text-slate-400 uppercase tracking-wider mb-1">Score registrado</p>
+                            <p className={`font-bold ${visual.scoreTone}`}>
+                              {resultadoModal.score ?? "N/A"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <pre className="pl-3 text-xs md:text-sm text-cyan-100/90 whitespace-pre-wrap break-words max-h-[32vh] overflow-auto leading-relaxed">
+                          {normalizeMensaje(resultadoModal.mensaje)}
+                        </pre>
+                      </div>
+                    </section>
+                  )}
 
                   {/* Garantías Mobiliarias — lista de garantías */}
                   {resultadoModal.datos_extra?.procesos?.length > 0 &&

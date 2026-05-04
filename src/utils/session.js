@@ -1,4 +1,4 @@
-export const SESSION_INACTIVITY_LIMIT_MS = 10 * 60 * 1000; // 10 minutos
+export const SESSION_INACTIVITY_LIMIT_MS = 8 * 60 * 60 * 1000; // 8 horas
 
 const TOKEN_KEY = "token";
 const USER_KEY = "user";

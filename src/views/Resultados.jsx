@@ -341,26 +341,17 @@ export default function Resultados() {
   const [liveConsultaId, setLiveConsultaId] = useState(null);
   const [dismissedLiveConsultaId, setDismissedLiveConsultaId] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
-    // Abrir automáticamente el modal para la consulta en proceso más reciente
-    useEffect(() => {
-      if (!data.length) return;
-      // Busca la consulta en proceso más reciente
-      const enProceso = data.filter((item) => (item.estado || "").toLowerCase() === "en_proceso");
-      if (enProceso.length > 0) {
-        // Ordena por fecha descendente
-        enProceso.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-        if (dismissedLiveConsultaId !== enProceso[0].id && liveConsultaId !== enProceso[0].id) {
-          setLiveConsultaId(enProceso[0].id);
-        }
-      } else {
-        if (liveConsultaId) {
-          setLiveConsultaId(null);
-        }
-        if (dismissedLiveConsultaId !== null) {
-          setDismissedLiveConsultaId(null);
-        }
-      }
-  }, [data, dismissedLiveConsultaId, liveConsultaId]);
+    // Limpiar liveConsultaId cuando la consulta deje de estar en proceso
+  useEffect(() => {
+    if (!liveConsultaId) return;
+    const sigueEnProceso = data.some(
+      (item) => item.id === liveConsultaId && (item.estado || "").toLowerCase() === "en_proceso"
+    );
+    if (!sigueEnProceso) {
+      setLiveConsultaId(null);
+      setDismissedLiveConsultaId(null);
+    }
+  }, [data, liveConsultaId]);
   // ---- Obtener todas las consultas ----
   const fetchResultados = async () => {
     try {

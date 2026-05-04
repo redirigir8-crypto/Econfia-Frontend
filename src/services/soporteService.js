@@ -1,193 +1,108 @@
 // src/services/soporteService.js
 
-import axiosInstance from './axiosConfig'; // Usando tu configuración existente
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const SUPPORT_API = `${API_URL}/api/support`;
 
-const SUPPORT_API = '/api/support';
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Token ${token}` } : {};
+};
+
+const parseResponse = async (response) => {
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = data?.error || data?.detail || "Error en la solicitud de soporte";
+    throw new Error(message);
+  }
+  return data;
+};
+
+const requestJson = async (url, options = {}) => {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+      ...(options.headers || {}),
+    },
+  });
+  return parseResponse(response);
+};
+
+const requestForm = async (url, formData) => {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: formData,
+  });
+  return parseResponse(response);
+};
 
 const soporteService = {
-	// ========== TICKETS ==========
-	
-	/**
-	 * Crear un nuevo ticket de soporte
-	 */
-	crearTicket: async (asunto, descripcion, categoria = 'otro', prioridad = 'media') => {
-		try {
-			const response = await axiosInstance.post(`${SUPPORT_API}/tickets/`, {
-				asunto,
-				descripcion,
-				categoria,
-				prioridad
-			});
-			return response.data;
-		} catch (error) {
-			console.error('Error al crear ticket:', error);
-			throw error;
-		}
-	},
+  crearTicket: async (asunto, descripcion, categoria = "otro", prioridad = "media") => {
+    return requestJson(`${SUPPORT_API}/tickets/`, {
+      method: "POST",
+      body: JSON.stringify({ asunto, descripcion, categoria, prioridad }),
+    });
+  },
 
-	/**
-	 * Obtener todos mis tickets
-	 */
-	obtenerMisTickets: async () => {
-		try {
-			const response = await axiosInstance.get(`${SUPPORT_API}/tickets/mis_tickets/`);
-			return response.data;
-		} catch (error) {
-			console.error('Error al obtener tickets:', error);
-			throw error;
-		}
-	},
+  obtenerMisTickets: async () => {
+    return requestJson(`${SUPPORT_API}/tickets/mis_tickets/`);
+  },
 
-	/**
-	 * Obtener detalle de un ticket específico
-	 */
-	obtenerTicket: async (ticketId) => {
-		try {
-			const response = await axiosInstance.get(`${SUPPORT_API}/tickets/${ticketId}/`);
-			return response.data;
-		} catch (error) {
-			console.error('Error al obtener ticket:', error);
-			throw error;
-		}
-	},
+  obtenerTicket: async (ticketId) => {
+    return requestJson(`${SUPPORT_API}/tickets/${ticketId}/`);
+  },
 
-	/**
-	 * Agregar mensaje a un ticket
-	 */
-	agregarMensaje: async (ticketId, mensaje, archivo = null) => {
-		try {
-			const formData = new FormData();
-			formData.append('mensaje', mensaje);
-			if (archivo) {
-				formData.append('archivo', archivo);
-			}
+  agregarMensaje: async (ticketId, mensaje, archivo = null) => {
+    const formData = new FormData();
+    formData.append("mensaje", mensaje);
+    if (archivo) formData.append("archivo", archivo);
+    return requestForm(`${SUPPORT_API}/tickets/${ticketId}/agregar_mensaje/`, formData);
+  },
 
-			const response = await axiosInstance.post(
-				`${SUPPORT_API}/tickets/${ticketId}/agregar_mensaje/`,
-				formData,
-				{
-					headers: {
-						'Content-Type': 'multipart/form-data'
-					}
-				}
-			);
-			return response.data;
-		} catch (error) {
-			console.error('Error al agregar mensaje:', error);
-			throw error;
-		}
-	},
+  obtenerRespuestaAutomatica: async (pregunta) => {
+    const params = new URLSearchParams({ pregunta });
+    return requestJson(`${SUPPORT_API}/respuestas-automaticas/obtener_respuesta/?${params.toString()}`);
+  },
 
-	// ========== RESPUESTAS AUTOMÁTICAS ==========
+  obtenerTicketsAbiertos: async () => {
+    return requestJson(`${SUPPORT_API}/tickets/tickets_abiertos/`);
+  },
 
-	/**
-	 * Obtener respuesta automática para una pregunta
-	 */
-	obtenerRespuestaAutomatica: async (pregunta) => {
-		try {
-			const response = await axiosInstance.get(
-				`${SUPPORT_API}/respuestas-automaticas/obtener_respuesta/`,
-				{
-					params: { pregunta }
-				}
-			);
-			return response.data;
-		} catch (error) {
-			console.error('Error al obtener respuesta automática:', error);
-			throw error;
-		}
-	},
+  obtenerEstadisticas: async () => {
+    return requestJson(`${SUPPORT_API}/tickets/estadisticas/`);
+  },
 
-	// ========== ADMIN ONLY ==========
+  cambiarEstado: async (ticketId, nuevoEstado) => {
+    return requestJson(`${SUPPORT_API}/tickets/${ticketId}/cambiar_estado/`, {
+      method: "PATCH",
+      body: JSON.stringify({ estado: nuevoEstado }),
+    });
+  },
 
-	/**
-	 * Obtener todos los tickets abiertos (solo admin)
-	 */
-	obtenerTicketsAbiertos: async () => {
-		try {
-			const response = await axiosInstance.get(`${SUPPORT_API}/tickets/tickets_abiertos/`);
-			return response.data;
-		} catch (error) {
-			console.error('Error al obtener tickets abiertos:', error);
-			throw error;
-		}
-	},
+  asignarAgente: async (ticketId, agenteId) => {
+    return requestJson(`${SUPPORT_API}/tickets/${ticketId}/asignar_agente/`, {
+      method: "PATCH",
+      body: JSON.stringify({ agente_id: agenteId }),
+    });
+  },
 
-	/**
-	 * Obtener estadísticas de tickets (solo admin)
-	 */
-	obtenerEstadisticas: async () => {
-		try {
-			const response = await axiosInstance.get(`${SUPPORT_API}/tickets/estadisticas/`);
-			return response.data;
-		} catch (error) {
-			console.error('Error al obtener estadísticas:', error);
-			throw error;
-		}
-	},
+  obtenerTodosTickets: async () => {
+    return requestJson(`${SUPPORT_API}/tickets/`);
+  },
 
-	/**
-	 * Cambiar estado de un ticket (solo admin)
-	 */
-	cambiarEstado: async (ticketId, nuevoEstado) => {
-		try {
-			const response = await axiosInstance.patch(
-				`${SUPPORT_API}/tickets/${ticketId}/cambiar_estado/`,
-				{ estado: nuevoEstado }
-			);
-			return response.data;
-		} catch (error) {
-			console.error('Error al cambiar estado:', error);
-			throw error;
-		}
-	},
-
-	/**
-	 * Asignar agente a un ticket (solo admin)
-	 */
-	asignarAgente: async (ticketId, agenteId) => {
-		try {
-			const response = await axiosInstance.patch(
-				`${SUPPORT_API}/tickets/${ticketId}/asignar_agente/`,
-				{ agente_id: agenteId }
-			);
-			return response.data;
-		} catch (error) {
-			console.error('Error al asignar agente:', error);
-			throw error;
-		}
-	},
-
-	/**
-	 * Obtener todos los tickets (sin filtro de usuario, solo admin)
-	 */
-	obtenerTodosTickets: async () => {
-		try {
-			const response = await axiosInstance.get(`${SUPPORT_API}/tickets/`);
-			return response.data;
-		} catch (error) {
-			console.error('Error al obtener tickets:', error);
-			throw error;
-		}
-	},
-
-	/**
-	 * Gestionar respuestas automáticas (solo admin)
-	 */
-	crearRespuestaAutomatica: async (categoria, palabrasClave, respuesta) => {
-		try {
-			const response = await axiosInstance.post(`${SUPPORT_API}/respuestas-automaticas/`, {
-				categoria,
-				palabras_clave: palabrasClave,
-				respuesta,
-				activa: true
-			});
-			return response.data;
-		} catch (error) {
-			console.error('Error al crear respuesta automática:', error);
-			throw error;
-		}
-	}
+  crearRespuestaAutomatica: async (categoria, palabrasClave, respuesta) => {
+    return requestJson(`${SUPPORT_API}/respuestas-automaticas/`, {
+      method: "POST",
+      body: JSON.stringify({
+        categoria,
+        palabras_clave: palabrasClave,
+        respuesta,
+        activa: true,
+      }),
+    });
+  },
 };
 
 export default soporteService;

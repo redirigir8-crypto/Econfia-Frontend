@@ -7,14 +7,15 @@ import {
   FaClipboardCheck,
   FaExclamationTriangle,
   FaFilePdf,
+  FaHistory,
   FaIdCard,
   FaIndustry,
+  FaEye,
   FaShieldAlt,
   FaStore,
   FaUserTie,
 } from "react-icons/fa";
 import Terminos from "../components/Terminos";
-import { generarInformeEmpresaPDF } from "../pdf/InformeEmpresaPDF";
 
 function SectionCard({ title, children, accent = "emerald", description }) {
   const accentMap = {
@@ -179,7 +180,7 @@ function getAssessmentData(resultadoEmpresa) {
       icon: FaUserTie,
     },
     {
-      label: "Cámara afiliados",
+      label: "Círculo de afiliados",
       value: camaraAfiliados?.aparece ? "Encontrado" : "Sin coincidencia",
       detail: camaraAfiliados?.mensaje || "Validación complementaria no disponible.",
       tone: camaraAfiliados?.aparece ? "emerald" : "violet",
@@ -216,6 +217,35 @@ function getAssessmentData(resultadoEmpresa) {
     signals,
     tone,
   };
+}
+
+function normalizarEmpresaData(data) {
+  return {
+    nombre: data.nombre,
+    nit: data.nit,
+    estado: data.estado,
+    camara_comercio: data.camara_comercio,
+    matricula: data.matricula,
+    fecha_consulta: data.fecha_consulta,
+    informacion_general: data.informacion_general || {},
+    actividad_economica: data.actividad_economica || [],
+    representante_legal: data.representante_legal || {},
+    propietario_establecimiento: data.propietario_establecimiento || {},
+    proveedores_ficticios_dian: data.proveedores_ficticios_dian || {},
+    camara_comercio_afiliados: data.camara_comercio_afiliados || {},
+    empresa_resumen: data.empresa_resumen || {},
+    captura_principal: data.captura_principal,
+  };
+}
+
+function formatDateTime(value) {
+  if (!value) return "Fecha no disponible";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("es-CO", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }
 
 function AssessmentSignal({ signal }) {
@@ -284,13 +314,13 @@ function CamaraAfiliadoCard({ item, index }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="inline-flex rounded-full border border-sky-400/20 bg-sky-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-200">
-              Registro Cámara {index + 1}
+              Registro afiliado {index + 1}
             </div>
             <h4 className="mt-3 text-lg font-bold leading-tight text-white">
               {item.razon_social || "Empresa afiliada"}
             </h4>
             <p className="mt-1 text-sm text-slate-300">
-              Afiliada a Cámara de Comercio con información mercantil, contacto y actividad económica registrada.
+              Afiliada al círculo de la Cámara de Comercio con información mercantil, contacto y actividad económica registrada.
             </p>
           </div>
           <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-200">
@@ -376,6 +406,9 @@ export default function ConsultaEmpresa() {
   const [consentimiento, setConsentimiento] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generandoPdf, setGenerandoPdf] = useState(false);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
+  const [mostrarHistorial, setMostrarHistorial] = useState(false);
+  const [historialEmpresas, setHistorialEmpresas] = useState([]);
   const [toast, setToast] = useState(null);
   const [resultadoEmpresa, setResultadoEmpresa] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
@@ -383,7 +416,7 @@ export default function ConsultaEmpresa() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!nit) {
-      setToast({ type: "error", message: "Ingresa el NIT de la empresa." });
+      setToast({ type: "error", message: "Ingresa el NIT de la persona natural o jurídica." });
       return;
     }
     if (!acepta) {
@@ -413,21 +446,7 @@ export default function ConsultaEmpresa() {
         return;
       }
 
-      setResultadoEmpresa({
-        nombre: data.nombre,
-        nit: data.nit,
-        estado: data.estado,
-        camara_comercio: data.camara_comercio,
-        matricula: data.matricula,
-        informacion_general: data.informacion_general || {},
-        actividad_economica: data.actividad_economica || [],
-        representante_legal: data.representante_legal || {},
-        propietario_establecimiento: data.propietario_establecimiento || {},
-        proveedores_ficticios_dian: data.proveedores_ficticios_dian || {},
-        camara_comercio_afiliados: data.camara_comercio_afiliados || {},
-        empresa_resumen: data.empresa_resumen || {},
-        captura_principal: data.captura_principal,
-      });
+      setResultadoEmpresa(normalizarEmpresaData(data));
     } catch (error) {
       setToast({ type: "error", message: "Ocurrió un error en la consulta." });
     } finally {
@@ -435,14 +454,70 @@ export default function ConsultaEmpresa() {
     }
   };
 
+  const handleToggleHistorial = async () => {
+    if (mostrarHistorial) {
+      setMostrarHistorial(false);
+      return;
+    }
+
+    setMostrarHistorial(true);
+    setLoadingHistorial(true);
+    setToast(null);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/api/historial-empresas-rues/?limit=60`, {
+        method: "GET",
+        headers: { Authorization: `Token ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ type: "error", message: data.error || "No fue posible cargar el historial." });
+        return;
+      }
+      setHistorialEmpresas(data.empresas || []);
+    } catch (error) {
+      setToast({ type: "error", message: "Ocurrió un error cargando el historial de empresas." });
+    } finally {
+      setLoadingHistorial(false);
+    }
+  };
+
+  const handleSeleccionarHistorial = (empresa) => {
+    setResultadoEmpresa(normalizarEmpresaData(empresa));
+    setNit(empresa.nit || "");
+    setToast(null);
+    setMostrarHistorial(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleDescargarPdf = async () => {
     if (!resultadoEmpresa || generandoPdf) return;
 
     setGenerandoPdf(true);
     try {
-      await generarInformeEmpresaPDF(resultadoEmpresa);
+      const token = localStorage.getItem("token");
+      const nit = resultadoEmpresa.nit;
+      const response = await fetch(`${API_URL}/api/descargar-pdf-empresa/${nit}/`, {
+        method: "GET",
+        headers: { Authorization: `Token ${token}` },
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "No fue posible obtener el PDF del servidor.");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Informe_Empresa_${nit}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch (error) {
-      setToast({ type: "error", message: "No fue posible generar el PDF de empresa." });
+      setToast({ type: "error", message: error.message || "No fue posible generar el PDF de empresa." });
     } finally {
       setGenerandoPdf(false);
     }
@@ -503,32 +578,41 @@ export default function ConsultaEmpresa() {
                 Consulta mercantil y perfil empresarial
               </h2>
               <p className="mt-2 text-xs leading-5 text-slate-300">
-                Ingresa el NIT para validar RUES, Cámara, actividad económica y señales de proveedor.
+                Ingresa el NIT de una persona natural o jurídica para validar RUES, Cámara, actividad económica y señales de proveedor.
               </p>
+              <button
+                type="button"
+                onClick={handleToggleHistorial}
+                className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-sky-300/20 bg-sky-400/10 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-sky-100 transition-all duration-300 hover:border-sky-200/45 hover:bg-sky-400/18"
+              >
+                <FaHistory />
+                {mostrarHistorial ? "Ocultar historial" : "Ver historial"}
+              </button>
             </div>
 
             <form onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[140px_1fr_1.25fr_180px] lg:items-end">
               <div>
                 <label className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-sky-100">
-                  Documento
+                  Tipo de consulta
                 </label>
                 <select
                   className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-white"
                   value={tipoDoc}
                   disabled
                 >
-                  <option value="NIT">NIT</option>
+                  <option value="NIT">NIT
+                  </option>
                 </select>
               </div>
 
               <div>
                 <label className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-sky-100">
-                  NIT de la empresa
+                  NIT persona natural o jurídica
                 </label>
                 <input
                   type="text"
                   className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-white placeholder:text-slate-500"
-                  placeholder="Ej: 0000000000"
+                  placeholder="Ej: 900000001"
                   value={nit}
                   onChange={(e) => setNit(e.target.value)}
                   autoComplete="off"
@@ -583,6 +667,80 @@ export default function ConsultaEmpresa() {
             </form>
           </div>
         </div>
+
+        {mostrarHistorial && (
+          <section className="rounded-[2rem] border border-white/10 bg-slate-950/72 p-5 shadow-[0_24px_80px_rgba(2,6,23,0.32)] backdrop-blur-xl">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-200">
+                  <FaHistory />
+                  Historial de empresas
+                </div>
+                <h3 className="mt-4 text-2xl font-black text-white">Empresas consultadas</h3>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+                  Selecciona una empresa del historial para abrir nuevamente su ficha y descargar el informe empresarial sin repetir la búsqueda.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-slate-200">
+                {historialEmpresas.length} registros
+              </div>
+            </div>
+
+            <div className="mt-5">
+              {loadingHistorial ? (
+                <div className="rounded-2xl border border-sky-400/15 bg-sky-500/10 px-4 py-5 text-sm text-sky-100">
+                  Cargando historial...
+                </div>
+              ) : historialEmpresas.length > 0 ? (
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {historialEmpresas.map((empresa) => {
+                    const alertaDian = empresa.proveedores_ficticios_dian?.aparece;
+                    return (
+                      <button
+                        key={`${empresa.nit}-${empresa.fecha_consulta}`}
+                        type="button"
+                        onClick={() => handleSeleccionarHistorial(empresa)}
+                        className="group rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-300/35 hover:bg-sky-400/10"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="truncate text-base font-black text-white">
+                              {empresa.nombre || "Empresa sin nombre"}
+                            </div>
+                            <div className="mt-1 text-sm font-semibold text-sky-200">
+                              NIT {empresa.nit || "No disponible"}
+                            </div>
+                          </div>
+                          <span className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${
+                            alertaDian ? "bg-amber-400/15 text-amber-200" : "bg-emerald-400/15 text-emerald-200"
+                          }`}>
+                            {alertaDian ? "DIAN alerta" : "Sin alerta"}
+                          </span>
+                        </div>
+                        <div className="mt-4 grid gap-2 text-sm text-slate-300">
+                          <div>Estado: <span className="font-semibold text-white">{empresa.estado || "No disponible"}</span></div>
+                          <div>Cámara: <span className="font-semibold text-white">{empresa.camara_comercio || "No disponible"}</span></div>
+                          <div>Matrícula: <span className="font-semibold text-white">{empresa.matricula || "No disponible"}</span></div>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/8 pt-3 text-xs text-slate-400">
+                          <span>{formatDateTime(empresa.fecha_consulta)}</span>
+                          <span className="inline-flex items-center gap-2 font-bold text-sky-200 group-hover:text-sky-100">
+                            <FaEye />
+                            Ver ficha
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-5 text-sm text-slate-300">
+                  Todavía no hay empresas guardadas en el historial.
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         <section className="space-y-6">
           <div className="rounded-[2rem] border border-white/10 bg-slate-950/82 px-6 py-6 text-center shadow-[0_24px_80px_rgba(2,6,23,0.3)] backdrop-blur-xl">
@@ -797,9 +955,9 @@ export default function ConsultaEmpresa() {
                   </SectionCard>
 
                   <SectionCard
-                    title="Afiliados Cámara de Comercio"
+                    title="Afiliados al círculo de la Cámara de Comercio"
                     accent={camaraAfiliados?.aparece ? "sky" : "violet"}
-                    description="Fuente complementaria para enriquecer contacto, actividad económica, representante y capacidad financiera reportada."
+                    description="Fuente complementaria del círculo de afiliados para enriquecer contacto, actividad económica, representante y capacidad financiera reportada."
                   >
                     <div className={`rounded-2xl border px-4 py-4 text-sm leading-6 ${
                       camaraAfiliados?.aparece
@@ -810,7 +968,7 @@ export default function ConsultaEmpresa() {
                         Validación en base de afiliados
                       </div>
                       <div className="mt-2 font-semibold">
-                        {camaraAfiliados?.mensaje || "Validación de afiliados Cámara no disponible."}
+                        {camaraAfiliados?.mensaje || "Validación de afiliados al círculo de la Cámara de Comercio no disponible."}
                       </div>
                       {camaraAfiliadosRegistros.length > 0 && (
                         <div className="mt-2 text-slate-300">
