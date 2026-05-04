@@ -71,6 +71,7 @@ export default function ConsultaContratista() {
   const [cedula, setCedula] = useState("");
   const [fechaExpedicion, setFechaExpedicion] = useState("");
   const [profesion, setProfesion] = useState("");
+  const [profesionSeleccionada, setProfesionSeleccionada] = useState(null); // { nombre, entidad_reguladora }
   const [profesionFocus, setProfesionFocus] = useState(false);
   const [profesionInput, setProfesionInput] = useState("");
   const profesionRef = useRef(null);
@@ -88,6 +89,19 @@ export default function ConsultaContratista() {
   const [consentimiento, setConsentimiento] = useState(false);
   // Estado para el modal de Términos
   const [profesionSugerencias, setProfesionSugerencias] = useState([]);
+  const profesionSugerenciasOrdenadas = useMemo(() => {
+    const q = String(profesion || "").trim().toLowerCase();
+    const list = Array.isArray(profesionSugerencias) ? [...profesionSugerencias] : [];
+    if (!q) return list;
+    const score = (item) => {
+      const name = String(item?.nombre || "").toLowerCase();
+      if (!name) return 999;
+      if (name.startsWith(q)) return 0;
+      if (name.includes(q)) return 1;
+      return 2;
+    };
+    return list.sort((a, b) => score(a) - score(b));
+  }, [profesion, profesionSugerencias]);
   const [showSugerencias, setShowSugerencias] = useState(false);
   const [profesionLoading, setProfesionLoading] = useState(false);
 
@@ -463,23 +477,35 @@ export default function ConsultaContratista() {
                       <label className="text-xs font-semibold text-white/70">
                         Profesión *
                       </label>
-                      <input
-                        required
-                        type="text"
-                        value={profesion}
-                        onChange={(e) => {
-                          setProfesion(e.target.value);
-                          setShowSugerencias(profesionSugerencias.length > 0);
-                        }}
-                        placeholder="Escribe tu profesión"
-                        autoComplete="off"
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
-                        onFocus={() => setShowSugerencias(profesionSugerencias.length > 0)}
-                        onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
-                      />
-                      {showSugerencias && (
-                        <div style={{ position: "relative" }}>
-                          <ul
+      <input
+        required
+        type="text"
+        value={profesion}
+        onChange={(e) => {
+          setProfesion(e.target.value);
+          setProfesionSeleccionada(null);
+          setShowSugerencias(true);
+        }}
+        placeholder="Escribe tu profesión"
+        autoComplete="off"
+        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+        onFocus={() => setShowSugerencias(profesionSugerencias.length > 0)}
+        onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
+      />
+      {profesionSeleccionada?.entidad_reguladora && (
+        <div className="mt-1 flex items-center gap-2 text-[11px] text-white/65">
+          <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-2 py-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300/90" />
+            Entidad reguladora:{" "}
+            <span className="text-white/85 font-semibold">
+              {profesionSeleccionada.entidad_reguladora}
+            </span>
+          </span>
+        </div>
+      )}
+      {showSugerencias && (
+        <div style={{ position: "relative" }}>
+          <ul
                             style={{
                               position: "absolute",
                               top: "100%",
@@ -490,24 +516,44 @@ export default function ConsultaContratista() {
                             }}
                             className="bg-slate-900 border border-cyan-500/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
                           >
-                            {profesionLoading && (
-                              <li className="px-3 py-2 text-xs text-white/60">Cargando…</li>
-                            )}
-                            {profesionSugerencias.map((sug) => (
-                              <li
-                                key={sug.nombre}
-                                className="px-3 py-2 text-xs text-white hover:bg-cyan-500/20 cursor-pointer"
-                                onMouseDown={() => {
-                                  setProfesion(sug.nombre);
-                                  setShowSugerencias(false);
-                                }}
-                              >
-                                {sug.nombre} {sug.entidad_reguladora && `(${sug.entidad_reguladora})`}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+            {profesionLoading && (
+              <li className="px-3 py-2 text-xs text-white/60">Cargando…</li>
+            )}
+            {!profesionLoading && profesionSugerenciasOrdenadas.length === 0 && (
+              <li className="px-3 py-2 text-xs text-white/60">
+                Sin coincidencias. Escribe la profesión completa.
+              </li>
+            )}
+            {profesionSugerenciasOrdenadas.map((sug) => (
+              <li
+                key={sug.nombre}
+                className="px-3 py-2 text-xs text-white hover:bg-cyan-500/20 cursor-pointer"
+                onMouseDown={() => {
+                  setProfesion(sug.nombre);
+                  setProfesionSeleccionada(sug);
+                  setShowSugerencias(false);
+                }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate font-semibold text-white/95">
+                      {sug.nombre}
+                    </div>
+                    {sug.entidad_reguladora && (
+                      <div className="truncate text-[11px] text-white/60">
+                        {sug.entidad_reguladora}
+                      </div>
+                    )}
+                  </div>
+                  <span className="mt-0.5 inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70">
+                    Seleccionar
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
                     </div>
 
                     {/* Correo */}
