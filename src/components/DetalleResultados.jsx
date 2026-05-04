@@ -859,61 +859,64 @@ export default function DetalleResultados({ consultaId }) {
         </h2>
       </div>
 
-      {/* 🔍 Barra de búsqueda y filtros elegantes */}
-      <div className="flex flex-wrap gap-1.5 md:gap-2 mb-2 md:mb-3">
+      {/* Barra de búsqueda y filtros */}
+      <div className="flex flex-col gap-1.5 md:gap-2 mb-2 md:mb-3">
+        {/* Fila 1: búsqueda principal */}
         <input
           type="text"
           placeholder="🔍 Buscar..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[150px] px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
+          className="w-full px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
         />
-        <input
-          type="text"
-          placeholder="Fuente"
-          value={filters.fuente}
-          onChange={(e) => setFilters({ ...filters, fuente: e.target.value })}
-          className="w-24 md:w-28 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs md:text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
-        />
-        <input
-          type="text"
-          placeholder="Tipo"
-          value={filters.tipo_fuente}
-          onChange={(e) => setFilters({ ...filters, tipo_fuente: e.target.value })}
-          className="w-20 md:w-24 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs md:text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
-        />
-        <select
-          value={filters.estado}
-          onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
-          className="w-28 md:w-32 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs md:text-sm text-white focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all appearance-none cursor-pointer"
-        >
-          <option className="bg-slate-900" value="">Todos</option>
-          <option className="bg-slate-900" value="validado">Validado</option>
-          <option className="bg-slate-900" value="offline">Offline</option>
-          <option className="bg-slate-900" value="error">Error</option>
-          <option className="bg-slate-900" value="revalidando">Revalidando</option>
-        </select>
-        <input
-          type="text"
-          placeholder="Score"
-          value={filters.score}
-          onChange={(e) => setFilters({ ...filters, score: e.target.value })}
-          className="w-16 md:w-20 px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs md:text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
-        />
-
-        <button
-          onClick={() =>
-            setFilters({ fuente: "", tipo_fuente: "", estado: "", score: "" })
-          }
-          className="inline-flex items-center px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-white text-xs md:text-sm font-semibold bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300"
-        >
-          Limpiar
-        </button>
+        {/* Fila 2: filtros secundarios */}
+        <div className="flex flex-wrap gap-1.5">
+          <input
+            type="text"
+            placeholder="Fuente"
+            value={filters.fuente}
+            onChange={(e) => setFilters({ ...filters, fuente: e.target.value })}
+            className="flex-1 min-w-[80px] px-2 py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
+          />
+          <input
+            type="text"
+            placeholder="Tipo"
+            value={filters.tipo_fuente}
+            onChange={(e) => setFilters({ ...filters, tipo_fuente: e.target.value })}
+            className="flex-1 min-w-[60px] px-2 py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
+          />
+          <select
+            value={filters.estado}
+            onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
+            className="flex-1 min-w-[90px] px-2 py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all appearance-none cursor-pointer"
+          >
+            <option className="bg-slate-900" value="">Todos</option>
+            <option className="bg-slate-900" value="validado">Validado</option>
+            <option className="bg-slate-900" value="offline">Offline</option>
+            <option className="bg-slate-900" value="error">Error</option>
+            <option className="bg-slate-900" value="revalidando">Revalidando</option>
+          </select>
+          <input
+            type="text"
+            placeholder="Score"
+            value={filters.score}
+            onChange={(e) => setFilters({ ...filters, score: e.target.value })}
+            className="w-14 sm:w-16 px-2 py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
+          />
+          <button
+            onClick={() =>
+              setFilters({ fuente: "", tipo_fuente: "", estado: "", score: "" })
+            }
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-white text-xs font-semibold bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300"
+          >
+            Limpiar
+          </button>
+        </div>
       </div>
 
       {/* Contenedor con scroll para la tabla */}
       <div className="flex-1 overflow-auto backdrop-blur-xl bg-gradient-to-br from-slate-900/50 via-blue-950/30 to-slate-900/50 border border-cyan-500/20 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-xl md:rounded-2xl mb-3 md:mb-4">
-        <table className="table-auto text-left text-sm min-w-full">
+        <table className="table-auto text-left text-sm min-w-[480px] w-full">
           <thead>
             <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Fuente</th>
@@ -1035,30 +1038,30 @@ export default function DetalleResultados({ consultaId }) {
         </table>
       </div>
 
-      {/* 📑 Paginación elegante - Fija en la parte inferior */}
-      <div className="flex flex-wrap justify-center items-center gap-2 pb-1">
+      {/* 📑 Paginación */}
+      <div className="flex flex-wrap justify-center items-center gap-1.5 sm:gap-2 pb-1">
         <button
           onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
           disabled={pagina === 1}
-          className="px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1.5 text-sm"
+          className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Anterior
+          <span className="hidden xs:inline">Anterior</span>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {getPages().map((p, i) =>
             p === "..." ? (
-              <span key={i} className="px-2 text-slate-500">...</span>
+              <span key={i} className="px-1 text-slate-500 text-xs leading-none">...</span>
             ) : (
               <button
                 key={i}
                 onClick={() => setPagina(p)}
-                className={`w-9 h-9 rounded-lg font-semibold transition-all duration-300 text-sm ${
+                className={`min-w-[1.75rem] sm:min-w-[2.25rem] h-7 sm:h-9 px-1.5 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm leading-none flex items-center justify-center ${
                   p === pagina
-                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.5)] scale-110"
+                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.5)]"
                     : "bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300"
                 }`}
               >
@@ -1071,22 +1074,22 @@ export default function DetalleResultados({ consultaId }) {
         <button
           onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))}
           disabled={pagina === totalPaginas || totalPaginas === 0}
-          className="px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1.5 text-sm"
+          className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm"
         >
-          Siguiente
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <span className="hidden xs:inline">Siguiente</span>
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
 
-        {/* Ir a página */}
-        <div className="flex items-center gap-2 ml-4">
+        {/* Ir a página — solo en sm+ */}
+        <div className="hidden sm:flex items-center gap-2 ml-2">
           <input
             type="number"
             value={inputPage}
             onChange={(e) => setInputPage(e.target.value)}
             placeholder="Pág."
-            className="w-16 px-3 py-2 rounded-lg bg-gradient-to-br from-slate-900/50 to-slate-800/50 border border-cyan-500/20 text-center text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all text-sm"
+            className="w-14 sm:w-16 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-gradient-to-br from-slate-900/50 to-slate-800/50 border border-cyan-500/20 text-center text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all text-xs sm:text-sm"
           />
           <button
             onClick={() => {
@@ -1096,7 +1099,7 @@ export default function DetalleResultados({ consultaId }) {
                 setInputPage("");
               }
             }}
-            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:scale-105 text-sm"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:scale-105 text-xs sm:text-sm"
           >
             Ir
           </button>

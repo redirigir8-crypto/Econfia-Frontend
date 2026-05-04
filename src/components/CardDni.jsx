@@ -38,7 +38,7 @@ export default function CardDni({ data }) {
   const portraitFallback = resolveGenderPortrait(sexo);
 
   return (
-    <div className="relative w-full max-w-[36rem] overflow-hidden rounded-[20px] border border-cyan-200/25 bg-[linear-gradient(180deg,#e7edf4_0%,#f5f7fa_44%,#dce4ee_100%)] shadow-[0_20px_48px_rgba(2,12,27,0.38)]">
+    <div className="relative w-full max-w-full sm:max-w-[36rem] overflow-hidden rounded-[16px] sm:rounded-[20px] border border-cyan-200/25 bg-[linear-gradient(180deg,#e7edf4_0%,#f5f7fa_44%,#dce4ee_100%)] shadow-[0_20px_48px_rgba(2,12,27,0.38)]">
       <div className="absolute inset-0 opacity-70 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.11),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(37,99,235,0.10),transparent_24%)]" />
       <div className="absolute inset-x-0 top-0 h-10 bg-[linear-gradient(90deg,#0f2e4f_0%,#123c67_26%,#1c5d8f_52%,#0f436d_76%,#0b2f4d_100%)] opacity-90" />
       {/* Marca de agua — franja azul superior */}
@@ -109,31 +109,31 @@ export default function CardDni({ data }) {
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-8 h-24 opacity-30 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.08),transparent_58%)]" />
 
-      <div className="relative z-10 p-4 pt-[3.35rem] sm:p-5 sm:pt-[3.5rem]">
-        <div className="mb-4 flex items-start justify-between gap-4 border-b border-slate-400/15 pb-3">
-          <div>
-            <p className="text-[9px] font-semibold uppercase tracking-[0.34em] text-slate-500">
+      <div className="relative z-10 p-3 pt-[3.1rem] sm:p-4 sm:pt-[3.35rem] md:p-5 md:pt-[3.5rem]">
+        <div className="mb-3 flex items-start justify-between gap-2 border-b border-slate-400/15 pb-2.5">
+          <div className="min-w-0">
+            <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.34em] text-slate-500">
               Republica de Colombia
             </p>
-            <h2 className="mt-1.5 text-[1.25rem] font-black uppercase tracking-tight text-slate-800 sm:text-[1.4rem]">
+            <h2 className="mt-1 text-[1rem] sm:text-[1.25rem] font-black uppercase tracking-tight text-slate-800 md:text-[1.4rem] leading-tight">
               {documentoLabel}
             </h2>
-            <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
+            <p className="mt-0.5 text-[9px] sm:text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
               Documento nacional de identificacion
             </p>
           </div>
 
-          <div className="min-w-[118px] self-start rounded-[10px] border border-cyan-100/35 bg-white/60 px-2.5 py-1.5 text-right shadow-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-400">NUIP</p>
-            <p className="mt-0.5 whitespace-nowrap font-mono text-[13px] font-black tracking-[0.08em] text-slate-800 sm:text-[14px]">
+          <div className="shrink-0 rounded-[8px] sm:rounded-[10px] border border-cyan-100/35 bg-white/60 px-2 py-1 sm:px-2.5 sm:py-1.5 text-right shadow-sm">
+            <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-400">NUIP</p>
+            <p className="mt-0.5 whitespace-nowrap font-mono text-[11px] sm:text-[13px] font-black tracking-[0.08em] text-slate-800 md:text-[14px]">
               {cedula}
             </p>
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-[132px_1fr]">
-          <div className="space-y-2.5">
-            <div className="relative flex h-36 items-center justify-center overflow-hidden rounded-[10px] border border-slate-400/40 bg-[linear-gradient(180deg,#d0d8e3_0%,#eef2f6_100%)] shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)]">
+        <div className="grid gap-3 sm:gap-4 grid-cols-[100px_1fr] sm:grid-cols-[132px_1fr]">
+          <div className="space-y-2">
+            <div className="relative flex h-28 sm:h-36 items-center justify-center overflow-hidden rounded-[8px] sm:rounded-[10px] border border-slate-400/40 bg-[linear-gradient(180deg,#d0d8e3_0%,#eef2f6_100%)] shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)]">
               {data?.foto ? (
                 <img
                   src={data.foto}
@@ -157,11 +157,11 @@ export default function CardDni({ data }) {
               )}
             </div>
 
-            <div className="rounded-[10px] border border-cyan-100/35 bg-white/45 px-3 py-2">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+            <div className="rounded-[8px] sm:rounded-[10px] border border-cyan-100/35 bg-white/45 px-2 py-1.5 sm:px-3 sm:py-2">
+              <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                 Fecha de expedicion
               </p>
-              <p className="mt-1 text-[13px] font-bold text-slate-700">
+              <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-[13px] font-bold text-slate-700">
                 {formatDate(fechaExpedicion)}
               </p>
             </div>
@@ -205,38 +205,38 @@ export default function CardDni({ data }) {
             </div>
           </div>
 
-          <div className="grid content-start gap-2.5">
-            <div className="grid gap-2.5 rounded-[12px] bg-white/30 p-3 sm:grid-cols-[104px_1fr] sm:p-3.5">
-              <p className="text-[13px] font-bold uppercase tracking-wide text-slate-700">Apellidos</p>
-              <p className="border-b border-slate-300/65 pb-1.5 text-[13px] font-medium uppercase tracking-wide text-slate-800 sm:text-sm">
+          <div className="grid content-start gap-2">
+            <div className="grid gap-1.5 sm:gap-2.5 rounded-[10px] sm:rounded-[12px] bg-white/30 p-2 sm:p-3 grid-cols-[80px_1fr] sm:grid-cols-[104px_1fr] sm:p-3.5">
+              <p className="text-[11px] sm:text-[13px] font-bold uppercase tracking-wide text-slate-700">Apellidos</p>
+              <p className="border-b border-slate-300/65 pb-1 text-[11px] sm:text-[13px] font-medium uppercase tracking-wide text-slate-800 sm:text-sm truncate">
                 {apellido}
               </p>
 
-              <p className="text-[13px] font-bold uppercase tracking-wide text-slate-700">Nombres</p>
-              <p className="border-b border-slate-300/65 pb-1.5 text-[13px] font-medium uppercase tracking-wide text-slate-800 sm:text-sm">
+              <p className="text-[11px] sm:text-[13px] font-bold uppercase tracking-wide text-slate-700">Nombres</p>
+              <p className="border-b border-slate-300/65 pb-1 text-[11px] sm:text-[13px] font-medium uppercase tracking-wide text-slate-800 sm:text-sm truncate">
                 {nombre}
               </p>
 
-              <p className="text-[13px] font-bold uppercase tracking-wide text-slate-700">Sexo</p>
-              <p className="border-b border-slate-300/65 pb-1.5 text-[13px] font-medium uppercase tracking-wide text-slate-800 sm:text-sm">
+              <p className="text-[11px] sm:text-[13px] font-bold uppercase tracking-wide text-slate-700">Sexo</p>
+              <p className="border-b border-slate-300/65 pb-1 text-[11px] sm:text-[13px] font-medium uppercase tracking-wide text-slate-800 sm:text-sm">
                 {sexo}
               </p>
 
-              <p className="text-[13px] font-bold uppercase tracking-wide text-slate-700">Fecha nac.</p>
-              <p className="border-b border-slate-300/65 pb-1.5 text-[13px] font-medium uppercase tracking-wide text-slate-800 sm:text-sm">
+              <p className="text-[11px] sm:text-[13px] font-bold uppercase tracking-wide text-slate-700">Fecha nac.</p>
+              <p className="border-b border-slate-300/65 pb-1 text-[11px] sm:text-[13px] font-medium uppercase tracking-wide text-slate-800 sm:text-sm">
                 {formatDate(fechaNacimiento)}
               </p>
             </div>
 
-            <div className="rounded-[12px] border border-cyan-200/25 bg-[linear-gradient(90deg,rgba(15,47,77,0.09),rgba(255,255,255,0.16),rgba(24,93,143,0.12))] px-4 py-3">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+            <div className="rounded-[10px] sm:rounded-[12px] border border-cyan-200/25 bg-[linear-gradient(90deg,rgba(15,47,77,0.09),rgba(255,255,255,0.16),rgba(24,93,143,0.12))] px-2.5 py-2 sm:px-4 sm:py-3">
+              <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.3em] text-slate-500">
                 Identificacion valida para consulta
               </p>
-              <div className="mt-2 flex items-center justify-between gap-3">
-                <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-slate-600">
-                  Titular Registrado  Archivo Nacional de Identificación. (ANI)
+              <div className="mt-1.5 flex items-center justify-between gap-2">
+                <span className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.12em] text-slate-600 leading-tight">
+                  Titular Registrado ANI
                 </span>
-                <span className="rounded-full border border-cyan-200/30 bg-white/50 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.22em] text-slate-700">
+                <span className="shrink-0 rounded-full border border-cyan-200/30 bg-white/50 px-2 py-0.5 sm:px-3 sm:py-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.22em] text-slate-700">
                   Econfia
                 </span>
               </div>

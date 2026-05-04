@@ -723,7 +723,7 @@ export default function Resultados() {
             modules={[Navigation, Pagination]}
             spaceBetween={20}
             slidesPerView={1}
-            pagination={{ clickable: true }}
+            pagination={false}
             navigation
             className="h-full swiper-custom-nav"
           >

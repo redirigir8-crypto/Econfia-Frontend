@@ -97,8 +97,8 @@ const ConsultaSlide = ({ consultaId }) => {
 
   return (
     <div className="relative h-[78vh] md:h-[82vh] rounded-2xl overflow-hidden bg-black">
-      {/* VIDEO DERECHA */}
-      <div className="absolute inset-0">
+      {/* VIDEO DERECHA — oculto en móvil */}
+      <div className="absolute inset-0 hidden sm:block">
         <video
           className="absolute right-0 top-0 h-full object-cover"
           src={holoVideo}
@@ -110,7 +110,7 @@ const ConsultaSlide = ({ consultaId }) => {
             WebkitMaskImage: "linear-gradient(270deg, rgba(0,0,0,1) 40%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,0.0) 70%)",
             maskImage: "linear-gradient(270deg, rgba(0,0,0,1) 40%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,0.0) 70%)",
             width: "72vw",
-            minWidth: 640
+            minWidth: 480
           }}
         />
         <div
@@ -120,15 +120,15 @@ const ConsultaSlide = ({ consultaId }) => {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(16,185,129,0.10),_transparent_60%)]" />
       </div>
 
-      {/* PANEL IZQUIERDA (contenido) */}
-      <div className="relative z-10 h-full grid" style={{ gridTemplateColumns: "minmax(460px, 820px) 1fr" }}>
-        {/* Columna izquierda con datos + burbuja (lado a lado) */}
-        <div className="h-full p-5 md:p-8">
-          <div className={`rounded-2xl p-[1px] bg-gradient-to-br ${riskUI.ring} ${riskUI.glow}`}>
-            <div className="rounded-2xl h-[66vh] md:h-[68vh] bg-black/55 backdrop-blur-md border border-white/10 p-5 md:p-6 overflow-y-auto">
-              
+      {/* PANEL CONTENIDO */}
+      <div className="relative z-10 h-full flex flex-col sm:grid sm:grid-cols-[minmax(0,820px)_1fr]">
+        {/* Columna izquierda con datos + burbuja */}
+        <div className="h-full p-3 sm:p-5 md:p-8 overflow-hidden">
+          <div className={`rounded-2xl p-[1px] bg-gradient-to-br ${riskUI.ring} ${riskUI.glow} h-full`}>
+            <div className="rounded-2xl h-full bg-black/55 backdrop-blur-md border border-white/10 p-3 sm:p-5 md:p-6 overflow-y-auto">
+
               {/* ====== GRID INTERNO 2 COLS ====== */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Columna IZQ: encabezado, chips, info */}
                 <div>
                   {/* encabezado */}
