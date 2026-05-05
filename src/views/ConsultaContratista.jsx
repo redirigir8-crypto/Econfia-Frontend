@@ -72,6 +72,7 @@ export default function ConsultaContratista() {
   const [fechaExpedicion, setFechaExpedicion] = useState("");
   const [profesion, setProfesion] = useState("");
   const [profesionSeleccionada, setProfesionSeleccionada] = useState(null); // { nombre, entidad_reguladora }
+  const [profesionesSeleccionadas, setProfesionesSeleccionadas] = useState([]); // array de { nombre, entidad_reguladora, bot_names }
   const [profesionFocus, setProfesionFocus] = useState(false);
   const [profesionInput, setProfesionInput] = useState("");
   const profesionRef = useRef(null);
@@ -104,6 +105,7 @@ export default function ConsultaContratista() {
   }, [profesion, profesionSugerencias]);
   const [showSugerencias, setShowSugerencias] = useState(false);
   const [profesionLoading, setProfesionLoading] = useState(false);
+  const [profesionBotPreview, setProfesionBotPreview] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [datos, setDatos] = useState(null);
@@ -147,12 +149,12 @@ export default function ConsultaContratista() {
     return (
       tipoDoc &&
       String(cedula || "").trim().length > 0 &&
-      profesion &&
+      (profesionesSeleccionadas.length > 0 || profesion) &&
       isValidEmail(email) &&
       acepta &&
       consentimiento
     );
-  }, [tipoDoc, cedula, profesion, email, acepta, consentimiento]);
+  }, [tipoDoc, cedula, profesion, profesionesSeleccionadas.length, email, acepta, consentimiento]);
 
   const handleConsultarContratista = async (e) => {
     e.preventDefault();
@@ -166,8 +168,8 @@ export default function ConsultaContratista() {
       setToast({ type: "error", message: "Ingresa el número de documento." });
       return;
     }
-    if (!profesion) {
-      setToast({ type: "error", message: "Ingresa la profesión." });
+    if (profesionesSeleccionadas.length === 0 && !profesion) {
+      setToast({ type: "error", message: "Selecciona al menos una profesión." });
       return;
     }
     if (!isValidEmail(email)) {
@@ -225,11 +227,23 @@ export default function ConsultaContratista() {
     const profesionNormalizada = normalizarProfesion(profesion);
     // Log antes de enviar la consulta
     console.log("[ENVIAR] Profesión normalizada enviada:", profesionNormalizada);
+    const selectedProfLabel = (profesionSeleccionada?.nombre || profesionSeleccionada?.label || profesion || "").trim();
+    const selectedList = profesionesSeleccionadas.length
+      ? profesionesSeleccionadas.map((p) => p?.nombre).filter(Boolean)
+      : (selectedProfLabel ? [selectedProfLabel] : []);
     const bodyData = {
       tipo_doc: tipoDoc,
       cedula: String(cedula).trim(),
       fecha_expedicion: fechaExpedicion || undefined,
-      profesion: [profesionNormalizada],
+      // Migrado al estilo de Titulos: enviar la profesión elegida como catálogo.
+      // Mantiene compatibilidad con backend: `profesiones` + fallback `profesion`.
+      profesiones: selectedList.length ? selectedList : undefined,
+      profesion: selectedList[0] || (selectedProfLabel ? selectedProfLabel : profesionNormalizada),
+      // Si el usuario selecciona varias profesiones o activa el switch,
+      // ejecutar solo bots adicionales por profesión (sin predeterminados).
+      // Si el usuario selecciona varias profesiones, ejecutar solo bots adicionales por profesión
+      // (sin predeterminados) para evitar ruido y costos.
+      solo_profesion: selectedList.length > 1,
       email: String(email).trim().toLowerCase(),
       empresa: nombreEmpresa.trim(),
       nit: (() => { const n = nitEmpresa.trim(); return n && !n.includes("-") ? `${n}-0` : n; })(),
@@ -390,8 +404,8 @@ export default function ConsultaContratista() {
             </div>
 
             {/* Tarjeta del formulario (derecha) */}
-            <div className="relative w-full max-w-sm mx-auto">
-              <div className="relative w-full bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[20px] border border-white/10 shadow-2xl shadow-cyan-500/10 p-6 group">
+            <div className="relative w-full max-w-sm md:max-w-md lg:max-w-lg mx-auto">
+              <div className="relative w-full bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[20px] border border-white/10 shadow-2xl shadow-cyan-500/10 p-5 md:p-6 group">
                 {/* Glow effect */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
@@ -407,7 +421,7 @@ export default function ConsultaContratista() {
                   {/* Formulario */}
                   <form
                     onSubmit={handleConsultarContratista}
-                    className="space-y-2"
+                    className="space-y-1.5"
                   >
                     {/* Tipo de documento */}
                     <div className="flex flex-col gap-1">
@@ -418,7 +432,7 @@ export default function ConsultaContratista() {
                         required
                         value={tipoDoc}
                         onChange={(e) => setTipoDoc(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
                       >
                         <option className="bg-slate-900 text-white" value="">
                           Seleccione tipo de documento
@@ -455,7 +469,7 @@ export default function ConsultaContratista() {
                         value={cedula}
                         onChange={(e) => setCedula(e.target.value)}
                         placeholder="Ingrese número de documento"
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                       />
                     </div>
 
@@ -468,7 +482,7 @@ export default function ConsultaContratista() {
                         type="date"
                         value={fechaExpedicion}
                         onChange={(e) => setFechaExpedicion(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                       />
                     </div>
 
@@ -477,21 +491,46 @@ export default function ConsultaContratista() {
                       <label className="text-xs font-semibold text-white/70">
                         Profesión *
                       </label>
-      <input
-        required
-        type="text"
-        value={profesion}
-        onChange={(e) => {
-          setProfesion(e.target.value);
-          setProfesionSeleccionada(null);
-          setShowSugerencias(true);
-        }}
-        placeholder="Escribe tu profesión"
-        autoComplete="off"
-        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
-        onFocus={() => setShowSugerencias(profesionSugerencias.length > 0)}
-        onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
-      />
+
+                      {/* Selecciones múltiples */}
+                      {profesionesSeleccionadas.length > 0 && (
+                        <div className="mb-2 flex flex-wrap gap-1.5">
+                          {profesionesSeleccionadas.map((p) => (
+                            <span
+                              key={p.nombre}
+                              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-white/80"
+                              title={p.entidad_reguladora || p.nombre}
+                            >
+                              <span className="max-w-[240px] truncate">{p.nombre}</span>
+                              <button
+                                type="button"
+                                className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70 hover:bg-white/10"
+                                onClick={() => {
+                                  setProfesionesSeleccionadas((prev) => prev.filter((x) => x.nombre !== p.nombre));
+                                }}
+                              >
+                                Quitar
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <input
+                        required={profesionesSeleccionadas.length === 0}
+                        type="text"
+                        value={profesion}
+                        onChange={(e) => {
+                          setProfesion(e.target.value);
+                          setProfesionSeleccionada(null);
+                          setShowSugerencias(true);
+                        }}
+                        placeholder="Escribe tu profesión"
+                        autoComplete="off"
+                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        onFocus={() => setShowSugerencias(profesionSugerencias.length > 0)}
+                        onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
+                      />
       {profesionSeleccionada?.entidad_reguladora && (
         <div className="mt-1 flex items-center gap-2 text-[11px] text-white/65">
           <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-2 py-1">
@@ -524,16 +563,22 @@ export default function ConsultaContratista() {
                 Sin coincidencias. Escribe la profesión completa.
               </li>
             )}
-            {profesionSugerenciasOrdenadas.map((sug) => (
-              <li
-                key={sug.nombre}
-                className="px-3 py-2 text-xs text-white hover:bg-cyan-500/20 cursor-pointer"
-                onMouseDown={() => {
-                  setProfesion(sug.nombre);
-                  setProfesionSeleccionada(sug);
-                  setShowSugerencias(false);
-                }}
-              >
+                            {profesionSugerenciasOrdenadas.map((sug) => (
+                              <li
+                                key={sug.nombre}
+                                className="px-3 py-2 text-xs text-white hover:bg-cyan-500/20 cursor-pointer"
+                                onMouseDown={() => {
+                                  setProfesion("");
+                                  setProfesionSeleccionada(sug);
+                                  setProfesionBotPreview(Array.isArray(sug.bot_names) ? sug.bot_names : []);
+                                  setProfesionesSeleccionadas((prev) => {
+                                    const exists = prev.some((p) => p.nombre === sug.nombre);
+                                    if (exists) return prev;
+                                    return [...prev, sug];
+                                  });
+                                  setShowSugerencias(false);
+                                }}
+                              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate font-semibold text-white/95">
@@ -568,7 +613,7 @@ export default function ConsultaContratista() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="ejemplo@correo.com"
                         pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-                        className={`w-full px-3 py-2 rounded-lg bg-white/5 text-white text-xs placeholder-white/40 border transition-all backdrop-blur-sm focus:outline-none focus:shadow-lg focus:shadow-cyan-500/10
+                        className={`w-full px-3 py-1.5 rounded-lg bg-white/5 text-white text-xs placeholder-white/40 border transition-all backdrop-blur-sm focus:outline-none focus:shadow-lg focus:shadow-cyan-500/10
                           ${
                             email && !isValidEmail(email)
                               ? "border-red-400/50 focus:border-red-400 focus:ring-1 focus:ring-red-400/30"
@@ -580,6 +625,30 @@ export default function ConsultaContratista() {
                           Formato de correo no válido
                         </span>
                       )}
+                      {Array.isArray(profesionBotPreview) && profesionBotPreview.length > 0 && (
+                        <div className="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                          <div className="text-[11px] font-semibold text-white/70">
+                            Validaciones que se ejecutarán ({profesionBotPreview.length})
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            {profesionBotPreview.slice(0, 8).map((b) => (
+                              <span
+                                key={b}
+                                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70"
+                                title={b}
+                              >
+                                {String(b).replaceAll("_", " ")}
+                              </span>
+                            ))}
+                            {profesionBotPreview.length > 8 && (
+                              <span className="text-[10px] text-white/55">
+                                +{profesionBotPreview.length - 8} más…
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                     </div>
 
                     {/* Nombre empresa */}
@@ -593,7 +662,7 @@ export default function ConsultaContratista() {
                         value={nombreEmpresa}
                         onChange={(e) => setNombreEmpresa(e.target.value)}
                         placeholder="Razón social de la empresa"
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                       />
                     </div>
 
@@ -608,7 +677,7 @@ export default function ConsultaContratista() {
                         value={nitEmpresa}
                         onChange={(e) => setNitEmpresa(e.target.value)}
                         placeholder="Ej: 830512262-1"
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                       />
                     </div>
 
