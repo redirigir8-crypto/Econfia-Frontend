@@ -15,6 +15,7 @@ import Consulta from "./views/Consulta";
 import ConsultaContratista from "./views/ConsultaContratista";
 import ConsultaMedida from "./views/ConsultaMedida";
 import ConsultaBasicElemnt from "./views/ConsultaBasicElemnt";
+import ConsultaEIdentidad from "./views/ConsultaEIdentidad";
 import Resultados from "./views/Resultados";
 import LogOut from "./views/LogOut";
 import Ayuda from "./views/Ayuda";
@@ -647,6 +648,7 @@ export default function App() {
               <Route path="/2b7d5e9c"          element={<TitulosValidationForm />}    />
               <Route path="/9e3a6c1f"          element={<ConsultaMedida />}           />
               <Route path="/b4f8d2e7"          element={<ConsultaBasicElemnt />}      />
+              <Route path="/1d5f8e3a"          element={<ConsultaEIdentidad />}       />
               <Route path="/6c1b9f3d"          element={<ConsultaContratista />}      />
               <Route path="/4a7e2b8f"          element={<ConsultaEmpresa />}          />
               <Route path="/8f5c3a1b/:nit"     element={<EmpresaRuesResult />}        />

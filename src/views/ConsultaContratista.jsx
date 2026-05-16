@@ -491,6 +491,7 @@ export default function ConsultaContratista() {
                       <label className="text-xs font-semibold text-white/70">
                         Profesión *
                       </label>
+                      <span className="text-[10px] text-white/45">Si tiene más de una profesión, colóquela.</span>
 
                       {/* Selecciones múltiples */}
                       {profesionesSeleccionadas.length > 0 && (
@@ -531,17 +532,6 @@ export default function ConsultaContratista() {
                         onFocus={() => setShowSugerencias(profesionSugerencias.length > 0)}
                         onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
                       />
-      {profesionSeleccionada?.entidad_reguladora && (
-        <div className="mt-1 flex items-center gap-2 text-[11px] text-white/65">
-          <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-2 py-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-300/90" />
-            Entidad reguladora:{" "}
-            <span className="text-white/85 font-semibold">
-              {profesionSeleccionada.entidad_reguladora}
-            </span>
-          </span>
-        </div>
-      )}
       {showSugerencias && (
         <div style={{ position: "relative" }}>
           <ul
@@ -624,29 +614,6 @@ export default function ConsultaContratista() {
                         <span className="text-xs text-red-400">
                           Formato de correo no válido
                         </span>
-                      )}
-                      {Array.isArray(profesionBotPreview) && profesionBotPreview.length > 0 && (
-                        <div className="mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                          <div className="text-[11px] font-semibold text-white/70">
-                            Validaciones que se ejecutarán ({profesionBotPreview.length})
-                          </div>
-                          <div className="mt-1 flex flex-wrap gap-1.5">
-                            {profesionBotPreview.slice(0, 8).map((b) => (
-                              <span
-                                key={b}
-                                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70"
-                                title={b}
-                              >
-                                {String(b).replaceAll("_", " ")}
-                              </span>
-                            ))}
-                            {profesionBotPreview.length > 8 && (
-                              <span className="text-[10px] text-white/55">
-                                +{profesionBotPreview.length - 8} más…
-                              </span>
-                            )}
-                          </div>
-                        </div>
                       )}
 
                     </div>

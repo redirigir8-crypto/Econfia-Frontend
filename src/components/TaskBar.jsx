@@ -65,6 +65,9 @@ if (user?.perfil?.planes && user.perfil.planes.length > 0) {
   if (planes.includes("essencial-express")) {
     consultaItems.push({ path: "/a1e6c4b8", icon: <img src={express} alt="E-Essencial Express" style={{width:28,height:28}} />, label: "E-Essencial Express" });
   }
+  if (planes.includes("e-identidad")) {
+    consultaItems.push({ path: "/1d5f8e3a", icon: <User size={28} strokeWidth={1.5} />, label: "E-Identidad" });
+  }
 
 
 }
@@ -103,6 +106,9 @@ if (hasPlanes) {
   }
   if(planes.includes("validacion-titulos")){
   consultaItems.push({ path: "/2b7d5e9c", icon: <img src={UserCogIcon} alt="Validación de títulos" style={{width:28,height:28}} />, label: "Validación de títulos" });
+  }
+  if (planes.includes("e-identidad")) {
+    consultaItems.push({ path: "/1d5f8e3a", icon: <User size={28} strokeWidth={1.5} />, label: "E-Identidad" });
   }
 }
 

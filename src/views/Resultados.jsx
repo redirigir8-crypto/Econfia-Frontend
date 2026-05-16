@@ -2,6 +2,7 @@ import TablaResultados from "../components/TablaResultados";
 import LiveQueryModal from "../components/LiveQueryModal";
 import CardDni from "../components/CardDni";
 import DetalleResultados from "../components/DetalleResultados";
+import EIdentidadLoteModal from "../components/EIdentidadLoteModal";
 import RadarRiesgo from "../components/RadarRiesgo";
 import MapaCalorResultados from "../components/MapaCalorResultados";
 import ModalDescargaIndividual from "../modals/ModalDescargaIndividual";
@@ -635,8 +636,17 @@ export default function Resultados() {
       <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
+      {/* Modal lote para e-identidad */}
+      {consultaSeleccionada && consultaTipoActual === "e-identidad" && (
+        <EIdentidadLoteModal
+          consultaciones={data.filter((c) => (c.tipo_consulta || c.tipo || "") === "e-identidad")}
+          initialId={consultaSeleccionada}
+          onClose={() => setConsultaSeleccionada(null)}
+        />
+      )}
+
       <div className="w-full px-4 relative z-10">
-        {!consultaSeleccionada ? (
+        {!consultaSeleccionada || consultaTipoActual === "e-identidad" ? (
           <div className="w-full max-w-7xl mx-auto">
             {/* Título */}
             <div className="mb-3 md:mb-4">
@@ -710,7 +720,7 @@ export default function Resultados() {
         }}
       />
           </div>
-        ) : (
+        ) : consultaTipoActual !== "e-identidad" ? (
         <div className="w-full max-w-7xl mx-auto h-[75vh]">
           <FloatingActionsPortal
             apiUrl={API_URL}
@@ -774,7 +784,7 @@ export default function Resultados() {
             data={{ consultaId: consultaSeleccionada }}
           />
         </div>
-      )}
+        ) : null}
       </div>
       <ExportBatchModal
         isOpen={exportModal.open}
