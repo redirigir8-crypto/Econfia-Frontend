@@ -847,20 +847,93 @@ export default function DetalleResultados({ consultaId }) {
     );
   };
 
-  return (
-    <div className="w-full px-4 md:px-8 lg:px-12 py-3 md:py-4 h-full flex flex-col">
-      {/* Header elegante */}
-      <div className="mb-3 md:mb-4">
-        <div className="inline-block px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-1.5">
-          <span className="text-cyan-300 text-[10px] md:text-xs font-medium">Consulta #{consultaId}</span>
+  const renderEvidenceActions = (item, compact = false) => {
+    if (hasEvidenceFile(item.archivo)) {
+      return (
+        <div className={`flex items-center ${compact ? "justify-start" : "justify-center"} gap-1.5`}>
+          <a
+            href={buildMediaUrl(item.archivo)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white 
+                       bg-gradient-to-r from-blue-500 to-blue-600 
+                       hover:from-blue-400 hover:to-blue-500
+                       shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]
+                       transition-all duration-300
+                       hover:scale-110 active:scale-95"
+            title="Ver evidencia"
+            aria-label="Ver evidencia"
+          >
+            <Eye size={14} />
+          </a>
+          <button
+            onClick={() =>
+              downloadEvidenceAsPdf(
+                item.archivo,
+                `${(item.fuente || "evidencia")
+                  .replace(/\s+/g, "_")
+                  .toLowerCase()}_${consultaId}_${item.id}`
+              )
+            }
+            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white 
+                       bg-gradient-to-r from-cyan-500 to-blue-500 
+                       hover:from-cyan-400 hover:to-blue-400
+                       shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]
+                       transition-all duration-300
+                       hover:scale-110 active:scale-95"
+            title="Descargar como PDF"
+            aria-label="Descargar como PDF"
+          >
+            <Download size={14} />
+          </button>
         </div>
-        <h2 className="text-xl md:text-2xl lg:text-3xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
-          Detalles de Resultados
-        </h2>
-      </div>
+      );
+    }
+
+    if (item.mensaje || item.score != null) {
+      if (isPositiveResult(item)) {
+        return (
+          <button
+            onClick={(e) => openResultadoModal(item, e)}
+            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-white
+                       bg-gradient-to-r from-red-500/80 to-rose-500/80
+                       hover:from-red-400 hover:to-rose-400
+                       shadow-[0_0_15px_rgba(239,68,68,0.25)] hover:shadow-[0_0_20px_rgba(239,68,68,0.45)]
+                       transition-all duration-300
+                       hover:scale-105 active:scale-95 text-xs font-semibold"
+            title="Ver resultado con alerta"
+            aria-label="Ver resultado con alerta"
+          >
+            Ver resultado
+          </button>
+        );
+      }
+
+      return (
+        <button
+          onClick={(e) => openResultadoModal(item, e)}
+          className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-slate-300
+                     bg-gradient-to-r from-slate-600/50 to-slate-700/50
+                     hover:from-slate-500/60 hover:to-slate-600/60
+                     border border-slate-500/30
+                     transition-all duration-300
+                     hover:scale-105 active:scale-95 text-xs font-semibold"
+          title="Ver detalle"
+          aria-label="Ver detalle"
+        >
+          Ver detalle
+        </button>
+      );
+    }
+
+    return <span className="text-slate-500 text-xs italic">Sin archivo</span>;
+  };
+
+  return (
+    <div className="w-full max-w-[1280px] mx-auto px-3 sm:px-4 md:px-12 pt-12 sm:pt-12 md:pt-10 lg:pt-10 pb-3 md:pb-4 h-full min-h-0 flex flex-col">
 
       {/* Barra de búsqueda y filtros */}
-      <div className="flex flex-col gap-1.5 md:gap-2 mb-2 md:mb-3">
+      <div className="flex flex-col gap-1.5 md:gap-2 mb-2 md:mb-2.5">
         {/* Fila 1: búsqueda principal */}
         <input
           type="text"
@@ -915,127 +988,96 @@ export default function DetalleResultados({ consultaId }) {
       </div>
 
       {/* Contenedor con scroll para la tabla */}
-      <div className="flex-1 overflow-auto backdrop-blur-xl bg-gradient-to-br from-slate-900/50 via-blue-950/30 to-slate-900/50 border border-cyan-500/20 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-xl md:rounded-2xl mb-3 md:mb-4">
-        <table className="table-auto text-left text-sm min-w-[480px] w-full">
-          <thead>
-            <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Fuente</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Tipo</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Estado</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Score</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider text-center">Evidencia</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-cyan-500/10">
-            {datosPagina.length > 0 ? (
-              datosPagina.map((item) => (
-                <tr
+      <div className="min-h-0 flex-1 overflow-auto backdrop-blur-xl bg-gradient-to-br from-slate-900/50 via-blue-950/30 to-slate-900/50 border border-cyan-500/20 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-xl md:rounded-2xl mb-3 md:mb-4">
+        {datosPagina.length > 0 ? (
+          <>
+            <div className="grid gap-3 p-3 sm:p-4 xl:hidden">
+              {datosPagina.map((item) => (
+                <article
                   key={item.id}
-                  className="group hover:bg-gradient-to-r hover:from-cyan-500/5 hover:to-blue-500/5 transition-all duration-300"
+                  className="rounded-2xl border border-cyan-500/15 bg-[linear-gradient(135deg,rgba(15,23,42,.88),rgba(17,24,39,.82))] p-4 shadow-[0_12px_30px_rgba(2,8,23,0.2)]"
                 >
-                  <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm">{item.fuente}</td>
-                  <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 text-xs md:text-sm">{item.tipo_fuente}</td>
-                  <td className="px-2 md:px-3 py-1.5 md:py-2">
-                    <EstadoCell item={item} />
-                  </td>
-                  <td className="px-2 md:px-3 py-1.5 md:py-2">
-                    <span className="inline-flex items-center justify-center px-2 py-0.5 md:py-1 rounded-lg bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 text-cyan-300 font-bold text-xs md:text-sm">
-                      {item.score}
-                    </span>
-                  </td>
-                  <td className="px-2 md:px-3 py-1.5 md:py-2">
-                    {hasEvidenceFile(item.archivo) ? (
-                      <div className="flex items-center justify-center gap-1">
-                        <a
-                          href={buildMediaUrl(item.archivo)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-lg text-white 
-                                     bg-gradient-to-r from-blue-500 to-blue-600 
-                                     hover:from-blue-400 hover:to-blue-500
-                                     shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]
-                                     transition-all duration-300
-                                     hover:scale-110 active:scale-95"
-                          title="Ver evidencia"
-                          aria-label="Ver evidencia"
-                        >
-                          <Eye size={14} className="md:w-4 md:h-4" />
-                        </a>
-                        <button
-                          onClick={() =>
-                            downloadEvidenceAsPdf(
-                              item.archivo,
-                              `${(item.fuente || "evidencia")
-                                .replace(/\s+/g, "_")
-                                .toLowerCase()}_${consultaId}_${item.id}`
-                            )
-                          }
-                          className="inline-flex items-center justify-center w-7 h-7 md:w-8 md:h-8 rounded-lg text-white 
-                                     bg-gradient-to-r from-cyan-500 to-blue-500 
-                                     hover:from-cyan-400 hover:to-blue-400
-                                     shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]
-                                     transition-all duration-300
-                                     hover:scale-110 active:scale-95"
-                          title="Descargar como PDF"
-                          aria-label="Descargar como PDF"
-                        >
-                          <Download size={14} className="md:w-4 md:h-4" />
-                        </button>
-                      </div>
-                    ) : item.mensaje || item.score != null ? (
-                      <div className="flex items-center justify-center">
-                        {isPositiveResult(item) ? (
-                          <button
-                            onClick={(e) => openResultadoModal(item, e)}
-                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-white
-                                       bg-gradient-to-r from-red-500/80 to-rose-500/80
-                                       hover:from-red-400 hover:to-rose-400
-                                       shadow-[0_0_15px_rgba(239,68,68,0.25)] hover:shadow-[0_0_20px_rgba(239,68,68,0.45)]
-                                       transition-all duration-300
-                                       hover:scale-105 active:scale-95 text-xs font-semibold"
-                            title="Ver resultado con alerta"
-                            aria-label="Ver resultado con alerta"
-                          >
-                            Ver resultado
-                          </button>
-                        ) : (
-                          <button
-                            onClick={(e) => openResultadoModal(item, e)}
-                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-slate-300
-                                       bg-gradient-to-r from-slate-600/50 to-slate-700/50
-                                       hover:from-slate-500/60 hover:to-slate-600/60
-                                       border border-slate-500/30
-                                       transition-all duration-300
-                                       hover:scale-105 active:scale-95 text-xs font-semibold"
-                            title="Ver detalle"
-                            aria-label="Ver detalle"
-                          >
-                            Ver detalle
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-slate-500 text-xs italic text-center block">Sin archivo</span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="text-center py-12">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-cyan-500/20 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300 mb-1">Fuente</div>
+                      <h3 className="text-sm font-bold text-slate-100 leading-snug break-words">
+                        {item.fuente}
+                      </h3>
                     </div>
-                    <p className="text-slate-400 text-sm italic">No se encontraron resultados</p>
+                    <div className="shrink-0">
+                      <span className="inline-flex items-center justify-center min-w-[2.2rem] px-2 py-1 rounded-lg bg-gradient-to-r from-slate-800/60 to-slate-900/60 border border-cyan-500/20 text-cyan-300 font-bold text-sm">
+                        {item.score}
+                      </span>
+                    </div>
                   </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300/90 mb-1">Tipo</div>
+                      <p className="text-sm text-slate-300 leading-snug break-words">{item.tipo_fuente}</p>
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300/90 mb-1">Estado</div>
+                      <EstadoCell item={item} />
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300/90 mb-2">Evidencia</div>
+                    {renderEvidenceActions(item, true)}
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="hidden xl:block">
+              <table className="table-fixed text-left text-sm min-w-[860px] lg:min-w-0 w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
+                    <th className="w-[38%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Fuente</th>
+                    <th className="w-[26%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Tipo</th>
+                    <th className="w-[14%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Estado</th>
+                    <th className="w-[8%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Score</th>
+                    <th className="w-[14%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider text-center">Evidencia</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-cyan-500/10">
+                  {datosPagina.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="group hover:bg-gradient-to-r hover:from-cyan-500/5 hover:to-blue-500/5 transition-all duration-300"
+                    >
+                      <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm leading-snug break-words pr-3">{item.fuente}</td>
+                      <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 text-xs md:text-sm leading-snug break-words pr-3">{item.tipo_fuente}</td>
+                      <td className="px-2 md:px-3 py-1.5 md:py-2">
+                        <EstadoCell item={item} />
+                      </td>
+                      <td className="px-2 md:px-3 py-1.5 md:py-2">
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 md:py-1 rounded-lg bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 text-cyan-300 font-bold text-xs md:text-sm">
+                          {item.score}
+                        </span>
+                      </td>
+                      <td className="px-2 md:px-3 py-1.5 md:py-2">
+                        {renderEvidenceActions(item)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-cyan-500/20 flex items-center justify-center">
+                <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-slate-400 text-sm italic">No se encontraron resultados</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 📑 Paginación */}

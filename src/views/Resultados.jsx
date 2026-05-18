@@ -111,8 +111,14 @@ function FloatingActionsPortal({
   if (!el) return null;
 
   return createPortal(
-    <div className="fixed top-4 left-4 z-[10000]">
-      <div className="flex items-start gap-2">
+    <div className="fixed top-3 left-3 right-3 z-[10000]">
+      {/* Título centrado en la barra */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <span className="hidden sm:block text-white font-bold text-sm md:text-base drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)]">
+          Detalles de Resultados
+        </span>
+      </div>
+      <div className="relative flex items-center gap-2">
         {/* Regresar */}
         <button
           onClick={goBack}
@@ -121,7 +127,7 @@ function FloatingActionsPortal({
           title="Regresar"
         >
           <ArrowLeft size={16} className="group-hover:text-cyan-400 transition-colors" />
-          <span className="text-sm font-semibold">Regresar</span>
+          <span className="text-xs sm:text-sm font-semibold">Regresar</span>
         </button>
 
         {/* PDF + dropdown */}
@@ -138,7 +144,7 @@ function FloatingActionsPortal({
             ) : (
               <FileDown size={16} />
             )}
-            <span className="text-sm font-semibold">PDF</span>
+            <span className="text-xs sm:text-sm font-semibold">PDF</span>
           </button>
 
           {open && (
@@ -721,7 +727,7 @@ export default function Resultados() {
       />
           </div>
         ) : consultaTipoActual !== "e-identidad" ? (
-        <div className="w-full max-w-7xl mx-auto h-[75vh]">
+        <div className="w-full max-w-7xl mx-auto min-h-[78vh] xl:min-h-[82vh] h-[calc(100vh-10rem)] max-h-[calc(100vh-5rem)]">
           <FloatingActionsPortal
             apiUrl={API_URL}
             consultaId={consultaSeleccionada}
@@ -735,19 +741,32 @@ export default function Resultados() {
             slidesPerView={1}
             pagination={false}
             navigation
-            className="h-full swiper-custom-nav"
+            className="h-full min-h-0 swiper-custom-nav"
           >
           <style jsx global>{`
             .swiper-custom-nav .swiper-button-next,
             .swiper-custom-nav .swiper-button-prev {
-              color: #06b6d4;
-              background: rgba(6, 182, 212, 0.1);
-              backdrop-filter: blur(10px);
-              width: 40px;
-              height: 40px;
-              border-radius: 50%;
-              border: 1px solid rgba(6, 182, 212, 0.3);
-              transition: all 0.3s;
+              display: none;
+            }
+            @media (min-width: 768px) {
+              .swiper-custom-nav .swiper-button-next,
+              .swiper-custom-nav .swiper-button-prev {
+                display: flex;
+                color: #06b6d4;
+                background: rgba(6, 182, 212, 0.1);
+                backdrop-filter: blur(10px);
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                border: 1px solid rgba(6, 182, 212, 0.3);
+                transition: all 0.3s;
+                left: 4px;
+                right: auto;
+              }
+              .swiper-custom-nav .swiper-button-next {
+                left: auto;
+                right: 4px;
+              }
             }
             .swiper-custom-nav .swiper-button-next:hover,
             .swiper-custom-nav .swiper-button-prev:hover {
@@ -757,21 +776,21 @@ export default function Resultados() {
             }
             .swiper-custom-nav .swiper-button-next::after,
             .swiper-custom-nav .swiper-button-prev::after {
-              font-size: 16px;
+              font-size: 14px;
               font-weight: bold;
             }
           `}</style>
 
             {/* Slide 2: Detalles con botones abajo */}
-            <SwiperSlide className="flex flex-col">
+            <SwiperSlide className="flex flex-col min-h-0 h-full">
               {/* 🔹 Detalle primero */}
-              <div className="flex-1">
+              <div className="flex-1 min-h-0">
                 <DetalleResultados consultaId={consultaSeleccionada} />
               </div>
 
             </SwiperSlide>
 
-            <SwiperSlide className="flex flex-row h-full">
+            <SwiperSlide className="flex flex-row h-full min-h-0">
             <ConsultaSlide consultaId={consultaSeleccionada} />
             </SwiperSlide>
             {/* Slide 3 */}
