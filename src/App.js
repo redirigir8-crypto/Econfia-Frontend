@@ -45,6 +45,7 @@ import VerificarReporte from "./pages/VerificarReporte";
 import Beneficios from "./pages/Beneficios";
 import ChatbotFlotante from "./components/ChatbotFlotante";
 import AdminSoporte from "./views/AdminSoporte";
+import AdminBlog from "./components/AdminBlog";
 import {
   ShieldCheck,
   Zap,
@@ -661,6 +662,7 @@ export default function App() {
               <Route path="/1e5c8a4b"          element={<AdminPlanes />}              />
               <Route path="/4d9b2f6e"          element={<AdminFuentes />}             />
               <Route path="/5d2a9c8e"          element={<AdminSoporte />}             />
+              <Route path="/2c8e5f1a"          element={<AdminBlog />}                />
             </Route>
 
             <Route path="/a8e3c7b2" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />

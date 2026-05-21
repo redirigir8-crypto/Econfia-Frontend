@@ -1,50 +1,38 @@
 // src/pages/Blog.jsx
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header"
 import { FaCalendar, FaClock, FaArrowRight, FaSearch, FaFire, FaTags } from "react-icons/fa";
-// Imágenes desde src/assets (ajusta los nombres si hace falta)
-import cover1 from "../assets/justicia.jpg";
-import cover2 from "../assets/justicia2.jpg";
-import cover3 from "../assets/justicia3.jpg";
-import fallbackImg from "../assets/logo-econfia (1).png"; // placeholder seguro
+import fallbackImg from "../assets/logo-econfia (1).png";
 
-/* Si luego traes posts del backend, reemplaza este array */
-const POSTS = [
-  {
-    slug: "por-que-automatizar-debida-diligencia",
-    title: "¿Por qué automatizar la debida diligencia?",
-    date: "15/9/2025",
-    readTime: "5 min",
-    excerpt:
-      "La automatización reduce tiempos, errores humanos y mejora el cumplimiento normativo.",
-    cover: cover1,
-    tags: ["cumplimiento", "automatización"],
-    featured: true,
-  },
-  {
-    slug: "listas-restrictivas-internacionales-101",
-    title: "Listas restrictivas internacionales 101",
-    date: "9/9/2025",
-    readTime: "8 min",
-    excerpt:
-      "UN, OFAC, UE, bancos multilaterales… cómo interpretarlas y auditarlas.",
-    cover: cover2,
-    tags: ["listas", "riesgo"],
-    featured: false,
-  },
-  {
-    slug: "mejores-practicas-reportes-riesgo",
-    title: "Mejores prácticas para reportes de riesgo",
-    date: "31/8/2025",
-    readTime: "6 min",
-    excerpt:
-      "Diseño de reportes claros: puntaje, semáforo, evidencia y trazabilidad.",
-    cover: cover3,
-    tags: ["reportes", "ux"],
-    featured: false,
-  },
-];
+// Normaliza un post del API al formato que usan los componentes
+function normalizar(p) {
+  return {
+    slug:      p.slug,
+    title:     p.titulo,
+    date:      p.fecha_publicacion || "",
+    readTime:  p.tiempo_lectura || "5 min",
+    excerpt:   p.extracto,
+    cover:     p.portada_url || null,
+    tags:      p.tags_lista || [],
+    featured:  p.destacado,
+    importante: p.importante,
+    autor:     p.autor,
+    contenido: p.contenido,
+    video_url: p.video_url || null,
+    video_archivo_url: p.video_archivo_url || null,
+  };
+}
+
+const POSTS_FALLBACK = [];
+
+let API_URL = process.env.REACT_APP_API_URL || "";
+if (!API_URL) {
+  API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:8000/"
+    : "https://www.econfia.co/";
+}
+if (!API_URL.endsWith("/")) API_URL += "/";
 
 const Tag = ({ children, onClick, active }) => (
   <span 
@@ -177,22 +165,35 @@ function PostCard({ post }) {
 }
 
 export default function Blog() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm]   = useState("");
   const [selectedTag, setSelectedTag] = useState(null);
+  const [posts, setPosts]             = useState(POSTS_FALLBACK);
+  const [loading, setLoading]         = useState(true);
 
-  // Obtener todos los tags únicos
-  const allTags = [...new Set(POSTS.flatMap(post => post.tags))];
+  useEffect(() => {
+    fetch(`${API_URL}api/blog/`)
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setPosts(data.map(normalizar));
+        }
+      })
+      .catch(() => {/* mantiene POSTS_FALLBACK */})
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Filtrar posts
-  const filteredPosts = POSTS.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+  const allTags = [...new Set(posts.flatMap((p) => p.tags))];
+
+  const filteredPosts = posts.filter((post) => {
+    const matchesSearch =
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTag = !selectedTag || post.tags.includes(selectedTag);
     return matchesSearch && matchesTag;
   });
 
-  const featuredPost = filteredPosts.find(p => p.featured);
-  const regularPosts = filteredPosts.filter(p => !p.featured);
+  const featuredPost = filteredPosts.find((p) => p.featured);
+  const regularPosts = filteredPosts.filter((p) => !p.featured);
 
   return (
     <main className="min-h-screen pt-20 md:pt-24 pb-20 text-white bg-gradient-to-b from-gray-900 via-blue-900/20 to-gray-900">
@@ -249,15 +250,22 @@ export default function Blog() {
           </div>
         </div>
 
+        {/* Indicador de carga */}
+        {loading && (
+          <div className="flex justify-center py-8">
+            <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
         {/* Post destacado */}
-        {featuredPost && (
+        {!loading && featuredPost && (
           <div className="mb-12">
             <FeaturedPost post={featuredPost} />
           </div>
         )}
 
         {/* Grid de posts regulares */}
-        {regularPosts.length > 0 ? (
+        {!loading && regularPosts.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {regularPosts.map((p) => (
               <PostCard key={p.slug} post={p} />

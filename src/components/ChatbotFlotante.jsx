@@ -5,11 +5,23 @@ import { MessageCircle, X, Send, Phone, Loader2 } from "lucide-react";
 import soporteService from "../services/soporteService";
 import polarBear from "../assets/polar-bear.svg";
 
-const SUGERENCIAS_CHAT = [
+const WHATSAPP_NUMBER = "573054226582";
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Hola,%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20ECONFIA`;
+
+// Sugerencias para usuarios autenticados
+const SUGERENCIAS_USUARIO = [
 	"¿Qué puedo preguntar?",
 	"Tengo un error en una consulta",
 	"¿Cómo descargo mi PDF?",
 	"¿Cómo funcionan las consultas masivas?"
+];
+
+// Sugerencias para visitantes sin sesión
+const SUGERENCIAS_NO_USUARIO = [
+	"¿Cómo me registro?",
+	"¿Cuáles son los planes?",
+	"¿Qué es ECONFIA?",
+	"Quiero más información"
 ];
 
 // Base de conocimientos para respuestas automáticas
@@ -19,8 +31,20 @@ const KNOWLEDGE_BASE = [
 		respuesta: "Puedes preguntarme por planes, errores en consultas, reportes PDF, pagos, consultas masivas, API, seguridad de datos o pedir soporte técnico con un agente."
 	},
 	{
-		palabras_clave: ["precio", "costo", "pagar", "tarifa"],
-		respuesta: "Tenemos planes flexibles: Por Consulta (paga por validación) e Ilimitado (consultas sin límite al mes). ¿Necesitas más detalles?"
+		palabras_clave: ["qué es econfia", "que es econfia", "econfia", "plataforma", "para qué sirve", "para que sirve"],
+		respuesta: "ECONFIA es una plataforma de validación de identidad y antecedentes en Colombia. Consultamos registros de Registraduría, ADRES, Policía, Procuraduría y más fuentes oficiales, de forma rápida y segura."
+	},
+	{
+		palabras_clave: ["cómo me registro", "como me registro", "crear cuenta", "registrarme", "registro"],
+		respuesta: "Para registrarte en ECONFIA haz clic en 'Crear cuenta' en la página principal, ingresa tu correo y datos básicos. Una vez verificado tu correo podrás adquirir un plan y comenzar a consultar."
+	},
+	{
+		palabras_clave: ["precio", "costo", "pagar", "tarifa", "plan", "planes", "cuánto cuesta", "cuanto cuesta"],
+		respuesta: "Tenemos planes flexibles según tus necesidades:\n• Por Consulta: pagas solo por lo que usas.\n• Plan mensual: consultas ilimitadas al mes.\n\nPara conocer los precios exactos o hablar con un asesor escríbenos por WhatsApp."
+	},
+	{
+		palabras_clave: ["más información", "mas informacion", "más info", "asesor", "contactar", "hablar", "whatsapp"],
+		respuesta: "Con gusto te atendemos. Puedes escribirnos directamente por WhatsApp al +57 305 422 6582 y un asesor te responderá de inmediato."
 	},
 	{
 		palabras_clave: ["api", "integración", "conectar", "sistema"],
@@ -67,7 +91,16 @@ export default function ChatbotFlotante() {
 	const [ticketPk, setTicketPk] = useState(null);
 	const [ticketCode, setTicketCode] = useState(null);
 	const [isSending, setIsSending] = useState(false);
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const messagesEndRef = useRef(null);
+
+	// Detectar si hay sesión activa
+	useEffect(() => {
+		const token = localStorage.getItem("token") || localStorage.getItem("authToken") || localStorage.getItem("access");
+		setIsAuthenticated(!!token);
+	}, [isOpen]);
+
+	const sugerencias = isAuthenticated ? SUGERENCIAS_USUARIO : SUGERENCIAS_NO_USUARIO;
 
 	// Auto-scroll al último mensaje
 	const scrollToBottom = () => {
@@ -81,14 +114,14 @@ export default function ChatbotFlotante() {
 	// Función para encontrar respuesta automática
 	const obtenerRespuestaAutomatica = (texto) => {
 		const textoLower = texto.toLowerCase();
-		
+
 		for (let kb of KNOWLEDGE_BASE) {
 			if (kb.palabras_clave.some(palabra => textoLower.includes(palabra))) {
 				return kb.respuesta;
 			}
 		}
-		
-		return "No entendí completamente tu pregunta. ¿Podrías darme más detalles o prefieres hablar con un agente de soporte?";
+
+		return "No entendí completamente tu pregunta. ¿Podrías darme más detalles o prefieres hablar con un asesor por WhatsApp?";
 	};
 
 	// Enviar mensaje del usuario
@@ -96,7 +129,6 @@ export default function ChatbotFlotante() {
 		const texto = inputValue.trim();
 		if (!texto || isSending) return;
 
-		// Agregar mensaje del usuario
 		const newUserMessage = {
 			id: messages.length + 1,
 			texto,
@@ -125,7 +157,6 @@ export default function ChatbotFlotante() {
 				setIsSending(false);
 			}
 		} else {
-			// Generar respuesta automática después de 500ms
 			setTimeout(() => {
 				const respuestaBot = obtenerRespuestaAutomatica(texto);
 				const newBotMessage = {
@@ -160,14 +191,15 @@ export default function ChatbotFlotante() {
 			setTicketCode(ticket.ticket_id);
 			setIsEscalated(true);
 
-			const escaladoMessage = {
-				id: Date.now(),
-				texto: `Ticket creado: ${ticket.ticket_id}\n\nUn agente de soporte podrá ver esta conversación y responder desde el panel administrativo.`,
-				sender: "bot",
-				timestamp: new Date()
-			};
-
-			setMessages(prev => [...prev, escaladoMessage]);
+			setMessages(prev => [
+				...prev,
+				{
+					id: Date.now(),
+					texto: `Ticket creado: ${ticket.ticket_id}\n\nUn agente de soporte podrá ver esta conversación y responder desde el panel administrativo.`,
+					sender: "bot",
+					timestamp: new Date()
+				}
+			]);
 		} catch (error) {
 			setMessages(prev => [
 				...prev,
@@ -181,6 +213,11 @@ export default function ChatbotFlotante() {
 		} finally {
 			setIsSending(false);
 		}
+	};
+
+	// Abrir WhatsApp
+	const handleWhatsApp = () => {
+		window.open(WHATSAPP_URL, "_blank", "noopener,noreferrer");
 	};
 
 	// Cerrar chat
@@ -242,10 +279,10 @@ export default function ChatbotFlotante() {
 								</div>
 								<div className="min-w-0">
 									<h3 className="font-bold text-white leading-tight">Soporte ECONFIA</h3>
-								<p className="text-xs text-cyan-100">
-									{isEscalated ? `Ticket: ${ticketCode}` : "Respuestas automáticas"}
-								</p>
-							</div>
+									<p className="text-xs text-cyan-100">
+										{isEscalated ? `Ticket: ${ticketCode}` : "Respuestas automáticas"}
+									</p>
+								</div>
 							</div>
 							<button
 								onClick={handleClose}
@@ -265,7 +302,7 @@ export default function ChatbotFlotante() {
 									className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
 								>
 									<div
-										className={`max-w-xs px-4 py-2 rounded-lg text-sm ${
+										className={`max-w-xs px-4 py-2 rounded-lg text-sm whitespace-pre-line ${
 											msg.sender === "user"
 												? "bg-cyan-600 text-white rounded-br-none"
 												: "bg-slate-700 text-cyan-100 rounded-bl-none border border-cyan-500/30"
@@ -284,13 +321,14 @@ export default function ChatbotFlotante() {
 							<div ref={messagesEndRef} />
 						</div>
 
+						{/* Sugerencias */}
 						{!isEscalated && messages.length <= 2 && (
 							<div className="px-4 pb-3">
 								<p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300/70">
 									Puedes preguntar
 								</p>
 								<div className="flex flex-wrap gap-2">
-									{SUGERENCIAS_CHAT.map((pregunta) => (
+									{sugerencias.map((pregunta) => (
 										<button
 											key={pregunta}
 											type="button"
@@ -304,17 +342,32 @@ export default function ChatbotFlotante() {
 							</div>
 						)}
 
-						{/* Opciones de acción */}
+						{/* Botones de acción */}
 						{!isEscalated && (
 							<div className="px-4 py-3 border-t border-cyan-500/20 space-y-2">
+								{/* WhatsApp — siempre visible */}
 								<button
-									onClick={handleEscalar}
-									disabled={isSending}
-									className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-300 rounded-lg hover:bg-orange-600/30 transition text-sm font-semibold"
+									onClick={handleWhatsApp}
+									className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-green-600/20 border border-green-500/50 text-green-300 rounded-lg hover:bg-green-600/30 transition text-sm font-semibold"
 								>
-									{isSending ? <Loader2 size={16} className="animate-spin" /> : <Phone size={16} />}
-									Hablar con soporte técnico
+									{/* Ícono WhatsApp SVG */}
+									<svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg">
+										<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+									</svg>
+									Contactar por WhatsApp
 								</button>
+
+								{/* Soporte técnico — solo para usuarios con sesión */}
+								{isAuthenticated && (
+									<button
+										onClick={handleEscalar}
+										disabled={isSending}
+										className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-orange-600/20 border border-orange-500/50 text-orange-300 rounded-lg hover:bg-orange-600/30 transition text-sm font-semibold"
+									>
+										{isSending ? <Loader2 size={16} className="animate-spin" /> : <Phone size={16} />}
+										Hablar con soporte técnico
+									</button>
+								)}
 							</div>
 						)}
 
