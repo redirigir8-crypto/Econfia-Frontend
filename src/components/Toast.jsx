@@ -1,21 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 
 export default function Toast({ type, message, onClose, sound }) {
-  const hasInteracted = useRef(false);
-
   useEffect(() => {
-    // Marcar interacción en el primer click
-    const markInteracted = () => {
-      hasInteracted.current = true;
-      window.removeEventListener('click', markInteracted);
-    };
-    window.addEventListener('click', markInteracted);
-    return () => window.removeEventListener('click', markInteracted);
-  }, []);
-
-  useEffect(() => {
-    if (sound && hasInteracted.current) {
+    if (sound && window.__userInteracted) {
       const audio = new Audio(sound);
       audio.play().catch(() => {});
     }

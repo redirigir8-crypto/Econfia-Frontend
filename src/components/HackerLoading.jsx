@@ -19,7 +19,7 @@ const audios = {
   "Analizando posibles riesgos en segundos": "/sounds/econfia-bot/econfia-9.wav",
   "Preparando tu reporte personalizado": "/sounds/econfia-bot/econfia-10.wav",
   "Buscando coincidencias en múltiples fuentes": "/sounds/econfia-bot/econfia-11.wav",
-  "Extrayendo información clave del candidato": "/sounds/econfia-bot/econfia-12.wav",
+  "Extrayendo información clave del candidato": "/sounds/econfia-bot/econfia-14.wav",
   "Procesando tu solicitud con máxima confiabilidad": "/sounds/econfia-bot/econfia-13.wav",
 };
 

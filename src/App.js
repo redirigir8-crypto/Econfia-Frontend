@@ -614,6 +614,20 @@ function Home() {
    App — router raíz
 ───────────────────────────────────────────────────────────── */
 export default function App() {
+  // Activar sonidos automáticamente en la primera interacción del usuario
+  React.useEffect(() => {
+    if (window.__userInteracted) return;
+    const mark = () => { window.__userInteracted = true; };
+    window.addEventListener("click", mark, { once: true });
+    window.addEventListener("keydown", mark, { once: true });
+    window.addEventListener("touchstart", mark, { once: true });
+    return () => {
+      window.removeEventListener("click", mark);
+      window.removeEventListener("keydown", mark);
+      window.removeEventListener("touchstart", mark);
+    };
+  }, []);
+
   return (
     <ConfigProvider theme={antdTheme}>
       <CardProvider>

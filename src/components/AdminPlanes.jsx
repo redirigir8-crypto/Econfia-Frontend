@@ -162,7 +162,7 @@ const AdminPlanes = () => {
             sound={
               toast.type === "error"
                 ? "/sounds/error-011-352286.mp3"
-                : "/sounds/success-1-6297.mp3"
+                : "/sounds/econfia-bot/econfia-1.wav"
             }
           />
         )}

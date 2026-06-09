@@ -332,7 +332,7 @@ const TitulosValidationForm = () => {
           type={toast.type}
           message={toast.message}
           onClose={() => setToast(null)}
-          sound="sounds/error-011-352286.mp3"
+          sound="/sounds/error-011-352286.mp3"
         />
       )}
     </section>

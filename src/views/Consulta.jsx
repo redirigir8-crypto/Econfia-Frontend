@@ -95,7 +95,7 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
           type={toast.type}
           message={toast.message}
           onClose={() => setToast(null)}
-          sound="sounds/error-011-352286.mp3"
+          sound="/sounds/error-011-352286.mp3"
         />
       )}
       <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
@@ -357,7 +357,7 @@ export default function Consulta() {
           type={toast.type}
           message={toast.message}
           onClose={() => setToast(null)}
-          sound="sounds/error-011-352286.mp3"
+          sound="/sounds/error-011-352286.mp3"
         />
       )}
 
