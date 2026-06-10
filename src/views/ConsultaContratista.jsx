@@ -83,6 +83,7 @@ export default function ConsultaContratista() {
         p.toLowerCase().includes(profesionInput.toLowerCase())
       );
     }, [profesionInput]);
+  const [fondoPension, setFondoPension] = useState("");
   const [email, setEmail] = useState("");
   const [nombreEmpresa, setNombreEmpresa] = useState("");
   const [nitEmpresa, setNitEmpresa] = useState("");
@@ -244,6 +245,7 @@ export default function ConsultaContratista() {
       // Si el usuario selecciona varias profesiones, ejecutar solo bots adicionales por profesión
       // (sin predeterminados) para evitar ruido y costos.
       solo_profesion: selectedList.length > 1,
+      fondo_pension: fondoPension || undefined,
       email: String(email).trim().toLowerCase(),
       empresa: nombreEmpresa.trim(),
       nit: (() => { const n = nitEmpresa.trim(); return n && !n.includes("-") ? `${n}-0` : n; })(),
@@ -421,94 +423,87 @@ export default function ConsultaContratista() {
                   {/* Formulario */}
                   <form
                     onSubmit={handleConsultarContratista}
-                    className="space-y-1.5"
+                    className="space-y-2"
                   >
-                    {/* Tipo de documento */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-white/70">
-                        Tipo de documento *
-                      </label>
-                      <select
-                        required
-                        value={tipoDoc}
-                        onChange={(e) => setTipoDoc(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
-                      >
-                        <option className="bg-slate-900 text-white" value="">
-                          Seleccione tipo de documento
-                        </option>
-                        <option className="bg-slate-900 text-white" value="CC">
-                          Cédula de Ciudadanía (CC)
-                        </option>
-                        <option className="bg-slate-900 text-white" value="TI">
-                          Tarjeta de Identidad (TI)
-                        </option>
-                        <option className="bg-slate-900 text-white" value="CE">
-                          Cédula de Extranjería (CE)
-                        </option>
-                        <option className="bg-slate-900 text-white" value="PPT">
-                          Permiso de Protección Temporal (PPT)
-                        </option>
-                        <option className="bg-slate-900 text-white" value="PEP">
-                          Permiso Especial de Permanencia (PEP)
-                        </option>
-                        <option className="bg-slate-900 text-white" value="NIT">
-                          NIT
-                        </option>
-                      </select>
+                    {/* Fila 1: Tipo doc + Número doc */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-white/70">Tipo doc *</label>
+                        <select
+                          required
+                          value={tipoDoc}
+                          onChange={(e) => setTipoDoc(e.target.value)}
+                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                        >
+                          <option className="bg-slate-900 text-white" value="">Seleccione</option>
+                          <option className="bg-slate-900 text-white" value="CC">CC</option>
+                          <option className="bg-slate-900 text-white" value="TI">TI</option>
+                          <option className="bg-slate-900 text-white" value="CE">CE</option>
+                          <option className="bg-slate-900 text-white" value="PPT">PPT</option>
+                          <option className="bg-slate-900 text-white" value="PEP">PEP</option>
+                          <option className="bg-slate-900 text-white" value="NIT">NIT</option>
+                        </select>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-white/70">N° documento *</label>
+                        <input
+                          required
+                          type="text"
+                          value={cedula}
+                          onChange={(e) => setCedula(e.target.value)}
+                          placeholder="Número de documento"
+                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm"
+                        />
+                      </div>
                     </div>
 
-                    {/* Número */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-white/70">
-                        Número de documento *
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        value={cedula}
-                        onChange={(e) => setCedula(e.target.value)}
-                        placeholder="Ingrese número de documento"
-                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
-                      />
+                    {/* Fila 2: Fecha expedición + Fondo de pensión */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-white/70">Fecha expedición</label>
+                        <input
+                          type="date"
+                          value={fechaExpedicion}
+                          onChange={(e) => setFechaExpedicion(e.target.value)}
+                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-white/70">Fondo de pensión</label>
+                        <select
+                          value={fondoPension}
+                          onChange={(e) => setFondoPension(e.target.value)}
+                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                        >
+                          <option className="bg-slate-900 text-white" value="">Todos los fondos</option>
+                          <option className="bg-slate-900 text-white" value="porvenir">Porvenir</option>
+                          <option className="bg-slate-900 text-white" value="colpensiones">Colpensiones</option>
+                          <option className="bg-slate-900 text-white" value="proteccion">Protección</option>
+                          <option className="bg-slate-900 text-white" value="colfondos">Colfondos</option>
+                          <option className="bg-slate-900 text-white" value="skandia">Skandia</option>
+                        </select>
+                      </div>
                     </div>
 
-                    {/* Fecha expedición (opcional) */}
+                    {/* Profesión — ancho completo por el autocomplete */}
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-semibold text-white/70">
-                        Fecha de expedición (Opcional)
+                        Profesión * <span className="font-normal text-white/45">(si tiene más de una, agréguela)</span>
                       </label>
-                      <input
-                        type="date"
-                        value={fechaExpedicion}
-                        onChange={(e) => setFechaExpedicion(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
-                      />
-                    </div>
 
-                    {/* Profesión */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-white/70">
-                        Profesión *
-                      </label>
-                      <span className="text-[10px] text-white/45">Si tiene más de una profesión, colóquela.</span>
-
-                      {/* Selecciones múltiples */}
                       {profesionesSeleccionadas.length > 0 && (
-                        <div className="mb-2 flex flex-wrap gap-1.5">
+                        <div className="mb-1 flex flex-wrap gap-1.5">
                           {profesionesSeleccionadas.map((p) => (
                             <span
                               key={p.nombre}
                               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-white/80"
                               title={p.entidad_reguladora || p.nombre}
                             >
-                              <span className="max-w-[240px] truncate">{p.nombre}</span>
+                              <span className="max-w-[200px] truncate">{p.nombre}</span>
                               <button
                                 type="button"
                                 className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70 hover:bg-white/10"
-                                onClick={() => {
-                                  setProfesionesSeleccionadas((prev) => prev.filter((x) => x.nombre !== p.nombre));
-                                }}
+                                onClick={() => setProfesionesSeleccionadas((prev) => prev.filter((x) => x.nombre !== p.nombre))}
                               >
                                 Quitar
                               </button>
@@ -521,38 +516,23 @@ export default function ConsultaContratista() {
                         required={profesionesSeleccionadas.length === 0}
                         type="text"
                         value={profesion}
-                        onChange={(e) => {
-                          setProfesion(e.target.value);
-                          setProfesionSeleccionada(null);
-                          setShowSugerencias(true);
-                        }}
+                        onChange={(e) => { setProfesion(e.target.value); setProfesionSeleccionada(null); setShowSugerencias(true); }}
                         placeholder="Escribe tu profesión"
                         autoComplete="off"
                         className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                         onFocus={() => setShowSugerencias(profesionSugerencias.length > 0)}
                         onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
                       />
-      {showSugerencias && (
-        <div style={{ position: "relative" }}>
-          <ul
-                            style={{
-                              position: "absolute",
-                              top: "100%",
-                              left: 0,
-                              width: "100%",
-                              marginTop: "4px",
-                              zIndex: 30,
-                            }}
+                      {showSugerencias && (
+                        <div style={{ position: "relative" }}>
+                          <ul
+                            style={{ position: "absolute", top: "100%", left: 0, width: "100%", marginTop: "4px", zIndex: 30 }}
                             className="bg-slate-900 border border-cyan-500/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
                           >
-            {profesionLoading && (
-              <li className="px-3 py-2 text-xs text-white/60">Cargando…</li>
-            )}
-            {!profesionLoading && profesionSugerenciasOrdenadas.length === 0 && (
-              <li className="px-3 py-2 text-xs text-white/60">
-                Sin coincidencias. Escribe la profesión completa.
-              </li>
-            )}
+                            {profesionLoading && <li className="px-3 py-2 text-xs text-white/60">Cargando…</li>}
+                            {!profesionLoading && profesionSugerenciasOrdenadas.length === 0 && (
+                              <li className="px-3 py-2 text-xs text-white/60">Sin coincidencias. Escribe la profesión completa.</li>
+                            )}
                             {profesionSugerenciasOrdenadas.map((sug) => (
                               <li
                                 key={sug.nombre}
@@ -563,39 +543,28 @@ export default function ConsultaContratista() {
                                   setProfesionBotPreview(Array.isArray(sug.bot_names) ? sug.bot_names : []);
                                   setProfesionesSeleccionadas((prev) => {
                                     const exists = prev.some((p) => p.nombre === sug.nombre);
-                                    if (exists) return prev;
-                                    return [...prev, sug];
+                                    return exists ? prev : [...prev, sug];
                                   });
                                   setShowSugerencias(false);
                                 }}
                               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="truncate font-semibold text-white/95">
-                      {sug.nombre}
-                    </div>
-                    {sug.entidad_reguladora && (
-                      <div className="truncate text-[11px] text-white/60">
-                        {sug.entidad_reguladora}
-                      </div>
-                    )}
-                  </div>
-                  <span className="mt-0.5 inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70">
-                    Seleccionar
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="truncate font-semibold text-white/95">{sug.nombre}</div>
+                                    {sug.entidad_reguladora && <div className="truncate text-[11px] text-white/60">{sug.entidad_reguladora}</div>}
+                                  </div>
+                                  <span className="mt-0.5 inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70">Seleccionar</span>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Correo */}
+                    {/* Correo — ancho completo */}
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-white/70">
-                        Correo electrónico *
-                      </label>
+                      <label className="text-xs font-semibold text-white/70">Correo electrónico *</label>
                       <input
                         required
                         type="email"
@@ -603,49 +572,35 @@ export default function ConsultaContratista() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="ejemplo@correo.com"
                         pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-                        className={`w-full px-3 py-1.5 rounded-lg bg-white/5 text-white text-xs placeholder-white/40 border transition-all backdrop-blur-sm focus:outline-none focus:shadow-lg focus:shadow-cyan-500/10
-                          ${
-                            email && !isValidEmail(email)
-                              ? "border-red-400/50 focus:border-red-400 focus:ring-1 focus:ring-red-400/30"
-                              : "border-white/15 focus:border-cyan-400/50 focus:bg-white/10"
-                          }`}
+                        className={`w-full px-3 py-1.5 rounded-lg bg-white/5 text-white text-xs placeholder-white/40 border transition-all backdrop-blur-sm focus:outline-none focus:shadow-lg focus:shadow-cyan-500/10 ${email && !isValidEmail(email) ? "border-red-400/50 focus:border-red-400 focus:ring-1 focus:ring-red-400/30" : "border-white/15 focus:border-cyan-400/50 focus:bg-white/10"}`}
                       />
-                      {email && !isValidEmail(email) && (
-                        <span className="text-xs text-red-400">
-                          Formato de correo no válido
-                        </span>
-                      )}
-
+                      {email && !isValidEmail(email) && <span className="text-xs text-red-400">Formato de correo no válido</span>}
                     </div>
 
-                    {/* Nombre empresa */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-white/70">
-                        Nombre de la Entidad  *
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        value={nombreEmpresa}
-                        onChange={(e) => setNombreEmpresa(e.target.value)}
-                        placeholder="Razón social de la empresa"
-                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
-                      />
-                    </div>
-
-                    {/* NIT empresa */}
-                    <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-white/70">
-                        NIT de la Entidad *
-                      </label>
-                      <input
-                        required
-                        type="text"
-                        value={nitEmpresa}
-                        onChange={(e) => setNitEmpresa(e.target.value)}
-                        placeholder="Ej: 830512262-1"
-                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
-                      />
+                    {/* Fila 3: Nombre empresa + NIT */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-white/70">Nombre Entidad *</label>
+                        <input
+                          required
+                          type="text"
+                          value={nombreEmpresa}
+                          onChange={(e) => setNombreEmpresa(e.target.value)}
+                          placeholder="Razón social"
+                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-white/70">NIT Entidad *</label>
+                        <input
+                          required
+                          type="text"
+                          value={nitEmpresa}
+                          onChange={(e) => setNitEmpresa(e.target.value)}
+                          placeholder="830512262-1"
+                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm"
+                        />
+                      </div>
                     </div>
 
                     {/* Checkboxes */}
