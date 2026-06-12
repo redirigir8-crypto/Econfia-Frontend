@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow } from "swiper/modules";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Search, FileText, LogOut, User, HelpCircle, HardHat, Target, ArrowUpCircle, BookOpen,
+  Search, FileText, LogOut, User, HelpCircle, HardHat, Target, ArrowUpCircle, BookOpen, ShieldCheck,
 } from "lucide-react";
 import { Fuel } from "lucide-react";
 import "swiper/css";
@@ -68,6 +68,9 @@ if (user?.perfil?.planes && user.perfil.planes.length > 0) {
   if (planes.includes("e-identidad")) {
     consultaItems.push({ path: "/1d5f8e3a", icon: <User size={28} strokeWidth={1.5} />, label: "E-Identidad" });
   }
+  if (planes.includes("experian")) {
+    consultaItems.push({ path: "/5c2e8f4a", icon: <ShieldCheck size={28} strokeWidth={1.5} />, label: "Experian" });
+  }
 
 
 }
@@ -109,6 +112,9 @@ if (hasPlanes) {
   }
   if (planes.includes("e-identidad")) {
     consultaItems.push({ path: "/1d5f8e3a", icon: <User size={28} strokeWidth={1.5} />, label: "E-Identidad" });
+  }
+  if (planes.includes("experian")) {
+    consultaItems.push({ path: "/5c2e8f4a", icon: <ShieldCheck size={28} strokeWidth={1.5} />, label: "Experian" });
   }
 }
 

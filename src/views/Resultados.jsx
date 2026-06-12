@@ -1,10 +1,8 @@
 import TablaResultados from "../components/TablaResultados";
 import LiveQueryModal from "../components/LiveQueryModal";
-import CardDni from "../components/CardDni";
 import DetalleResultados from "../components/DetalleResultados";
+import ExperianDetalleResultados from "../components/ExperianDetalleResultados";
 import EIdentidadLoteModal from "../components/EIdentidadLoteModal";
-import RadarRiesgo from "../components/RadarRiesgo";
-import MapaCalorResultados from "../components/MapaCalorResultados";
 import ModalDescargaIndividual from "../modals/ModalDescargaIndividual";
 import ConsultaSlide from "../components/ConsultaSlide";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -16,12 +14,45 @@ import "swiper/css/pagination";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, FileDown, FileText, Images } from "lucide-react";
+import { isExperianConsulta, normalizeExperianConsulta } from "../utils/experian";
+
+const EXPERIAN_PDF_THEME_OPTIONS = ["claro", "oscuro"];
+
+function readStoredExperianPdfTheme() {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const theme = user?.perfil?.tema_pdf_experian;
+    return EXPERIAN_PDF_THEME_OPTIONS.includes(theme) ? theme : "claro";
+  } catch (_error) {
+    return "claro";
+  }
+}
+
+function writeStoredExperianPdfTheme(theme) {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const nextUser = {
+      ...user,
+      perfil: {
+        ...(user?.perfil || {}),
+        tema_pdf_experian: theme,
+      },
+    };
+    localStorage.setItem("user", JSON.stringify(nextUser));
+  } catch (_error) {
+    // Si localStorage falla no bloqueamos la preferencia del backend.
+  }
+}
 
 /** --- BOTONES FLOTANTES (portal) --- */
 function FloatingActionsPortal({
   apiUrl,
   consultaId,
   consultaTipo,
+  consultaSource,
+  experianPdfTheme,
+  savingExperianPdfTheme,
+  onChangeExperianPdfTheme,
   onBack,
   onOpenIndividual, // abre tu ModalDescargaIndividual
 }) {
@@ -56,11 +87,41 @@ function FloatingActionsPortal({
 
   const tipoConsultaNormalizado = (consultaTipo || "").toLowerCase();
   const isEconfiafast = tipoConsultaNormalizado === "econfiafast";
+  const isExperian = consultaSource === "experian" || tipoConsultaNormalizado === "experian";
 
   const downloadPdf = async (tipo) => {
     setDownloading(true);
     try {
       const token = localStorage.getItem("token");
+
+      if (isExperian) {
+        const url = `${apiUrl}/api/experian/consultas/${consultaId}/pdf/`;
+        const res = await fetch(url, {
+          method: "GET",
+          headers: token ? { Authorization: `Token ${token}` } : {},
+        });
+
+        if (!res.ok) {
+          throw new Error(`Error al descargar PDF de Experian: ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        const disposition = res.headers.get("content-disposition") || "";
+        const match = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
+        const filename = match?.[1]
+          ? decodeURIComponent(match[1])
+          : `experian_${consultaId}.pdf`;
+
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(link.href);
+        setOpen(false);
+        return;
+      }
 
       if (tipo === 3 && isEconfiafast) {
         const url = `${apiUrl}/api/descargar_pdf_fast/${consultaId}/`;
@@ -130,27 +191,65 @@ function FloatingActionsPortal({
           <span className="text-xs sm:text-sm font-semibold">Regresar</span>
         </button>
 
-        {/* PDF + dropdown */}
-        <div className="relative" ref={menuRef}>
-          <button
-            onClick={() => setOpen((v) => !v)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
-                       text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
-            title="Descargar PDF"
-            disabled={downloading}
-          >
-            {downloading ? (
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />
-            ) : (
-              <FileDown size={16} />
-            )}
-            <span className="text-xs sm:text-sm font-semibold">PDF</span>
-          </button>
+        {isExperian ? (
+          <>
+            <div className="flex items-center rounded-lg border border-white/15 bg-slate-900/85 p-1 backdrop-blur-xl shadow-lg shadow-black/20">
+              {EXPERIAN_PDF_THEME_OPTIONS.map((theme) => {
+                const isActive = experianPdfTheme === theme;
+                return (
+                  <button
+                    key={theme}
+                    type="button"
+                    onClick={() => onChangeExperianPdfTheme?.(theme)}
+                    disabled={savingExperianPdfTheme}
+                    className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
+                      isActive
+                        ? "bg-cyan-500/20 text-cyan-100"
+                        : "text-slate-300 hover:text-white"
+                    } disabled:cursor-not-allowed disabled:opacity-60`}
+                  >
+                    {theme}
+                  </button>
+                );
+              })}
+            </div>
 
-          {open && (
-            <div className="absolute left-0 mt-2 w-56 rounded-lg overflow-hidden border border-white/20
-                            bg-gradient-to-br from-slate-900/95 via-blue-900/40 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/20 animate-in fade-in duration-200">
-              {isEconfiafast ? (
+            <button
+              onClick={() => downloadPdf(3)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
+                         text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+              title="Descargar PDF Experian"
+              disabled={downloading || savingExperianPdfTheme}
+            >
+              {downloading ? (
+                <span className="inline-block w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />
+              ) : (
+                <FileDown size={16} />
+              )}
+              <span className="text-xs sm:text-sm font-semibold">PDF</span>
+            </button>
+          </>
+        ) : (
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setOpen((v) => !v)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
+                         text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+              title="Descargar PDF"
+              disabled={downloading}
+            >
+              {downloading ? (
+                <span className="inline-block w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />
+              ) : (
+                <FileDown size={16} />
+              )}
+              <span className="text-xs sm:text-sm font-semibold">PDF</span>
+            </button>
+
+            {open && (
+              <div className="absolute left-0 mt-2 w-56 rounded-lg overflow-hidden border border-white/20
+                              bg-gradient-to-br from-slate-900/95 via-blue-900/40 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/20 animate-in fade-in duration-200">
+                {isEconfiafast ? (
                 <button
                   onClick={() => downloadPdf(3)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-blue-500/20 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
@@ -188,14 +287,23 @@ function FloatingActionsPortal({
                     <span className="group-hover:text-purple-300">Descarga individual</span>
                   </button>
                 </>
-              )}
-            </div>
-          )}
-        </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>,
     el
   );
+}
+
+function normalizeCoreConsulta(item) {
+  return {
+    ...item,
+    source: "consulta",
+    row_id: `consulta-${item.id}`,
+  };
 }
 
 function ExportBatchModal({
@@ -338,7 +446,6 @@ export default function Resultados() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [consultaSeleccionada, setConsultaSeleccionada] = useState(null);
-  const [riesgo, setRiesgo] = useState(null);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({ estado: "", fecha: "" });
   const [showModalIndividual, setShowModalIndividual] = useState(false);
@@ -346,69 +453,93 @@ export default function Resultados() {
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportModal, setExportModal] = useState({ open: false, format: "excel" });
   const [liveConsultaId, setLiveConsultaId] = useState(null);
-  const [dismissedLiveConsultaId, setDismissedLiveConsultaId] = useState(null);
+  const [experianPdfTheme, setExperianPdfTheme] = useState(readStoredExperianPdfTheme);
+  const [savingExperianPdfTheme, setSavingExperianPdfTheme] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
-    // Limpiar liveConsultaId cuando la consulta deje de estar en proceso
+
+  // Limpiar liveConsultaId cuando la consulta deje de estar en proceso
   useEffect(() => {
     if (!liveConsultaId) return;
     const sigueEnProceso = data.some(
-      (item) => item.id === liveConsultaId && (item.estado || "").toLowerCase() === "en_proceso"
+      (item) => item.id === liveConsultaId && item.source !== "experian" && (item.estado || "").toLowerCase() === "en_proceso"
     );
     if (!sigueEnProceso) {
       setLiveConsultaId(null);
-      setDismissedLiveConsultaId(null);
     }
   }, [data, liveConsultaId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncExperianPdfTheme() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const response = await fetch(`${API_URL}/api/profile/`, {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const nextTheme = data?.perfil?.tema_pdf_experian;
+        if (!cancelled && EXPERIAN_PDF_THEME_OPTIONS.includes(nextTheme)) {
+          setExperianPdfTheme(nextTheme);
+          writeStoredExperianPdfTheme(nextTheme);
+        }
+      } catch (_error) {
+        // Si falla, seguimos con la preferencia local.
+      }
+    }
+
+    syncExperianPdfTheme();
+    return () => {
+      cancelled = true;
+    };
+  }, [API_URL]);
+
   // ---- Obtener todas las consultas ----
   const fetchResultados = async () => {
     try {
       const token = localStorage.getItem("token");
-      console.log(API_URL)
-      const res = await fetch(`${API_URL}/api/consultas/`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      };
+
+      const [consultasRes, experianRes] = await Promise.all([
+        fetch(`${API_URL}/api/consultas/`, { headers }),
+        fetch(`${API_URL}/api/experian/consultas/`, { headers }),
+      ]);
+
+      if (!consultasRes.ok) throw new Error(`Error HTTP: ${consultasRes.status}`);
+
+      const consultasJson = await consultasRes.json();
+      let experianRows = [];
+
+      if (experianRes.ok) {
+        const experianJson = await experianRes.json();
+        experianRows = (experianJson?.consultas || []).map(normalizeExperianConsulta);
+      }
+
+      const mergedRows = [
+        ...(Array.isArray(consultasJson) ? consultasJson : []).map(normalizeCoreConsulta),
+        ...experianRows,
+      ].sort((left, right) => {
+        const leftTime = left.fecha ? new Date(left.fecha).getTime() : 0;
+        const rightTime = right.fecha ? new Date(right.fecha).getTime() : 0;
+        return rightTime - leftTime;
       });
 
-      if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
-      const json = await res.json();
-      setData(json);
+      setData(mergedRows);
     } catch (error) {
       console.error("Error al obtener resultados:", error);
     } finally {
       setLoading(false);
     }
   };
-
-  // ---- Obtener riesgo de la consulta seleccionada ----
-  const fetchRiesgo = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `${API_URL}/api/calcular_riesgo/${id}/`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-        }
-      );
-
-      if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
-      const json = await res.json();
-      setRiesgo(json);
-    } catch (error) {
-      console.error("Error al obtener riesgo:", error);
-    }
-  };
-
-  // ---- Al seleccionar consulta, cargo su riesgo ----
-  useEffect(() => {
-    if (consultaSeleccionada) {
-      fetchRiesgo(consultaSeleccionada);
-    }
-  }, [consultaSeleccionada]);
 
   // ---- Cargar consultas periódicamente ----
   useEffect(() => {
@@ -425,6 +556,7 @@ export default function Resultados() {
     const matchSearch =
       search === "" ||
       item.id.toString().includes(search) ||
+      item.row_id?.toString().includes(search) ||
       item.cedula?.toString().includes(search) ||
       item.nombre?.toLowerCase().includes(search.toLowerCase()) ||
       item.estado?.toLowerCase().includes(search.toLowerCase());
@@ -438,7 +570,7 @@ export default function Resultados() {
     return matchSearch && matchEstado && matchFecha;
   });
   const exportableData = [...filteredData]
-    .filter((item) => (item.estado || "").toLowerCase() === "completado")
+    .filter((item) => item.source !== "experian" && (item.estado || "").toLowerCase() === "completado")
     .sort((left, right) => {
       const leftTime = left.fecha ? new Date(left.fecha).getTime() : 0;
       const rightTime = right.fecha ? new Date(right.fecha).getTime() : 0;
@@ -630,11 +762,56 @@ export default function Resultados() {
   void handleExportExcel;
   void handleExportPdf;
 
-  const consultaActual = data.find((c) => c.id === consultaSeleccionada) || null;
+  const handleExperianPdfThemeChange = async (theme) => {
+    if (!EXPERIAN_PDF_THEME_OPTIONS.includes(theme) || theme === experianPdfTheme || savingExperianPdfTheme) {
+      return;
+    }
+
+    const previousTheme = experianPdfTheme;
+    setExperianPdfTheme(theme);
+    setSavingExperianPdfTheme(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/api/experian/preferences/pdf-theme/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({ tema_pdf_experian: theme }),
+      });
+
+      if (!response.ok) {
+        let message = "No se pudo guardar la preferencia del PDF de Experian.";
+        try {
+          const data = await response.json();
+          message = data?.detail || data?.error || message;
+        } catch (_error) {
+          // dejamos el mensaje por defecto
+        }
+        throw new Error(message);
+      }
+
+      const data = await response.json();
+      const savedTheme = data?.tema_pdf_experian || theme;
+      setExperianPdfTheme(savedTheme);
+      writeStoredExperianPdfTheme(savedTheme);
+    } catch (error) {
+      console.error("Error al guardar tema PDF Experian:", error);
+      setExperianPdfTheme(previousTheme);
+      alert(error.message || "No se pudo guardar la preferencia del PDF de Experian.");
+    } finally {
+      setSavingExperianPdfTheme(false);
+    }
+  };
+
+  const consultaActual = consultaSeleccionada || null;
   const consultaTipoActual =
     consultaActual?.tipo_consulta ||
     consultaActual?.tipo ||
     (consultaActual?.es_econfiafask ? "econfiafask" : "");
+  const isExperianActual = isExperianConsulta(consultaActual);
 
   return (
     <section className="relative min-h-screen py-4 md:py-6 pb-32 md:pb-36 overflow-hidden bg-transparent">
@@ -646,7 +823,7 @@ export default function Resultados() {
       {consultaSeleccionada && consultaTipoActual === "e-identidad" && (
         <EIdentidadLoteModal
           consultaciones={data.filter((c) => (c.tipo_consulta || c.tipo || "") === "e-identidad")}
-          initialId={consultaSeleccionada}
+          initialId={consultaSeleccionada.id}
           onClose={() => setConsultaSeleccionada(null)}
         />
       )}
@@ -715,14 +892,10 @@ export default function Resultados() {
       <LiveQueryModal
         consultaId={liveConsultaId}
         onClose={() => {
-          if (liveConsultaId) {
-            setDismissedLiveConsultaId(liveConsultaId);
-          }
           setLiveConsultaId(null);
         }}
         onFinished={() => {
           setLiveConsultaId(null);
-          setDismissedLiveConsultaId(null);
         }}
       />
           </div>
@@ -730,11 +903,20 @@ export default function Resultados() {
         <div className="w-full max-w-7xl mx-auto min-h-[78vh] xl:min-h-[82vh] h-[calc(100vh-10rem)] max-h-[calc(100vh-5rem)]">
           <FloatingActionsPortal
             apiUrl={API_URL}
-            consultaId={consultaSeleccionada}
+            consultaId={consultaSeleccionada.id}
             consultaTipo={consultaTipoActual}
+            consultaSource={consultaActual?.source}
+            experianPdfTheme={experianPdfTheme}
+            savingExperianPdfTheme={savingExperianPdfTheme}
+            onChangeExperianPdfTheme={handleExperianPdfThemeChange}
             onBack={() => setConsultaSeleccionada(null)}
-            onOpenIndividual={() => setShowModalIndividual(true)}
+            onOpenIndividual={isExperianActual ? undefined : () => setShowModalIndividual(true)}
           />
+          {isExperianActual ? (
+            <div className="h-full min-h-0 pt-14">
+              <ExperianDetalleResultados consultaId={consultaSeleccionada.id} />
+            </div>
+          ) : (
           <Swiper
             modules={[Navigation, Pagination]}
             spaceBetween={20}
@@ -785,22 +967,23 @@ export default function Resultados() {
             <SwiperSlide className="flex flex-col min-h-0 h-full">
               {/* 🔹 Detalle primero */}
               <div className="flex-1 min-h-0">
-                <DetalleResultados consultaId={consultaSeleccionada} />
+                <DetalleResultados consultaId={consultaSeleccionada.id} />
               </div>
 
             </SwiperSlide>
 
             <SwiperSlide className="flex flex-row h-full min-h-0">
-            <ConsultaSlide consultaId={consultaSeleccionada} />
+            <ConsultaSlide consultaId={consultaSeleccionada.id} />
             </SwiperSlide>
             {/* Slide 3 */}
           </Swiper>
+          )}
 
           {/* Modal fuera del Swiper */}
           <ModalDescargaIndividual
-            isOpen={showModalIndividual}
+            isOpen={showModalIndividual && !isExperianActual}
             onClose={() => setShowModalIndividual(false)}
-            data={{ consultaId: consultaSeleccionada }}
+            data={{ consultaId: consultaSeleccionada?.id }}
           />
         </div>
         ) : null}

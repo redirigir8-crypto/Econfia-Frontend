@@ -10,6 +10,7 @@ const PLAN_LABELS = {
   "basic-elemnt":        "Basic Element",
   "essential":           "Essential",
   "empresa":             "Empresa",
+  "experian":            "Experian",
   "validacion-titulos":  "Validación Títulos",
   "contratista":         "Contratista",
   "ecorefull":           "E-corefull",
@@ -29,6 +30,7 @@ const DURATION_MAP = {
   "basic-elemnt":         4 * 60 * 1000,
   "essential":            5 * 60 * 1000,
   "empresa":              5 * 60 * 1000,
+  "experian":            90 * 1000,
   "validacion-titulos":   6 * 60 * 1000,
   "contratista":         10 * 60 * 1000,
   "ecorefull":           11 * 60 * 1000,
@@ -173,7 +175,7 @@ function ProcessDockPortal({ items }) {
     };
   }, []);
 
-  const startsRef = useStartTimes(items, it => it.id, it => it.fecha);
+  const startsRef = useStartTimes(items, it => it.row_id || it.id, it => it.fecha);
   useTicker(1000);
 
   if (!container) return null;
@@ -202,7 +204,7 @@ function ProcessDockPortal({ items }) {
           <div className="px-4 pb-4 pt-3 max-h-[50vh] overflow-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent">
             <div className="flex flex-col gap-3">
               {items.map(card => {
-                const start = startsRef.current.get(card.id) ?? now;
+                const start = startsRef.current.get(card.row_id || card.id) ?? now;
                 const percent = percentFrom(start, now, card.tipo_consulta);
                 return (
                   <ElegantCard key={`${card.id}-${card.persona}`} className="gap-2">
@@ -264,13 +266,20 @@ export default function TablaResultados({
         "Persona en proceso";
       const key = persona;
       if (!map.has(key)) {
-        map.set(key, { persona, id: it.id, cedula: it.cedula, fecha: it.fecha, tipo_consulta: it.tipo_consulta });
+        map.set(key, {
+          persona,
+          id: it.id,
+          row_id: it.row_id || `row-${it.id}`,
+          cedula: it.cedula,
+          fecha: it.fecha,
+          tipo_consulta: it.tipo_consulta,
+        });
       }
     }
     return Array.from(map.values());
   }, [data]);
 
-  const startsRef = useStartTimes(data, it => it.id, it => it.fecha);
+  const startsRef = useStartTimes(data, it => it.row_id || it.id, it => it.fecha);
   useTicker(1000);
   const now = Date.now();
 
@@ -365,12 +374,12 @@ export default function TablaResultados({
                 const estado = (item.estado || "").toLowerCase();
                 const isProcessing = estado === "en_proceso";
                 const isDone = estado === "completado";
-                const start = startsRef.current.get(item.id) ?? now;
+                const start = startsRef.current.get(item.row_id || item.id) ?? now;
                 const percent = percentFrom(start, now, item.tipo_consulta);
 
                 return (
                   <tr 
-                    key={item.id} 
+                    key={item.row_id || item.id} 
                     className="group hover:bg-gradient-to-r hover:from-cyan-500/5 hover:to-blue-500/5 transition-all duration-300 align-top"
                   >
                     <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 font-mono text-[10px] md:text-xs">
@@ -424,7 +433,7 @@ export default function TablaResultados({
                     <td className="px-2 md:px-3 py-1.5 md:py-2">
                       {isDone ? (
                         <button
-                          onClick={() => onVerResultados?.(item.id)}
+                          onClick={() => onVerResultados?.(item)}
                           className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105 transform text-[10px] md:text-xs"
                         >
                           Ver resultados

@@ -41,6 +41,7 @@ import EmpresaRuesResult from "./components/EmpresaRuesResult";
 import ConsultaEmpresa from "./views/ConsultaEmpresa";
 import ConsultaFask from "./views/ConsultaFask";
 import ConsultaEssencialExpress from "./views/ConsultaEssencialExpress";
+import ConsultaExperian from "./views/ConsultaExperian";
 import VerificarReporte from "./pages/VerificarReporte";
 import Beneficios from "./pages/Beneficios";
 import ChatbotFlotante from "./components/ChatbotFlotante";
@@ -659,6 +660,8 @@ export default function App() {
               <Route path="/3c8f1a2e"          element={<Consulta />}                />
               <Route path="/consulta"           element={<Consulta />}                />
               <Route path="/a1e6c4b8"          element={<ConsultaEssencialExpress />} />
+              <Route path="/5c2e8f4a"          element={<ConsultaExperian />}         />
+              <Route path="/experian"          element={<ConsultaExperian />}         />
               <Route path="/7f3a9e2b"          element={<ConsultaFask />}             />
               <Route path="/2b7d5e9c"          element={<TitulosValidationForm />}    />
               <Route path="/9e3a6c1f"          element={<ConsultaMedida />}           />
