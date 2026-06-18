@@ -180,6 +180,12 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
                   <p className="text-sm font-semibold text-white truncate">
                     {active.fuente || active.fuente_nombre || "—"}
                   </p>
+                  {active.profesion && (
+                    <p className="text-xs font-semibold text-cyan-300 mt-1">
+                      Profesión encontrada:{" "}
+                      <span className="text-cyan-200">{active.profesion}</span>
+                    </p>
+                  )}
                   {active.mensaje && (
                     <p className="text-xs text-white/50 mt-1 line-clamp-2">{active.mensaje}</p>
                   )}
