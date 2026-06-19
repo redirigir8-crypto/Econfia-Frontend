@@ -180,9 +180,24 @@ export default function Profile() {
 
   if (!profile || !stats) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="px-4 py-3 rounded-xl border border-white/10 bg-white/5 backdrop-blur">
-          <span className="text-white/80">Cargando perfil...</span>
+      <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4">
+        {/* Spinner doble anillo con glow */}
+        <div className="relative h-20 w-20">
+          <span className="absolute inset-0 rounded-full border-2 border-cyan-500/15" />
+          <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-cyan-400 border-r-cyan-400 [animation-duration:0.9s]" />
+          <span className="absolute inset-2 animate-spin rounded-full border-2 border-transparent border-b-blue-400 border-l-blue-400 [animation-duration:1.4s] [animation-direction:reverse]" />
+          <span className="absolute inset-0 m-auto h-3 w-3 rounded-full bg-cyan-300 shadow-[0_0_16px_4px_rgba(34,211,238,0.7)] animate-pulse" />
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-lg font-bold bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+            Cargando perfil
+          </p>
+          <div className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.3s]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.15s]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce" />
+          </div>
+          <p className="text-xs text-white/40">Preparando tu información, un momento…</p>
         </div>
       </div>
     );
@@ -340,8 +355,8 @@ export default function Profile() {
       <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
-      <div className="w-full max-w-7xl mx-auto px-4 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Card izquierda: perfil */}
           <ElegantCard className="lg:col-span-1">
           <div className="flex flex-col items-center relative">
@@ -353,15 +368,12 @@ export default function Profile() {
             >
               <FiLogOut className="w-4 h-4" />
             </button>
-            <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3">
+            <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
               <span className="text-cyan-300 text-xs font-medium">Mi Perfil</span>
             </div>
-            <h2 className="font-black text-2xl text-center bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent mb-2">
-              {profile?.full_name}
-            </h2>
 
             <div
-              className="w-28 h-28 rounded-full my-4 overflow-hidden border-2 border-cyan-500/30 relative group cursor-pointer transition-all hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/50"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full my-3 overflow-hidden border-2 border-cyan-500/30 relative group cursor-pointer transition-all hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/50"
               onClick={() => setShowAvatarModal(true)}
             >
               <img
@@ -399,39 +411,45 @@ export default function Profile() {
               </div>
             </Modal>
 
-            <h3 className="text-lg font-semibold text-white">{profile?.username}</h3>
-            <p className="text-white/60 text-sm mb-3">{profile?.email || "Sin correo"}</p>
+            <h3 className="text-base sm:text-lg font-semibold text-white text-center">{profile?.full_name || profile?.username}</h3>
+            <p className="text-white/60 text-xs sm:text-sm mb-2 text-center break-all">{profile?.email || "Sin correo"}</p>
 
             <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold shadow-lg shadow-cyan-500/30">
               {profile?.groups?.length > 0 ? profile.groups[0] : "Usuario"}
             </span>
 
-            <div className="w-full grid grid-cols-2 gap-3 mt-5">
-              <div className="rounded-lg px-4 py-3 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 hover:from-cyan-500/20 hover:to-blue-500/10 transition-all">
-                <div className="text-xs text-cyan-300 font-medium">Consultas</div>
-                <div className="text-white text-2xl font-black">
+            <div className="w-full grid grid-cols-2 gap-2.5 sm:gap-3 mt-4">
+              {/* Consultas */}
+              <div className="rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 hover:from-cyan-500/20 hover:to-blue-500/10 transition-all flex flex-col">
+                <div className="text-[10px] sm:text-xs text-cyan-300 font-semibold uppercase tracking-wide">Consultas</div>
+                <div className="text-white text-xl sm:text-2xl font-black mt-0.5 flex items-center">
                   {profile?.perfil?.consultas_infinitas
-                    ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'28px'}} />
+                    ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'26px'}} />
                     : (profile?.perfil?.consultas_disponibles ?? 0)}
                 </div>
               </div>
-              <div className="rounded-lg px-4 py-3 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 hover:from-blue-500/20 hover:to-purple-500/10 transition-all">
-                <div className="text-xs text-blue-300 font-medium">Planes activos</div>
-                <div className="text-white text-base font-bold flex flex-wrap gap-1">
+              {/* Planes activos */}
+              <div className="rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 hover:from-blue-500/20 hover:to-purple-500/10 transition-all flex flex-col">
+                <div className="text-[10px] sm:text-xs text-blue-300 font-semibold uppercase tracking-wide mb-1.5">Planes activos</div>
+                <div className="flex flex-wrap gap-1.5">
                   {(profile?.perfil?.planes && profile.perfil.planes.length > 0)
                     ? profile.perfil.planes.map((plan) => (
-                        <span key={plan.id} className="px-2 py-1 rounded bg-cyan-700/40 text-cyan-100 text-xs font-semibold mr-1 mb-1">
+                        <span
+                          key={plan.id}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/25 to-blue-500/25 border border-cyan-400/30 text-cyan-100 text-[10px] sm:text-[11px] font-bold shadow-sm shadow-cyan-500/20"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
                           {plan.nombre.charAt(0).toUpperCase() + plan.nombre.slice(1)}
                         </span>
                       ))
-                    : <span className="text-slate-400">Sin plan</span>}
+                    : <span className="text-slate-400 text-xs">Sin plan</span>}
                 </div>
               </div>
             </div>
             {/* Botón PDF */}
-            <div className="w-full flex justify-center mt-6">
+            <div className="w-full flex justify-center mt-5">
               <button
-                className="w-full px-6 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg shadow-cyan-500/30 hover:from-cyan-600 hover:to-blue-600 transition-all"
+                className="w-full px-6 py-2 text-sm sm:text-base rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg shadow-cyan-500/30 hover:from-cyan-600 hover:to-blue-600 transition-all"
                 onClick={() => generarInformeUsuarioPDF(profile, stats)}
               >
                 Generar informe PDF
@@ -443,30 +461,30 @@ export default function Profile() {
         {/* Card derecha: estadísticas y gráfico renovado */}
         <ElegantCard title="Estadísticas" className="lg:col-span-2 w-full">
           {/* Control de consultas */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="rounded-lg px-4 py-3 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 text-center">
-              <div className="text-xs text-cyan-300 font-medium">Consultas cargadas</div>
-              <div className="text-white text-2xl font-black">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="rounded-xl px-3 py-3 sm:px-4 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/10">
+              <div className="text-[10px] sm:text-xs text-cyan-300 font-semibold uppercase tracking-wide">Consultas cargadas</div>
+              <div className="text-white text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">
                 {profile?.perfil?.consultas_infinitas
-                  ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'28px', margin:'0 auto'}} />
+                  ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'26px'}} />
                   : (profile?.perfil?.consultas_cargadas_total ?? 0)}
               </div>
             </div>
-            <div className="rounded-lg px-4 py-3 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 text-center">
-              <div className="text-xs text-blue-300 font-medium">Consultas consumidas</div>
-              <div className="text-white text-2xl font-black">{profile?.perfil?.consultas_consumidas ?? 0}</div>
+            <div className="rounded-xl px-3 py-3 sm:px-4 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/10">
+              <div className="text-[10px] sm:text-xs text-blue-300 font-semibold uppercase tracking-wide">Consultas consumidas</div>
+              <div className="text-white text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">{profile?.perfil?.consultas_consumidas ?? 0}</div>
             </div>
-            <div className="rounded-lg px-4 py-3 border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 text-center">
-              <div className="text-xs text-emerald-300 font-medium">Saldo de consultas</div>
-              <div className="text-white text-2xl font-black">
+            <div className="rounded-xl px-3 py-3 sm:px-4 border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/10">
+              <div className="text-[10px] sm:text-xs text-emerald-300 font-semibold uppercase tracking-wide">Saldo de consultas</div>
+              <div className="text-white text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">
                 {profile?.perfil?.consultas_infinitas
-                  ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'32px', margin:'0 auto'}} />
+                  ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'30px'}} />
                   : (profile?.perfil?.consultas_disponibles ?? 0)}
               </div>
             </div>
-            <div className="rounded-lg px-4 py-3 border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-pink-500/5 text-center">
-              <div className="text-xs text-amber-300 font-medium">Estado de renovación</div>
-              <div className="text-2xl font-black">
+            <div className="rounded-xl px-3 py-3 sm:px-4 border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-pink-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/10">
+              <div className="text-[10px] sm:text-xs text-amber-300 font-semibold uppercase tracking-wide">Estado de renovación</div>
+              <div className="text-base sm:text-xl font-black mt-1 flex items-center justify-center min-h-[34px] leading-tight">
                 {profile?.perfil?.consultas_infinitas
                   ? <span className="text-cyan-300">Plan ilimitado</span>
                   : profile?.perfil?.consultas_disponibles === 0
@@ -477,7 +495,7 @@ export default function Profile() {
           </div>
 
           {/* Gráfico de barras: Consultas por estado */}
-          <div className="w-full h-[320px] md:h-[380px]">
+          <div className="w-full h-[220px] sm:h-[280px] md:h-[340px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={consultasPorEstado} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
                 <defs>

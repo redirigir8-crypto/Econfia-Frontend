@@ -1,9 +1,13 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { playEventSound } from "./SoundManager";
 
 export default function Toast({ type, message, onClose, sound }) {
   useEffect(() => {
-    if (sound && window.__userInteracted) {
+    if (type === "error") {
+      // Sonido de fallo gestionado por el admin (evento configurable)
+      playEventSound("error_consulta");
+    } else if (sound && window.__userInteracted) {
       const audio = new Audio(sound);
       audio.play().catch(() => {});
     }
@@ -11,7 +15,7 @@ export default function Toast({ type, message, onClose, sound }) {
       onClose();
     }, 3000);
     return () => clearTimeout(timer);
-  }, [sound, onClose]);
+  }, [sound, type, onClose]);
 
   // Contenido del Toast
   const toastContent = (

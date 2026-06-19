@@ -13,7 +13,14 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState(""); // filtro de texto
   const [toast, setToast] = useState(null); // NUEVO: para mostrar errores
+  const [panelMin, setPanelMin] = useState(false); // panel de seleccionadas minimizado
   const API_URL = process.env.REACT_APP_API_URL;
+
+  // Nombre amigable de una fuente a partir de su "nombre" técnico
+  const nombreToDisplay = (nombre) => {
+    const f = fuentes.find((x) => x.nombre === nombre);
+    return f?.nombre_pila || f?.nombre || nombre;
+  };
 
   // Cargar fuentes al abrir modal
   useEffect(() => {
@@ -197,11 +204,72 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess }) {
               </button>
             </div>
 
-            {/* Contador de fuentes seleccionadas */}
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-cyan-300 font-semibold text-sm">
-                {`Fuentes seleccionadas: ${seleccionadas.length}`}
-              </span>
+            {/* Panel colapsable de fuentes seleccionadas */}
+            <div className="mb-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5">
+              <button
+                type="button"
+                onClick={() => setPanelMin((v) => !v)}
+                className="w-full flex items-center justify-between px-3 py-2 text-left"
+              >
+                <span className="text-cyan-300 font-semibold text-sm flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-cyan-500/30 text-cyan-100 text-xs font-bold">
+                    {seleccionadas.length}
+                  </span>
+                  Fuentes seleccionadas
+                </span>
+                <span className="flex items-center gap-3">
+                  {seleccionadas.length > 0 && (
+                    <span
+                      role="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSeleccionadas([]);
+                      }}
+                      className="text-[11px] text-white/50 hover:text-red-300 transition-colors"
+                    >
+                      Limpiar
+                    </span>
+                  )}
+                  <svg
+                    className={`w-4 h-4 text-cyan-300 transition-transform duration-300 ${panelMin ? "" : "rotate-180"}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </span>
+              </button>
+
+              {!panelMin && (
+                <div className="px-3 pb-3">
+                  {seleccionadas.length === 0 ? (
+                    <p className="text-xs text-white/40">Aún no has seleccionado fuentes.</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto custom-scrollbar">
+                      {seleccionadas.map((nombre) => (
+                        <span
+                          key={nombre}
+                          className="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-gradient-to-r from-cyan-500/25 to-blue-500/25 border border-cyan-400/30 text-cyan-100 text-[11px] font-semibold"
+                        >
+                          <span className="truncate max-w-[220px]">{nombreToDisplay(nombre)}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCheckbox(nombre)}
+                            className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-red-500/50 text-cyan-200 hover:text-white transition-colors text-[10px]"
+                            aria-label={`Quitar ${nombreToDisplay(nombre)}`}
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Lista de fuentes */}

@@ -1,5 +1,6 @@
 import imagenDNIF from "../assets/imagenDNIF.png";
 import imagenDNIM from "../assets/imagenDNIM.png";
+import huellaEidentidad from "../assets/eidentidad-fingerprint-light.png";
 
 function formatDate(value) {
   if (!value) return "No disponible";
@@ -166,32 +167,15 @@ export default function CardDni({ data }) {
               </p>
             </div>
 
-            {/* Huella dactilar SVG + escaner */}
+            {/* Huella dactilar (imagen e-identidad) + escaner */}
             <div className="relative flex justify-center overflow-hidden rounded-[10px] border border-cyan-300/25 bg-[rgba(6,30,60,0.55)] px-3 py-2.5">
-              <svg
+              <img
+                src={huellaEidentidad}
+                alt=""
                 aria-hidden="true"
-                viewBox="0 0 80 80"
-                className="h-20 w-20"
-                fill="none"
-                strokeLinecap="round"
-              >
-                {/* Arcos concentricos de huella dactilar */}
-                <ellipse cx="40" cy="44" rx="5"  ry="4"  stroke="rgba(34,211,238,0.90)" strokeWidth="1.4"/>
-                <ellipse cx="40" cy="44" rx="9"  ry="8"  stroke="rgba(34,211,238,0.85)" strokeWidth="1.3"/>
-                <path d="M28 44 Q28 30 40 30 Q52 30 52 44" stroke="rgba(34,211,238,0.82)" strokeWidth="1.3"/>
-                <path d="M24 46 Q23 27 40 26 Q57 27 56 46" stroke="rgba(34,211,238,0.78)" strokeWidth="1.2"/>
-                <path d="M20 48 Q18 23 40 22 Q62 23 60 48" stroke="rgba(34,211,238,0.74)" strokeWidth="1.2"/>
-                <path d="M16 50 Q13 19 40 18 Q67 19 64 50" stroke="rgba(34,211,238,0.68)" strokeWidth="1.1"/>
-                <path d="M12 52 Q8 14 40 13 Q72 14 68 52" stroke="rgba(34,211,238,0.60)" strokeWidth="1.1"/>
-                <path d="M8  55 Q3  9  40  8  Q77  9  72 55" stroke="rgba(34,211,238,0.50)" strokeWidth="1.0"/>
-                {/* Lineas verticales base del dedo */}
-                <line x1="30" y1="44" x2="28" y2="60" stroke="rgba(34,211,238,0.55)" strokeWidth="1.1"/>
-                <line x1="50" y1="44" x2="52" y2="60" stroke="rgba(34,211,238,0.55)" strokeWidth="1.1"/>
-                <line x1="24" y1="46" x2="21" y2="64" stroke="rgba(34,211,238,0.45)" strokeWidth="1.0"/>
-                <line x1="56" y1="46" x2="59" y2="64" stroke="rgba(34,211,238,0.45)" strokeWidth="1.0"/>
-                <line x1="18" y1="50" x2="14" y2="67" stroke="rgba(34,211,238,0.35)" strokeWidth="1.0"/>
-                <line x1="62" y1="50" x2="66" y2="67" stroke="rgba(34,211,238,0.35)" strokeWidth="1.0"/>
-              </svg>
+                className="h-20 w-20 select-none object-contain opacity-95"
+                style={{ filter: "drop-shadow(0 0 6px rgba(34,211,238,0.55))" }}
+              />
               {/* Linea de escaneo */}
               <span
                 aria-hidden="true"

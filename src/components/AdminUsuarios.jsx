@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Toast from "./Toast";
-import Modal from "./Modal";
 import { generarInformeAdminPDF, generarInformeAdminIndividualPDF } from "../pdf/InformeAdminPDFV2";
 import AdminSoporte from "../views/AdminSoporte";
 import soporteService from "../services/soporteService";
@@ -36,28 +35,6 @@ const EyeOffIcon = () => (
 );
 
 // ─── Botón de acción reutilizable ─────────────────────────────────
-const ActionBtn = ({ onClick, title, color, children, className = "", disabled = false }) => {
-  const colors = {
-    teal:   "border-teal-500/40 text-teal-300 hover:bg-teal-900/40 hover:border-teal-400/60 hover:text-teal-200",
-    cyan:   "border-cyan-500/40 text-cyan-300 hover:bg-cyan-900/40 hover:border-cyan-400/60 hover:text-cyan-200",
-    sky:    "border-sky-500/40 text-sky-300 hover:bg-sky-900/40 hover:border-sky-400/60 hover:text-sky-200",
-    indigo: "border-indigo-500/40 text-indigo-300 hover:bg-indigo-900/40 hover:border-indigo-400/60 hover:text-indigo-200",
-    red:    "border-red-500/40 text-red-300 hover:bg-red-900/40 hover:border-red-400/60 hover:text-red-200",
-    green:  "border-green-500/40 text-green-300 hover:bg-green-900/40 hover:border-green-400/60 hover:text-green-200",
-    violet: "border-violet-500/40 text-violet-300 hover:bg-violet-900/40 hover:border-violet-400/60 hover:text-violet-200",
-  };
-  return (
-    <button
-      onClick={onClick}
-      title={title}
-      disabled={disabled}
-      className={`inline-flex items-center justify-center px-2.5 py-1.5 rounded-lg border bg-white/5 text-xs font-semibold transition-all duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-wait ${colors[color] || colors.cyan} ${className}`}
-    >
-      {children}
-    </button>
-  );
-};
-
 // ─── Input reutilizable para modales ──────────────────────────────
 const ModalInput = ({ label, ...props }) => (
   <div className="flex flex-col gap-1">
@@ -84,6 +61,37 @@ const Badge = ({ children, color }) => {
     </span>
   );
 };
+
+// ─── Modal oscuro elegante (reemplaza el Modal blanco en esta vista) ──
+const Sheet = ({ children, onClose, title, subtitle, icon }) => (
+  <div className="fixed inset-0 z-[65] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm" onClick={onClose}>
+    <div
+      className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[24px] border border-cyan-500/25 bg-gradient-to-br from-slate-950 via-blue-950/40 to-slate-950 shadow-2xl shadow-cyan-500/15"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-cyan-500/10 blur-3xl" />
+      <div className="relative flex items-center gap-3 border-b border-white/10 px-5 py-4">
+        {icon && (
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/15 text-lg">
+            {icon}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-black text-white">{title}</h3>
+          {subtitle && <p className="mt-0.5 truncate text-xs text-white/45">{subtitle}</p>}
+        </div>
+        <button
+          onClick={onClose}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xl font-bold text-white/60 transition hover:bg-white/10 hover:text-white"
+          aria-label="Cerrar"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="relative overflow-y-auto px-5 py-5">{children}</div>
+    </div>
+  </div>
+);
 
 const formatPlanName = (name = "") => name ? name.charAt(0).toUpperCase() + name.slice(1) : "Sin plan";
 
@@ -135,6 +143,9 @@ const AdminUsuarios = () => {
   const [showSoporteModal, setShowSoporteModal] = useState(false);
   const [ticketsSoporteActivos, setTicketsSoporteActivos] = useState(0);
   const [loadingSoporte, setLoadingSoporte] = useState(false);
+
+  // Modal único de gestión de usuario (datos + todas las acciones)
+  const [gestionUser, setGestionUser] = useState(null);
 
   const token = localStorage.getItem("token");
 
@@ -499,34 +510,38 @@ const AdminUsuarios = () => {
         />
       )}
 
-      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
-        <div className="overflow-hidden rounded-[28px] border border-cyan-500/10 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_34%),linear-gradient(135deg,rgba(8,15,30,0.98),rgba(10,18,36,0.92)_55%,rgba(8,12,24,0.98))] px-4 py-5 shadow-[0_30px_80px_rgba(8,145,178,0.08)] sm:px-6 sm:py-6 lg:px-8">
-          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4">
+        <div className="overflow-hidden rounded-[24px] border border-cyan-500/10 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_34%),linear-gradient(135deg,rgba(8,15,30,0.98),rgba(10,18,36,0.92)_55%,rgba(8,12,24,0.98))] px-4 py-4 shadow-[0_30px_80px_rgba(8,145,178,0.08)] sm:px-5 sm:py-5 lg:px-7">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-200/90">
+              <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-200/90">
                 Centro administrativo
               </span>
-              <h2 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-4xl xl:text-[2.65rem]">
+              <h2 className="mt-3 bg-gradient-to-r from-white via-cyan-100 to-sky-300 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl xl:text-4xl">
                 Administracion de usuarios
               </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300 sm:text-[15px]">
+              <p className="mt-2 max-w-2xl text-xs leading-5 text-slate-300 sm:text-sm sm:leading-6">
                 Supervisa cuentas, planes, credito operativo y exportes desde una vista mucho mas comoda para escritorio, tablet y movil.
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:min-w-[560px]">
               {[
-                { label: "Usuarios activos", value: usuariosActivos, tone: "from-emerald-400/20 to-transparent text-emerald-300" },
-                { label: "Cuentas empresa", value: usuariosEmpresa, tone: "from-violet-400/20 to-transparent text-violet-300" },
-                { label: "Con planes", value: usuariosConPlanes, tone: "from-sky-400/20 to-transparent text-sky-300" },
-                { label: "Masivas activas", value: usuariosMasivos, tone: "from-amber-400/20 to-transparent text-amber-300" },
+                { label: "Usuarios activos", value: usuariosActivos, icon: "🟢", ring: "border-emerald-400/30", glow: "hover:shadow-emerald-500/20", bg: "from-emerald-500/15", grad: "from-emerald-300 to-teal-200", bar: "from-emerald-400 to-teal-400" },
+                { label: "Cuentas empresa", value: usuariosEmpresa, icon: "🏢", ring: "border-violet-400/30", glow: "hover:shadow-violet-500/20", bg: "from-violet-500/15", grad: "from-violet-300 to-purple-200", bar: "from-violet-400 to-purple-400" },
+                { label: "Con planes", value: usuariosConPlanes, icon: "📦", ring: "border-sky-400/30", glow: "hover:shadow-sky-500/20", bg: "from-sky-500/15", grad: "from-sky-300 to-cyan-200", bar: "from-sky-400 to-cyan-400" },
+                { label: "Masivas activas", value: usuariosMasivos, icon: "⚡", ring: "border-amber-400/30", glow: "hover:shadow-amber-500/20", bg: "from-amber-500/15", grad: "from-amber-300 to-yellow-200", bar: "from-amber-400 to-yellow-400" },
               ].map((item) => (
                 <div
                   key={item.label}
-                  className={`rounded-2xl border border-white/10 bg-gradient-to-br ${item.tone} px-4 py-4 backdrop-blur-sm`}
+                  className={`group relative overflow-hidden rounded-2xl border ${item.ring} bg-gradient-to-br ${item.bg} to-transparent px-3 py-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:px-4 ${item.glow}`}
                 >
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{item.label}</div>
-                  <div className="mt-3 text-2xl font-black text-white">{item.value}</div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50">{item.label}</div>
+                    <span className="text-base leading-none opacity-80">{item.icon}</span>
+                  </div>
+                  <div className={`mt-2 bg-gradient-to-r ${item.grad} bg-clip-text text-2xl font-black text-transparent sm:text-3xl`}>{item.value}</div>
+                  <div className={`mt-2 h-1 w-9 rounded-full bg-gradient-to-r ${item.bar} transition-all duration-300 group-hover:w-14`} />
                 </div>
               ))}
             </div>
@@ -614,20 +629,28 @@ const AdminUsuarios = () => {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Resultados visibles</div>
+                <div className="group rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-all hover:border-cyan-400/30 hover:bg-white/[0.06]">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
+                    <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" /> Resultados visibles
+                  </div>
                   <div className="mt-2 text-xl font-bold text-white">{filteredUsers.length}</div>
                 </div>
-                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Rango mostrado</div>
+                <div className="group rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-all hover:border-sky-400/30 hover:bg-white/[0.06]">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
+                    <span className="h-1.5 w-1.5 rounded-full bg-sky-400" /> Rango mostrado
+                  </div>
                   <div className="mt-2 text-xl font-bold text-white">{visibleFrom} - {visibleTo}</div>
                 </div>
-                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Pagina actual</div>
+                <div className="group rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-all hover:border-violet-400/30 hover:bg-white/[0.06]">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
+                    <span className="h-1.5 w-1.5 rounded-full bg-violet-400" /> Pagina actual
+                  </div>
                   <div className="mt-2 text-xl font-bold text-white">{currentPage} / {totalPages}</div>
                 </div>
-                <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">Cobertura</div>
+                <div className="group rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-all hover:border-emerald-400/30 hover:bg-white/[0.06]">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Cobertura
+                  </div>
                   <div className="mt-2 text-sm font-semibold text-cyan-200">
                     {filter.trim() ? "Listado filtrado por busqueda activa" : "Vista completa del padron de usuarios"}
                   </div>
@@ -716,35 +739,12 @@ const AdminUsuarios = () => {
                         {u.perfil?.consultas_masivas && <Badge color="violet">Masivas activas</Badge>}
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        <ActionBtn className="w-full justify-center" color="teal" onClick={() => handleVerConsultas(u)} title="Ver cedulas consultadas">Consultas</ActionBtn>
-                        <ActionBtn className="w-full justify-center" color="cyan" onClick={() => handleOpenConsultasModal(u)}>Creditos</ActionBtn>
-                        <ActionBtn
-                          className="w-full justify-center"
-                          color="green"
-                          onClick={() => handleGenerateIndividualPDF(u)}
-                          title="Descargar informe individual"
-                          disabled={generandoPDFUserId === u.id}
-                        >
-                          {generandoPDFUserId === u.id ? "Generando..." : "PDF usuario"}
-                        </ActionBtn>
-                        {u.perfil && <ActionBtn className="w-full justify-center" color="sky" onClick={() => handleEditPlanes(u)}>Planes</ActionBtn>}
-                        {u.perfil && (
-                          <ActionBtn
-                            className="w-full justify-center"
-                            color="violet"
-                            onClick={() => { setMasivasUser(u); setMasivasPlanId(""); setShowMasivasModal(true); }}
-                            title="Asignar consultas masivas al usuario"
-                          >
-                            {u.perfil.consultas_masivas ? "Masivas on" : "Masivas"}
-                          </ActionBtn>
-                        )}
-                        <ActionBtn className="w-full justify-center" color="indigo" onClick={() => handleEditUser(u)}>Editar</ActionBtn>
-                        <ActionBtn className="w-full justify-center" color="red" onClick={() => handleDeleteUser(u)}>Eliminar</ActionBtn>
-                        {u.is_active
-                          ? <ActionBtn className="w-full justify-center" color="red" onClick={() => handleToggleActive(u)}>Desactivar</ActionBtn>
-                          : <ActionBtn className="w-full justify-center" color="green" onClick={() => handleToggleActive(u)}>Activar</ActionBtn>}
-                      </div>
+                      <button
+                        onClick={() => setGestionUser(u)}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/15 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-cyan-100 transition-all hover:from-cyan-500/30 hover:to-blue-500/30 hover:shadow-lg hover:shadow-cyan-500/20"
+                      >
+                        ⚙ Gestionar usuario
+                      </button>
                     </div>
                   </article>
                 ))}
@@ -756,8 +756,8 @@ const AdminUsuarios = () => {
             <div className="overflow-hidden rounded-[24px] border border-white/8 bg-slate-950/40">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1320px] text-left text-sm">
-                  <thead className="bg-[linear-gradient(180deg,rgba(20,35,64,0.98),rgba(16,28,50,0.95))] text-[11px] uppercase tracking-[0.18em] text-slate-300">
-                    <tr className="border-b border-white/8">
+                  <thead className="bg-[linear-gradient(180deg,rgba(20,35,64,0.98),rgba(16,28,50,0.95))] text-[11px] uppercase tracking-[0.18em] text-cyan-100/80">
+                    <tr className="border-b border-cyan-500/15">
                       <th className="px-4 py-4 font-semibold">ID</th>
                       <th className="px-4 py-4 font-semibold">Usuario</th>
                       <th className="px-4 py-4 font-semibold">Email</th>
@@ -779,16 +779,16 @@ const AdminUsuarios = () => {
                       </tr>
                     ) : (
                       pagedUsers.map((u) => (
-                        <tr key={u.id} className="align-top transition-colors hover:bg-cyan-500/[0.04]">
+                        <tr key={u.id} className="group align-top transition-colors hover:bg-cyan-500/[0.07]">
                           <td className="px-4 py-4">
-                            <span className="rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-xs font-mono text-white/55">
+                            <span className="rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-xs font-mono text-white/55 transition-colors group-hover:border-cyan-400/30 group-hover:text-cyan-200">
                               #{u.id}
                             </span>
                           </td>
 
                           <td className="px-4 py-4">
                             <div className="flex items-start gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/10 text-sm font-black uppercase text-cyan-200">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/10 text-sm font-black uppercase text-cyan-200 transition-all duration-300 group-hover:border-cyan-400/50 group-hover:bg-cyan-500/20 group-hover:shadow-[0_0_14px_rgba(34,211,238,0.3)]">
                                 {(u.username || "U").slice(0, 1)}
                               </div>
                               <div className="min-w-0">
@@ -844,7 +844,7 @@ const AdminUsuarios = () => {
                                 {u.perfil.planes.map((p) => (
                                   <span
                                     key={p.id}
-                                    className="rounded-full border border-cyan-400/15 bg-cyan-500/10 px-2.5 py-1 text-xs font-semibold text-cyan-200"
+                                    className="rounded-full border border-cyan-400/25 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-2.5 py-1 text-xs font-semibold text-cyan-100 shadow-sm shadow-cyan-500/10"
                                   >
                                     {formatPlanName(p.nombre)}
                                   </span>
@@ -856,35 +856,12 @@ const AdminUsuarios = () => {
                           </td>
 
                           <td className="px-4 py-4">
-                            <div className="grid max-w-[280px] grid-cols-2 gap-2">
-                              <ActionBtn className="w-full justify-center" color="teal" onClick={() => handleVerConsultas(u)} title="Ver cedulas consultadas">Consultas</ActionBtn>
-                              <ActionBtn className="w-full justify-center" color="cyan" onClick={() => handleOpenConsultasModal(u)}>Creditos</ActionBtn>
-                              <ActionBtn
-                                className="w-full justify-center"
-                                color="green"
-                                onClick={() => handleGenerateIndividualPDF(u)}
-                                title="Descargar informe individual"
-                                disabled={generandoPDFUserId === u.id}
-                              >
-                                {generandoPDFUserId === u.id ? "Generando..." : "PDF usuario"}
-                              </ActionBtn>
-                              {u.perfil && <ActionBtn className="w-full justify-center" color="sky" onClick={() => handleEditPlanes(u)}>Planes</ActionBtn>}
-                              {u.perfil && (
-                                <ActionBtn
-                                  className="w-full justify-center"
-                                  color="violet"
-                                  onClick={() => { setMasivasUser(u); setMasivasPlanId(""); setShowMasivasModal(true); }}
-                                  title="Asignar consultas masivas al usuario"
-                                >
-                                  {u.perfil.consultas_masivas ? "Masivas on" : "Masivas"}
-                                </ActionBtn>
-                              )}
-                              <ActionBtn className="w-full justify-center" color="indigo" onClick={() => handleEditUser(u)}>Editar</ActionBtn>
-                              <ActionBtn className="w-full justify-center" color="red" onClick={() => handleDeleteUser(u)}>Eliminar</ActionBtn>
-                              {u.is_active
-                                ? <ActionBtn className="w-full justify-center" color="red" onClick={() => handleToggleActive(u)}>Desactivar</ActionBtn>
-                                : <ActionBtn className="w-full justify-center" color="green" onClick={() => handleToggleActive(u)}>Activar</ActionBtn>}
-                            </div>
+                            <button
+                              onClick={() => setGestionUser(u)}
+                              className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/15 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-cyan-100 transition-all hover:from-cyan-500/30 hover:to-blue-500/30 hover:shadow-lg hover:shadow-cyan-500/20"
+                            >
+                              ⚙ Gestionar
+                            </button>
                           </td>
                         </tr>
                       ))
@@ -923,6 +900,144 @@ const AdminUsuarios = () => {
           </div>
         </div>
       </div>
+      {/* ── Modal: Gestión de usuario (datos + acciones) ── */}
+      {gestionUser && (() => {
+        const gu = gestionUser;
+        const perfil = gu.perfil || {};
+        const planesU = perfil.planes || [];
+        const cerrar = () => setGestionUser(null);
+        const act = (fn) => { cerrar(); fn(); };
+        const credito = (v) => (perfil.consultas_infinitas ? "∞" : (v ?? 0));
+
+        const Dato = ({ label, value, mono }) => (
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">{label}</div>
+            <div className={`mt-1 text-sm font-medium text-white ${mono ? "font-mono" : ""} break-words`}>{value}</div>
+          </div>
+        );
+
+        const Accion = ({ icon, label, sub, onClick, tone = "cyan", disabled }) => {
+          const tones = {
+            cyan:   "border-cyan-400/25 hover:border-cyan-400/50 hover:bg-cyan-500/10 text-cyan-200",
+            teal:   "border-teal-400/25 hover:border-teal-400/50 hover:bg-teal-500/10 text-teal-200",
+            sky:    "border-sky-400/25 hover:border-sky-400/50 hover:bg-sky-500/10 text-sky-200",
+            violet: "border-violet-400/25 hover:border-violet-400/50 hover:bg-violet-500/10 text-violet-200",
+            green:  "border-emerald-400/25 hover:border-emerald-400/50 hover:bg-emerald-500/10 text-emerald-200",
+            indigo: "border-indigo-400/25 hover:border-indigo-400/50 hover:bg-indigo-500/10 text-indigo-200",
+            amber:  "border-amber-400/25 hover:border-amber-400/50 hover:bg-amber-500/10 text-amber-200",
+            red:    "border-rose-400/25 hover:border-rose-400/50 hover:bg-rose-500/10 text-rose-200",
+          };
+          return (
+            <button
+              onClick={onClick}
+              disabled={disabled}
+              className={`flex items-center gap-3 rounded-2xl border bg-white/[0.02] px-3.5 py-3 text-left transition-all disabled:cursor-wait disabled:opacity-50 ${tones[tone]}`}
+            >
+              <span className="text-lg leading-none">{icon}</span>
+              <span className="min-w-0">
+                <span className="block text-sm font-bold leading-tight">{label}</span>
+                {sub && <span className="block text-[11px] text-white/40 leading-tight">{sub}</span>}
+              </span>
+            </button>
+          );
+        };
+
+        return (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm" onClick={cerrar}>
+            <div
+              className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[26px] border border-cyan-500/25 bg-gradient-to-br from-slate-950 via-blue-950/40 to-slate-950 shadow-2xl shadow-cyan-500/15"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* glow */}
+              <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-cyan-500/10 blur-3xl" />
+
+              {/* Header */}
+              <div className="relative flex shrink-0 items-center gap-4 border-b border-white/10 px-5 py-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/15 text-xl font-black uppercase text-cyan-200 shadow-lg shadow-cyan-500/20">
+                  {(gu.username || "U").slice(0, 1)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80">Gestión de usuario</p>
+                  <h3 className="truncate text-xl font-black text-white">{gu.username}</h3>
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                    {gu.is_active ? <Badge color="green">Activo</Badge> : <Badge color="red">Inactivo</Badge>}
+                    {gu.is_superuser && <Badge color="violet">Super</Badge>}
+                    {gu.is_staff && !gu.is_superuser && <Badge color="cyan">Staff</Badge>}
+                    {perfil.consultas_masivas && <Badge color="violet">Masivas</Badge>}
+                  </div>
+                </div>
+                <button
+                  onClick={cerrar}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xl font-bold text-white/60 transition hover:bg-white/10 hover:text-white"
+                  aria-label="Cerrar"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="relative overflow-y-auto px-5 py-5 space-y-5">
+                {/* Créditos destacados */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/12 to-transparent px-3 py-3 text-center">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-cyan-300/80">Disponibles</div>
+                    <div className="mt-1 text-2xl font-black text-white">{credito(perfil.consultas_disponibles)}</div>
+                  </div>
+                  <div className="rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-500/12 to-transparent px-3 py-3 text-center">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-blue-300/80">Cargadas</div>
+                    <div className="mt-1 text-2xl font-black text-white">{credito(perfil.consultas_cargadas_total)}</div>
+                  </div>
+                  <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/12 to-transparent px-3 py-3 text-center">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-violet-300/80">Consumidas</div>
+                    <div className="mt-1 text-2xl font-black text-white">{perfil.consultas_consumidas ?? 0}</div>
+                  </div>
+                </div>
+
+                {/* Datos */}
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  <Dato label="Email" value={gu.email || "Sin email"} />
+                  <Dato label="Nombre completo" value={gu.full_name || "Sin nombre"} />
+                  <Dato label="Tipo" value={perfil.tipo_registro === "empresa" ? "Empresa" : "Natural"} />
+                  <Dato label="Empresa / NIT" value={perfil.tipo_registro === "empresa" ? `${perfil.nombre_empresa || "Sin nombre"} · ${perfil.nit ? "NIT " + perfil.nit : "Sin NIT"}` : "No aplica"} />
+                  <Dato label="Roles" value={getRoleSummary(gu)} />
+                  <Dato label="ID" value={`#${gu.id}`} mono />
+                </div>
+
+                {/* Planes */}
+                <div>
+                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Planes activos</div>
+                  {planesU.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {planesU.map((p) => (
+                        <span key={p.id} className="rounded-full border border-cyan-400/25 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-3 py-1 text-xs font-semibold text-cyan-100">
+                          {formatPlanName(p.nombre)}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-xs italic text-white/30">Sin planes asignados</span>
+                  )}
+                </div>
+
+                {/* Acciones */}
+                <div>
+                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Acciones</div>
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    <Accion icon="💳" tone="cyan"   label="Créditos" sub="Aumentar / ajustar saldo" onClick={() => act(() => handleOpenConsultasModal(gu))} />
+                    <Accion icon="📊" tone="teal"   label="Ver consultas" sub="Cédulas consultadas" onClick={() => act(() => handleVerConsultas(gu))} />
+                    {gu.perfil && <Accion icon="📦" tone="sky" label="Editar planes" sub="Asignar o quitar planes" onClick={() => act(() => handleEditPlanes(gu))} />}
+                    {gu.perfil && <Accion icon="⚡" tone="violet" label={perfil.consultas_masivas ? "Masivas (activas)" : "Masivas"} sub="Consultas masivas" onClick={() => act(() => { setMasivasUser(gu); setMasivasPlanId(""); setShowMasivasModal(true); })} />}
+                    <Accion icon="✏️" tone="indigo" label="Editar usuario" sub="Datos de la cuenta" onClick={() => act(() => handleEditUser(gu))} />
+                    <Accion icon="📄" tone="green"  label="PDF usuario" sub="Informe individual" disabled={generandoPDFUserId === gu.id} onClick={() => act(() => handleGenerateIndividualPDF(gu))} />
+                    <Accion icon={gu.is_active ? "🔌" : "✅"} tone={gu.is_active ? "amber" : "green"} label={gu.is_active ? "Desactivar" : "Activar"} sub="Estado de la cuenta" onClick={() => act(() => handleToggleActive(gu))} />
+                    <Accion icon="🗑" tone="red" label="Eliminar" sub="Borrar usuario" onClick={() => act(() => handleDeleteUser(gu))} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── Modal: Soporte técnico ── */}
       {showSoporteModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
@@ -954,15 +1069,13 @@ const AdminUsuarios = () => {
 
       {/* ── Modal: Consultas Masivas ── */}
       {showMasivasModal && masivasUser && (
-        <Modal onClose={() => setShowMasivasModal(false)}>
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 flex flex-col gap-4 min-w-[340px] border border-white/10 shadow-2xl">
-            <div>
-              <h3 className="text-lg font-bold text-white">Consultas Masivas</h3>
-              <p className="text-xs text-white/40 mt-0.5">
-                Usuario: <span className="text-violet-300">{masivasUser.username}</span>
-              </p>
-            </div>
-
+        <Sheet
+          onClose={() => setShowMasivasModal(false)}
+          icon="⚡"
+          title="Consultas Masivas"
+          subtitle={`Usuario: ${masivasUser.username}`}
+        >
+          <div className="flex flex-col gap-4">
             {/* Estado actual */}
             <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/5 border border-white/10">
               <span className="text-xs text-white/50">Estado actual:</span>
@@ -1040,53 +1153,58 @@ const AdminUsuarios = () => {
               </button>
             </div>
           </div>
-        </Modal>
+        </Sheet>
       )}
 
       {/* ── Modal: Asignar créditos ── */}
       {showConsultasModal && (
-        <Modal onClose={() => setShowConsultasModal(false)}>
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 flex flex-col gap-4 min-w-[320px] border border-white/10 shadow-2xl">
+        <Sheet
+          onClose={() => setShowConsultasModal(false)}
+          icon="💳"
+          title="Asignar consultas"
+          subtitle={`Usuario: ${selectedUser?.username || ""}`}
+        >
+          <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-bold text-white">Asignar consultas</h3>
-              <p className="text-xs text-white/40 mt-0.5">Usuario: <span className="text-cyan-300">{selectedUser?.username}</span></p>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/55">Número de consultas</label>
+              <input
+                type="number"
+                min={0}
+                value={consultasValue}
+                onChange={(e) => setConsultasValue(e.target.value === "" ? "" : Number(e.target.value))}
+                onBlur={(e) => { if (e.target.value === "") setConsultasValue(0); }}
+                disabled={consultasInfinitas}
+                className="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white outline-none transition focus:border-cyan-400/60 focus:bg-slate-900 disabled:opacity-40"
+              />
             </div>
-            <ModalInput
-              label="Número de consultas"
-              type="number"
-              min={0}
-              value={consultasValue}
-              onChange={(e) => setConsultasValue(e.target.value === "" ? "" : Number(e.target.value))}
-              onBlur={(e) => { if (e.target.value === "") setConsultasValue(0); }}
-              disabled={consultasInfinitas}
-            />
-            <label className="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 border border-white/10 bg-white/5 hover:bg-white/8 transition">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 transition hover:bg-white/[0.06]">
               <input
                 type="checkbox"
                 checked={consultasInfinitas}
                 onChange={(e) => setConsultasInfinitas(e.target.checked)}
-                className="w-4 h-4 accent-cyan-400"
+                className="h-5 w-5 accent-cyan-400"
               />
-              <span className="text-sm text-white/80 font-medium">Consultas infinitas</span>
+              <span className="text-sm font-medium text-white/85">Consultas infinitas (∞)</span>
             </label>
             <button
               onClick={handleSaveConsultas}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-sm transition shadow-lg shadow-cyan-500/20"
+              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition hover:brightness-110"
             >
               Guardar
             </button>
           </div>
-        </Modal>
+        </Sheet>
       )}
 
       {/* ── Modal: Editar usuario ── */}
       {showEditModal && (
-        <Modal onClose={() => setShowEditModal(false)}>
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 flex flex-col gap-4 min-w-[320px] border border-white/10 shadow-2xl">
-            <div>
-              <h3 className="text-lg font-bold text-white">Editar usuario</h3>
-              <p className="text-xs text-white/40 mt-0.5">ID: #{selectedUser?.id}</p>
-            </div>
+        <Sheet
+          onClose={() => setShowEditModal(false)}
+          icon="✏️"
+          title="Editar usuario"
+          subtitle={`ID: #${selectedUser?.id ?? ""}`}
+        >
+          <div className="flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-3">
               <ModalInput label="Usuario"  name="username"   value={editUserData.username}   onChange={(e) => setEditUserData({ ...editUserData, [e.target.name]: e.target.value })} placeholder="usuario" />
               <ModalInput label="Email"    name="email"      value={editUserData.email}      onChange={(e) => setEditUserData({ ...editUserData, [e.target.name]: e.target.value })} placeholder="email@..." />
@@ -1116,47 +1234,55 @@ const AdminUsuarios = () => {
             </div>
             <button
               onClick={handleSaveEditUser}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-sm transition shadow-lg shadow-cyan-500/20"
+              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition hover:brightness-110"
             >
               Guardar cambios
             </button>
           </div>
-        </Modal>
+        </Sheet>
       )}
 
       {/* ── Modal: Editar planes ── */}
       {showModal && (
-        <Modal onClose={() => setShowModal(false)}>
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 flex flex-col gap-4 min-w-[280px] border border-white/10 shadow-2xl">
-            <div>
-              <h3 className="text-lg font-bold text-white">Editar planes</h3>
-              <p className="text-xs text-white/40 mt-0.5">Usuario: <span className="text-cyan-300">{selectedUser?.username}</span></p>
-            </div>
-            <div className="flex flex-col gap-2">
-              {planes.map((plan) => (
-                <label key={plan.id} className="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 border border-white/8 bg-white/4 hover:bg-white/8 transition">
-                  <input
-                    type="checkbox"
-                    checked={selectedPlanes.includes(plan.id)}
-                    onChange={(e) =>
-                      e.target.checked
-                        ? setSelectedPlanes([...selectedPlanes, plan.id])
-                        : setSelectedPlanes(selectedPlanes.filter((id) => id !== plan.id))
-                    }
-                    className="w-4 h-4 accent-cyan-400"
-                  />
-                  <span className="text-sm text-white/80 font-medium">{plan.nombre}</span>
-                </label>
-              ))}
-            </div>
-            <button
-              onClick={handleSavePlanes}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-sm transition shadow-lg shadow-cyan-500/20"
-            >
-              Guardar cambios
-            </button>
+        <Sheet
+          onClose={() => setShowModal(false)}
+          icon="📦"
+          title="Editar planes"
+          subtitle={`Usuario: ${selectedUser?.username || ""}`}
+        >
+          <div className="grid max-h-[52vh] grid-cols-2 gap-2 overflow-y-auto pr-1">
+            {planes.map((plan) => {
+              const on = selectedPlanes.includes(plan.id);
+              return (
+                <button
+                  key={plan.id}
+                  type="button"
+                  onClick={() =>
+                    on
+                      ? setSelectedPlanes(selectedPlanes.filter((id) => id !== plan.id))
+                      : setSelectedPlanes([...selectedPlanes, plan.id])
+                  }
+                  className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${
+                    on
+                      ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-100"
+                      : "border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20 hover:bg-white/[0.06]"
+                  }`}
+                >
+                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] font-black ${
+                    on ? "border-cyan-400 bg-cyan-400 text-slate-900" : "border-white/30 text-transparent"
+                  }`}>✓</span>
+                  <span className="truncate font-medium">{formatPlanName(plan.nombre)}</span>
+                </button>
+              );
+            })}
           </div>
-        </Modal>
+          <button
+            onClick={handleSavePlanes}
+            className="mt-4 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition hover:brightness-110"
+          >
+            Guardar cambios
+          </button>
+        </Sheet>
       )}
 
       {/* ── Modal: Ver consultas realizadas ── */}

@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation, Outlet, useNavigate } from "react-router-dom";
 import Taskbar from "../components/TaskBar";
-import RadioBubble from "../components/RadioBubble";
 import {
   SESSION_INACTIVITY_LIMIT_MS,
   clearSession,
@@ -130,7 +129,6 @@ export default function Dashboard() {
         </motion.main>
       </AnimatePresence>
 
-      <RadioBubble />
       <Taskbar />
     </div>
   );

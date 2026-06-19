@@ -10,78 +10,127 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Hola,%20quiero%20m%C
 
 // Sugerencias para usuarios autenticados
 const SUGERENCIAS_USUARIO = [
-	"¿Qué puedo preguntar?",
-	"Tengo un error en una consulta",
-	"¿Cómo descargo mi PDF?",
-	"¿Cómo funcionan las consultas masivas?"
+	"¿Qué son las listas restrictivas?",
+	"¿Por qué son importantes?",
+	"¿Qué es SARLAFT?",
+	"¿Cómo descargo mi PDF?"
 ];
 
 // Sugerencias para visitantes sin sesión
 const SUGERENCIAS_NO_USUARIO = [
-	"¿Cómo me registro?",
-	"¿Cuáles son los planes?",
+	"¿Qué son las listas restrictivas?",
 	"¿Qué es ECONFIA?",
-	"Quiero más información"
+	"¿Qué es una PEP?",
+	"¿Cuáles son los planes?"
 ];
+
+// Quita acentos y normaliza para comparar de forma flexible
+const normalizar = (texto) =>
+	String(texto || "")
+		.toLowerCase()
+		.normalize("NFD")
+		.replace(/[̀-ͯ]/g, "");
 
 // Base de conocimientos para respuestas automáticas
 const KNOWLEDGE_BASE = [
+	// ── Ayuda / general ───────────────────────────────────────────────
 	{
-		palabras_clave: ["que puedo preguntar", "qué puedo preguntar", "preguntas", "ayuda", "opciones"],
-		respuesta: "Puedes preguntarme por planes, errores en consultas, reportes PDF, pagos, consultas masivas, API, seguridad de datos o pedir soporte técnico con un agente."
+		palabras_clave: ["que puedo preguntar", "preguntas", "ayuda", "opciones", "temas", "que sabes", "que haces"],
+		respuesta: "Soy el asistente de ECONFIA. Puedo explicarte temas de cumplimiento como:\n• Listas restrictivas (qué son, para qué sirven, por qué importan)\n• Tipos de listas: OFAC, ONU, Unión Europea, Interpol, Lista Clinton\n• SARLAFT / SAGRILAFT y LA/FT\n• Debida diligencia (KYC) y PEP\n• Antecedentes: Procuraduría, Contraloría, Policía, Rama Judicial\n\nTambién te ayudo con planes, reportes PDF, consultas masivas, errores y soporte. ¿Sobre qué tema quieres saber?"
+	},
+	// ── LISTAS RESTRICTIVAS ───────────────────────────────────────────
+	{
+		palabras_clave: ["que son las listas restrictivas", "que es una lista restrictiva", "lista restrictiva", "listas restrictivas", "listas de control", "listas vinculantes"],
+		respuesta: "Las listas restrictivas son bases de datos —nacionales e internacionales— donde figuran personas y empresas señaladas por estar relacionadas con delitos como lavado de activos, financiación del terrorismo, narcotráfico, corrupción o sanciones económicas.\n\nConsultarlas permite saber si alguien con quien vas a hacer negocios representa un riesgo legal o reputacional. En ECONFIA validamos a una persona o empresa contra muchas de estas listas al mismo tiempo."
 	},
 	{
-		palabras_clave: ["qué es econfia", "que es econfia", "econfia", "plataforma", "para qué sirve", "para que sirve"],
-		respuesta: "ECONFIA es una plataforma de validación de identidad y antecedentes en Colombia. Consultamos registros de Registraduría, ADRES, Policía, Procuraduría y más fuentes oficiales, de forma rápida y segura."
+		palabras_clave: ["para que sirven las listas", "para que sirve una lista restrictiva", "para que sirven", "utilidad de las listas", "para que funcionan las listas", "para que funcionan"],
+		respuesta: "Las listas restrictivas sirven para:\n• Prevenir el lavado de activos y la financiación del terrorismo (LA/FT).\n• Evitar vincular a tu empresa con personas sancionadas o investigadas.\n• Cumplir la ley (SARLAFT/SAGRILAFT) y exigencias de bancos y aliados.\n• Proteger tu reputación y evitar multas o bloqueos.\n\nEn pocas palabras: te ayudan a 'conocer con quién haces negocios' antes de firmar."
 	},
 	{
-		palabras_clave: ["cómo me registro", "como me registro", "crear cuenta", "registrarme", "registro"],
-		respuesta: "Para registrarte en ECONFIA haz clic en 'Crear cuenta' en la página principal, ingresa tu correo y datos básicos. Una vez verificado tu correo podrás adquirir un plan y comenzar a consultar."
+		palabras_clave: ["por que son importantes", "importancia de las listas", "por que importan", "por que es importante consultar", "riesgo de no consultar"],
+		respuesta: "Son importantes porque vincularte con una persona o empresa en una lista restrictiva puede traer:\n• Sanciones y multas de los entes de control.\n• Bloqueo de cuentas o pérdida de relaciones bancarias.\n• Daño reputacional difícil de recuperar.\n• Responsabilidad legal por no hacer la debida diligencia.\n\nConsultarlas es una medida preventiva: detectas el riesgo antes de que se convierta en un problema."
 	},
 	{
-		palabras_clave: ["precio", "costo", "pagar", "tarifa", "plan", "planes", "cuánto cuesta", "cuanto cuesta"],
-		respuesta: "Tenemos planes flexibles según tus necesidades:\n• Por Consulta: pagas solo por lo que usas.\n• Plan mensual: consultas ilimitadas al mes.\n\nPara conocer los precios exactos o hablar con un asesor escríbenos por WhatsApp."
+		palabras_clave: ["tipos de listas", "que listas existen", "cuales listas", "ofac", "onu", "union europea", "interpol", "lista clinton", "clinton", "lista vinculante", "lista informativa"],
+		respuesta: "Existen muchas listas; las principales son:\n• OFAC (Lista Clinton) – Tesoro de EE. UU., sanciones económicas.\n• ONU – Consejo de Seguridad, terrorismo y sanciones.\n• Unión Europea – sanciones de la UE.\n• Interpol – personas buscadas internacionalmente.\n• Listas nacionales: Procuraduría, Contraloría, Policía, Rama Judicial.\n\nSe dividen en vinculantes (de obligatorio cumplimiento) e informativas (de gestión de riesgo). ECONFIA consulta tanto listas nacionales como internacionales."
+	},
+	// ── SARLAFT / LAFT ────────────────────────────────────────────────
+	{
+		palabras_clave: ["sarlaft", "sagrilaft", "laft", "la/ft", "lavado de activos", "financiacion del terrorismo", "que es el lavado"],
+		respuesta: "SARLAFT (y SAGRILAFT para el sector real) es el Sistema de Administración del Riesgo de Lavado de Activos y Financiación del Terrorismo. Obliga a las empresas a identificar a sus clientes, evaluar riesgos y reportar operaciones sospechosas.\n\nLavado de activos = dar apariencia legal a dinero de origen ilícito. Consultar listas restrictivas y hacer debida diligencia son pasos clave para cumplir SARLAFT/SAGRILAFT."
+	},
+	// ── DEBIDA DILIGENCIA / KYC ───────────────────────────────────────
+	{
+		palabras_clave: ["debida diligencia", "kyc", "conoce a tu cliente", "conocer al cliente", "verificacion de identidad", "validar identidad"],
+		respuesta: "La debida diligencia (o KYC, 'Conoce a tu Cliente') es el proceso de verificar la identidad y los antecedentes de una persona o empresa antes de hacer negocios con ella.\n\nIncluye: validar el documento, confirmar que está vivo/activo, revisar listas restrictivas y antecedentes. ECONFIA automatiza este proceso consultando decenas de fuentes oficiales en una sola búsqueda."
+	},
+	// ── PEP ───────────────────────────────────────────────────────────
+	{
+		palabras_clave: ["pep", "persona expuesta", "personas expuestas politicamente", "politicamente expuesta"],
+		respuesta: "Una PEP es una Persona Expuesta Políticamente: alguien que ocupa o ocupó un cargo público relevante (y sus allegados). No es algo negativo en sí mismo, pero implica mayor riesgo de corrupción o conflicto de interés, por lo que la ley exige una debida diligencia reforzada antes de vincularla."
+	},
+	// ── ANTECEDENTES / FUENTES ────────────────────────────────────────
+	{
+		palabras_clave: ["antecedentes", "procuraduria", "contraloria", "policia", "rama judicial", "que fuentes", "que consulta econfia", "fuentes oficiales"],
+		respuesta: "ECONFIA consulta antecedentes y registros en fuentes oficiales como:\n• Procuraduría (antecedentes disciplinarios)\n• Contraloría (responsabilidad fiscal)\n• Policía (antecedentes judiciales)\n• Rama Judicial (procesos)\n• Registraduría/ADRES (identidad y afiliación)\n• Listas restrictivas nacionales e internacionales.\n\nTodo en una sola consulta consolidada en un reporte."
+	},
+	// ── ECONFIA / producto ────────────────────────────────────────────
+	{
+		palabras_clave: ["que es econfia", "econfia", "plataforma", "para que sirve econfia", "que hace econfia"],
+		respuesta: "ECONFIA es una plataforma de validación de identidad, antecedentes y listas restrictivas en Colombia. Consulta registros de Registraduría, ADRES, Policía, Procuraduría, Contraloría, Rama Judicial y listas nacionales e internacionales, de forma rápida, segura y consolidada en un reporte."
 	},
 	{
-		palabras_clave: ["más información", "mas informacion", "más info", "asesor", "contactar", "hablar", "whatsapp"],
-		respuesta: "Con gusto te atendemos. Puedes escribirnos directamente por WhatsApp al +57 305 422 6582 y un asesor te responderá de inmediato."
+		palabras_clave: ["como me registro", "crear cuenta", "registrarme", "registro", "abrir cuenta"],
+		respuesta: "Para registrarte haz clic en 'Crear cuenta' en la página principal e ingresa tu correo y datos básicos. Al verificar tu correo podrás adquirir un plan y empezar a consultar."
 	},
 	{
-		palabras_clave: ["api", "integración", "conectar", "sistema"],
-		respuesta: "Sí, ofrecemos integración por API REST, webhooks y SDKs. ¿Quieres documentación técnica?"
+		palabras_clave: ["precio", "costo", "pagar", "tarifa", "plan", "planes", "cuanto cuesta", "valor"],
+		respuesta: "Tenemos planes flexibles:\n• Por consulta: pagas solo por lo que usas.\n• Plan mensual: consultas según tu paquete.\n\nPara precios exactos o un asesor, escríbenos por WhatsApp al +57 305 422 6582."
 	},
 	{
-		palabras_clave: ["seguridad", "datos", "privacidad", "encriptación"],
-		respuesta: "Usamos encriptación AES-256, cumplimiento GDPR, y auditorías de seguridad trimestrales. Tus datos están protegidos."
+		palabras_clave: ["mas informacion", "mas info", "asesor", "contactar", "hablar", "whatsapp", "telefono"],
+		respuesta: "Con gusto. Escríbenos por WhatsApp al +57 305 422 6582 y un asesor te responderá de inmediato."
 	},
 	{
-		palabras_clave: ["errores", "error", "bug", "no funciona", "problema"],
-		respuesta: "Lamento que tengas problemas. Por favor escribe una descripción detallada del error y te transferiré con soporte técnico."
+		palabras_clave: ["api", "integracion", "conectar", "sistema", "webhook"],
+		respuesta: "Sí, ofrecemos integración por API REST y webhooks para conectar ECONFIA con tus sistemas. ¿Quieres que un asesor te comparta la documentación?"
 	},
 	{
-		palabras_clave: ["factura", "recibo", "pago", "comprobante"],
-		respuesta: "Las facturas se envían automáticamente por email. Si no la recibiste, te conectaré con nuestro equipo de billing."
+		palabras_clave: ["seguridad", "datos", "privacidad", "encriptacion", "habeas data"],
+		respuesta: "Protegemos tu información con cifrado, controles de acceso y cumplimiento de la normativa de tratamiento de datos (Habeas Data). Tus consultas y reportes son confidenciales."
 	},
 	{
-		palabras_clave: ["pdf", "reporte", "descargar", "informe"],
-		respuesta: "Puedes descargar los reportes desde la vista de resultados o desde la ficha de la consulta. Si el botón falla, dime qué consulta hiciste y qué error aparece."
+		palabras_clave: ["error", "bug", "no funciona", "problema", "falla", "no carga"],
+		respuesta: "Lamento el inconveniente. Cuéntame qué consulta hiciste y qué mensaje aparece. Si lo prefieres, puedo abrir un ticket con soporte técnico para que un agente lo revise."
 	},
 	{
-		palabras_clave: ["masiva", "masivas", "excel", "lote", "archivo"],
-		respuesta: "Las consultas masivas procesan registros por archivo en lote. Puedo orientarte con la plantilla, errores de carga o estado del procesamiento."
+		palabras_clave: ["factura", "recibo", "comprobante", "facturacion"],
+		respuesta: "Las facturas se envían por email. Si no la recibiste, puedo conectarte con el equipo de facturación."
 	},
 	{
-		palabras_clave: ["validación", "búsqueda", "consulta", "resultado"],
-		respuesta: "¿Tienes una consulta específica? Puedo ayudarte a entender cómo funciona o transferirte a un agente especializado."
+		palabras_clave: ["pdf", "reporte", "descargar", "informe", "consolidado"],
+		respuesta: "Puedes descargar el reporte PDF desde la vista de resultados o desde la ficha de la consulta. Si el botón falla, dime qué consulta hiciste y qué error aparece."
+	},
+	{
+		palabras_clave: ["masiva", "masivas", "excel", "lote", "archivo", "varios", "plantilla"],
+		respuesta: "Las consultas masivas procesan muchos registros desde un archivo (plantilla Excel). Puedo orientarte con la plantilla, los errores de carga o el estado del procesamiento."
+	},
+	{
+		palabras_clave: ["validacion", "busqueda", "consulta", "resultado", "como consulto"],
+		respuesta: "Para consultar, ingresa el documento de la persona o empresa y elige las fuentes/listas a revisar. ECONFIA te entrega un reporte consolidado. ¿Quieres saber cómo interpretar los resultados?"
 	},
 ];
+
+// Saludos simples
+const SALUDOS = ["hola", "buenas", "buenos dias", "buenas tardes", "buenas noches", "hey", "que tal"];
 
 export default function ChatbotFlotante() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [messages, setMessages] = useState([
 		{
 			id: 1,
-			texto: "Hola. Soy el asistente de ECONFIA. Puedes preguntarme por planes, errores, consultas, reportes, pagos o solicitar soporte técnico.",
+			texto: "Hola. Soy el asistente de ECONFIA 🐻‍❄️\n\nPuedo explicarte sobre listas restrictivas, SARLAFT, debida diligencia, PEP y antecedentes, además de ayudarte con planes, reportes, consultas o soporte técnico. ¿Qué quieres saber?",
 			sender: "bot",
 			timestamp: new Date()
 		}
@@ -111,17 +160,39 @@ export default function ChatbotFlotante() {
 		scrollToBottom();
 	}, [messages]);
 
-	// Función para encontrar respuesta automática
+	// Función para encontrar respuesta automática.
+	// Normaliza (sin acentos) y elige la entrada con MÁS coincidencias de palabras
+	// clave, para acertar aunque la pregunta esté escrita de forma distinta.
 	const obtenerRespuestaAutomatica = (texto) => {
-		const textoLower = texto.toLowerCase();
+		const t = normalizar(texto);
 
-		for (let kb of KNOWLEDGE_BASE) {
-			if (kb.palabras_clave.some(palabra => textoLower.includes(palabra))) {
-				return kb.respuesta;
+		// Saludo simple
+		if (SALUDOS.some((s) => t === s || t.startsWith(s + " ")) && t.length <= 25) {
+			return "¡Hola! Soy el asistente de ECONFIA. Puedo explicarte sobre listas restrictivas, SARLAFT, debida diligencia, PEP, antecedentes y también ayudarte con planes, reportes o soporte. ¿Qué necesitas saber?";
+		}
+
+		let mejor = null;
+		let mejorPuntaje = 0;
+
+		for (const kb of KNOWLEDGE_BASE) {
+			let puntaje = 0;
+			for (const palabra of kb.palabras_clave) {
+				const p = normalizar(palabra);
+				if (!p) continue;
+				if (t.includes(p)) {
+					// Frases largas valen más que palabras sueltas
+					puntaje += p.includes(" ") ? 3 : 1;
+				}
+			}
+			if (puntaje > mejorPuntaje) {
+				mejorPuntaje = puntaje;
+				mejor = kb;
 			}
 		}
 
-		return "No entendí completamente tu pregunta. ¿Podrías darme más detalles o prefieres hablar con un asesor por WhatsApp?";
+		if (mejor && mejorPuntaje > 0) return mejor.respuesta;
+
+		return "Buena pregunta. Puedo ayudarte con temas como: qué son las listas restrictivas y para qué sirven, SARLAFT/SAGRILAFT, debida diligencia (KYC), PEP, antecedentes (Procuraduría, Contraloría, Policía, Rama Judicial), o con planes, reportes y soporte. ¿Sobre cuál quieres que te explique? También puedes hablar con un asesor por WhatsApp.";
 	};
 
 	// Enviar mensaje del usuario
@@ -262,7 +333,7 @@ export default function ChatbotFlotante() {
 						initial={{ opacity: 0, scale: 0.8, y: 20 }}
 						animate={{ opacity: 1, scale: 1, y: 0 }}
 						exit={{ opacity: 0, scale: 0.8, y: 20 }}
-						className="absolute bottom-20 right-0 w-96 h-[600px] bg-gradient-to-b from-slate-900 to-slate-950 rounded-2xl shadow-2xl border border-cyan-500/20 flex flex-col overflow-hidden"
+						className="absolute bottom-20 right-0 w-[92vw] max-w-sm h-[70vh] max-h-[560px] bg-gradient-to-b from-slate-900 to-slate-950 rounded-2xl shadow-2xl border border-cyan-500/20 flex flex-col overflow-hidden"
 					>
 						{/* Header */}
 						<div className="bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-4 flex items-center justify-between">

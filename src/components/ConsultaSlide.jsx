@@ -67,7 +67,7 @@ const ConsultaSlide = ({ consultaId }) => {
 
   if (loading) {
     return (
-      <div className="relative h-[78vh] md:h-[82vh] rounded-2xl overflow-hidden">
+      <div className="relative h-[70vh] md:h-[76vh] rounded-2xl overflow-hidden">
         <SkeletonVideoRight />
         <div className="absolute inset-0 grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
           <div className="p-5 md:p-8">
@@ -96,9 +96,9 @@ const ConsultaSlide = ({ consultaId }) => {
   const fechaConsulta = consulta?.fecha ? new Date(consulta.fecha).toLocaleString() : "—";
 
   return (
-    <div className="relative h-[78vh] md:h-[82vh] rounded-2xl overflow-hidden bg-black">
-      {/* VIDEO DERECHA — oculto en móvil */}
-      <div className="absolute inset-0 hidden sm:block">
+    <div className="relative h-[70vh] md:h-[76vh] rounded-2xl overflow-hidden bg-black">
+      {/* VIDEO DERECHA — solo en pantallas grandes (evita que se cruce con la tarjeta) */}
+      <div className="absolute inset-0 hidden lg:block">
         <video
           className="absolute right-0 top-0 h-full object-cover"
           src={holoVideo}
@@ -107,10 +107,10 @@ const ConsultaSlide = ({ consultaId }) => {
           loop
           playsInline
           style={{
-            WebkitMaskImage: "linear-gradient(270deg, rgba(0,0,0,1) 40%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,0.0) 70%)",
-            maskImage: "linear-gradient(270deg, rgba(0,0,0,1) 40%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,0.0) 70%)",
-            width: "72vw",
-            minWidth: 480
+            WebkitMaskImage: "linear-gradient(270deg, rgba(0,0,0,1) 45%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.0) 78%)",
+            maskImage: "linear-gradient(270deg, rgba(0,0,0,1) 45%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.0) 78%)",
+            width: "52vw",
+            minWidth: 440
           }}
         />
         <div
@@ -121,11 +121,11 @@ const ConsultaSlide = ({ consultaId }) => {
       </div>
 
       {/* PANEL CONTENIDO */}
-      <div className="relative z-10 h-full flex flex-col sm:grid sm:grid-cols-[minmax(0,820px)_1fr]">
+      <div className="relative z-10 h-full flex flex-col lg:grid lg:grid-cols-[minmax(0,720px)_1fr]">
         {/* Columna izquierda con datos + burbuja */}
-        <div className="h-full p-3 sm:p-5 md:p-8 overflow-hidden">
+        <div className="h-full p-3 sm:p-5 md:p-7 overflow-hidden">
           <div className={`rounded-2xl p-[1px] bg-gradient-to-br ${riskUI.ring} ${riskUI.glow} h-full`}>
-            <div className="rounded-2xl h-full bg-black/55 backdrop-blur-md border border-white/10 p-3 sm:p-5 md:p-6 overflow-y-auto">
+            <div className="rounded-2xl h-full bg-slate-950/90 backdrop-blur-md border border-white/10 p-3 sm:p-5 md:p-6 overflow-y-auto">
 
               {/* ====== GRID INTERNO 2 COLS ====== */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">

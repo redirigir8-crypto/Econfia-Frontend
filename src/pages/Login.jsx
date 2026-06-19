@@ -88,6 +88,8 @@ export default function Login() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         touchActivity();
+        // El SoundManager reproducirá el sonido de "login" tras la recarga.
+        sessionStorage.setItem("econfia_play_login", "1");
         setToast({
           type: "success",
           message: `Bienvenido ${data.user.username}!`,

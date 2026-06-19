@@ -47,6 +47,8 @@ import Beneficios from "./pages/Beneficios";
 import ChatbotFlotante from "./components/ChatbotFlotante";
 import AdminSoporte from "./views/AdminSoporte";
 import AdminBlog from "./components/AdminBlog";
+import AdminSonidos from "./components/AdminSonidos";
+import SoundManager from "./components/SoundManager";
 import {
   ShieldCheck,
   Zap,
@@ -315,7 +317,7 @@ function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.18),transparent_32%),radial-gradient(circle_at_center,rgba(14,165,233,0.10),transparent_45%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-slate-950/10 via-slate-950/20 to-slate-950/70" />
 
-          <div className="relative mx-auto grid min-h-[95vh] max-w-7xl grid-cols-1 items-center gap-14 px-4 pb-16 md:px-6 lg:grid-cols-[1.1fr_.9fr]">
+          <div className="relative mx-auto grid min-h-[80vh] max-w-7xl grid-cols-1 items-center gap-10 px-4 pb-14 pt-6 md:px-6 lg:grid-cols-[1.1fr_.9fr]">
             {/* Left */}
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-200 shadow-[0_0_25px_rgba(34,211,238,0.08)]">
@@ -323,7 +325,7 @@ function Home() {
                 Plataforma de verificación, riesgo y cumplimiento
               </div>
 
-              <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[1.02] text-white md:text-6xl xl:text-7xl">
+              <h1 className="mt-5 max-w-4xl text-3xl font-black leading-[1.05] text-white sm:text-4xl md:text-5xl xl:text-6xl">
                 Inteligencia para
                 <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
                   {" "}verificar, analizar{" "}
@@ -331,28 +333,28 @@ function Home() {
                 y decidir con confianza.
               </h1>
 
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
                 ECONFIA transforma procesos de validación en una experiencia visual,
                 sólida y ejecutiva. Centraliza consultas, evidencia, scoring de riesgo
                 y reportes profesionales en una sola plataforma.
               </p>
 
-              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="/consulta"
-                  className="group rounded-full bg-cyan-500 px-8 py-4 text-center text-base font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:bg-cyan-400 hover:shadow-[0_12px_40px_rgba(34,211,238,0.25)]"
+                  className="group rounded-full bg-cyan-500 px-7 py-3 text-center text-base font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:bg-cyan-400 hover:shadow-[0_12px_40px_rgba(34,211,238,0.25)]"
                 >
                   Iniciar consulta
                 </a>
                 <a
                   href="/precios"
-                  className="rounded-full border border-white/15 bg-white/5 px-8 py-4 text-center text-base font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-400/40 hover:bg-white/10"
+                  className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-center text-base font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-400/40 hover:bg-white/10"
                 >
                   Ver planes
                 </a>
               </div>
 
-              <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
                 {highlights.map((item) => (
                   <div
                     key={item.label}
@@ -372,7 +374,7 @@ function Home() {
 
               <div className="grid grid-cols-2 gap-5">
                 <div className="premium-card col-span-2 overflow-hidden">
-                  <div className="relative min-h-[320px]">
+                  <div className="relative min-h-[260px]">
                     <img
                       src={networkGif}
                       alt="Econfia monitoreo"
@@ -384,7 +386,7 @@ function Home() {
                         <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                         Monitoreo activo
                       </div>
-                      <h3 className="text-2xl font-bold text-white md:text-3xl">
+                      <h3 className="text-xl font-bold text-white md:text-2xl">
                         Verificación avanzada en tiempo real
                       </h3>
                       <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300 md:text-base">
@@ -635,6 +637,7 @@ export default function App() {
         <Router>
           <ParticlesBackground />
           <ChatbotFlotante />
+          <SoundManager />
           <Routes>
             {/* Públicas */}
             <Route path="/"                  element={<Home />}             />
@@ -680,6 +683,7 @@ export default function App() {
               <Route path="/4d9b2f6e"          element={<AdminFuentes />}             />
               <Route path="/5d2a9c8e"          element={<AdminSoporte />}             />
               <Route path="/2c8e5f1a"          element={<AdminBlog />}                />
+              <Route path="/8f4a1d7c"          element={<AdminSonidos />}             />
             </Route>
 
             <Route path="/a8e3c7b2" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />

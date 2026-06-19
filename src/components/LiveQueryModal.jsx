@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { playEventSound } from "./SoundManager";
 
 const ESTADO_LABEL = {
   pendiente: { text: "Pendiente", color: "text-yellow-300", dot: "bg-yellow-400" },
@@ -40,6 +41,9 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
     setActiveIdx(0);
     setDone(false);
     clearTimeout(closeTimeoutRef.current);
+
+    // Sonido: se inició una consulta
+    playEventSound("consulta");
 
     const poll = async () => {
       try {
@@ -122,6 +126,9 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
     clearTimeout(closeTimeoutRef.current);
     if (!done) return;
 
+    // Sonido: la consulta terminó y hay resultados
+    playEventSound("resultados");
+
     closeTimeoutRef.current = setTimeout(() => {
       onFinished?.();
     }, 1200);
@@ -133,6 +140,13 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
 
   const active = resultadosVisibles[activeIdx] || null;
   const progress = totalFuentes > 0 ? Math.round((completados / totalFuentes) * 100) : 0;
+
+  // Profesión encontrada en CUALQUIER fuente de profesión. Persistente: no depende
+  // de qué tarjeta esté rotando, se queda fija mientras dura la consulta.
+  const profesionEncontrada =
+    resultados
+      .map((r) => String(r.profesion || "").trim())
+      .find((p) => p.length > 0) || "";
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm px-4">
@@ -170,6 +184,26 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
               />
             </div>
           </div>
+
+          {/* Banner fijo de profesión encontrada — permanece visible toda la consulta */}
+          {profesionEncontrada && (
+            <div className="flex items-center gap-3 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 flex-shrink-0 text-cyan-300" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a10 10 0 0 1 10 10c0 1.5-.2 3-.6 4.4" />
+                <path d="M12 6a6 6 0 0 1 6 6c0 2-.3 4-1 6" />
+                <path d="M8 12a4 4 0 0 1 8 0c0 3-.5 6-1.5 8.5" />
+                <path d="M12 12v2c0 3-.8 6-2 8.5" />
+                <path d="M2 12a10 10 0 0 1 5-8.7" />
+                <path d="M5 18c.7-1.9 1-4 1-6a6 6 0 0 1 1.5-4" />
+              </svg>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-cyan-300/80">
+                  Profesión encontrada
+                </p>
+                <p className="text-sm font-bold text-cyan-100 truncate">{profesionEncontrada}</p>
+              </div>
+            </div>
+          )}
 
           {/* Tarjeta de fuente activa */}
           {active ? (

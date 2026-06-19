@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow } from "swiper/modules";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Search, FileText, LogOut, User, HelpCircle, HardHat, Target, ArrowUpCircle, BookOpen, ShieldCheck,
+  Search, FileText, LogOut, User, HelpCircle, HardHat, Target, ArrowUpCircle, BookOpen, ShieldCheck, Volume2,
 } from "lucide-react";
 import { Fuel } from "lucide-react";
 import "swiper/css";
@@ -136,6 +136,7 @@ if (isAdmin) {
     { path: "/1e5c8a4b", icon: <FileText size={28} strokeWidth={1.5} />, label: "Admin Planes" },
     { path: "/4d9b2f6e", icon: <Search size={28} strokeWidth={1.5} />, label: "Admin Fuentes" },
     { path: "/2c8e5f1a", icon: <BookOpen size={28} strokeWidth={1.5} />, label: "Admin Blog" },
+    { path: "/8f4a1d7c", icon: <Volume2 size={28} strokeWidth={1.5} />, label: "Admin Sonidos" },
   ];
 }
 
