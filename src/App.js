@@ -257,6 +257,55 @@ function LiveStatusCard({ className = "" }) {
   );
 }
 
+function IntroVideoOverlay() {
+  const [visible, setVisible] = React.useState(true);
+  const [leaving, setLeaving] = React.useState(false);
+  const videoRef = React.useRef(null);
+
+  const closeIntro = React.useCallback(() => {
+    setLeaving(true);
+    window.setTimeout(() => setVisible(false), 900);
+  }, []);
+
+  const playIntro = React.useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = false;
+    video.volume = 1;
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {
+        video.muted = true;
+        video.play().catch(closeIntro);
+      });
+    }
+  }, [closeIntro]);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      className={`fixed inset-0 z-[9999] bg-black transition-opacity duration-700 ease-out ${
+        leaving ? "opacity-0" : "opacity-100"
+      }`}
+    >
+      <video
+        ref={videoRef}
+        className={`h-full w-full object-cover transition-transform duration-700 ease-out ${
+          leaving ? "scale-[1.03]" : "scale-100"
+        }`}
+        src="/videos/opcin%20uno.mp4"
+        autoPlay
+        playsInline
+        preload="auto"
+        onCanPlay={playIntro}
+        onEnded={closeIntro}
+        onError={closeIntro}
+      />
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────────
    Home — página principal
 ───────────────────────────────────────────────────────────── */
@@ -309,6 +358,7 @@ function Home() {
 
   return (
     <div className="min-h-screen text-white">
+      <IntroVideoOverlay />
       <Header />
 
       <main className="relative overflow-hidden">
