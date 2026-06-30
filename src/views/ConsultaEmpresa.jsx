@@ -1053,16 +1053,17 @@ export default function ConsultaEmpresa() {
                             )}
                           </div>
                         ))}
-                        {resultadoEmpresa.representante_legal?.mensaje && (
-                          <div className="rounded-2xl border border-white/8 bg-slate-950/35 p-4 text-sm leading-7 text-slate-300 whitespace-pre-line">
-                            {resultadoEmpresa.representante_legal.mensaje}
-                          </div>
-                        )}
                       </div>
                     ) : resultadoEmpresa.representante_legal?.mensaje ? (
-                      <div className="rounded-2xl border border-white/8 bg-slate-950/35 p-4 text-sm leading-7 text-slate-300 whitespace-pre-line">
-                        {resultadoEmpresa.representante_legal.mensaje}
-                      </div>
+                      <details className="group rounded-2xl border border-white/8 bg-slate-950/35 p-4">
+                        <summary className="cursor-pointer list-none text-sm font-semibold text-sky-300 marker:hidden">
+                          <span className="group-open:hidden">Ver detalle del nombramiento</span>
+                          <span className="hidden group-open:inline">Ocultar detalle</span>
+                        </summary>
+                        <div className="mt-3 max-h-72 overflow-y-auto text-sm leading-7 text-slate-300 whitespace-pre-line">
+                          {resultadoEmpresa.representante_legal.mensaje}
+                        </div>
+                      </details>
                     ) : (
                       <div className="text-slate-300">Información no disponible.</div>
                     )}
