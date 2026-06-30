@@ -28,6 +28,7 @@ Thumbs.db
 
 # Large media and binaries
 public/videos/*.mp4
+!public/videos/opcin uno.mp4
 public/videos/*.mov
 public/videos/*.avi
 public/videos/*.mkv
