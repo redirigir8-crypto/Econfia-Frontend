@@ -86,7 +86,7 @@ export default function ServicioEconfia() {
             Plataforma de validación, consulta y análisis de riesgo
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
             Econfia
           </h1>
 

@@ -169,7 +169,7 @@ function SectionTitle({ eyebrow, title, description, center = false }) {
           {eyebrow}
         </p>
       )}
-      <h2 className="text-3xl font-bold leading-tight text-white md:text-5xl">{title}</h2>
+      <h2 className="text-3xl font-bold leading-tight text-white md:text-4xl">{title}</h2>
       {description && (
         <p className="mt-4 text-base leading-7 text-slate-300 md:text-lg">{description}</p>
       )}
@@ -426,7 +426,7 @@ function Home() {
                 Plataforma de verificación, riesgo y cumplimiento
               </div>
 
-              <h1 className="mt-5 max-w-4xl text-3xl font-black leading-[1.05] text-white sm:text-4xl md:text-5xl xl:text-6xl">
+              <h1 className="mt-5 max-w-4xl text-3xl font-bold leading-[1.15] text-white sm:text-4xl md:text-[2.75rem] xl:text-5xl">
                 Inteligencia para
                 <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
                   {" "}verificar, analizar{" "}
@@ -573,7 +573,7 @@ function Home() {
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
                 ¿Por qué ECONFIA?
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-white md:text-5xl">
+              <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
                 Un ecosistema de verificación con presencia, claridad y valor corporativo
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
@@ -605,7 +605,7 @@ function Home() {
                   <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
                     Soluciones ECONFIA
                   </p>
-                  <h2 className="mt-3 text-3xl font-bold text-white md:text-5xl">
+                  <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
                     Diferentes consultas, una sola experiencia premium
                   </h2>
                   <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
@@ -682,7 +682,7 @@ function Home() {
                   <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
                     Empieza ahora
                   </p>
-                  <h2 className="mt-4 text-3xl font-bold text-white md:text-5xl">
+                  <h2 className="mt-4 text-3xl font-bold text-white md:text-4xl">
                     Haz que la verificación se vea tan sólida como tu servicio.
                   </h2>
                   <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">

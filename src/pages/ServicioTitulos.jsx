@@ -64,7 +64,7 @@ export default function ServicioTitulos() {
 
             <div className="mt-8 grid gap-8 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
               <div>
-                <h1 className="text-4xl md:text-6xl font-black leading-tight text-white">
+                <h1 className="text-4xl md:text-5xl font-bold leading-tight text-white">
                   Econfia Títulos
                 </h1>
                 <p className="mt-5 max-w-3xl text-lg md:text-xl leading-8 text-slate-300">
@@ -191,7 +191,7 @@ export default function ServicioTitulos() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">
                 Cómo se entiende
               </p>
-              <h2 className="mt-3 text-3xl md:text-5xl font-bold text-white">
+              <h2 className="mt-3 text-3xl md:text-4xl font-bold text-white">
                 Un flujo simple para que el servicio se entienda rápido
               </h2>
               <p className="mt-4 text-lg leading-8 text-slate-300">
@@ -224,7 +224,7 @@ export default function ServicioTitulos() {
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-200">
                   Cierre
                 </p>
-                <h2 className="mt-3 text-3xl md:text-5xl font-bold text-white">
+                <h2 className="mt-3 text-3xl md:text-4xl font-bold text-white">
                   Econfia Títulos debe verse tan confiable como el proceso que respalda
                 </h2>
                 <p className="mt-5 text-lg leading-8 text-slate-300">

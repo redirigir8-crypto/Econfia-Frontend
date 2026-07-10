@@ -207,7 +207,7 @@ export default function Blog() {
               📚 Centro de Conocimiento
             </span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight mb-4 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-4 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
             Blog Econfia
           </h1>
           <p className="text-xl text-white/70 max-w-2xl mx-auto">

@@ -368,7 +368,7 @@ export default function Pricing() {
               Planes y precios
             </p>
             <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent"
+              className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent"
               style={{ fontFamily: "poppins, sans-serif" }}
             >
               Elige el plan perfecto para ti

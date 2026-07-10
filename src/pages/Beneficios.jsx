@@ -213,7 +213,7 @@ export default function Beneficios() {
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
                 Ventajas competitivas
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-white md:text-5xl">
+              <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
                 ¿Por qué elegir ECONFIA?
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
@@ -292,7 +292,7 @@ export default function Beneficios() {
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
                 Reportería profesional
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-white md:text-5xl">
+              <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
                 Todos los reportes que maneja Econfia 
               </h2>
               <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">

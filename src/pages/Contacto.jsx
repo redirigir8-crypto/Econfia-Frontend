@@ -292,7 +292,7 @@ export default function Contacto() {
         <div className="relative max-w-6xl mx-auto">
           {/* Encabezado */}
           <div className="text-center mb-16 animate-fade-in-up">
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-black mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
                 Cómo nos
               </span>

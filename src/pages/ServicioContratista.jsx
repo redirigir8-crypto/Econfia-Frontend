@@ -93,7 +93,7 @@ export default function ServicioContratista() {
               Solución documental para procesos de contratación
             </div>
 
-            <h1 className="max-w-4xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+            <h1 className="max-w-4xl text-4xl font-bold leading-tight tracking-tight md:text-5xl">
               Econfia Contratista
               <span className="mt-2 block bg-gradient-to-r from-purple-300 via-fuchsia-200 to-violet-300 bg-clip-text text-transparent">
                 documentos listos, más claridad operativa

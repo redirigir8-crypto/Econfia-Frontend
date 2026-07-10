@@ -236,7 +236,7 @@ if (isAdmin) {
           <button
             type="button"
             onClick={() => navigate("/f1d8a5c3")}
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors duration-200 outline-none"
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors duration-200 outline-none"
           >
             <LogOut size={15} strokeWidth={1.75} />
             Salir
@@ -256,7 +256,7 @@ if (isAdmin) {
                   type="button"
                   data-active={isActive}
                   onClick={() => navigate(item.path)}
-                  className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 outline-none ${
+                  className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 outline-none ${
                     isActive
                       ? "taskbar-item-active text-white"
                       : `text-white/55 hover:text-white hover:bg-white/[0.06] ${
