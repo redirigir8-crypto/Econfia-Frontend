@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation, Outlet, useNavigate } from "react-router-dom";
 import Taskbar from "../components/TaskBar";
@@ -10,9 +10,25 @@ import {
   touchActivity,
 } from "../utils/session";
 
+const RESULTADOS_DETALLE_PREFIX = "/d3b7f1e9/";
+
 export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [resultadosDetalleAbierto, setResultadosDetalleAbierto] = useState(false);
+  const hideLayout =
+    location.pathname.startsWith(RESULTADOS_DETALLE_PREFIX) ||
+    (location.pathname === "/d3b7f1e9" && resultadosDetalleAbierto);
+
+  useEffect(() => {
+    if (!location.pathname.startsWith("/d3b7f1e9")) {
+      setResultadosDetalleAbierto(false);
+      return undefined;
+    }
+    const handler = (event) => setResultadosDetalleAbierto(Boolean(event.detail));
+    window.addEventListener("econfia-resultados-detalle", handler);
+    return () => window.removeEventListener("econfia-resultados-detalle", handler);
+  }, [location.pathname]);
 
   useEffect(() => {
     let timeoutId = null;
@@ -115,25 +131,29 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex flex-col bg-transparent">
-      {/* Logo — esquina superior izquierda */}
-      <div className="hidden md:flex fixed md:top-6 md:left-6 z-40 items-center gap-3 group">
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-red-500/30 blur-xl scale-125 group-hover:bg-red-500/50 transition-all duration-500" />
-          <div className="relative w-14 h-14 rounded-full bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_24px_rgba(220,38,38,0.3)] group-hover:shadow-[0_0_36px_rgba(220,38,38,0.5)] transition-all duration-500 group-hover:scale-105">
-            <img
-              src="/img/logo-econfia-1.png"
-              alt="Econfía"
-              className="w-9 h-9 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]"
-            />
+      {!hideLayout && (
+        <>
+          {/* Logo — esquina superior izquierda */}
+          <div className="hidden md:flex fixed md:top-6 md:left-6 z-40 items-center gap-3 group">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-red-500/30 blur-xl scale-125 group-hover:bg-red-500/50 transition-all duration-500" />
+              <div className="relative w-14 h-14 rounded-full bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_24px_rgba(220,38,38,0.3)] group-hover:shadow-[0_0_36px_rgba(220,38,38,0.5)] transition-all duration-500 group-hover:scale-105">
+                <img
+                  src="/img/logo-econfia-1.png"
+                  alt="Econfía"
+                  className="w-9 h-9 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]"
+                />
+              </div>
+            </div>
+            <div>
+              <p className="text-transparent bg-clip-text font-black text-base tracking-[0.3em] uppercase" style={{backgroundImage:"linear-gradient(to right, #ffffff, #bae6fd, #38bdf8, #0ea5e9)", filter:"drop-shadow(0 0 8px rgba(56,189,248,0.9)) drop-shadow(0 0 18px rgba(56,189,248,0.5))"}}>Econfia</p>
+              <p className="text-white/40 text-[9px] tracking-[0.2em] uppercase font-light mt-0.5">Una marca de Grupo Soluciones</p>
+            </div>
           </div>
-        </div>
-        <div>
-          <p className="text-transparent bg-clip-text font-black text-base tracking-[0.3em] uppercase" style={{backgroundImage:"linear-gradient(to right, #ffffff, #bae6fd, #38bdf8, #0ea5e9)", filter:"drop-shadow(0 0 8px rgba(56,189,248,0.9)) drop-shadow(0 0 18px rgba(56,189,248,0.5))"}}>Econfia</p>
-          <p className="text-white/40 text-[9px] tracking-[0.2em] uppercase font-light mt-0.5">Una marca de Grupo Soluciones</p>
-        </div>
-      </div>
 
-      <Taskbar />
+          <Taskbar />
+        </>
+      )}
 
       <AnimatePresence mode="wait">
         <motion.main
@@ -142,7 +162,7 @@ export default function Dashboard() {
           animate={{ opacity: 1, filter: "blur(0px)" }}
           exit={{ opacity: 0, filter: "blur(10px)" }}
           transition={{ duration: 0.35 }}
-          className="flex-1 w-full pt-20"
+          className={`flex-1 w-full ${hideLayout ? "" : "pt-20"}`}
         >
           {/* Aquí se renderizan las rutas hijas definidas en App.jsx */}
           <Outlet />

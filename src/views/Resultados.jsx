@@ -446,6 +446,15 @@ export default function Resultados() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [consultaSeleccionada, setConsultaSeleccionada] = useState(null);
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("econfia-resultados-detalle", { detail: Boolean(consultaSeleccionada) })
+    );
+    return () => {
+      window.dispatchEvent(new CustomEvent("econfia-resultados-detalle", { detail: false }));
+    };
+  }, [consultaSeleccionada]);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({ estado: "", fecha: "" });
   const [showModalIndividual, setShowModalIndividual] = useState(false);
