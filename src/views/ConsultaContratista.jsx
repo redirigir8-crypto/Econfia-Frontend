@@ -341,23 +341,6 @@ export default function ConsultaContratista() {
           style={{ animationDelay: "1s" }}
         />
 
-        {/* Logo — esquina superior izquierda */}
-        <div className="hidden md:flex absolute md:top-6 md:left-6 z-20 items-center gap-3 group">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-red-500/30 blur-xl scale-125 group-hover:bg-red-500/50 transition-all duration-500" />
-            <div className="relative w-14 h-14 rounded-full bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center shadow-[0_0_24px_rgba(220,38,38,0.3)] group-hover:shadow-[0_0_36px_rgba(220,38,38,0.5)] transition-all duration-500 group-hover:scale-105">
-              <img
-                src="/img/logo-econfia-1.png"
-                alt="Econfía"
-                className="w-9 h-9 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]"
-              />
-            </div>
-          </div>
-          <div>
-            <p className="text-transparent bg-clip-text font-black text-base tracking-[0.3em] uppercase" style={{backgroundImage:"linear-gradient(to right, #ffffff, #bae6fd, #38bdf8, #0ea5e9)", filter:"drop-shadow(0 0 8px rgba(56,189,248,0.9)) drop-shadow(0 0 18px rgba(56,189,248,0.5))"}}>Econfia</p>
-            <p className="text-white/40 text-[9px] tracking-[0.2em] uppercase font-light mt-0.5">Una marca de Grupo Soluciones</p>
-          </div>
-        </div>
         <div className="max-w-5xl mx-auto px-4 w-full relative z-10">
           <div className="grid md:grid-cols-2 gap-6 items-center">
             {/* Hero copy (izquierda) */}

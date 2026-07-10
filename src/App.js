@@ -260,6 +260,7 @@ function LiveStatusCard({ className = "" }) {
 function IntroVideoOverlay() {
   const [visible, setVisible] = React.useState(true);
   const [leaving, setLeaving] = React.useState(false);
+  const [started, setStarted] = React.useState(false);
   const videoRef = React.useRef(null);
 
   const closeIntro = React.useCallback(() => {
@@ -267,7 +268,8 @@ function IntroVideoOverlay() {
     window.setTimeout(() => setVisible(false), 900);
   }, []);
 
-  const playIntro = React.useCallback(() => {
+  const startIntro = React.useCallback(() => {
+    setStarted(true);
     const video = videoRef.current;
     if (!video) return;
     video.muted = false;
@@ -295,13 +297,62 @@ function IntroVideoOverlay() {
           leaving ? "scale-[1.03]" : "scale-100"
         }`}
         src="/videos/opcin%20uno.mp4"
-        autoPlay
         playsInline
         preload="auto"
-        onCanPlay={playIntro}
         onEnded={closeIntro}
         onError={closeIntro}
       />
+
+      {!started && (
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center gap-8 backdrop-blur-sm"
+          style={{
+            background:
+              "radial-gradient(circle at 50% 45%, rgba(120,10,20,0.45) 0%, rgba(15,2,4,0.85) 45%, #000 100%)",
+          }}
+        >
+          <style>{`
+            @keyframes econfiaShine {
+              0% { transform: translateX(-150%) rotate(20deg); }
+              100% { transform: translateX(250%) rotate(20deg); }
+            }
+            @keyframes econfiaGlow {
+              0%, 100% { box-shadow: 0 0 25px 4px rgba(239,68,68,0.45), 0 0 60px 10px rgba(239,68,68,0.15); }
+              50% { box-shadow: 0 0 40px 10px rgba(239,68,68,0.7), 0 0 90px 18px rgba(239,68,68,0.28); }
+            }
+            .econfia-enter-btn { animation: econfiaGlow 2.1s ease-in-out infinite; }
+            .econfia-shine-sweep {
+              position: absolute;
+              top: -20%;
+              left: 0;
+              width: 40%;
+              height: 140%;
+              background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+              animation: econfiaShine 2.6s ease-in-out infinite;
+              pointer-events: none;
+            }
+          `}</style>
+
+          <div className="flex flex-col items-center gap-8">
+            <img
+              src="/logo192.png"
+              alt="Econfia"
+              className="h-16 w-auto drop-shadow-[0_0_25px_rgba(239,68,68,0.55)]"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+            <button
+              type="button"
+              onClick={startIntro}
+              className="econfia-enter-btn relative overflow-hidden rounded-full bg-gradient-to-r from-red-600 via-rose-500 to-red-700 px-12 py-4 text-lg font-semibold tracking-wide text-white transition-transform duration-300 hover:scale-105"
+            >
+              <span className="econfia-shine-sweep" />
+              <span className="relative">!Comenzar¡</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

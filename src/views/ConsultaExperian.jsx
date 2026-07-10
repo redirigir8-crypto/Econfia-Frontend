@@ -162,29 +162,6 @@ export default function ConsultaExperian() {
         <div className="absolute right-20 top-20 h-72 w-72 animate-pulse rounded-full bg-cyan-500/10 blur-3xl" />
         <div className="absolute bottom-20 left-20 h-96 w-96 animate-pulse rounded-full bg-blue-500/10 blur-3xl" style={{ animationDelay: "1s" }} />
 
-        <div className="hidden items-center gap-3 absolute left-6 top-6 z-20 md:flex group">
-          <div className="relative">
-            <div className="absolute inset-0 scale-125 rounded-full bg-red-500/30 blur-xl transition-all duration-500 group-hover:bg-red-500/50" />
-            <div className="relative flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5 shadow-[0_0_24px_rgba(220,38,38,0.3)] backdrop-blur-md transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_0_36px_rgba(220,38,38,0.5)]">
-              <img src="/img/logo-econfia-1.png" alt="Econfia" className="h-9 w-9 object-contain drop-shadow-[0_0_8px_rgba(220,38,38,0.8)]" />
-            </div>
-          </div>
-          <div>
-            <p
-              className="bg-clip-text text-base font-black uppercase tracking-[0.3em] text-transparent"
-              style={{
-                backgroundImage: "linear-gradient(to right, #ffffff, #bae6fd, #38bdf8, #0ea5e9)",
-                filter: "drop-shadow(0 0 8px rgba(56,189,248,0.9))",
-              }}
-            >
-              Econfia
-            </p>
-            <p className="mt-0.5 text-[9px] font-light uppercase tracking-[0.2em] text-white/40">
-              Una marca de Grupo Soluciones
-            </p>
-          </div>
-        </div>
-
         <div className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 items-center gap-6 px-4 md:grid-cols-2">
           <div className="space-y-5 text-center md:text-left">
             <div>
