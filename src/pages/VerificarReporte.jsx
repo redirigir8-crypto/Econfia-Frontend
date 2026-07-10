@@ -13,19 +13,18 @@ const RIESGO_META = {
 };
 
 const SCORE_META = [
+  { label: "No registra incidentes", color: "bg-green-500",  text: "text-green-400"  },
+  { label: "Coincidencia por revisar", color: "bg-yellow-400", text: "text-yellow-400" },
+  { label: "Moderado",   color: "bg-orange-500", text: "text-orange-400" },
   { label: "Crítico",    color: "bg-red-500",    text: "text-red-400"    },
-  { label: "Precaución", color: "bg-orange-500", text: "text-orange-400" },
-  { label: "Moderado",   color: "bg-yellow-400", text: "text-yellow-400" },
-  { label: "Favorable",  color: "bg-blue-400",   text: "text-blue-400"   },
-  { label: "Limpio",     color: "bg-green-500",  text: "text-green-400"  },
 ];
 
 function ScoreDots({ score }) {
-  const s = Math.max(1, Math.min(5, score || 1));
+  const s = Math.max(1, Math.min(4, score || 1));
   const meta = SCORE_META[s - 1];
   return (
     <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((i) => (
+      {[1, 2, 3, 4].map((i) => (
         <span
           key={i}
           className={`inline-block w-2.5 h-2.5 rounded-full ${
@@ -211,7 +210,7 @@ export default function VerificarReporte() {
                   {data.score_promedio != null && (
                     <p className="text-sm text-gray-400 mt-0.5">
                       Score promedio:{" "}
-                      <span className="text-white font-bold">{data.score_promedio} / 5</span>
+                      <span className="text-white font-bold">{data.score_promedio} / 4</span>
                     </p>
                   )}
                   {/* Barra de progreso */}
@@ -256,7 +255,7 @@ export default function VerificarReporte() {
                         <div className="mt-1 flex items-center gap-2">
                           <ScoreDots score={f.score} />
                           <span className="text-[10px] text-gray-500">
-                            {SCORE_META[Math.max(0, Math.min(4, (f.score || 1) - 1))].label}
+                            {SCORE_META[Math.max(0, Math.min(3, (f.score || 1) - 1))].label}
                           </span>
                         </div>
                       </div>
