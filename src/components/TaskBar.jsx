@@ -76,7 +76,10 @@ if (hasPlanes) {
     consultaItems.push({ path: "/1d5f8e3a", icon: <User size={16} strokeWidth={1.75} />, label: "E-Identidad", color: "teal" });
   }
   if (planes.includes("experian")) {
-    consultaItems.push({ path: "/5c2e8f4a", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Experian", color: "sky" });
+    consultaItems.push({ path: "/5c2e8f4a", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Central de riesgo", color: "sky" });
+  }
+  if (planes.includes("historia_credito") || planes.includes("experian")) {
+    consultaItems.push({ path: "/3e9f7c1d", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Historia de Crédito", color: "sky" });
   }
 }
 
