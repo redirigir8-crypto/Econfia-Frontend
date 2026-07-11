@@ -2,6 +2,8 @@ import TablaResultados from "../components/TablaResultados";
 import LiveQueryModal from "../components/LiveQueryModal";
 import DetalleResultados from "../components/DetalleResultados";
 import ExperianDetalleResultados from "../components/ExperianDetalleResultados";
+import HdcDetalleResultados from "../components/HdcDetalleResultados";
+import ReconocerDetalleResultados from "../components/ReconocerDetalleResultados";
 import EIdentidadLoteModal from "../components/EIdentidadLoteModal";
 import ModalDescargaIndividual from "../modals/ModalDescargaIndividual";
 import ConsultaSlide from "../components/ConsultaSlide";
@@ -14,7 +16,14 @@ import "swiper/css/pagination";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, FileDown, FileText, Images } from "lucide-react";
-import { isExperianConsulta, normalizeExperianConsulta } from "../utils/experian";
+import {
+  isExperianConsulta,
+  normalizeExperianConsulta,
+  isHdcConsulta,
+  normalizeHdcConsulta,
+  isReconocerConsulta,
+  normalizeReconocerConsulta,
+} from "../utils/experian";
 
 const EXPERIAN_PDF_THEME_OPTIONS = ["claro", "oscuro"];
 
@@ -518,24 +527,38 @@ export default function Resultados() {
         Authorization: `Token ${token}`,
       };
 
-      const [consultasRes, experianRes] = await Promise.all([
+      const [consultasRes, experianRes, hdcRes, reconocerRes] = await Promise.all([
         fetch(`${API_URL}/api/consultas/`, { headers }),
         fetch(`${API_URL}/api/experian/consultas/`, { headers }),
+        fetch(`${API_URL}/api/hdc/consultas/`, { headers }),
+        fetch(`${API_URL}/api/reconocer/consultas/`, { headers }),
       ]);
 
       if (!consultasRes.ok) throw new Error(`Error HTTP: ${consultasRes.status}`);
 
       const consultasJson = await consultasRes.json();
       let experianRows = [];
+      let hdcRows = [];
+      let reconocerRows = [];
 
       if (experianRes.ok) {
         const experianJson = await experianRes.json();
         experianRows = (experianJson?.consultas || []).map(normalizeExperianConsulta);
       }
+      if (hdcRes.ok) {
+        const hdcJson = await hdcRes.json();
+        hdcRows = (hdcJson?.consultas || []).map(normalizeHdcConsulta);
+      }
+      if (reconocerRes.ok) {
+        const reconocerJson = await reconocerRes.json();
+        reconocerRows = (reconocerJson?.consultas || []).map(normalizeReconocerConsulta);
+      }
 
       const mergedRows = [
         ...(Array.isArray(consultasJson) ? consultasJson : []).map(normalizeCoreConsulta),
         ...experianRows,
+        ...hdcRows,
+        ...reconocerRows,
       ].sort((left, right) => {
         const leftTime = left.fecha ? new Date(left.fecha).getTime() : 0;
         const rightTime = right.fecha ? new Date(right.fecha).getTime() : 0;
@@ -839,12 +862,34 @@ export default function Resultados() {
     }
   };
 
+  const descargarProductoPdf = async (kind, id) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/api/${kind}/consultas/${id}/pdf/`, {
+        headers: token ? { Authorization: `Token ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`Error al descargar PDF: ${res.status}`);
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `${kind}_${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(link.href);
+    } catch (error) {
+      alert(error.message || "No se pudo descargar el PDF.");
+    }
+  };
+
   const consultaActual = consultaSeleccionada || null;
   const consultaTipoActual =
     consultaActual?.tipo_consulta ||
     consultaActual?.tipo ||
     (consultaActual?.es_econfiafask ? "econfiafask" : "");
   const isExperianActual = isExperianConsulta(consultaActual);
+  const isHdcActual = isHdcConsulta(consultaActual);
+  const isReconocerActual = isReconocerConsulta(consultaActual);
 
   return (
     <section className="relative min-h-screen py-4 md:py-6 pb-32 md:pb-36 overflow-hidden bg-transparent">
@@ -934,18 +979,60 @@ export default function Resultados() {
           </div>
         ) : consultaTipoActual !== "e-identidad" ? (
         <div className="w-full max-w-7xl mx-auto min-h-[78vh] xl:min-h-[82vh] h-[calc(100vh-10rem)] max-h-[calc(100vh-5rem)]">
-          <FloatingActionsPortal
-            apiUrl={API_URL}
-            consultaId={consultaSeleccionada.id}
-            consultaTipo={consultaTipoActual}
-            consultaSource={consultaActual?.source}
-            experianPdfTheme={experianPdfTheme}
-            savingExperianPdfTheme={savingExperianPdfTheme}
-            onChangeExperianPdfTheme={handleExperianPdfThemeChange}
-            onBack={() => setConsultaSeleccionada(null)}
-            onOpenIndividual={isExperianActual ? undefined : () => setShowModalIndividual(true)}
-          />
-          {isExperianActual ? (
+          {!isHdcActual && !isReconocerActual && (
+            <FloatingActionsPortal
+              apiUrl={API_URL}
+              consultaId={consultaSeleccionada.id}
+              consultaTipo={consultaTipoActual}
+              consultaSource={consultaActual?.source}
+              experianPdfTheme={experianPdfTheme}
+              savingExperianPdfTheme={savingExperianPdfTheme}
+              onChangeExperianPdfTheme={handleExperianPdfThemeChange}
+              onBack={() => setConsultaSeleccionada(null)}
+              onOpenIndividual={isExperianActual ? undefined : () => setShowModalIndividual(true)}
+            />
+          )}
+          {isHdcActual ? (
+            <div className="h-full min-h-0 overflow-y-auto pt-2">
+              <div className="mb-4 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConsultaSeleccionada(null)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/30 hover:text-white"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Regresar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => descargarProductoPdf("hdc", consultaSeleccionada.id)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-cyan-400 hover:to-blue-400"
+                >
+                  <FileText className="h-4 w-4" /> Descargar PDF
+                </button>
+              </div>
+              <HdcDetalleResultados consultaId={consultaSeleccionada.id} />
+            </div>
+          ) : isReconocerActual ? (
+            <div className="h-full min-h-0 overflow-y-auto pt-2">
+              <div className="mb-4 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConsultaSeleccionada(null)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/30 hover:text-white"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Regresar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => descargarProductoPdf("reconocer", consultaSeleccionada.id)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-cyan-400 hover:to-blue-400"
+                >
+                  <FileText className="h-4 w-4" /> Descargar PDF
+                </button>
+              </div>
+              <ReconocerDetalleResultados consultaId={consultaSeleccionada.id} />
+            </div>
+          ) : isExperianActual ? (
             <div className="h-full min-h-0 pt-14">
               <ExperianDetalleResultados consultaId={consultaSeleccionada.id} />
             </div>

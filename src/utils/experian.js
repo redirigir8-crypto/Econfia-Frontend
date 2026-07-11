@@ -50,3 +50,49 @@ export function normalizeExperianConsulta(item) {
     consulta_original_id: item.id,
   };
 }
+
+// ── Historia de Crédito (HDC) ──────────────────────────────────────────────
+
+export function isHdcConsulta(item) {
+  const source = String(item?.source || "").trim().toLowerCase();
+  const tipo = String(item?.tipo_consulta || item?.tipo || "").trim().toLowerCase();
+  return source === "hdc" || tipo === "hdc";
+}
+
+export function normalizeHdcConsulta(item) {
+  return {
+    ...item,
+    id: item.id,
+    row_id: `hdc-${item.id}`,
+    source: "hdc",
+    tipo: "PERSONA",
+    tipo_consulta: "Historia de Crédito",
+    cedula: item.numero_identificacion || "",
+    nombre: item.nombre_mostrado || item.apellido_razon_social || "",
+    fecha: item.created_at || item.updated_at || null,
+    consulta_original_id: item.id,
+  };
+}
+
+// ── Reconocer Master ───────────────────────────────────────────────────────
+
+export function isReconocerConsulta(item) {
+  const source = String(item?.source || "").trim().toLowerCase();
+  const tipo = String(item?.tipo_consulta || item?.tipo || "").trim().toLowerCase();
+  return source === "reconocer" || tipo === "reconocer";
+}
+
+export function normalizeReconocerConsulta(item) {
+  return {
+    ...item,
+    id: item.id,
+    row_id: `reconocer-${item.id}`,
+    source: "reconocer",
+    tipo: "PERSONA",
+    tipo_consulta: "Reconocer",
+    cedula: item.numero_identificacion || "",
+    nombre: item.nombre_mostrado || item.apellido_razon_social || "",
+    fecha: item.created_at || item.updated_at || null,
+    consulta_original_id: item.id,
+  };
+}

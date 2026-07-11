@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CreditCard,
   Landmark,
@@ -123,13 +123,59 @@ function AccountCard({ titulo, subtitulo, estado, filas }) {
 
 // ── Componente principal ────────────────────────────────────────────────────
 
-export default function HdcDetalleResultados({ data, consulta }) {
+export default function HdcDetalleResultados({ data, consulta, consultaId }) {
   const [showJson, setShowJson] = useState(false);
+  const [fetched, setFetched] = useState(null);
+  const [loading, setLoading] = useState(Boolean(consultaId && !data));
+  const [error, setError] = useState("");
+
+  // Modo "por id": carga el detalle desde el backend (como el de Experian).
+  useEffect(() => {
+    if (!consultaId || data) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/api/hdc/consultas/${consultaId}/`,
+          { headers: { Authorization: `Token ${token}` } }
+        );
+        const json = await response.json();
+        if (!response.ok) throw new Error(json?.detail || `Error HTTP ${response.status}`);
+        if (!cancelled) setFetched(json);
+      } catch (e) {
+        if (!cancelled) setError(e.message || "No fue posible cargar la Historia de Crédito.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [consultaId, data]);
+
+  const consultaObj = consulta || fetched || {};
+  const respuesta = useMemo(() => data || fetched?.respuesta_json || {}, [data, fetched]);
 
   const pr = useMemo(() => {
-    const root = data || {};
+    const root = respuesta || {};
     return root.ReportHDCplus?.productResult || root.productResult || root.ReportHDCplus || root;
-  }, [data]);
+  }, [respuesta]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-2 border-t-cyan-400 border-slate-800" />
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="mx-auto max-w-md rounded-2xl border border-rose-500/20 bg-rose-500/[0.06] p-6 text-center text-sm text-rose-200">
+        {error}
+      </div>
+    );
+  }
 
   const basic = pr.basicInformation || {};
   const location = pr.location || {};
@@ -147,7 +193,7 @@ export default function HdcDetalleResultados({ data, consulta }) {
   const principals = overview.principals || {};
   const balances = overview.balances || {};
 
-  const fullName = basic.fullName || natural.fullName || consulta?.apellido_razon_social || "—";
+  const fullName = basic.fullName || natural.fullName || consultaObj?.apellido_razon_social || "—";
   const genero = basic.genderDesc || natural.genderDesc || "";
   const edad = age.min && age.max ? `${age.min} - ${age.max} años` : "—";
 
@@ -168,7 +214,7 @@ export default function HdcDetalleResultados({ data, consulta }) {
         </div>
         <h2 className="mt-4 text-2xl font-black tracking-tight text-white md:text-3xl">{fullName}</h2>
         <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-400">
-          <span>Doc: {fmtText(basic.personId?.personIdNumber || consulta?.numero_identificacion)}</span>
+          <span>Doc: {fmtText(basic.personId?.personIdNumber || consultaObj?.numero_identificacion)}</span>
           {genero && <span>Género: {genero}</span>}
           <span>Edad: {edad}</span>
           {pr.consultDate && <span>Consulta: {String(pr.consultDate).slice(0, 10)}</span>}
@@ -331,7 +377,7 @@ export default function HdcDetalleResultados({ data, consulta }) {
         </button>
         {showJson && (
           <pre className="mt-2 max-h-[28rem] overflow-auto rounded-xl border border-white/10 bg-[#02040a] p-4 text-[11px] leading-5 text-cyan-100/80">
-            {JSON.stringify(data, null, 2)}
+            {JSON.stringify(respuesta, null, 2)}
           </pre>
         )}
       </div>

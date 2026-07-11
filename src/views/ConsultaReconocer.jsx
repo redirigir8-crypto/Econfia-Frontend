@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 
 import Terminos from "../components/Terminos";
 import Toast from "../components/Toast";
@@ -19,30 +21,8 @@ function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Visor genérico de JSON (mientras se conoce el formato real de la respuesta).
-function JsonTree({ data, level = 0 }) {
-  if (data === null || data === undefined) return <span className="text-slate-500">—</span>;
-  if (typeof data !== "object") return <span className="text-cyan-200">{String(data)}</span>;
-
-  const entries = Array.isArray(data) ? data.map((v, i) => [i, v]) : Object.entries(data);
-  if (!entries.length) return <span className="text-slate-500">{Array.isArray(data) ? "[ ]" : "{ }"}</span>;
-
-  return (
-    <div className={level === 0 ? "" : "ml-4 border-l border-white/10 pl-3"}>
-      {entries.map(([key, value]) => {
-        const isObj = value && typeof value === "object";
-        return (
-          <div key={key} className="py-0.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{String(key)}</span>
-            {isObj ? <JsonTree data={value} level={level + 1} /> : <span className="ml-2 text-sm text-slate-100">{String(value)}</span>}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export default function ConsultaReconocer() {
+  const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL;
 
   const [tipoIdentificacion, setTipoIdentificacion] = useState("");
@@ -53,41 +33,9 @@ export default function ConsultaReconocer() {
   const [consentimiento, setConsentimiento] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
-  const [resultado, setResultado] = useState(null);
-  const [historial, setHistorial] = useState([]);
+  const [done, setDone] = useState(false);
 
   const fieldConfig = useMemo(() => getExperianSubjectField(tipoIdentificacion), [tipoIdentificacion]);
-
-  const cargarHistorial = useCallback(async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/api/reconocer/consultas/?limit=15`, {
-        headers: { Authorization: `Token ${token}` },
-      });
-      if (!response.ok) return;
-      const data = await response.json();
-      setHistorial(data.consultas || []);
-    } catch (_error) {
-      /* silencioso */
-    }
-  }, [API_URL]);
-
-  useEffect(() => {
-    cargarHistorial();
-  }, [cargarHistorial]);
-
-  const verDetalle = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/api/reconocer/consultas/${id}/`, {
-        headers: { Authorization: `Token ${token}` },
-      });
-      const data = await response.json();
-      if (response.ok) setResultado(data);
-    } catch (_error) {
-      setToast({ type: "error", message: "No se pudo cargar el detalle." });
-    }
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -99,7 +47,6 @@ export default function ConsultaReconocer() {
     if (!consentimiento) return setToast({ type: "error", message: "Debes confirmar el consentimiento del titular." });
 
     setLoading(true);
-    setResultado(null);
 
     try {
       const token = localStorage.getItem("token");
@@ -129,9 +76,8 @@ export default function ConsultaReconocer() {
         return;
       }
 
-      setResultado(data.consulta || data);
-      setToast({ type: "success", message: "Consulta Reconocer completada." });
-      cargarHistorial();
+      setDone(true);
+      setTimeout(() => navigate("/d3b7f1e9"), 1200);
     } catch (_error) {
       setToast({ type: "error", message: "Ocurrió un error al consultar Reconocer." });
     } finally {
@@ -149,13 +95,45 @@ export default function ConsultaReconocer() {
 
   return (
     <>
+      {loading &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+            <div className="relative w-full max-w-md rounded-2xl border border-cyan-400/20 bg-slate-950/85 p-10 text-center shadow-2xl shadow-cyan-500/20 backdrop-blur-md">
+              <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-t-4 border-cyan-400" />
+              <p className="animate-pulse text-lg font-semibold text-white">Consultando Reconocer...</p>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {!loading &&
+        done &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+            <div className="w-full max-w-xl rounded-3xl border border-cyan-400/20 bg-slate-950/88 p-8 text-center shadow-[0_20px_80px_rgba(8,145,178,0.22)] backdrop-blur-xl">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-emerald-300">
+                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-2xl font-black text-transparent">
+                Consulta completada
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-slate-300">
+                El resultado quedó almacenado. Te llevamos al panel de resultados para ver el detalle.
+              </p>
+            </div>
+          </div>,
+          document.body
+        )}
+
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 
       <section className="relative min-h-screen overflow-hidden bg-transparent pb-32 pt-24">
         <div className="absolute right-20 top-20 h-72 w-72 animate-pulse rounded-full bg-cyan-500/10 blur-3xl" />
         <div className="absolute bottom-20 left-20 h-96 w-96 animate-pulse rounded-full bg-blue-500/10 blur-3xl" style={{ animationDelay: "1s" }} />
 
-        <div className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 items-start gap-6 px-4 md:grid-cols-2">
+        <div className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 items-center gap-6 px-4 md:grid-cols-2">
           <div className="space-y-5 text-center md:text-left">
             <div>
               <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-3 py-1">
@@ -171,12 +149,13 @@ export default function ConsultaReconocer() {
             </div>
 
             <p className="text-sm leading-relaxed text-white/70">
-              Localiza y valida datos de contacto del titular en la central de riesgo.
+              Localiza y valida datos de contacto del titular en la central de riesgo. El resultado queda
+              disponible en el panel de resultados.
             </p>
 
             <p className="pt-2 text-xs leading-6 text-red-300/85">
-              Al realizar esta consulta, declara y certifica que cuenta con la autorización válida y
-              expresa del titular del documento consultado.
+              Al realizar esta consulta, declara y certifica que cuenta con la autorización válida y expresa del
+              titular del documento consultado.
             </p>
           </div>
 
@@ -263,75 +242,6 @@ export default function ConsultaReconocer() {
             </div>
           </div>
         </div>
-
-        {/* Resultado */}
-        {resultado && (
-          <div className="relative z-10 mx-auto mt-8 max-w-5xl px-4">
-            <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-6 backdrop-blur-xl">
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <h2 className="text-lg font-bold text-white">
-                  {resultado.resumen_json?.nombre_completo || resultado.apellido_razon_social || "Resultado"}
-                </h2>
-                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  resultado.estado === "completado" ? "bg-emerald-500/15 text-emerald-300" : "bg-rose-500/15 text-rose-300"
-                }`}>
-                  {resultado.estado} · HTTP {resultado.codigo_http ?? "—"}
-                </span>
-                <span className="text-xs text-slate-400">Doc: {resultado.tipo_identificacion} {resultado.numero_identificacion}</span>
-              </div>
-
-              {resultado.mensaje && (
-                <p className="mb-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">{resultado.mensaje}</p>
-              )}
-
-              <div className="rounded-xl border border-white/10 bg-[#02040a] p-4">
-                <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Respuesta completa</div>
-                <div className="max-h-[28rem] overflow-auto"><JsonTree data={resultado.respuesta_json} /></div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Historial */}
-        {historial.length > 0 && (
-          <div className="relative z-10 mx-auto mt-8 max-w-5xl px-4">
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Historial de consultas</h3>
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950/60">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-white/5 text-[11px] uppercase tracking-wide text-slate-400">
-                  <tr>
-                    <th className="px-4 py-3">Documento</th>
-                    <th className="px-4 py-3">Nombre</th>
-                    <th className="px-4 py-3">Estado</th>
-                    <th className="px-4 py-3">Fecha</th>
-                    <th className="px-4 py-3" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {historial.map((item) => (
-                    <tr key={item.id} className="border-t border-white/5 hover:bg-white/5">
-                      <td className="px-4 py-3 text-slate-200">{item.tipo_identificacion} {item.numero_identificacion}</td>
-                      <td className="px-4 py-3 text-slate-200">{item.nombre_mostrado || item.apellido_razon_social}</td>
-                      <td className="px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                          item.estado === "completado" ? "bg-emerald-500/15 text-emerald-300" : "bg-rose-500/15 text-rose-300"
-                        }`}>
-                          {item.estado}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-slate-400">{item.created_at ? new Date(item.created_at).toLocaleString("es-CO") : "—"}</td>
-                      <td className="px-4 py-3 text-right">
-                        <button type="button" onClick={() => verDetalle(item.id)} className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-3 py-1.5 text-xs font-semibold text-white hover:from-cyan-400 hover:to-blue-400">
-                          Ver
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </section>
     </>
   );
