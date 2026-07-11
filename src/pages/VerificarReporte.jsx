@@ -13,10 +13,30 @@ const RIESGO_META = {
 };
 
 const SCORE_META = [
-  { label: "No registra incidentes", color: "bg-green-500",  text: "text-green-400"  },
-  { label: "Coincidencia por revisar", color: "bg-yellow-400", text: "text-yellow-400" },
-  { label: "Moderado",   color: "bg-orange-500", text: "text-orange-400" },
-  { label: "Crítico",    color: "bg-red-500",    text: "text-red-400"    },
+  {
+    label: "Sin hallazgos",
+    desc: "No se identificaron coincidencias en las fuentes consultadas.",
+    color: "bg-green-500",
+    text: "text-green-400",
+  },
+  {
+    label: "Coincidencia por validar",
+    desc: "Existe una posible coincidencia que requiere verificación.",
+    color: "bg-yellow-400",
+    text: "text-yellow-400",
+  },
+  {
+    label: "Hallazgo confirmado",
+    desc: "Se confirmó un registro que requiere análisis de riesgo.",
+    color: "bg-orange-500",
+    text: "text-orange-400",
+  },
+  {
+    label: "Alerta de Alto Riesgo",
+    desc: "Se identificaron hallazgos relevantes en fuentes críticas o listas restrictivas que requieren gestión inmediata.",
+    color: "bg-red-500",
+    text: "text-red-400",
+  },
 ];
 
 function ScoreDots({ score }) {
@@ -66,6 +86,7 @@ export default function VerificarReporte() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filtroScore, setFiltroScore] = useState(null); // null = todos, 1-4 = nivel específico
 
   useEffect(() => {
     fetch(`${API_URL}/api/verificar-reporte/${consultaId}/`)
@@ -241,28 +262,76 @@ export default function VerificarReporte() {
                 </span>
               </div>
 
+              {/* Filtro por tipo de hallazgo */}
+              {data.fuentes.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <button
+                    onClick={() => setFiltroScore(null)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition ${
+                      filtroScore === null
+                        ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-300"
+                        : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10"
+                    }`}
+                  >
+                    Todos ({data.fuentes.length})
+                  </button>
+                  {SCORE_META.map((m, i) => {
+                    const nivel = i + 1;
+                    const cantidad = data.fuentes.filter(
+                      (f) => Math.max(1, Math.min(4, f.score || 1)) === nivel
+                    ).length;
+                    if (cantidad === 0) return null;
+                    return (
+                      <button
+                        key={nivel}
+                        onClick={() => setFiltroScore(filtroScore === nivel ? null : nivel)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border transition ${
+                          filtroScore === nivel
+                            ? `${m.color} border-transparent text-black`
+                            : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10"
+                        }`}
+                      >
+                        <span className={`inline-block w-2 h-2 rounded-full ${filtroScore === nivel ? "bg-black/30" : m.color}`} />
+                        {m.label} ({cantidad})
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {data.fuentes.length === 0 ? (
                 <p className="text-gray-500 text-sm text-center py-4">Sin resultados disponibles</p>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {data.fuentes.map((f, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-white/5 border border-white/8 hover:bg-white/8 transition"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-xs font-medium truncate">{f.nombre}</p>
-                        <div className="mt-1 flex items-center gap-2">
-                          <ScoreDots score={f.score} />
-                          <span className="text-[10px] text-gray-500">
-                            {SCORE_META[Math.max(0, Math.min(3, (f.score || 1) - 1))].label}
-                          </span>
+                (() => {
+                  const fuentesFiltradas = filtroScore
+                    ? data.fuentes.filter((f) => Math.max(1, Math.min(4, f.score || 1)) === filtroScore)
+                    : data.fuentes;
+                  return fuentesFiltradas.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-4">
+                      Ninguna fuente coincide con este filtro.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {fuentesFiltradas.map((f, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-white/5 border border-white/8 hover:bg-white/8 transition"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-xs font-medium truncate">{f.nombre}</p>
+                            <div className="mt-1 flex items-center gap-2">
+                              <ScoreDots score={f.score} />
+                              <span className="text-[10px] text-gray-500">
+                                {SCORE_META[Math.max(0, Math.min(3, (f.score || 1) - 1))].label}
+                              </span>
+                            </div>
+                          </div>
+                          <EstadoBadge estado={f.estado} />
                         </div>
-                      </div>
-                      <EstadoBadge estado={f.estado} />
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()
               )}
             </div>
 
@@ -271,13 +340,17 @@ export default function VerificarReporte() {
               <p className="text-[11px] text-gray-500 uppercase tracking-wider font-bold mb-3">
                 Interpretación del score por fuente
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {SCORE_META.map((m, i) => (
-                  <div key={i} className="flex items-center gap-1.5 text-xs">
-                    <span className={`inline-block w-2.5 h-2.5 rounded-full ${m.color}`} />
-                    <span className="text-gray-400">
-                      {i + 1} — <span className={m.text}>{m.label}</span>
-                    </span>
+                  <div key={i} className="flex items-start gap-2">
+                    <span className={`mt-1 inline-block w-2.5 h-2.5 rounded-full shrink-0 ${m.color}`} />
+                    <div>
+                      <p className="text-xs">
+                        <span className="text-gray-500">{i + 1} — </span>
+                        <span className={`font-semibold ${m.text}`}>{m.label}</span>
+                      </p>
+                      <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">{m.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>

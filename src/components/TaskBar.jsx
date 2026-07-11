@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search, FileText, LogOut, User, HelpCircle, HardHat, Target, ArrowUpCircle, BookOpen, ShieldCheck, Volume2,
@@ -80,8 +80,9 @@ if (hasPlanes) {
   }
 }
 
-// Menú base
+// Menú base — "Salir" siempre primero, de izquierda a derecha
 let menuItems = [
+  { path: "/f1d8a5c3", icon: <LogOut size={16} strokeWidth={1.75} />, label: "Salir", color: "rose" },
   ...consultaItems,
   { path: "/e9c4b2f7", icon: <img src={UserBaseIcon} alt="Perfil" />, label: "Perfil", color: "fuchsia" },
   { path: "/d3b7f1e9", icon: <FileText size={16} strokeWidth={1.75} />, label: "Consultas", color: "blue" },
@@ -103,189 +104,216 @@ if (isAdmin) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const COLOR_MAP = {
-    amber:   { text: "text-amber-300",   dot: "#fbbf24" },
-    orange:  { text: "text-orange-300",  dot: "#fb923c" },
-    cyan:    { text: "text-cyan-300",    dot: "#22d3ee" },
-    violet:  { text: "text-violet-300",  dot: "#a78bfa" },
-    emerald: { text: "text-emerald-300", dot: "#34d399" },
-    yellow:  { text: "text-yellow-300",  dot: "#facc15" },
-    pink:    { text: "text-pink-300",    dot: "#f472b6" },
-    indigo:  { text: "text-indigo-300",  dot: "#818cf8" },
-    teal:    { text: "text-teal-300",    dot: "#2dd4bf" },
-    sky:     { text: "text-sky-300",     dot: "#38bdf8" },
-    fuchsia: { text: "text-fuchsia-300", dot: "#e879f9" },
-    blue:    { text: "text-blue-300",    dot: "#60a5fa" },
-    lime:    { text: "text-lime-300",    dot: "#a3e635" },
-    rose:    { text: "text-rose-300",    dot: "#fb7185" },
+  const COLOR_HEX = {
+    amber: "#f59e0b",
+    orange: "#f97316",
+    cyan: "#06b6d4",
+    violet: "#8b5cf6",
+    emerald: "#10b981",
+    yellow: "#eab308",
+    pink: "#ec4899",
+    indigo: "#6366f1",
+    teal: "#14b8a6",
+    sky: "#0ea5e9",
+    fuchsia: "#d946ef",
+    blue: "#3b82f6",
+    lime: "#84cc16",
+    rose: "#f43f5e",
   };
 
-  const scrollRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const updateScrollState = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 4);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
+  const SIDE_SPAN = 2; // ítems visibles a cada lado del activo
+  const activeIndex = menuItems.findIndex(
+    (item) => pathname === item.path || pathname.startsWith(item.path + "/")
+  );
+  const [anchor, setAnchor] = useState(activeIndex >= 0 ? activeIndex : 0);
 
   useEffect(() => {
-    updateScrollState();
-    const el = scrollRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", updateScrollState, { passive: true });
-    window.addEventListener("resize", updateScrollState);
-    return () => {
-      el.removeEventListener("scroll", updateScrollState);
-      window.removeEventListener("resize", updateScrollState);
-    };
-  }, [updateScrollState, menuItems.length]);
+    if (activeIndex >= 0) setAnchor(activeIndex);
+  }, [activeIndex]);
 
-  const scrollByAmount = (dir) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * 240, behavior: "smooth" });
-  };
+  const windowStart = Math.max(0, anchor - SIDE_SPAN);
+  const windowEnd = Math.min(menuItems.length, anchor + SIDE_SPAN + 1);
+  const pageItems = menuItems.slice(windowStart, windowEnd);
+  const canPagePrev = windowStart > 0;
+  const canPageNext = windowEnd < menuItems.length;
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const centerActiveItem = () => {
-      const activeBtn = el.querySelector('[data-active="true"]');
-      if (!activeBtn) return;
-      const target =
-        activeBtn.offsetLeft - el.clientWidth / 2 + activeBtn.offsetWidth / 2;
-      el.scrollLeft = Math.max(0, target);
-      updateScrollState();
-    };
-
-    const raf = requestAnimationFrame(centerActiveItem);
-    return () => cancelAnimationFrame(raf);
-  }, [pathname, menuItems.length, updateScrollState]);
+  // Curva tipo "sonrisa": baja hacia el centro y sube en los extremos.
+  const ITEM_GAP = 80;
+  const DIP_DEPTH = 32;
+  const count = pageItems.length;
+  const midIndex = (count - 1) / 2;
 
   return (
-    <div className="fixed top-3 left-0 right-0 z-50 flex items-center justify-center gap-2 px-3">
+    <div className="fixed top-3 left-0 right-0 z-50 flex justify-center pointer-events-none">
       <style>{`
-        .taskbar-scroll::-webkit-scrollbar { height: 0; }
-        .glass-surface {
-          background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.015) 100%),
-                      rgba(15,20,35,0.50);
-          backdrop-filter: blur(8px) saturate(160%);
-          -webkit-backdrop-filter: blur(8px) saturate(160%);
-          border: 1px solid rgba(255,255,255,0.14);
-          box-shadow:
-            0 8px 32px rgba(0,0,0,0.28),
-            inset 0 1px 0 rgba(255,255,255,0.14),
-            inset 0 0 0 1px rgba(255,255,255,0.03);
+        .glass-pill {
+          background: linear-gradient(180deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.02) 100%),
+                      rgba(15,20,35,0.55);
+          backdrop-filter: blur(10px) saturate(160%);
+          -webkit-backdrop-filter: blur(10px) saturate(160%);
+          border: 1px solid rgba(120,170,255,0.22);
         }
         @keyframes taskbarShineSweep {
           0% { transform: translateX(-130%) rotate(20deg); }
           100% { transform: translateX(230%) rotate(20deg); }
         }
-        @keyframes taskbarTextPulse {
-          0%, 100% { color: #ffffff; }
-          50% { color: #bfdbfe; }
+        @keyframes taskbarPulseGlow {
+          0%, 100% {
+            box-shadow:
+              0 0 14px 2px color-mix(in srgb, var(--item-color, #38bdf8) 55%, transparent),
+              inset 0 0 0 1px rgba(255,255,255,0.25);
+          }
+          50% {
+            box-shadow:
+              0 0 26px 6px color-mix(in srgb, var(--item-color, #38bdf8) 80%, transparent),
+              inset 0 0 0 1px rgba(255,255,255,0.4);
+          }
         }
-        .taskbar-item-active {
+        .curve-track {
           position: relative;
-          z-index: 10;
+          height: 84px;
+        }
+        .curve-item {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          width: 76px;
+          pointer-events: auto;
+          z-index: 1;
+          transition: transform 0.35s ease, opacity 0.2s ease, filter 0.2s ease;
+        }
+        .curve-icon {
+          position: relative;
           overflow: hidden;
-          background: linear-gradient(180deg, rgba(56,120,220,0.55) 0%, rgba(37,80,160,0.5) 100%);
-          box-shadow:
-            0 4px 18px rgba(56,120,220,0.35),
-            0 0 0 1px rgba(255,255,255,0.16) inset;
-          animation: taskbarTextPulse 2.4s ease-in-out infinite;
+          width: 44px;
+          height: 44px;
+          border-radius: 9999px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid color-mix(in srgb, var(--item-color, #38bdf8) 45%, rgba(120,170,255,0.22));
+          transition: all 0.2s ease;
         }
-        .taskbar-item-dim {
-          opacity: 0.4;
+        .curve-item.active {
+          z-index: 10;
         }
-        .taskbar-item-dim:hover {
-          opacity: 0.85;
+        .curve-item.active .curve-icon {
+          width: 52px;
+          height: 52px;
+          background: linear-gradient(180deg,
+            color-mix(in srgb, var(--item-color, #38bdf8) 85%, white 5%),
+            color-mix(in srgb, var(--item-color, #38bdf8) 65%, black 25%));
+          border-color: color-mix(in srgb, var(--item-color, #38bdf8) 70%, white 20%);
+          animation: taskbarPulseGlow 2.2s ease-in-out infinite;
         }
-        .taskbar-item-active .taskbar-shine {
+        .curve-item.active .curve-shine {
           position: absolute;
           top: -40%;
           left: 0;
-          width: 35%;
+          width: 45%;
           height: 180%;
-          background: linear-gradient(120deg, transparent, rgba(255,255,255,0.65), transparent);
-          animation: taskbarShineSweep 2.2s ease-in-out infinite;
-          pointer-events: none;
+          background: linear-gradient(120deg, transparent, rgba(255,255,255,0.7), transparent);
+          animation: taskbarShineSweep 2.4s ease-in-out infinite;
+        }
+        .curve-item:not(.active) {
+          opacity: 0.55;
+          filter: blur(1.5px);
+        }
+        .curve-item:not(.active):hover {
+          opacity: 0.9;
+          filter: blur(0);
+        }
+        .curve-label {
+          font-size: 10.5px;
+          font-weight: 600;
+          color: rgba(255,255,255,0.6);
+          text-align: center;
+          line-height: 1.15;
+          white-space: nowrap;
+          max-width: 84px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .curve-item.active .curve-label {
+          color: #ffffff;
+          font-size: 11.5px;
+          text-shadow: 0 0 10px color-mix(in srgb, var(--item-color, #38bdf8) 70%, transparent);
+        }
+        .curve-page-btn {
+          pointer-events: auto;
+          flex-shrink: 0;
+          width: 32px;
+          height: 32px;
+          border-radius: 9999px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(255,255,255,0.75);
+          transition: all 0.15s ease;
         }
       `}</style>
 
-      <button
-        type="button"
-        onClick={() => scrollByAmount(-1)}
-        className={`glass-surface shrink-0 flex items-center justify-center w-9 h-9 rounded-full text-white/75 hover:text-white hover:bg-white/[0.08] transition-all ${
-          canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-        aria-label="Ver módulos anteriores"
-      >
-        <ChevronLeft size={18} />
-      </button>
-
-      <div className="relative w-full sm:w-auto" style={{ maxWidth: "min(100%, 560px)" }}>
-        <nav
-          ref={scrollRef}
-          className="glass-surface taskbar-scroll flex items-center gap-1.5 overflow-x-auto rounded-full px-2 py-2"
+      <div className="pointer-events-auto flex items-center gap-5">
+        {/* Flecha página anterior */}
+        <button
+          type="button"
+          onClick={() => canPagePrev && setAnchor((a) => Math.max(0, a - 1))}
+          className={`curve-page-btn glass-pill hover:bg-white/10 ${
+            canPagePrev ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          aria-label="Módulos anteriores"
         >
-          <button
-            type="button"
-            onClick={() => navigate("/f1d8a5c3")}
-            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors duration-200 outline-none"
-          >
-            <LogOut size={15} strokeWidth={1.75} />
-            Salir
-          </button>
+          <ChevronLeft size={16} />
+        </button>
 
-          <div className="w-px h-5 bg-white/10 shrink-0" />
-
-          {(() => {
-            const hasActiveItem = menuItems.some(
-              (item) => pathname === item.path || pathname.startsWith(item.path + "/")
-            );
-            return menuItems.map((item) => {
-              const isActive = pathname === item.path || pathname.startsWith(item.path + "/");
-              return (
-                <button
-                  key={item.path}
-                  type="button"
-                  data-active={isActive}
-                  onClick={() => navigate(item.path)}
-                  className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 outline-none ${
-                    isActive
-                      ? "taskbar-item-active text-white"
-                      : `text-white/55 hover:text-white hover:bg-white/[0.06] ${
-                          hasActiveItem ? "taskbar-item-dim" : ""
-                        }`
-                  }`}
-                >
-                  {isActive && <span className="taskbar-shine" />}
-                  <span className="relative flex items-center justify-center w-4 h-4 [&>img]:w-[15px] [&>img]:h-[15px] [&>img]:opacity-90 [&>svg]:opacity-90">
+        {/* Módulos en curva tipo "sonrisa" */}
+        <div className="curve-track" style={{ width: ITEM_GAP * Math.max(0, count - 1) + 76 }}>
+          {pageItems.map((item, i) => {
+            const offsetFromMid = i - midIndex;
+            const x = offsetFromMid * ITEM_GAP;
+            const norm = midIndex > 0 ? offsetFromMid / midIndex : 0;
+            const y = 6 + DIP_DEPTH * (1 - norm * norm);
+            const isActive = pathname === item.path || pathname.startsWith(item.path + "/");
+            return (
+              <button
+                key={item.path}
+                type="button"
+                onClick={() => navigate(item.path)}
+                className={`curve-item ${isActive ? "active" : ""}`}
+                style={{
+                  transform: `translate(${x}px, ${y}px) translateX(-50%)`,
+                  "--item-color": COLOR_HEX[item.color] || "#38bdf8",
+                }}
+              >
+                <span className="curve-icon glass-pill" title={item.label}>
+                  {isActive && <span className="curve-shine" />}
+                  <span className="relative flex items-center justify-center w-5 h-5 text-white [&>img]:w-[18px] [&>img]:h-[18px] [&>svg]:w-[18px] [&>svg]:h-[18px]">
                     {item.icon}
                   </span>
-                  <span className="relative">{item.label}</span>
-                </button>
-              );
-            });
-          })()}
-        </nav>
-      </div>
+                </span>
+                <span className="curve-label">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
-      <button
-        type="button"
-        onClick={() => scrollByAmount(1)}
-        className={`glass-surface shrink-0 flex items-center justify-center w-9 h-9 rounded-full text-white/75 hover:text-white hover:bg-white/[0.08] transition-all ${
-          canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-        aria-label="Ver más módulos"
-      >
-        <ChevronRight size={18} />
-      </button>
+        {/* Flecha página siguiente */}
+        <button
+          type="button"
+          onClick={() => canPageNext && setAnchor((a) => Math.min(menuItems.length - 1, a + 1))}
+          className={`curve-page-btn glass-pill hover:bg-white/10 ${
+            canPageNext ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          aria-label="Más módulos"
+        >
+          <ChevronRight size={16} />
+        </button>
+
+      </div>
     </div>
   );
 }
