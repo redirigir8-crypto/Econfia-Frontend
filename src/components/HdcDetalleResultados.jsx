@@ -15,6 +15,23 @@ function toArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
+// Busca la primera aparición de `key` en cualquier nivel del objeto.
+// Así funciona sin importar si la respuesta viene bajo ReportHDCplus,
+// productResult, o directo.
+function deepFind(root, key) {
+  const stack = [root];
+  while (stack.length) {
+    const node = stack.shift();
+    if (Array.isArray(node)) {
+      for (const v of node) if (v && typeof v === "object") stack.push(v);
+    } else if (node && typeof node === "object") {
+      if (node[key] !== undefined) return node[key];
+      for (const v of Object.values(node)) if (v && typeof v === "object") stack.push(v);
+    }
+  }
+  return undefined;
+}
+
 function fmtMoney(value) {
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) return "$0";
@@ -157,10 +174,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
   const consultaObj = consulta || fetched || {};
   const respuesta = useMemo(() => data || fetched?.respuesta_json || {}, [data, fetched]);
 
-  const pr = useMemo(() => {
-    const root = respuesta || {};
-    return root.ReportHDCplus?.productResult || root.productResult || root.ReportHDCplus || root;
-  }, [respuesta]);
+  const pr = useMemo(() => respuesta || {}, [respuesta]);
 
   if (loading) {
     return (
@@ -177,21 +191,22 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
     );
   }
 
-  const basic = pr.basicInformation || {};
-  const location = pr.location || {};
-  const natural = location.nationalNatural || {};
+  const basic = deepFind(pr, "basicInformation") || {};
+  const natural = deepFind(pr, "nationalNatural") || {};
   const identificacion = basic.identification || natural.identification || {};
   const age = basic.age || natural.age || {};
 
-  const savings = toArray(pr.savings);
-  const liabilities = toArray(pr.liabilities);
-  const creditCard = toArray(pr.creditCard);
-  const global = toArray(pr.globalIndebtedness);
-  const footprints = toArray(pr.inquiryFootprints);
+  const savings = toArray(deepFind(pr, "savings"));
+  const liabilities = toArray(deepFind(pr, "liabilities"));
+  const creditCard = toArray(deepFind(pr, "creditCard"));
+  const global = toArray(deepFind(pr, "globalIndebtedness"));
+  const footprints = toArray(deepFind(pr, "inquiryFootprints"));
 
-  const overview = pr.agregatedInfo?.overview || {};
-  const principals = overview.principals || {};
-  const balances = overview.balances || {};
+  const overview = deepFind(pr, "overview") || {};
+  const principals = overview.principals || deepFind(pr, "principals") || {};
+  const balances = overview.balances || deepFind(pr, "balances") || {};
+  const responseDesc = deepFind(pr, "responseDesc");
+  const consultDate = deepFind(pr, "consultDate");
 
   const fullName = basic.fullName || natural.fullName || consultaObj?.apellido_razon_social || "—";
   const genero = basic.genderDesc || natural.genderDesc || "";
@@ -210,14 +225,14 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
             <ShieldCheck className="h-3.5 w-3.5" />
             Historia de Crédito
           </div>
-          {pr.responseDesc && <Badge tone="emerald">{pr.responseDesc}</Badge>}
+          {responseDesc && <Badge tone="emerald">{responseDesc}</Badge>}
         </div>
         <h2 className="mt-4 text-2xl font-black tracking-tight text-white md:text-3xl">{fullName}</h2>
         <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-400">
           <span>Doc: {fmtText(basic.personId?.personIdNumber || consultaObj?.numero_identificacion)}</span>
           {genero && <span>Género: {genero}</span>}
           <span>Edad: {edad}</span>
-          {pr.consultDate && <span>Consulta: {String(pr.consultDate).slice(0, 10)}</span>}
+          {consultDate && <span>Consulta: {String(consultDate).slice(0, 10)}</span>}
         </div>
       </div>
 
