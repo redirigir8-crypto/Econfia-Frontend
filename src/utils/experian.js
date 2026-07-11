@@ -45,7 +45,7 @@ export function normalizeExperianConsulta(item) {
     tipo_consulta: "experian",
     cedula: item.numero_identificacion || "",
     nit: item.numero_identificacion || "",
-    nombre: item.apellido_razon_social || "",
+    nombre: item.nombre_mostrado || item.apellido_razon_social || "",
     fecha: item.created_at || item.updated_at || null,
     consulta_original_id: item.id,
   };

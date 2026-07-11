@@ -21,10 +21,27 @@ function humanizeKey(key) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function objectToText(obj) {
+  return Object.values(obj || {})
+    .filter((v) => v !== null && v !== undefined && v !== "")
+    .map((v) => (typeof v === "object" ? objectToText(v) : String(v)))
+    .filter(Boolean)
+    .join(" — ");
+}
+
 function displayValue(value) {
   if (value === null || value === undefined || value === "") return "No disponible";
   if (typeof value === "boolean") return value ? "Sí" : "No";
-  if (Array.isArray(value)) return value.length ? value.filter(Boolean).join(", ") : "No disponible";
+  if (Array.isArray(value)) {
+    const parts = value
+      .map((v) => (v && typeof v === "object" ? objectToText(v) : String(v ?? "")))
+      .filter(Boolean);
+    return parts.length ? parts.join(" · ") : "No disponible";
+  }
+  if (typeof value === "object") {
+    const text = objectToText(value);
+    return text || "No disponible";
+  }
   return String(value);
 }
 
@@ -440,6 +457,74 @@ function EvidenceDrawer({ open, onClose, detalle }) {
   );
 }
 
+// Claves del objeto sugerencias que NO son la lista de recomendaciones.
+const SUGERENCIA_VECTOR_KEYS = ["vectorSugerencias", "vector", "sugerencias", "recomendaciones", "listaSugerencias"];
+
+function pickSugerenciaTexto(item) {
+  if (item === null || item === undefined) return "";
+  if (typeof item === "string") return item;
+  if (typeof item !== "object") return String(item);
+  // Campos típicos de cada recomendación.
+  const titulo = item.titulo || item.nombre || item.codigo || item.tipo || "";
+  const detalle = item.descripcion || item.mensaje || item.detalle || item.texto || item.valor || "";
+  const compuesto = [titulo, detalle].filter(Boolean).join(": ");
+  return compuesto || objectToText(item);
+}
+
+function SugerenciasBlock({ sugerencias }) {
+  if (!sugerencias || typeof sugerencias !== "object") {
+    return (
+      <CompactList items={safeArray(sugerencias)} emptyLabel="No se recibieron sugerencias." />
+    );
+  }
+
+  // La lista de recomendaciones puede venir en distintas claves.
+  let vector = [];
+  for (const key of SUGERENCIA_VECTOR_KEYS) {
+    if (Array.isArray(sugerencias[key]) && sugerencias[key].length) {
+      vector = sugerencias[key];
+      break;
+    }
+  }
+
+  // Datos sueltos (conInformacion, etc.) que acompañan a la lista.
+  const meta = Object.entries(sugerencias)
+    .filter(([key, value]) => !SUGERENCIA_VECTOR_KEYS.includes(key))
+    .map(([key, value]) => ({ label: humanizeKey(key), value: displayValue(value) }))
+    .filter((item) => item.value !== "No disponible");
+
+  const recomendaciones = vector.map(pickSugerenciaTexto).filter(Boolean);
+
+  return (
+    <div className="grid gap-4">
+      {meta.length > 0 && <FactGrid items={meta} columns="md:grid-cols-2 xl:grid-cols-3" />}
+
+      {recomendaciones.length > 0 ? (
+        <div className="grid gap-2.5">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Recomendaciones
+          </div>
+          {recomendaciones.map((texto, index) => (
+            <div
+              key={`${index}-${texto.slice(0, 24)}`}
+              className="flex gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.035] px-5 py-4 shadow-[0_12px_30px_rgba(2,6,23,0.18)] backdrop-blur-xl transition hover:border-white/[0.13] hover:bg-white/[0.055]"
+            >
+              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] text-[11px] font-bold text-cyan-300">
+                {index + 1}
+              </div>
+              <p className="text-sm leading-6 text-slate-100">{texto}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        meta.length === 0 && (
+          <p className="text-sm italic text-slate-500">No se recibieron sugerencias estructuradas.</p>
+        )
+      )}
+    </div>
+  );
+}
+
 function buildExecutiveMetrics(detalle, isPj) {
   if (isPj) {
     return [
@@ -528,6 +613,11 @@ export default function ExperianDetalleResultados({ consultaId }) {
   }, [detalle]);
 
   const isPj = detalle?.tipo_resultado === "pj";
+  const displayName =
+    context.datosBasicos?.nombreCompleto ||
+    context.datosBasicos?.razonSocial ||
+    detalle?.apellido_razon_social ||
+    detalle?.numero_identificacion;
   const metrics    = useMemo(() => buildExecutiveMetrics(detalle, isPj), [detalle, isPj]);
   const gaugeProps = useMemo(() => buildGaugeProps(detalle, isPj),       [detalle, isPj]);
 
@@ -546,9 +636,9 @@ export default function ExperianDetalleResultados({ consultaId }) {
   const validationFacts = useMemo(() => {
     const base = [
       { label: "Documento",          value: `${detalle?.tipo_identificacion || ""} ${detalle?.numero_identificacion || ""}`.trim() },
-      { label: isPj ? "Razon social" : "Titular", value: displayValue(detalle?.apellido_razon_social) },
+      { label: isPj ? "Razon social" : "Titular", value: displayValue(context.datosBasicos?.nombreCompleto || context.datosBasicos?.razonSocial || detalle?.apellido_razon_social) },
       { label: "Estado interno",     value: displayValue(detalle?.estado) },
-      { label: "Respuesta Experian", value: displayValue(detalle?.status_experian) },
+      { label: "Respuesta central de riesgo", value: displayValue(detalle?.status_experian) },
       { label: "Estado contenido",   value: displayValue(detalle?.content_status) },
       { label: "Mensaje",            value: displayValue(detalle?.mensaje) },
     ];
@@ -606,7 +696,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
             <div className="absolute inset-0 animate-ping rounded-full border border-cyan-500/25" />
             <div className="absolute inset-2 animate-spin rounded-full border-2 border-t-cyan-400 border-slate-800" />
           </div>
-          <p className="text-sm font-semibold text-slate-300">Cargando reporte Experian</p>
+          <p className="text-sm font-semibold text-slate-300">Cargando reporte de central de riesgo</p>
           <p className="mt-1 text-xs text-slate-600">Un momento por favor...</p>
         </div>
       </div>
@@ -620,7 +710,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-500/25 bg-rose-500/[0.08]">
             <AlertTriangle className="h-6 w-6 text-rose-400" />
           </div>
-          <h3 className="text-lg font-semibold text-white">Error al cargar Experian</h3>
+          <h3 className="text-lg font-semibold text-white">Error al cargar central de riesgo</h3>
           <p className="mt-2 text-sm leading-6 text-rose-200/70">{error}</p>
         </div>
       </div>
@@ -645,11 +735,11 @@ export default function ExperianDetalleResultados({ consultaId }) {
               <div className="flex min-w-0 flex-col justify-center">
                 <div className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.08)]">
                   <ShieldCheck className="h-3.5 w-3.5" />
-                  Experian · MiDecisor
+                  Central de riesgo
                 </div>
 
                 <h2 className="mt-5 max-w-4xl text-3xl font-black tracking-tight text-white md:text-4xl md:leading-tight">
-                  {detalle.apellido_razon_social || detalle.numero_identificacion}
+                  {displayName}
                 </h2>
 
                 <p className="mt-4 max-w-2xl text-base leading-8 text-slate-400">
@@ -760,18 +850,9 @@ export default function ExperianDetalleResultados({ consultaId }) {
             <SectionCard
               icon={BadgeCheck}
               title="Sugerencias"
-              description="Recomendaciones devueltas por Experian para apoyo en la decisión."
+              description="Recomendaciones devueltas por la central de riesgo para apoyo en la decisión."
             >
-              {typeof context.sugerencias === "object" && !Array.isArray(context.sugerencias) ? (
-                <FactGrid
-                  items={compactFactsFromObject(context.sugerencias, Object.keys(context.sugerencias || {}))}
-                />
-              ) : (
-                <CompactList
-                  items={safeArray(context.sugerencias)}
-                  emptyLabel="No se recibieron sugerencias estructuradas."
-                />
-              )}
+              <SugerenciasBlock sugerencias={context.sugerencias} />
             </SectionCard>
           ) : (
             <SectionCard
