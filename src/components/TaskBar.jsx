@@ -81,6 +81,9 @@ if (hasPlanes) {
   if (planes.includes("historia_credito") || planes.includes("experian")) {
     consultaItems.push({ path: "/3e9f7c1d", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Historia de Crédito", color: "sky" });
   }
+  if (planes.includes("reconocer") || planes.includes("experian")) {
+    consultaItems.push({ path: "/6b2d8e4f", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Reconocer", color: "sky" });
+  }
 }
 
 // Menú base — "Salir" siempre primero, de izquierda a derecha

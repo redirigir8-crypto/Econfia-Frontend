@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Terminos from "../components/Terminos";
 import Toast from "../components/Toast";
-import HdcDetalleResultados from "../components/HdcDetalleResultados";
 import { EXPERIAN_DOCUMENT_OPTIONS, getExperianSubjectField } from "../utils/experian";
 
 function buildAuthorizedName() {
@@ -20,7 +19,30 @@ function todayIsoDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function ConsultaHistoriaCredito() {
+// Visor genérico de JSON (mientras se conoce el formato real de la respuesta).
+function JsonTree({ data, level = 0 }) {
+  if (data === null || data === undefined) return <span className="text-slate-500">—</span>;
+  if (typeof data !== "object") return <span className="text-cyan-200">{String(data)}</span>;
+
+  const entries = Array.isArray(data) ? data.map((v, i) => [i, v]) : Object.entries(data);
+  if (!entries.length) return <span className="text-slate-500">{Array.isArray(data) ? "[ ]" : "{ }"}</span>;
+
+  return (
+    <div className={level === 0 ? "" : "ml-4 border-l border-white/10 pl-3"}>
+      {entries.map(([key, value]) => {
+        const isObj = value && typeof value === "object";
+        return (
+          <div key={key} className="py-0.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{String(key)}</span>
+            {isObj ? <JsonTree data={value} level={level + 1} /> : <span className="ml-2 text-sm text-slate-100">{String(value)}</span>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function ConsultaReconocer() {
   const API_URL = process.env.REACT_APP_API_URL;
 
   const [tipoIdentificacion, setTipoIdentificacion] = useState("");
@@ -34,15 +56,12 @@ export default function ConsultaHistoriaCredito() {
   const [resultado, setResultado] = useState(null);
   const [historial, setHistorial] = useState([]);
 
-  const fieldConfig = useMemo(
-    () => getExperianSubjectField(tipoIdentificacion),
-    [tipoIdentificacion]
-  );
+  const fieldConfig = useMemo(() => getExperianSubjectField(tipoIdentificacion), [tipoIdentificacion]);
 
   const cargarHistorial = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/api/hdc/consultas/?limit=15`, {
+      const response = await fetch(`${API_URL}/api/reconocer/consultas/?limit=15`, {
         headers: { Authorization: `Token ${token}` },
       });
       if (!response.ok) return;
@@ -60,7 +79,7 @@ export default function ConsultaHistoriaCredito() {
   const verDetalle = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/api/hdc/consultas/${id}/`, {
+      const response = await fetch(`${API_URL}/api/reconocer/consultas/${id}/`, {
         headers: { Authorization: `Token ${token}` },
       });
       const data = await response.json();
@@ -98,7 +117,7 @@ export default function ConsultaHistoriaCredito() {
         },
       };
 
-      const response = await fetch(`${API_URL}/api/hdc/consultar/`, {
+      const response = await fetch(`${API_URL}/api/reconocer/consultar/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Token ${token}` },
         body: JSON.stringify(payload),
@@ -111,10 +130,10 @@ export default function ConsultaHistoriaCredito() {
       }
 
       setResultado(data.consulta || data);
-      setToast({ type: "success", message: "Consulta de Historia de Crédito completada." });
+      setToast({ type: "success", message: "Consulta Reconocer completada." });
       cargarHistorial();
     } catch (_error) {
-      setToast({ type: "error", message: "Ocurrió un error al consultar Historia de Crédito." });
+      setToast({ type: "error", message: "Ocurrió un error al consultar Reconocer." });
     } finally {
       setLoading(false);
     }
@@ -130,16 +149,13 @@ export default function ConsultaHistoriaCredito() {
 
   return (
     <>
-      {toast && (
-        <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />
-      )}
+      {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 
       <section className="relative min-h-screen overflow-hidden bg-transparent pb-32 pt-24">
         <div className="absolute right-20 top-20 h-72 w-72 animate-pulse rounded-full bg-cyan-500/10 blur-3xl" />
         <div className="absolute bottom-20 left-20 h-96 w-96 animate-pulse rounded-full bg-blue-500/10 blur-3xl" style={{ animationDelay: "1s" }} />
 
         <div className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 items-start gap-6 px-4 md:grid-cols-2">
-          {/* Info + formulario */}
           <div className="space-y-5 text-center md:text-left">
             <div>
               <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-3 py-1">
@@ -147,15 +163,15 @@ export default function ConsultaHistoriaCredito() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500" />
                 </span>
-                <span className="text-xs font-medium text-cyan-300">Historia de Crédito</span>
+                <span className="text-xs font-medium text-cyan-300">Reconocer</span>
               </div>
               <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-3xl font-black leading-tight tracking-tight text-transparent md:text-4xl">
-                Historia de Crédito (HDC+)
+                Reconocer Master
               </h1>
             </div>
 
             <p className="text-sm leading-relaxed text-white/70">
-              Consulta la historia de crédito del titular directamente en la central de riesgo.
+              Localiza y valida datos de contacto del titular en la central de riesgo.
             </p>
 
             <p className="pt-2 text-xs leading-6 text-red-300/85">
@@ -240,7 +256,7 @@ export default function ConsultaHistoriaCredito() {
                         : "transform bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:scale-105 hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
                     }`}
                   >
-                    {loading ? "Consultando..." : "Consultar Historia de Crédito"}
+                    {loading ? "Consultando..." : "Consultar Reconocer"}
                   </button>
                 </form>
               </div>
@@ -251,27 +267,35 @@ export default function ConsultaHistoriaCredito() {
         {/* Resultado */}
         {resultado && (
           <div className="relative z-10 mx-auto mt-8 max-w-5xl px-4">
-            {resultado.estado === "completado" && resultado.respuesta_json ? (
-              <HdcDetalleResultados data={resultado.respuesta_json} consulta={resultado} />
-            ) : (
-              <div className="rounded-2xl border border-rose-500/20 bg-rose-500/[0.06] p-6 text-center">
-                <p className="text-sm font-semibold text-rose-200">
-                  {resultado.mensaje || "La consulta no se completó."}
-                </p>
-                <p className="mt-1 text-xs text-slate-400">
-                  Estado: {resultado.estado} · HTTP {resultado.codigo_http ?? "—"}
-                </p>
+            <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-6 backdrop-blur-xl">
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <h2 className="text-lg font-bold text-white">
+                  {resultado.resumen_json?.nombre_completo || resultado.apellido_razon_social || "Resultado"}
+                </h2>
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  resultado.estado === "completado" ? "bg-emerald-500/15 text-emerald-300" : "bg-rose-500/15 text-rose-300"
+                }`}>
+                  {resultado.estado} · HTTP {resultado.codigo_http ?? "—"}
+                </span>
+                <span className="text-xs text-slate-400">Doc: {resultado.tipo_identificacion} {resultado.numero_identificacion}</span>
               </div>
-            )}
+
+              {resultado.mensaje && (
+                <p className="mb-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">{resultado.mensaje}</p>
+              )}
+
+              <div className="rounded-xl border border-white/10 bg-[#02040a] p-4">
+                <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Respuesta completa</div>
+                <div className="max-h-[28rem] overflow-auto"><JsonTree data={resultado.respuesta_json} /></div>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Historial */}
         {historial.length > 0 && (
           <div className="relative z-10 mx-auto mt-8 max-w-5xl px-4">
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-              Historial de consultas
-            </h3>
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Historial de consultas</h3>
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950/60">
               <table className="w-full text-left text-sm">
                 <thead className="bg-white/5 text-[11px] uppercase tracking-wide text-slate-400">
@@ -295,15 +319,9 @@ export default function ConsultaHistoriaCredito() {
                           {item.estado}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-400">
-                        {item.created_at ? new Date(item.created_at).toLocaleString("es-CO") : "—"}
-                      </td>
+                      <td className="px-4 py-3 text-slate-400">{item.created_at ? new Date(item.created_at).toLocaleString("es-CO") : "—"}</td>
                       <td className="px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => verDetalle(item.id)}
-                          className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-3 py-1.5 text-xs font-semibold text-white hover:from-cyan-400 hover:to-blue-400"
-                        >
+                        <button type="button" onClick={() => verDetalle(item.id)} className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-3 py-1.5 text-xs font-semibold text-white hover:from-cyan-400 hover:to-blue-400">
                           Ver
                         </button>
                       </td>

@@ -43,6 +43,7 @@ import ConsultaFask from "./views/ConsultaFask";
 import ConsultaEssencialExpress from "./views/ConsultaEssencialExpress";
 import ConsultaExperian from "./views/ConsultaExperian";
 import ConsultaHistoriaCredito from "./views/ConsultaHistoriaCredito";
+import ConsultaReconocer from "./views/ConsultaReconocer";
 import VerificarReporte from "./pages/VerificarReporte";
 import Beneficios from "./pages/Beneficios";
 import ChatbotFlotante from "./components/ChatbotFlotante";
@@ -769,6 +770,8 @@ export default function App() {
               <Route path="/experian"          element={<ConsultaExperian />}         />
               <Route path="/3e9f7c1d"          element={<ConsultaHistoriaCredito />}  />
               <Route path="/historia-credito"  element={<ConsultaHistoriaCredito />}  />
+              <Route path="/6b2d8e4f"          element={<ConsultaReconocer />}        />
+              <Route path="/reconocer"         element={<ConsultaReconocer />}        />
               <Route path="/7f3a9e2b"          element={<ConsultaFask />}             />
               <Route path="/2b7d5e9c"          element={<TitulosValidationForm />}    />
               <Route path="/9e3a6c1f"          element={<ConsultaMedida />}           />
