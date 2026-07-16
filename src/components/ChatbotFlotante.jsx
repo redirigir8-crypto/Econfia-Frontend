@@ -3,10 +3,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Phone, Loader2 } from "lucide-react";
 import soporteService from "../services/soporteService";
-import polarBear from "../assets/polar-bear.svg";
 
 const WHATSAPP_NUMBER = "573054226582";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Hola,%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20ECONFIA`;
+const CHATBOT_BEAR_IMAGE = "/img/chatbot-oso-econfia.png";
 
 // Sugerencias para usuarios autenticados
 const SUGERENCIAS_USUARIO = [
@@ -311,9 +311,9 @@ export default function ChatbotFlotante() {
 					>
 						<div className="relative w-10 h-10 flex items-center justify-center">
 							<img
-								src={polarBear}
+								src={CHATBOT_BEAR_IMAGE}
 								alt="Oso polar"
-								className="w-10 h-10 drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
+								className="w-10 h-10 rounded-full object-cover object-center drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]"
 								onError={(e) => {
 									e.currentTarget.style.display = "none";
 								}}
@@ -340,9 +340,9 @@ export default function ChatbotFlotante() {
 							<div className="flex items-center gap-3 min-w-0">
 								<div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
 									<img
-										src={polarBear}
+										src={CHATBOT_BEAR_IMAGE}
 										alt="Oso polar"
-										className="w-10 h-10"
+										className="w-10 h-10 object-cover object-center"
 										onError={(e) => {
 											e.currentTarget.style.display = "none";
 										}}

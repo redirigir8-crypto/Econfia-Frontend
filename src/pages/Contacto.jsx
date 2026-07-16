@@ -5,6 +5,8 @@ import Toast from "../components/Toast";
 import Header from "../components/Header";
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaLinkedin, FaTwitter, FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
 
+const CONTACT_BEAR_IMAGE = "/img/chatbot-oso-econfia.png";
+
 // Estilos de animación personalizados
 const animationStyles = `
   @keyframes fadeInUp {
@@ -67,7 +69,6 @@ function ChatAvatar({ talking = false, className = "" }) {
         .oso-svg-talk   { animation: oso-talk  0.45s ease-in-out infinite; transform-origin: center bottom; }
         .oso-glow       { animation: oso-glow-pulse 2.8s ease-in-out infinite; }
         .oso-shadow-el  { animation: oso-shadow 3.2s ease-in-out infinite; transform-origin: center; }
-        .oso-mouth-anim { animation: oso-mouth-open 0.35s ease-in-out infinite; transform-origin: 64px 94px; }
       `}</style>
 
       {/* Glow detrás */}
@@ -79,81 +80,21 @@ function ChatAvatar({ talking = false, className = "" }) {
         }}
       />
 
-      {/* SVG inline — permite controlar ojos y boca con React */}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 128 128"
+      <img
+        src={CONTACT_BEAR_IMAGE}
+        alt="Oso polar ECONFIA"
         className={talking ? "oso-svg-talk" : "oso-svg"}
         style={{
-          width: "100%",
-          height: "100%",
+          width: "190px",
+          height: "190px",
+          objectFit: "cover",
+          objectPosition: "center",
+          borderRadius: "9999px",
           filter: talking
             ? "drop-shadow(0 0 18px rgba(34,211,238,0.75)) drop-shadow(0 0 6px rgba(99,102,241,0.5))"
             : "drop-shadow(0 0 10px rgba(34,211,238,0.45)) drop-shadow(0 0 3px rgba(99,102,241,0.3))",
         }}
-      >
-        <defs>
-          <linearGradient id="ctFur" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#ffffff" />
-            <stop offset="1" stopColor="#dbeafe" />
-          </linearGradient>
-          <linearGradient id="ctShadow" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#0ea5e9" stopOpacity="0.25" />
-            <stop offset="1" stopColor="#1d4ed8" stopOpacity="0.18" />
-          </linearGradient>
-        </defs>
-
-        {/* fondo glow */}
-        <circle cx="64" cy="64" r="58" fill="url(#ctShadow)" />
-        {/* cabeza */}
-        <circle cx="64" cy="68" r="44" fill="url(#ctFur)" />
-        {/* orejas */}
-        <circle cx="32" cy="40" r="14" fill="url(#ctFur)" />
-        <circle cx="96" cy="40" r="14" fill="url(#ctFur)" />
-        <circle cx="32" cy="40" r="7"  fill="#c7d2fe" opacity="0.45" />
-        <circle cx="96" cy="40" r="7"  fill="#c7d2fe" opacity="0.45" />
-        {/* hocico */}
-        <ellipse cx="64" cy="84" rx="26" ry="20" fill="#eef2ff" />
-        {/* nariz */}
-        <path d="M64 74c-7 0-12 5-12 10 0 5 5 9 12 9s12-4 12-9c0-5-5-10-12-10z" fill="#0f172a" />
-        {/* mejillas */}
-        <circle cx="38" cy="84" r="9" fill="#38bdf8" opacity="0.10" />
-        <circle cx="90" cy="84" r="9" fill="#38bdf8" opacity="0.10" />
-
-        {/* ojos */}
-        <circle cx="48" cy="66" r="5" fill="#0f172a" />
-        <circle cx="80" cy="66" r="5" fill="#0f172a" />
-        {/* reflejo blanco estático */}
-        <circle cx="46" cy="64" r="2" fill="#ffffff" opacity="0.9" />
-        <circle cx="78" cy="64" r="2" fill="#ffffff" opacity="0.9" />
-
-        {/* boca: sonrisa o abierta al hablar */}
-        {talking ? (
-          <>
-            <ellipse cx="64" cy="94" rx="7" ry="4" fill="#0f172a" className="oso-mouth-anim" />
-            <path
-              d="M52 103 Q58 109 64 103 Q70 97 76 103"
-              fill="none"
-              stroke="#22d3ee"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              opacity="0.7"
-            >
-              <animate attributeName="opacity" values="0.7;0.1;0.7" dur="0.4s" repeatCount="indefinite" />
-            </path>
-          </>
-        ) : (
-          <path
-            d="M56 92c3 5 9 8 8 8s5-3 8-8"
-            fill="none"
-            stroke="#0f172a"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.9"
-          />
-        )}
-      </svg>
+      />
 
       {/* Sombra suelo */}
       <div

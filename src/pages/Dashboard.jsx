@@ -136,87 +136,61 @@ export default function Dashboard() {
           {/* Logo — esquina superior izquierda */}
           <div className="hidden md:flex fixed md:top-4 md:left-4 z-40 items-center gap-3 group">
             <style>{`
-              @keyframes econfiaLogoSpin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
+              @keyframes econfiaLetterSweep {
+                0% { background-position: 130% 50%; }
+                45% { background-position: -30% 50%; }
+                100% { background-position: -30% 50%; }
               }
-              @keyframes econfiaLogoSpinReverse {
-                from { transform: rotate(360deg); }
-                to { transform: rotate(0deg); }
-              }
-              @keyframes econfiaAuraPulse {
-                0%, 100% {
-                  box-shadow: 0 0 14px 3px rgba(239,68,68,0.35), 0 0 26px 6px rgba(56,189,248,0.16);
-                }
-                50% {
-                  box-shadow: 0 0 22px 5px rgba(239,68,68,0.55), 0 0 38px 10px rgba(56,189,248,0.28);
-                }
-              }
-              @keyframes econfiaTextShine {
-                0% { transform: translateX(-120%) skewX(-20deg); }
-                100% { transform: translateX(220%) skewX(-20deg); }
-              }
-              .econfia-logo-ring {
-                animation: econfiaLogoSpin 10s linear infinite;
-              }
-              .econfia-logo-ring-dashed {
-                animation: econfiaLogoSpinReverse 16s linear infinite;
-              }
-              .econfia-aura {
-                animation: econfiaAuraPulse 2.6s ease-in-out infinite;
+              .econfia-title-shell {
+                position: relative;
+                display: inline-block;
+                padding: 2px 0;
               }
               .econfia-title {
                 position: relative;
                 display: inline-block;
-                overflow: hidden;
-                background: linear-gradient(to right, #ffffff 0%, #ffffff 45%, #38bdf8 100%);
+                background:
+                  linear-gradient(100deg,
+                    #eef7ff 0%,
+                    #ffffff 28%,
+                    #ffffff 42%,
+                    #8fe7ff 49%,
+                    #ffffff 56%,
+                    #dff7ff 72%,
+                    #74d9ff 100%);
+                background-size: 240% 100%;
+                background-position: 130% 50%;
                 -webkit-background-clip: text;
                 background-clip: text;
                 color: transparent;
-                filter: drop-shadow(0 0 10px rgba(56,189,248,0.5));
-              }
-              .econfia-title::after {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 40%;
-                height: 100%;
-                background: linear-gradient(100deg, transparent, rgba(255,255,255,0.9), transparent);
-                animation: econfiaTextShine 3s ease-in-out infinite;
-                mix-blend-mode: overlay;
+                animation: econfiaLetterSweep 3.8s ease-in-out infinite;
+                text-shadow:
+                  0 0 2px rgba(255,255,255,0.56),
+                  0 0 8px rgba(125,211,252,0.28);
+                filter:
+                  drop-shadow(0 0 3px rgba(255,255,255,0.45))
+                  drop-shadow(0 0 8px rgba(56,189,248,0.24));
               }
             `}</style>
-            <div className="econfia-aura relative flex items-center gap-3 rounded-xl border border-cyan-400/20 bg-transparent px-4 py-2.5 transition-all duration-500 group-hover:border-cyan-400/40">
-              {/* Icono con anillo tecnológico */}
+            <div className="relative flex w-[360px] items-center gap-3 bg-transparent px-2 py-2">
               <div className="relative w-[58px] h-[58px] shrink-0">
-                <div className="absolute inset-0 rounded-full bg-red-500/25 blur-md scale-125 group-hover:bg-red-500/40 transition-all duration-500" />
-                <svg viewBox="0 0 100 100" className="econfia-logo-ring absolute inset-0 w-full h-full">
-                  <circle cx="50" cy="50" r="46" fill="none" stroke="url(#econfiaRingGradient)" strokeWidth="3" strokeDasharray="8 6" strokeLinecap="round" opacity="0.85" />
-                  <defs>
-                    <linearGradient id="econfiaRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#ef4444" />
-                      <stop offset="100%" stopColor="#38bdf8" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <svg viewBox="0 0 100 100" className="econfia-logo-ring-dashed absolute inset-0 w-full h-full">
-                  <circle cx="50" cy="50" r="36" fill="none" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="2 8" strokeLinecap="round" opacity="0.5" />
-                </svg>
-                <div className="absolute inset-[7px] rounded-full bg-[#0a0e18] border border-white/10 flex items-center justify-center shadow-[inset_0_0_10px_rgba(239,68,68,0.4)]">
+                <div className="absolute inset-1 rounded-2xl bg-red-500/10 blur-md transition-all duration-500 group-hover:bg-red-500/16" />
+                <div className="absolute inset-[5px] rounded-2xl bg-[#0a0e18]/55 border border-white/10 flex items-center justify-center shadow-[inset_0_0_10px_rgba(255,255,255,0.06)]">
                   <img
                     src="/img/logo-econfia-1.png"
                     alt="Econfía"
-                    className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(239,68,68,0.9)]"
+                    className="w-10 h-10 object-contain drop-shadow-[0_0_6px_rgba(239,68,68,0.55)]"
                   />
                 </div>
               </div>
 
-              <div>
-                <p className="econfia-title font-black text-lg tracking-[0.22em] uppercase leading-none">
-                  Econfia
-                </p>
-                <p className="text-white/40 text-[8px] tracking-[0.15em] uppercase font-light mt-1.5 whitespace-nowrap">
+              <div className="flex flex-col justify-center leading-none">
+                <div className="econfia-title-shell">
+                  <p className="econfia-title font-black text-xl tracking-[0.22em] uppercase leading-none">
+                    Econfia
+                  </p>
+                </div>
+                <p className="text-white/40 text-[8.5px] tracking-[0.15em] uppercase font-light mt-1 whitespace-nowrap">
                   Una marca de Grupo Soluciones
                 </p>
               </div>

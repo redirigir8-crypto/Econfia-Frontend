@@ -144,13 +144,13 @@ if (isAdmin) {
   const canPageNext = windowEnd < menuItems.length;
 
   // Curva tipo "sonrisa": baja hacia el centro y sube en los extremos.
-  const ITEM_GAP = 80;
-  const DIP_DEPTH = 32;
+  const ITEM_GAP = 104;
+  const DIP_DEPTH = 36;
   const count = pageItems.length;
   const midIndex = (count - 1) / 2;
 
   return (
-    <div className="fixed top-3 left-0 right-0 z-50 flex justify-center pointer-events-none">
+    <div className="fixed top-5 left-0 right-0 z-50 flex justify-center pointer-events-none">
       <style>{`
         .glass-pill {
           background: linear-gradient(180deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.02) 100%),
@@ -177,7 +177,7 @@ if (isAdmin) {
         }
         .curve-track {
           position: relative;
-          height: 84px;
+          height: 98px;
         }
         .curve-item {
           position: absolute;
@@ -186,8 +186,8 @@ if (isAdmin) {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 6px;
-          width: 76px;
+          gap: 7px;
+          width: 92px;
           pointer-events: auto;
           z-index: 1;
           transition: transform 0.35s ease, opacity 0.2s ease, filter 0.2s ease;
@@ -195,8 +195,8 @@ if (isAdmin) {
         .curve-icon {
           position: relative;
           overflow: hidden;
-          width: 44px;
-          height: 44px;
+          width: 50px;
+          height: 50px;
           border-radius: 9999px;
           display: flex;
           align-items: center;
@@ -208,8 +208,8 @@ if (isAdmin) {
           z-index: 10;
         }
         .curve-item.active .curve-icon {
-          width: 52px;
-          height: 52px;
+          width: 60px;
+          height: 60px;
           background: linear-gradient(180deg,
             color-mix(in srgb, var(--item-color, #38bdf8) 85%, white 5%),
             color-mix(in srgb, var(--item-color, #38bdf8) 65%, black 25%));
@@ -234,26 +234,26 @@ if (isAdmin) {
           filter: blur(0);
         }
         .curve-label {
-          font-size: 10.5px;
+          font-size: 11px;
           font-weight: 600;
           color: rgba(255,255,255,0.6);
           text-align: center;
           line-height: 1.15;
           white-space: nowrap;
-          max-width: 84px;
+          max-width: 96px;
           overflow: hidden;
           text-overflow: ellipsis;
         }
         .curve-item.active .curve-label {
           color: #ffffff;
-          font-size: 11.5px;
+          font-size: 12px;
           text-shadow: 0 0 10px color-mix(in srgb, var(--item-color, #38bdf8) 70%, transparent);
         }
         .curve-page-btn {
           pointer-events: auto;
           flex-shrink: 0;
-          width: 32px;
-          height: 32px;
+          width: 38px;
+          height: 38px;
           border-radius: 9999px;
           display: flex;
           align-items: center;
@@ -263,7 +263,7 @@ if (isAdmin) {
         }
       `}</style>
 
-      <div className="pointer-events-auto flex items-center gap-5">
+      <div className="pointer-events-auto flex items-center gap-6">
         {/* Flecha página anterior */}
         <button
           type="button"
@@ -273,11 +273,11 @@ if (isAdmin) {
           }`}
           aria-label="Módulos anteriores"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={18} />
         </button>
 
         {/* Módulos en curva tipo "sonrisa" */}
-        <div className="curve-track" style={{ width: ITEM_GAP * Math.max(0, count - 1) + 76 }}>
+        <div className="curve-track" style={{ width: ITEM_GAP * Math.max(0, count - 1) + 100 }}>
           {pageItems.map((item, i) => {
             const offsetFromMid = i - midIndex;
             const x = offsetFromMid * ITEM_GAP;
@@ -297,7 +297,7 @@ if (isAdmin) {
               >
                 <span className="curve-icon glass-pill" title={item.label}>
                   {isActive && <span className="curve-shine" />}
-                  <span className="relative flex items-center justify-center w-5 h-5 text-white [&>img]:w-[18px] [&>img]:h-[18px] [&>svg]:w-[18px] [&>svg]:h-[18px]">
+                  <span className="relative flex items-center justify-center w-6 h-6 text-white [&>img]:w-[22px] [&>img]:h-[22px] [&>svg]:w-[22px] [&>svg]:h-[22px]">
                     {item.icon}
                   </span>
                 </span>
@@ -316,7 +316,7 @@ if (isAdmin) {
           }`}
           aria-label="Más módulos"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={18} />
         </button>
 
       </div>
