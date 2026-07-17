@@ -6,6 +6,16 @@ import Header from "../components/Header";
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaLinkedin, FaTwitter, FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
 
 const CONTACT_BEAR_IMAGE = "/img/chatbot-oso-econfia.png";
+const GOOGLE_ADS_LEAD_CONVERSION_ID = "AW-18330172200/oMOnCNilktIcEKj2wKRE";
+
+function trackLeadConversion() {
+  if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+  window.gtag("event", "conversion", {
+    send_to: GOOGLE_ADS_LEAD_CONVERSION_ID,
+    value: 1.0,
+    currency: "COP",
+  });
+}
 
 // Estilos de animación personalizados
 const animationStyles = `
@@ -203,6 +213,7 @@ export default function Contacto() {
         body: JSON.stringify(form),
       });
       if (res.ok) {
+        trackLeadConversion();
         setToast({ message: "¡Mensaje enviado! Te contactaremos pronto.", type: "success" });
         setForm({ nombre: "", email: "", asunto: "", mensaje: "" });
         speak("Mensaje enviado con éxito");
