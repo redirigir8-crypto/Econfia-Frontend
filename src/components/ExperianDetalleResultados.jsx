@@ -116,7 +116,7 @@ function SpeedoGauge({ value, max = 1000, displayText, label = "Score" }) {
 
   return (
     <div className="flex flex-col items-center">
-      <svg viewBox="0 0 200 130" className="w-full">
+      <svg viewBox="0 -8 200 138" className="w-full">
         <defs>
           <filter id="g-glow" x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur stdDeviation="3" result="b" />
@@ -152,9 +152,9 @@ function SpeedoGauge({ value, max = 1000, displayText, label = "Score" }) {
         <circle cx={CX} cy={CY} r={2.5} fill={color} />
 
         {/* Zone labels — fixed, safe positions */}
-        <text x="16"  y={leftY + 14} textAnchor="middle" fontSize={6.5} fill="#475569">ALTO</text>
-        <text x={CX}  y={arcTop - 4} textAnchor="middle" fontSize={6.5} fill="#475569">MEDIO</text>
-        <text x="184" y={leftY + 14} textAnchor="middle" fontSize={6.5} fill="#475569">BAJO</text>
+        <text x="16"  y={leftY + 17} textAnchor="middle" fontSize={6.5} fill="#475569">ALTO</text>
+        <text x={CX}  y={arcTop - 15} textAnchor="middle" fontSize={6.5} fill="#475569">MEDIO</text>
+        <text x="184" y={leftY + 17} textAnchor="middle" fontSize={6.5} fill="#475569">BAJO</text>
 
         {/* Separator line before value */}
         <line x1="60" y1={CY + 16} x2="140" y2={CY + 16} stroke="#1e293b" strokeWidth={1} />
