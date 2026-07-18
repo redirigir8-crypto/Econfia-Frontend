@@ -144,7 +144,7 @@ export default function ConsultaReconocer() {
                 <span className="text-xs font-medium text-cyan-300">Reconocer</span>
               </div>
               <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-3xl font-black leading-tight tracking-tight text-transparent md:text-4xl">
-                Reconocer Master
+                Econfia Recognize
               </h1>
             </div>
 

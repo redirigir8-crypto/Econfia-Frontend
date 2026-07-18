@@ -173,7 +173,7 @@ export default function ConsultaExperian() {
                 <span className="text-xs font-medium text-cyan-300">MiDecisor Experian</span>
               </div>
               <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-3xl font-black leading-tight tracking-tight text-transparent md:text-4xl">
-                Central de riesgo Experian
+                Econfia Adjudicator
               </h1>
             </div>
 

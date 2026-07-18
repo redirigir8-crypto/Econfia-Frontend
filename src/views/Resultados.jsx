@@ -565,7 +565,16 @@ export default function Resultados() {
         return rightTime - leftTime;
       });
 
-      setData(mergedRows);
+      // Consecutivo POR USUARIO: la más antigua es la #1 y la más reciente la #N.
+      // Es estable (al agregar una nueva, las anteriores conservan su número) y
+      // evita mostrar el ID global de la base de datos, que confunde al usuario.
+      const totalConsultas = mergedRows.length;
+      setData(
+        mergedRows.map((row, index) => ({
+          ...row,
+          numero_usuario: totalConsultas - index,
+        }))
+      );
     } catch (error) {
       console.error("Error al obtener resultados:", error);
     } finally {
@@ -611,6 +620,7 @@ export default function Resultados() {
   const filteredData = data.filter((item) => {
     const matchSearch =
       search === "" ||
+      item.numero_usuario?.toString().includes(search) ||
       item.id.toString().includes(search) ||
       item.row_id?.toString().includes(search) ||
       item.cedula?.toString().includes(search) ||

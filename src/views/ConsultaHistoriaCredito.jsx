@@ -144,13 +144,12 @@ export default function ConsultaHistoriaCredito() {
                 <span className="text-xs font-medium text-cyan-300">Historia de Crédito</span>
               </div>
               <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-3xl font-black leading-tight tracking-tight text-transparent md:text-4xl">
-                Historia de Crédito (HDC+)
+                Econfia Credit Report
               </h1>
             </div>
 
             <p className="text-sm leading-relaxed text-white/70">
-              Consulta la historia de crédito del titular directamente en la central de riesgo. El resultado
-              queda disponible en el panel de resultados.
+              Consulta el comportamiento crediticio del titular y obtén información relevante para fortalecer tus procesos de evaluación.
             </p>
 
             <p className="pt-2 text-xs leading-6 text-red-300/85">

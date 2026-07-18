@@ -360,7 +360,7 @@ export default function TablaResultados({
           <table className="min-w-full text-left text-sm">
             <thead>
             <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
-                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">ID</th>
+                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider" title="Consecutivo de tus consultas">N°</th>
                 <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">NIT/Documento</th>
                 <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Tipo de Consulta</th>
                 <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Nombre</th>
@@ -383,8 +383,12 @@ export default function TablaResultados({
                     className="group hover:bg-gradient-to-r hover:from-cyan-500/5 hover:to-blue-500/5 transition-all duration-300 align-top"
                   >
                     <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 font-mono text-[10px] md:text-xs">
-                      <span className="inline-flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-cyan-500/20 group-hover:border-cyan-500/40 transition-colors text-[10px] md:text-xs">
-                        {item.id}
+                      {/* Consecutivo por usuario (el id real de BD queda en el title, para soporte) */}
+                      <span
+                        title={`ID interno: ${item.id}`}
+                        className="inline-flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-cyan-500/20 group-hover:border-cyan-500/40 transition-colors text-[10px] md:text-xs"
+                      >
+                        {item.numero_usuario ?? item.id}
                       </span>
                     </td>
                     <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm">

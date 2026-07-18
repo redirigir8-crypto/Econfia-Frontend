@@ -76,13 +76,13 @@ if (hasPlanes) {
     consultaItems.push({ path: "/1d5f8e3a", icon: <User size={16} strokeWidth={1.75} />, label: "E-Identidad", color: "teal" });
   }
   if (planes.includes("experian")) {
-    consultaItems.push({ path: "/5c2e8f4a", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Central de riesgo", color: "sky" });
+    consultaItems.push({ path: "/5c2e8f4a", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Econfia Adjudicator", color: "sky" });
   }
   if (planes.includes("historia_credito") || planes.includes("experian")) {
-    consultaItems.push({ path: "/3e9f7c1d", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Historia de Crédito", color: "sky" });
+    consultaItems.push({ path: "/3e9f7c1d", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Econfia Credit Report", color: "sky" });
   }
   if (planes.includes("reconocer") || planes.includes("experian")) {
-    consultaItems.push({ path: "/6b2d8e4f", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Reconocer", color: "sky" });
+    consultaItems.push({ path: "/6b2d8e4f", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Econfia Recognize", color: "sky" });
   }
 }
 
