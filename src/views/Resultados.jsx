@@ -4,6 +4,7 @@ import DetalleResultados from "../components/DetalleResultados";
 import ExperianDetalleResultados from "../components/ExperianDetalleResultados";
 import HdcDetalleResultados from "../components/HdcDetalleResultados";
 import ReconocerDetalleResultados from "../components/ReconocerDetalleResultados";
+import EmpresaDetalleResultados from "../components/EmpresaDetalleResultados";
 import EIdentidadLoteModal from "../components/EIdentidadLoteModal";
 import ModalDescargaIndividual from "../modals/ModalDescargaIndividual";
 import ConsultaSlide from "../components/ConsultaSlide";
@@ -23,6 +24,8 @@ import {
   normalizeHdcConsulta,
   isReconocerConsulta,
   normalizeReconocerConsulta,
+  isEmpresaConsulta,
+  normalizeEmpresaConsulta,
 } from "../utils/experian";
 
 const EXPERIAN_PDF_THEME_OPTIONS = ["claro", "oscuro"];
@@ -527,11 +530,12 @@ export default function Resultados() {
         Authorization: `Token ${token}`,
       };
 
-      const [consultasRes, experianRes, hdcRes, reconocerRes] = await Promise.all([
+      const [consultasRes, experianRes, hdcRes, reconocerRes, empresaRes] = await Promise.all([
         fetch(`${API_URL}/api/consultas/`, { headers }),
         fetch(`${API_URL}/api/experian/consultas/`, { headers }),
         fetch(`${API_URL}/api/hdc/consultas/`, { headers }),
         fetch(`${API_URL}/api/reconocer/consultas/`, { headers }),
+        fetch(`${API_URL}/api/historial-empresas-rues/?limit=80`, { headers }),
       ]);
 
       if (!consultasRes.ok) throw new Error(`Error HTTP: ${consultasRes.status}`);
@@ -540,6 +544,7 @@ export default function Resultados() {
       let experianRows = [];
       let hdcRows = [];
       let reconocerRows = [];
+      let empresaRows = [];
 
       if (experianRes.ok) {
         const experianJson = await experianRes.json();
@@ -553,12 +558,17 @@ export default function Resultados() {
         const reconocerJson = await reconocerRes.json();
         reconocerRows = (reconocerJson?.consultas || []).map(normalizeReconocerConsulta);
       }
+      if (empresaRes.ok) {
+        const empresaJson = await empresaRes.json();
+        empresaRows = (empresaJson?.empresas || []).map(normalizeEmpresaConsulta);
+      }
 
       const mergedRows = [
         ...(Array.isArray(consultasJson) ? consultasJson : []).map(normalizeCoreConsulta),
         ...experianRows,
         ...hdcRows,
         ...reconocerRows,
+        ...empresaRows,
       ].sort((left, right) => {
         const leftTime = left.fecha ? new Date(left.fecha).getTime() : 0;
         const rightTime = right.fecha ? new Date(right.fecha).getTime() : 0;
@@ -636,7 +646,7 @@ export default function Resultados() {
     return matchSearch && matchEstado && matchFecha;
   });
   const exportableData = [...filteredData]
-    .filter((item) => item.source !== "experian" && (item.estado || "").toLowerCase() === "completado")
+    .filter((item) => (item.source || "consulta") === "consulta" && (item.estado || "").toLowerCase() === "completado")
     .sort((left, right) => {
       const leftTime = left.fecha ? new Date(left.fecha).getTime() : 0;
       const rightTime = right.fecha ? new Date(right.fecha).getTime() : 0;
@@ -900,6 +910,7 @@ export default function Resultados() {
   const isExperianActual = isExperianConsulta(consultaActual);
   const isHdcActual = isHdcConsulta(consultaActual);
   const isReconocerActual = isReconocerConsulta(consultaActual);
+  const isEmpresaActual = isEmpresaConsulta(consultaActual);
 
   return (
     <section className="relative min-h-screen py-4 md:py-6 pb-32 md:pb-36 overflow-hidden bg-transparent">
@@ -989,7 +1000,7 @@ export default function Resultados() {
           </div>
         ) : consultaTipoActual !== "e-identidad" ? (
         <div className="w-full max-w-7xl mx-auto min-h-[78vh] xl:min-h-[82vh] h-[calc(100vh-10rem)] max-h-[calc(100vh-5rem)]">
-          {!isHdcActual && !isReconocerActual && !isExperianActual && (
+          {!isHdcActual && !isReconocerActual && !isExperianActual && !isEmpresaActual && (
             <FloatingActionsPortal
               apiUrl={API_URL}
               consultaId={consultaSeleccionada.id}
@@ -1041,6 +1052,41 @@ export default function Resultados() {
                 </button>
               </div>
               <ReconocerDetalleResultados consultaId={consultaSeleccionada.id} />
+            </div>
+          ) : isEmpresaActual ? (
+            <div className="h-full min-h-0 overflow-y-auto pt-2">
+              <div className="mb-4 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConsultaSeleccionada(null)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/30 hover:text-white"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Regresar
+                </button>
+              </div>
+              <EmpresaDetalleResultados
+                empresa={consultaSeleccionada}
+                onDownloadPdf={async (nit) => {
+                  if (!nit) return;
+                  try {
+                    const token = localStorage.getItem("token");
+                    const res = await fetch(`${API_URL}/api/descargar-pdf-empresa/${nit}/`, {
+                      headers: token ? { Authorization: `Token ${token}` } : {},
+                    });
+                    if (!res.ok) throw new Error(`Error al descargar PDF: ${res.status}`);
+                    const blob = await res.blob();
+                    const link = document.createElement("a");
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = `empresa_rues_${nit}.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    window.URL.revokeObjectURL(link.href);
+                  } catch (error) {
+                    alert(error.message || "No se pudo descargar el informe empresarial.");
+                  }
+                }}
+              />
             </div>
           ) : isExperianActual ? (
             <div className="h-full min-h-0 overflow-y-auto pt-2">

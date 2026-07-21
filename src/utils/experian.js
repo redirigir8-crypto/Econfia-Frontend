@@ -96,3 +96,31 @@ export function normalizeReconocerConsulta(item) {
     consulta_original_id: item.id,
   };
 }
+
+// ── Empresa RUES ───────────────────────────────────────────────────────────
+
+export function isEmpresaConsulta(item) {
+  const source = String(item?.source || "").trim().toLowerCase();
+  const tipo = String(item?.tipo_consulta || item?.tipo || "").trim().toLowerCase();
+  return source === "empresa-rues" || tipo === "empresa rues" || tipo === "empresa";
+}
+
+export function normalizeEmpresaConsulta(item) {
+  return {
+    ...item,
+    id: item.nit || item.id,
+    row_id: `empresa-rues-${item.nit || item.id}`,
+    source: "empresa-rues",
+    tipo: "EMPRESA",
+    tipo_consulta: "Empresa RUES",
+    estado: "completado",
+    cedula: item.nit || "",
+    nit: item.nit || "",
+    nombre: item.nombre || "Empresa consultada",
+    fecha: item.fecha_consulta || null,
+    empresa_data: item,
+    integraciones_pendientes: {
+      econfia_adjudicator: false,
+    },
+  };
+}

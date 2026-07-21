@@ -2,12 +2,12 @@ import { useState } from "react";
 import {
   FaBuilding,
   FaBalanceScale,
+  FaChartPie,
   FaChartLine,
   FaCheckCircle,
   FaClipboardCheck,
   FaExclamationTriangle,
   FaFilePdf,
-  FaHistory,
   FaIdCard,
   FaIndustry,
   FaEye,
@@ -16,6 +16,18 @@ import {
   FaUserTie,
 } from "react-icons/fa";
 import Terminos from "../components/Terminos";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 function SectionCard({ title, children, accent = "emerald", description }) {
   const accentMap = {
@@ -90,6 +102,11 @@ function formatMoney(value) {
     currency: "COP",
     maximumFractionDigits: 0,
   }).format(numeric);
+}
+
+function parseMoneyNumber(value) {
+  const numeric = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
 }
 
 function CompactField({ label, value }) {
@@ -238,16 +255,6 @@ function normalizarEmpresaData(data) {
   };
 }
 
-function formatDateTime(value) {
-  if (!value) return "Fecha no disponible";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("es-CO", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
-
 function AssessmentSignal({ signal }) {
   const Icon = signal.icon;
   const toneMap = {
@@ -298,6 +305,182 @@ function DecisionStep({ icon: Icon, title, text, tone = "sky" }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function EmpresaGraficosEjecutivos({ resultadoEmpresa }) {
+  if (!resultadoEmpresa) return null;
+
+  const actividad = resultadoEmpresa.actividad_economica || [];
+  const representante = resultadoEmpresa.representante_legal || {};
+  const proveedores = resultadoEmpresa.proveedores_ficticios_dian || {};
+  const afiliados = resultadoEmpresa.camara_comercio_afiliados || {};
+  const afiliadosRegistros = afiliados.registros || [];
+  const propietarioRegistros = resultadoEmpresa.propietario_establecimiento?.registros || [];
+
+  const cobertura = [
+    { name: "RUES", value: resultadoEmpresa.informacion_general && Object.keys(resultadoEmpresa.informacion_general).length ? 1 : 0, color: "#38bdf8" },
+    { name: "Actividad", value: actividad.length ? 1 : 0, color: "#2dd4bf" },
+    { name: "Representante", value: representante.registros?.length || representante.mensaje ? 1 : 0, color: "#a78bfa" },
+    { name: "DIAN", value: proveedores.mensaje ? 1 : 0, color: "#f59e0b" },
+    { name: "Afiliados", value: afiliados.mensaje ? 1 : 0, color: "#fb7185" },
+  ];
+  const coberturaTotal = cobertura.reduce((sum, item) => sum + item.value, 0);
+  const coberturaPct = Math.round((coberturaTotal / cobertura.length) * 100);
+  const senales = [
+    { name: "Mercantil", valor: isActiveStatus(resultadoEmpresa.estado) ? 100 : 45 },
+    { name: "Actividad", valor: Math.min(100, actividad.length * 35) },
+    { name: "Rep. legal", valor: representante.registros?.length ? 90 : representante.mensaje ? 65 : 20 },
+    { name: "DIAN", valor: proveedores.aparece ? 25 : proveedores.mensaje ? 95 : 45 },
+    { name: "Afiliados", valor: afiliados.aparece ? 85 : afiliados.mensaje ? 55 : 25 },
+  ];
+  const financieros = afiliadosRegistros
+    .slice(0, 3)
+    .map((item, index) => ({
+      name: item.razon_social || `Registro ${index + 1}`,
+      ingresos: parseMoneyNumber(item.financiero?.ingresos_actividad_ordinaria),
+      patrimonio: parseMoneyNumber(item.financiero?.patrimonio),
+    }))
+    .filter((item) => item.ingresos || item.patrimonio);
+
+  return (
+    <SectionCard
+      title="Lectura gráfica empresarial"
+      accent="sky"
+      description="Resumen visual para evaluar cobertura de fuentes, señales de revisión y capacidad reportada cuando exista información financiera."
+    >
+      <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/40 p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-black text-white">Cobertura de fuentes</div>
+              <div className="text-xs text-slate-400">Disponibilidad de señales por fuente.</div>
+            </div>
+            <FaChartPie className="text-cyan-300" />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-[210px_1fr]">
+            <div className="relative h-[210px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={cobertura}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="62%"
+                    outerRadius="82%"
+                    paddingAngle={4}
+                    cornerRadius={8}
+                    stroke="rgba(2,6,23,0.76)"
+                    strokeWidth={3}
+                    isAnimationActive
+                    animationDuration={900}
+                  >
+                    {cobertura.map((item) => (
+                      <Cell key={item.name} fill={item.value ? item.color : "rgba(148,163,184,0.18)"} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    cursor={false}
+                    contentStyle={{
+                      background: "rgba(6,24,31,0.96)",
+                      border: "1px solid rgba(103,232,249,0.18)",
+                      borderRadius: 12,
+                      color: "#e8f1f2",
+                    }}
+                    formatter={(value) => [value ? "Disponible" : "No disponible", "Estado"]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-3xl font-black text-white">{coberturaPct}%</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-200">cobertura</div>
+              </div>
+            </div>
+            <div className="grid content-center gap-2">
+              {cobertura.map((item) => (
+                <div key={item.name} className="flex items-center justify-between rounded-xl border border-white/8 bg-white/[0.035] px-3 py-2">
+                  <span className="flex items-center gap-2 text-sm font-bold text-white">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.value ? item.color : "rgba(148,163,184,0.45)" }} />
+                    {item.name}
+                  </span>
+                  <span className={item.value ? "text-xs font-black text-emerald-200" : "text-xs font-black text-slate-500"}>
+                    {item.value ? "OK" : "Pendiente"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/40 p-4">
+          <div className="mb-3">
+            <div className="text-sm font-black text-white">Señales para calificación</div>
+            <div className="text-xs text-slate-400">Lectura visual para priorizar revisión.</div>
+          </div>
+          <div className="h-[230px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={senales} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid stroke="#24424c" strokeOpacity={0.45} vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis domain={[0, 100]} tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: "rgba(103,232,249,0.06)" }}
+                  contentStyle={{
+                    background: "rgba(6,24,31,0.96)",
+                    border: "1px solid rgba(103,232,249,0.18)",
+                    borderRadius: 12,
+                    color: "#e8f1f2",
+                  }}
+                />
+                <Bar dataKey="valor" name="Indicador" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1000}>
+                  {senales.map((item) => (
+                    <Cell key={item.name} fill={item.valor < 50 ? "#f59e0b" : item.valor > 80 ? "#2dd4bf" : "#38bdf8"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <MetricTile label="Fuentes disponibles" value={`${coberturaTotal}/${cobertura.length}`} tone="sky" />
+        <MetricTile label="Establecimientos" value={propietarioRegistros.length || "—"} tone="violet" />
+        <MetricTile label="Registros afiliados" value={afiliadosRegistros.length || "—"} tone="emerald" />
+      </div>
+
+      {financieros.length > 0 && (
+        <div className="mt-4 rounded-[1.5rem] border border-white/10 bg-slate-950/40 p-4">
+          <div className="mb-3">
+            <div className="text-sm font-black text-white">Indicadores financieros reportados</div>
+            <div className="text-xs text-slate-400">Ingresos y patrimonio desde fuentes complementarias.</div>
+          </div>
+          <div className="h-[230px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={financieros} margin={{ top: 8, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid stroke="#24424c" strokeOpacity={0.45} vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "#9bb9c3", fontSize: 10 }} axisLine={false} tickLine={false} interval={0} />
+                <YAxis tickFormatter={(value) => `${Math.round(value / 1000000)}M`} tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  cursor={{ fill: "rgba(103,232,249,0.06)" }}
+                  formatter={(value, name) => [formatMoney(value), name]}
+                  contentStyle={{
+                    background: "rgba(6,24,31,0.96)",
+                    border: "1px solid rgba(103,232,249,0.18)",
+                    borderRadius: 12,
+                    color: "#e8f1f2",
+                  }}
+                />
+                <Bar dataKey="ingresos" name="Ingresos" fill="#38bdf8" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="patrimonio" name="Patrimonio" fill="#2dd4bf" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+    </SectionCard>
   );
 }
 
@@ -399,6 +582,121 @@ function CamaraAfiliadoCard({ item, index }) {
   );
 }
 
+function EmpresaConsultaExitosaModal({ empresa, onClose }) {
+  if (!empresa) return null;
+
+  const estadoActivo = isActiveStatus(empresa.estado);
+  const alertaDian = empresa.proveedores_ficticios_dian?.aparece;
+
+  return (
+    <div className="fixed inset-0 z-[12000] flex items-center justify-center bg-slate-950/78 p-4 backdrop-blur-md">
+      <div className="relative w-full max-w-3xl overflow-hidden rounded-[24px] border border-cyan-200/25 bg-[linear-gradient(180deg,#e7edf4_0%,#f5f7fa_46%,#dce4ee_100%)] text-slate-800 shadow-[0_28px_80px_rgba(2,12,27,0.55)]">
+        <div className="absolute inset-x-0 top-0 h-12 bg-[linear-gradient(90deg,#0f2e4f_0%,#123c67_26%,#1c5d8f_52%,#0f436d_76%,#0b2f4d_100%)] opacity-95" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-12 overflow-hidden">
+          <svg viewBox="0 0 760 48" aria-hidden="true" preserveAspectRatio="none" className="h-full w-full">
+            <g stroke="rgba(255,255,255,0.42)" strokeWidth="1.5">
+              {Array.from({ length: 36 }).map((_, i) => {
+                const x = i * 24 - 20;
+                return <line key={i} x1={x} y1="0" x2={x + 56} y2="48" />;
+              })}
+            </g>
+          </svg>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 z-10 rounded-full border border-white/20 bg-slate-950/30 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-white transition hover:bg-slate-950/50"
+        >
+          Cerrar
+        </button>
+
+        <div className="relative p-6 pt-20 md:p-8 md:pt-20">
+          <div className="mb-5 flex flex-wrap items-start justify-between gap-4 border-b border-slate-300/70 pb-5">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.34em] text-slate-500">
+                Econfia empresarial
+              </p>
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-slate-800 md:text-3xl">
+                Consulta procesada
+              </h2>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Empresa RUES registrada para revisión en Consultas
+              </p>
+            </div>
+            <div className="rounded-2xl border border-cyan-100/70 bg-white/70 px-4 py-3 text-right shadow-sm">
+              <p className="text-[9px] font-black uppercase tracking-[0.26em] text-slate-400">NIT</p>
+              <p className="mt-1 font-mono text-base font-black tracking-[0.08em] text-slate-800">
+                {empresa.nit || "—"}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-[180px_1fr]">
+            <div className="space-y-3">
+              <div className="flex h-36 items-center justify-center rounded-2xl border border-slate-300/60 bg-[linear-gradient(180deg,#d0d8e3_0%,#eef2f6_100%)]">
+                <FaBuilding className="text-6xl text-sky-700" />
+              </div>
+              <div className="rounded-2xl border border-cyan-100/70 bg-white/55 px-4 py-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.24em] text-slate-400">Fecha consulta</p>
+                <p className="mt-1 text-sm font-black text-slate-700">
+                  {empresa.fecha_consulta ? new Date(empresa.fecha_consulta).toLocaleDateString("es-CO") : "Hoy"}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid content-start gap-3">
+              <div className="rounded-2xl bg-white/42 p-4">
+                <div className="grid gap-3 md:grid-cols-[150px_1fr]">
+                  <p className="text-sm font-black uppercase tracking-wide text-slate-700">Razón social</p>
+                  <p className="border-b border-slate-300/70 pb-2 text-sm font-semibold uppercase tracking-wide text-slate-800">
+                    {empresa.nombre || "Empresa consultada"}
+                  </p>
+                  <p className="text-sm font-black uppercase tracking-wide text-slate-700">Estado</p>
+                  <p className="border-b border-slate-300/70 pb-2 text-sm font-semibold uppercase tracking-wide text-slate-800">
+                    {empresa.estado || "No reportado"}
+                  </p>
+                  <p className="text-sm font-black uppercase tracking-wide text-slate-700">Cámara</p>
+                  <p className="border-b border-slate-300/70 pb-2 text-sm font-semibold uppercase tracking-wide text-slate-800">
+                    {empresa.camara_comercio || "No reportada"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className={`rounded-2xl border px-4 py-3 ${estadoActivo ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}>
+                  <p className="text-[9px] font-black uppercase tracking-[0.24em] opacity-70">Estado mercantil</p>
+                  <p className="mt-1 text-lg font-black">{estadoActivo ? "Activo" : "Revisar"}</p>
+                </div>
+                <div className={`rounded-2xl border px-4 py-3 ${alertaDian ? "border-amber-200 bg-amber-50 text-amber-800" : "border-cyan-200 bg-cyan-50 text-cyan-800"}`}>
+                  <p className="text-[9px] font-black uppercase tracking-[0.24em] opacity-70">DIAN</p>
+                  <p className="mt-1 text-lg font-black">{alertaDian ? "Alerta" : "Sin alerta"}</p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-cyan-200/45 bg-[linear-gradient(90deg,rgba(15,47,77,0.08),rgba(255,255,255,0.2),rgba(24,93,143,0.12))] px-4 py-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">
+                  Resultado disponible en Consultas
+                </p>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-600">
+                    Abra el historial de consultas para revisar ficha, gráficos y PDF.
+                  </span>
+                  <a
+                    href="/resultados"
+                    className="rounded-full border border-cyan-200/40 bg-white/70 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-700 transition hover:bg-white"
+                  >
+                    Ir a Consultas
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ConsultaEmpresa() {
   const [tipoDoc] = useState("NIT");
   const [nit, setNit] = useState("");
@@ -406,11 +704,9 @@ export default function ConsultaEmpresa() {
   const [consentimiento, setConsentimiento] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generandoPdf, setGenerandoPdf] = useState(false);
-  const [loadingHistorial, setLoadingHistorial] = useState(false);
-  const [mostrarHistorial, setMostrarHistorial] = useState(false);
-  const [historialEmpresas, setHistorialEmpresas] = useState([]);
   const [toast, setToast] = useState(null);
   const [resultadoEmpresa, setResultadoEmpresa] = useState(null);
+  const [capturaAmpliada, setCapturaAmpliada] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
 
   const handleSubmit = async (e) => {
@@ -452,42 +748,6 @@ export default function ConsultaEmpresa() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleToggleHistorial = async () => {
-    if (mostrarHistorial) {
-      setMostrarHistorial(false);
-      return;
-    }
-
-    setMostrarHistorial(true);
-    setLoadingHistorial(true);
-    setToast(null);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/api/historial-empresas-rues/?limit=60`, {
-        method: "GET",
-        headers: { Authorization: `Token ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setToast({ type: "error", message: data.error || "No fue posible cargar el historial." });
-        return;
-      }
-      setHistorialEmpresas(data.empresas || []);
-    } catch (error) {
-      setToast({ type: "error", message: "Ocurrió un error cargando el historial de empresas." });
-    } finally {
-      setLoadingHistorial(false);
-    }
-  };
-
-  const handleSeleccionarHistorial = (empresa) => {
-    setResultadoEmpresa(normalizarEmpresaData(empresa));
-    setNit(empresa.nit || "");
-    setToast(null);
-    setMostrarHistorial(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDescargarPdf = async () => {
@@ -567,96 +827,113 @@ export default function ConsultaEmpresa() {
     <div className="pointer-events-none fixed inset-x-0 top-0 z-40 h-16 border-b border-white/10 bg-slate-950/96 backdrop-blur-xl md:h-20" />
     <div className="relative z-0 mx-auto max-w-7xl px-4 pb-8 pt-24 md:px-6 md:pb-10 md:pt-28">
       <div className="space-y-8">
-        <div className="rounded-[2.25rem] border border-sky-400/15 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.18),transparent_34%),linear-gradient(135deg,rgba(7,13,34,0.98),rgba(20,41,102,0.95))] p-5 shadow-[0_30px_80px_rgba(2,6,23,0.35)]">
-          <div className="grid gap-5 xl:grid-cols-[280px_1fr] xl:items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-xs font-semibold text-sky-200">
+        <div className="relative overflow-hidden rounded-[2rem] border border-sky-400/15 bg-[linear-gradient(135deg,rgba(7,13,34,0.98),rgba(15,45,70,0.94)_48%,rgba(20,41,102,0.92))] p-5 shadow-[0_30px_80px_rgba(2,6,23,0.35)]">
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-sky-400/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-28 left-10 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="relative grid gap-6 xl:grid-cols-[0.85fr_1.45fr] xl:items-center">
+            <div className="max-w-md">
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-sky-200">
                 <FaBuilding className="text-sky-300" />
-                Consulta de Empresa
+                Empresa RUES
               </div>
-              <h2 className="mt-4 text-xl font-bold leading-tight text-white">
-                Consulta mercantil y perfil empresarial
+              <h2 className="mt-5 text-2xl font-black leading-tight text-white md:text-3xl">
+                Consulta mercantil empresarial
               </h2>
-              <p className="mt-2 text-xs leading-5 text-slate-300">
-                Ingresa el NIT de una persona natural o jurídica para validar RUES, Cámara, actividad económica y señales de proveedor.
+              <p className="mt-3 text-sm leading-6 text-slate-300">
+                Valida RUES, Cámara de Comercio, actividad económica, representación legal y señales de proveedor desde una sola consulta.
               </p>
-              <button
-                type="button"
-                onClick={handleToggleHistorial}
-                className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-sky-300/20 bg-sky-400/10 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-sky-100 transition-all duration-300 hover:border-sky-200/45 hover:bg-sky-400/18"
-              >
-                <FaHistory />
-                {mostrarHistorial ? "Ocultar historial" : "Ver historial"}
-              </button>
+              <div className="mt-5 grid gap-2 text-xs text-slate-300 sm:grid-cols-3 xl:grid-cols-1">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                  <div className="font-black uppercase tracking-[0.16em] text-sky-200">Fuente</div>
+                  <div className="mt-1 font-semibold text-white">RUES + complementarias</div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                  <div className="font-black uppercase tracking-[0.16em] text-emerald-200">Salida</div>
+                  <div className="mt-1 font-semibold text-white">Ficha + PDF empresarial</div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+                  <div className="font-black uppercase tracking-[0.16em] text-cyan-200">Cruce futuro</div>
+                  <div className="mt-1 font-semibold text-white">Adjudicator pendiente</div>
+                </div>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="grid gap-4 lg:grid-cols-[140px_1fr_1.25fr_180px] lg:items-end">
-              <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-sky-100">
-                  Tipo de consulta
-                </label>
-                <select
-                  className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-white"
-                  value={tipoDoc}
-                  disabled
+            <form onSubmit={handleSubmit} className="rounded-[1.5rem] border border-white/10 bg-slate-950/36 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl">
+              <div className="grid gap-4 lg:grid-cols-[150px_1fr]">
+                <div>
+                  <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-sky-100">
+                    Tipo
+                  </label>
+                  <select
+                    className="h-14 w-full rounded-2xl border border-white/10 bg-slate-950/55 px-4 text-base font-bold text-white outline-none"
+                    value={tipoDoc}
+                    disabled
+                  >
+                    <option value="NIT">NIT</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-sky-100">
+                    NIT persona natural o jurídica
+                  </label>
+                  <input
+                    type="text"
+                    className="h-14 w-full rounded-2xl border border-white/10 bg-slate-950/55 px-4 text-lg font-bold text-white outline-none transition placeholder:text-slate-500 focus:border-sky-300/45 focus:ring-2 focus:ring-sky-400/15"
+                    placeholder="Ej: 900000001"
+                    value={nit}
+                    onChange={(e) => setNit(e.target.value)}
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_220px] lg:items-stretch">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                  <div className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    Autorización requerida
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <label htmlFor="acepta" className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/8 bg-slate-950/35 px-3 py-3 text-sm leading-5 text-slate-300 transition hover:border-sky-300/25 hover:bg-sky-400/10">
+                      <input
+                        type="checkbox"
+                        id="acepta"
+                        checked={acepta}
+                        onChange={(e) => setAcepta(e.target.checked)}
+                        className="mt-1 accent-sky-500"
+                      />
+                      <span>Acepto los <Terminos inline />.</span>
+                    </label>
+
+                    <label htmlFor="consentimiento" className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/8 bg-slate-950/35 px-3 py-3 text-sm leading-5 text-slate-300 transition hover:border-sky-300/25 hover:bg-sky-400/10">
+                      <input
+                        type="checkbox"
+                        id="consentimiento"
+                        checked={consentimiento}
+                        onChange={(e) => setConsentimiento(e.target.checked)}
+                        className="mt-1 accent-sky-500"
+                      />
+                      <span>Confirmo autorización para consultar esta información.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex min-h-[92px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 to-blue-500 px-5 text-base font-black text-white shadow-[0_18px_38px_rgba(14,165,233,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:from-sky-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  <option value="NIT">NIT
-                  </option>
-                </select>
+                  {loading ? (
+                    <span className="inline-flex items-center gap-3">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                      Consultando
+                    </span>
+                  ) : "Consultar Empresa"}
+                </button>
               </div>
-
-              <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-sky-100">
-                  NIT persona natural o jurídica
-                </label>
-                <input
-                  type="text"
-                  className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-white placeholder:text-slate-500"
-                  placeholder="Ej: 900000001"
-                  value={nit}
-                  onChange={(e) => setNit(e.target.value)}
-                  autoComplete="off"
-                />
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3">
-                <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  id="acepta"
-                  checked={acepta}
-                  onChange={(e) => setAcepta(e.target.checked)}
-                  className="mt-1 accent-sky-500"
-                />
-                <label htmlFor="acepta" className="text-sm text-slate-300">
-                  Acepto los <Terminos inline />.
-                </label>
-                </div>
-
-                <div className="mt-2 flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  id="consentimiento"
-                  checked={consentimiento}
-                  onChange={(e) => setConsentimiento(e.target.checked)}
-                  className="mt-1 accent-sky-500"
-                />
-                <label htmlFor="consentimiento" className="text-sm text-slate-300">
-                  Confirmo que cuento con autorización para consultar esta información.
-                </label>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="h-[48px] w-full rounded-xl bg-gradient-to-r from-sky-500 to-blue-500 px-4 font-semibold text-white transition-all duration-300 hover:from-sky-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {loading ? "Consultando..." : "Consultar Empresa"}
-              </button>
 
               {toast && (
-                <div className={`lg:col-span-4 rounded-xl border px-4 py-3 text-sm ${
+                <div className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
                   toast.type === "error"
                     ? "border-red-400/20 bg-red-500/10 text-red-200"
                     : "border-emerald-400/20 bg-emerald-500/10 text-emerald-200"
@@ -668,111 +945,7 @@ export default function ConsultaEmpresa() {
           </div>
         </div>
 
-        {mostrarHistorial && (
-          <section className="rounded-[2rem] border border-white/10 bg-slate-950/72 p-5 shadow-[0_24px_80px_rgba(2,6,23,0.32)] backdrop-blur-xl">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-emerald-200">
-                  <FaHistory />
-                  Historial de empresas
-                </div>
-                <h3 className="mt-4 text-2xl font-black text-white">Empresas consultadas</h3>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
-                  Selecciona una empresa del historial para abrir nuevamente su ficha y descargar el informe empresarial sin repetir la búsqueda.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-slate-200">
-                {historialEmpresas.length} registros
-              </div>
-            </div>
-
-            <div className="mt-5">
-              {loadingHistorial ? (
-                <div className="rounded-2xl border border-sky-400/15 bg-sky-500/10 px-4 py-5 text-sm text-sky-100">
-                  Cargando historial...
-                </div>
-              ) : historialEmpresas.length > 0 ? (
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                  {historialEmpresas.map((empresa) => {
-                    const alertaDian = empresa.proveedores_ficticios_dian?.aparece;
-                    return (
-                      <button
-                        key={`${empresa.nit}-${empresa.fecha_consulta}`}
-                        type="button"
-                        onClick={() => handleSeleccionarHistorial(empresa)}
-                        className="group rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-300/35 hover:bg-sky-400/10"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="truncate text-base font-black text-white">
-                              {empresa.nombre || "Empresa sin nombre"}
-                            </div>
-                            <div className="mt-1 text-sm font-semibold text-sky-200">
-                              NIT {empresa.nit || "No disponible"}
-                            </div>
-                          </div>
-                          <span className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${
-                            alertaDian ? "bg-amber-400/15 text-amber-200" : "bg-emerald-400/15 text-emerald-200"
-                          }`}>
-                            {alertaDian ? "DIAN alerta" : "Sin alerta"}
-                          </span>
-                        </div>
-                        <div className="mt-4 grid gap-2 text-sm text-slate-300">
-                          <div>Estado: <span className="font-semibold text-white">{empresa.estado || "No disponible"}</span></div>
-                          <div>Cámara: <span className="font-semibold text-white">{empresa.camara_comercio || "No disponible"}</span></div>
-                          <div>Matrícula: <span className="font-semibold text-white">{empresa.matricula || "No disponible"}</span></div>
-                        </div>
-                        <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/8 pt-3 text-xs text-slate-400">
-                          <span>{formatDateTime(empresa.fecha_consulta)}</span>
-                          <span className="inline-flex items-center gap-2 font-bold text-sky-200 group-hover:text-sky-100">
-                            <FaEye />
-                            Ver ficha
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-5 text-sm text-slate-300">
-                  Todavía no hay empresas guardadas en el historial.
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-
-        <section className="space-y-6">
-          <div className="rounded-[2rem] border border-white/10 bg-slate-950/82 px-6 py-6 text-center shadow-[0_24px_80px_rgba(2,6,23,0.3)] backdrop-blur-xl">
-            {!resultadoEmpresa ? (
-              <>
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-400/10 text-sky-300">
-                <FaIndustry className="text-2xl" />
-              </div>
-              <h3 className="mt-4 text-xl font-bold text-white">
-                Resultado de empresa
-              </h3>
-              <p className="mt-2 max-w-2xl mx-auto text-sm leading-6 text-slate-300">
-                Aquí verás la ficha empresarial con información general, actividad económica, representación legal, historia registral y captura de consulta.
-              </p>
-              </>
-            ) : (
-              <>
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300">
-                  <FaClipboardCheck className="text-2xl" />
-                </div>
-                <h3 className="mt-4 text-xl font-bold text-white">
-                  Resultado listo
-                </h3>
-                <p className="mt-2 max-w-2xl mx-auto text-sm leading-6 text-slate-300">
-                  La ficha empresarial se muestra debajo del formulario para que puedas conservar la consulta y revisar el resultado completo.
-                </p>
-              </>
-            )}
-          </div>
-        </section>
-
-        {resultadoEmpresa && (
+        {false && resultadoEmpresa && (
             <>
               <div className={`overflow-hidden rounded-[2.25rem] border bg-gradient-to-br p-6 md:p-8 shadow-[0_30px_100px_rgba(2,6,23,0.42)] backdrop-blur-xl ${assessment?.classes || "border-white/10 from-slate-950 to-slate-900"}`}>
                 <div className="space-y-6">
@@ -865,6 +1038,8 @@ export default function ConsultaEmpresa() {
                   ))}
                 </div>
               </div>
+
+              <EmpresaGraficosEjecutivos resultadoEmpresa={resultadoEmpresa} />
 
               <div className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
                 <div className="space-y-6">
@@ -1091,11 +1266,21 @@ export default function ConsultaEmpresa() {
                       accent="emerald"
                       description="Evidencia visual de la fuente consultada para soporte del análisis."
                     >
-                      <img
-                        src={resultadoEmpresa.captura_principal}
-                        alt="Captura de la empresa"
-                        className="w-full rounded-2xl border border-white/10 shadow"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setCapturaAmpliada(true)}
+                        className="group relative block w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] text-left shadow"
+                      >
+                        <img
+                          src={resultadoEmpresa.captura_principal}
+                          alt="Captura de la empresa"
+                          className="max-h-[360px] w-full object-cover opacity-90 transition duration-300 group-hover:scale-[1.01] group-hover:opacity-100"
+                        />
+                        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-slate-950/90 to-transparent px-4 py-4">
+                          <span className="text-sm font-bold text-white">Clic para ampliar evidencia</span>
+                          <FaEye className="text-cyan-200" />
+                        </div>
+                      </button>
                     </SectionCard>
                   )}
 
@@ -1137,6 +1322,34 @@ export default function ConsultaEmpresa() {
           )}
       </div>
     </div>
+    <EmpresaConsultaExitosaModal
+      empresa={resultadoEmpresa}
+      onClose={() => setResultadoEmpresa(null)}
+    />
+    {capturaAmpliada && resultadoEmpresa?.captura_principal && (
+      <div
+        className="fixed inset-0 z-[12000] flex items-center justify-center bg-slate-950/88 p-4 backdrop-blur-md"
+        onClick={() => setCapturaAmpliada(false)}
+      >
+        <div
+          className="relative max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-cyan-400/20 bg-slate-950 shadow-2xl"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => setCapturaAmpliada(false)}
+            className="absolute right-3 top-3 z-10 rounded-full border border-white/10 bg-slate-950/80 px-3 py-2 text-sm font-black text-white transition hover:bg-white/10"
+          >
+            Cerrar
+          </button>
+          <img
+            src={resultadoEmpresa.captura_principal}
+            alt="Captura ampliada de la empresa"
+            className="max-h-[92vh] w-full object-contain"
+          />
+        </div>
+      </div>
+    )}
     </>
   );
 }
