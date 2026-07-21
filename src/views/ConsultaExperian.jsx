@@ -107,7 +107,7 @@ export default function ConsultaExperian() {
       setResultado(data.consulta || data);
       setTimeout(() => navigate("/d3b7f1e9"), 1200);
     } catch (_error) {
-      setToast({ type: "error", message: "Ocurrió un error al consultar Experian." });
+      setToast({ type: "error", message: "Ocurrió un error al consultar Econfia Adjudicator." });
     } finally {
       setLoading(false);
     }
@@ -121,7 +121,7 @@ export default function ConsultaExperian() {
             <div className="relative w-full max-w-md rounded-2xl border border-cyan-400/20 bg-slate-950/85 p-10 text-center shadow-2xl shadow-cyan-500/20 backdrop-blur-md">
               <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-t-4 border-cyan-400" />
               <p className="animate-pulse text-lg font-semibold text-white">
-                Consultando MiDecisor en Experian...
+                Consultando Econfia Adjudicator...
               </p>
             </div>
           </div>,
@@ -139,7 +139,7 @@ export default function ConsultaExperian() {
                 </svg>
               </div>
               <h2 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-2xl font-black text-transparent">
-                Consulta Experian completada
+                Consulta Econfia Adjudicator completada
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-300">
                 El resultado ya quedó almacenado y te enviaremos al panel de resultados para revisar el detalle.
@@ -170,7 +170,7 @@ export default function ConsultaExperian() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500" />
                 </span>
-                <span className="text-xs font-medium text-cyan-300">MiDecisor Experian</span>
+                <span className="text-xs font-medium text-cyan-300">Econfia Adjudicator</span>
               </div>
               <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-3xl font-black leading-tight tracking-tight text-transparent md:text-4xl">
                 Econfia Adjudicator
@@ -251,7 +251,7 @@ export default function ConsultaExperian() {
                         className="h-4 w-4 cursor-pointer accent-cyan-500"
                       />
                       <span className="text-xs text-white/80 transition-colors group-hover:text-white">
-                        Forzar consulta nueva en Experian
+                        Forzar consulta nueva
                       </span>
                     </label>
                     <label className="group flex cursor-pointer items-center gap-2">
@@ -303,7 +303,7 @@ export default function ConsultaExperian() {
                         : "transform bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:scale-105 hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
                     }`}
                   >
-                    Consultar Experian
+                    Consultar Econfia Adjudicator
                   </button>
                 </form>
 

@@ -8,6 +8,16 @@ import {
   UserRound,
   Wallet,
 } from "lucide-react";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -42,6 +52,19 @@ function fmtMoney(value) {
   }).format(n);
 }
 
+function numValue(value) {
+  const numeric = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
+}
+
+function fmtAxis(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "0";
+  if (Math.abs(n) >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (Math.abs(n) >= 1000) return `${Math.round(n / 1000)}k`;
+  return String(Math.round(n));
+}
+
 function fmtText(value) {
   if (value === null || value === undefined || value === "" || value === "null") return "—";
   return String(value);
@@ -57,6 +80,27 @@ function sumField(list, field) {
     const value = Number(acc(item)[field]);
     return total + (Number.isFinite(value) && value > 0 ? value : 0);
   }, 0);
+}
+
+function buildDebtTrendData(root) {
+  const evolution = deepFind(root, "debtEvolution");
+  const trimester = toArray(evolution?.trimester);
+  if (!trimester.length) return [];
+
+  return trimester
+    .map((item) => {
+      const deb = item?.DebBasic || {};
+      const rawPercent = numValue(deb.usePercentage ?? deb.debtPercentage);
+      return {
+        period: String(item?.trimesterDate || "").slice(0, 7),
+        cupo: numValue(deb.initialValue),
+        saldo: numValue(deb.debtBalance),
+        deuda: rawPercent <= 1 ? Math.round(rawPercent * 1000) / 10 : Math.round(rawPercent * 10) / 10,
+      };
+    })
+    .filter((item) => item.period && (item.cupo > 0 || item.saldo > 0 || item.deuda > 0))
+    .sort((a, b) => a.period.localeCompare(b.period))
+    .slice(-8);
 }
 
 // ── UI atoms ────────────────────────────────────────────────────────────────
@@ -138,6 +182,115 @@ function AccountCard({ titulo, subtitulo, estado, filas }) {
   );
 }
 
+function DebtTrendChart({ data }) {
+  if (!data.length) return null;
+
+  return (
+    <Section icon={Wallet} title="Evolución de cupo, saldo y % de deuda">
+      <div className="rounded-2xl border border-white/[0.08] bg-[#0b2630]/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="h-[320px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 14, right: 28, left: 4, bottom: 8 }}>
+              <defs>
+                <linearGradient id="hdc-cupo-line" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" stopColor="#38bdf8" />
+                  <stop offset="100%" stopColor="#0ea5e9" />
+                </linearGradient>
+                <linearGradient id="hdc-saldo-line" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" stopColor="#34d399" />
+                  <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="#22424c" strokeOpacity={0.62} vertical={false} />
+              <XAxis
+                dataKey="period"
+                tick={{ fill: "#9bb9c3", fontSize: 12 }}
+                axisLine={{ stroke: "#2b5662" }}
+                tickLine={false}
+              />
+              <YAxis
+                yAxisId="money"
+                tickFormatter={fmtAxis}
+                tick={{ fill: "#9bb9c3", fontSize: 12 }}
+                axisLine={{ stroke: "#2b5662" }}
+                tickLine={false}
+                label={{ value: "Valor reportado", angle: -90, position: "insideLeft", fill: "#9bb9c3", fontSize: 12 }}
+              />
+              <YAxis
+                yAxisId="percent"
+                orientation="right"
+                domain={[0, 100]}
+                tickFormatter={(value) => `${value}%`}
+                tick={{ fill: "#9bb9c3", fontSize: 12 }}
+                axisLine={{ stroke: "#2b5662" }}
+                tickLine={false}
+                label={{ value: "% deuda", angle: 90, position: "insideRight", fill: "#9bb9c3", fontSize: 12 }}
+              />
+              <Tooltip
+                cursor={{ stroke: "#67e8f9", strokeOpacity: 0.18 }}
+                contentStyle={{
+                  background: "rgba(6, 24, 31, 0.96)",
+                  border: "1px solid rgba(103, 232, 249, 0.18)",
+                  borderRadius: 12,
+                  color: "#e8f1f2",
+                  boxShadow: "0 18px 48px rgba(2,6,23,.32)",
+                }}
+                formatter={(value, name) => {
+                  if (name === "% deuda") return [`${Number(value).toFixed(1)}%`, name];
+                  return [fmtMoney(value), name];
+                }}
+              />
+              <Legend
+                verticalAlign="top"
+                height={36}
+                iconType="circle"
+                wrapperStyle={{ color: "#c8d9de", fontSize: 12 }}
+              />
+              <Line
+                yAxisId="money"
+                type="monotone"
+                dataKey="cupo"
+                name="Cupo total"
+                stroke="url(#hdc-cupo-line)"
+                strokeWidth={3}
+                dot={{ r: 4, strokeWidth: 2, fill: "#0b2630", stroke: "#38bdf8" }}
+                activeDot={{ r: 6 }}
+                isAnimationActive
+                animationDuration={900}
+              />
+              <Line
+                yAxisId="money"
+                type="monotone"
+                dataKey="saldo"
+                name="Saldo total"
+                stroke="url(#hdc-saldo-line)"
+                strokeWidth={3}
+                dot={{ r: 4, strokeWidth: 2, fill: "#0b2630", stroke: "#34d399" }}
+                activeDot={{ r: 6 }}
+                isAnimationActive
+                animationDuration={1050}
+              />
+              <Line
+                yAxisId="percent"
+                type="monotone"
+                dataKey="deuda"
+                name="% deuda"
+                stroke="#f59e0b"
+                strokeWidth={3}
+                strokeDasharray="7 5"
+                dot={{ r: 4, strokeWidth: 2, fill: "#0b2630", stroke: "#f59e0b" }}
+                activeDot={{ r: 6 }}
+                isAnimationActive
+                animationDuration={1200}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
 // ── Componente principal ────────────────────────────────────────────────────
 
 export default function HdcDetalleResultados({ data, consulta, consultaId }) {
@@ -146,7 +299,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
   const [loading, setLoading] = useState(Boolean(consultaId && !data));
   const [error, setError] = useState("");
 
-  // Modo "por id": carga el detalle desde el backend (como el de Experian).
+  // Modo "por id": carga el detalle desde el backend.
   useEffect(() => {
     if (!consultaId || data) return;
     let cancelled = false;
@@ -163,7 +316,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
         if (!response.ok) throw new Error(json?.detail || `Error HTTP ${response.status}`);
         if (!cancelled) setFetched(json);
       } catch (e) {
-        if (!cancelled) setError(e.message || "No fue posible cargar la Historia de Crédito.");
+        if (!cancelled) setError(e.message || "No fue posible cargar Econfia Credit Report.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -214,6 +367,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
 
   const totalDeuda = sumField(liabilities, "debtBalance") + sumField(creditCard, "debtBalance");
   const totalCuota = sumField(liabilities, "valueMonthlyPayment") + sumField(creditCard, "valueMonthlyPayment");
+  const debtTrendData = buildDebtTrendData(pr);
 
   return (
     <div className="grid gap-4">
@@ -223,7 +377,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
         <div className="relative flex flex-wrap items-center gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Historia de Crédito
+            Econfia Credit Report
           </div>
           {responseDesc && <Badge tone="emerald">{responseDesc}</Badge>}
         </div>
@@ -251,6 +405,8 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
         <StatTile label="Mora total" value={fmtMoney(Number(balances.totalValueBalanceOverdue) * 1000)} tone={Number(balances.totalValueBalanceOverdue) > 0 ? "rose" : "emerald"} />
         <StatTile label="Antigüedad desde" value={fmtText(principals.maturationSince)} tone="slate" />
       </div>
+
+      <DebtTrendChart data={debtTrendData} />
 
       {/* Identificación */}
       <Section icon={UserRound} title="Identificación">

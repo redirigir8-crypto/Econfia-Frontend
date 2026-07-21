@@ -79,7 +79,7 @@ export default function ConsultaReconocer() {
       setDone(true);
       setTimeout(() => navigate("/d3b7f1e9"), 1200);
     } catch (_error) {
-      setToast({ type: "error", message: "Ocurrió un error al consultar Reconocer." });
+      setToast({ type: "error", message: "Ocurrió un error al consultar Econfia Recognize." });
     } finally {
       setLoading(false);
     }
@@ -100,7 +100,7 @@ export default function ConsultaReconocer() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
             <div className="relative w-full max-w-md rounded-2xl border border-cyan-400/20 bg-slate-950/85 p-10 text-center shadow-2xl shadow-cyan-500/20 backdrop-blur-md">
               <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-t-4 border-cyan-400" />
-              <p className="animate-pulse text-lg font-semibold text-white">Consultando Reconocer...</p>
+              <p className="animate-pulse text-lg font-semibold text-white">Consultando Econfia Recognize...</p>
             </div>
           </div>,
           document.body
@@ -141,7 +141,7 @@ export default function ConsultaReconocer() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500" />
                 </span>
-                <span className="text-xs font-medium text-cyan-300">Reconocer</span>
+                <span className="text-xs font-medium text-cyan-300">Econfia Recognize</span>
               </div>
               <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-3xl font-black leading-tight tracking-tight text-transparent md:text-4xl">
                 Econfia Recognize
@@ -149,7 +149,7 @@ export default function ConsultaReconocer() {
             </div>
 
             <p className="text-sm leading-relaxed text-white/70">
-              Localiza y valida datos de contacto del titular en la central de riesgo. El resultado queda
+              Localiza y valida datos de contacto del titular. El resultado queda
               disponible en el panel de resultados.
             </p>
 
@@ -235,7 +235,7 @@ export default function ConsultaReconocer() {
                         : "transform bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:scale-105 hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
                     }`}
                   >
-                    {loading ? "Consultando..." : "Consultar Reconocer"}
+                    {loading ? "Consultando..." : "Consultar Econfia Recognize"}
                   </button>
                 </form>
               </div>

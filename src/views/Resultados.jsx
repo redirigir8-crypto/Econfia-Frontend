@@ -111,7 +111,7 @@ function FloatingActionsPortal({
         });
 
         if (!res.ok) {
-          throw new Error(`Error al descargar PDF de Experian: ${res.status}`);
+          throw new Error(`Error al descargar PDF de Econfia Adjudicator: ${res.status}`);
         }
 
         const blob = await res.blob();
@@ -119,7 +119,7 @@ function FloatingActionsPortal({
         const match = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
         const filename = match?.[1]
           ? decodeURIComponent(match[1])
-          : `experian_${consultaId}.pdf`;
+          : `econfia_adjudicator_${consultaId}.pdf`;
 
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
@@ -227,7 +227,7 @@ function FloatingActionsPortal({
               onClick={() => downloadPdf(3)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
                          text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
-              title="Descargar PDF Experian"
+              title="Descargar PDF Econfia Adjudicator"
               disabled={downloading || savingExperianPdfTheme}
             >
               {downloading ? (
@@ -849,7 +849,7 @@ export default function Resultados() {
       });
 
       if (!response.ok) {
-        let message = "No se pudo guardar la preferencia del PDF de Experian.";
+        let message = "No se pudo guardar la preferencia del PDF de Econfia Adjudicator.";
         try {
           const data = await response.json();
           message = data?.detail || data?.error || message;
@@ -864,9 +864,9 @@ export default function Resultados() {
       setExperianPdfTheme(savedTheme);
       writeStoredExperianPdfTheme(savedTheme);
     } catch (error) {
-      console.error("Error al guardar tema PDF Experian:", error);
+      console.error("Error al guardar tema PDF Econfia Adjudicator:", error);
       setExperianPdfTheme(previousTheme);
-      alert(error.message || "No se pudo guardar la preferencia del PDF de Experian.");
+      alert(error.message || "No se pudo guardar la preferencia del PDF de Econfia Adjudicator.");
     } finally {
       setSavingExperianPdfTheme(false);
     }
@@ -989,7 +989,7 @@ export default function Resultados() {
           </div>
         ) : consultaTipoActual !== "e-identidad" ? (
         <div className="w-full max-w-7xl mx-auto min-h-[78vh] xl:min-h-[82vh] h-[calc(100vh-10rem)] max-h-[calc(100vh-5rem)]">
-          {!isHdcActual && !isReconocerActual && (
+          {!isHdcActual && !isReconocerActual && !isExperianActual && (
             <FloatingActionsPortal
               apiUrl={API_URL}
               consultaId={consultaSeleccionada.id}
@@ -999,7 +999,7 @@ export default function Resultados() {
               savingExperianPdfTheme={savingExperianPdfTheme}
               onChangeExperianPdfTheme={handleExperianPdfThemeChange}
               onBack={() => setConsultaSeleccionada(null)}
-              onOpenIndividual={isExperianActual ? undefined : () => setShowModalIndividual(true)}
+              onOpenIndividual={() => setShowModalIndividual(true)}
             />
           )}
           {isHdcActual ? (
@@ -1043,7 +1043,44 @@ export default function Resultados() {
               <ReconocerDetalleResultados consultaId={consultaSeleccionada.id} />
             </div>
           ) : isExperianActual ? (
-            <div className="h-full min-h-0 pt-14">
+            <div className="h-full min-h-0 overflow-y-auto pt-2">
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConsultaSeleccionada(null)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/30 hover:text-white"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Regresar
+                </button>
+                <div className="flex items-center rounded-lg border border-white/15 bg-slate-900/70 p-1 backdrop-blur-xl">
+                  {EXPERIAN_PDF_THEME_OPTIONS.map((theme) => {
+                    const isActive = experianPdfTheme === theme;
+                    return (
+                      <button
+                        key={theme}
+                        type="button"
+                        onClick={() => handleExperianPdfThemeChange(theme)}
+                        disabled={savingExperianPdfTheme}
+                        className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
+                          isActive
+                            ? "bg-cyan-500/20 text-cyan-100"
+                            : "text-slate-300 hover:text-white"
+                        } disabled:cursor-not-allowed disabled:opacity-60`}
+                      >
+                        {theme}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => descargarProductoPdf("experian", consultaSeleccionada.id)}
+                  disabled={savingExperianPdfTheme}
+                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-cyan-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <FileText className="h-4 w-4" /> Descargar PDF
+                </button>
+              </div>
               <ExperianDetalleResultados consultaId={consultaSeleccionada.id} />
             </div>
           ) : (

@@ -57,6 +57,28 @@ function formatMoney(value) {
   }).format(numeric);
 }
 
+function numericValue(value) {
+  const raw = String(value ?? "").replace(/[^\d.-]/g, "");
+  if (!raw || raw === "-" || raw === "." || raw === "-.") return null;
+  const numeric = Number(raw);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function buildTrendBars(entries) {
+  const parsed = entries
+    .map(([label, value]) => ({ label, value, numeric: numericValue(value) }))
+    .filter((item) => item.numeric !== null && item.numeric > 0);
+
+  if (!parsed.length) return [];
+
+  const max = Math.max(...parsed.map((item) => item.numeric)) || 1;
+  return parsed.map((item) => ({
+    ...item,
+    width: Math.max(8, Math.round((item.numeric / max) * 100)),
+    display: formatMoney(item.value),
+  }));
+}
+
 function safeArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -118,11 +140,26 @@ function SpeedoGauge({ value, max = 1000, displayText, label = "Score" }) {
     <div className="flex flex-col items-center">
       <svg viewBox="0 -8 200 138" className="w-full">
         <defs>
+          <linearGradient id="experian-gauge-gradient" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stopColor={color} stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#14b8a6" stopOpacity="0.9" />
+          </linearGradient>
           <filter id="g-glow" x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur stdDeviation="3" result="b" />
             <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
+        <style>{`
+          @keyframes experianGaugeDraw { to { stroke-dashoffset: 0; } }
+          @keyframes experianNeedleIn {
+            from { opacity: .25; transform: rotate(-16deg) scale(.82); }
+            to { opacity: .95; transform: rotate(0deg) scale(1); }
+          }
+          @keyframes experianValueIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
 
         {/* Background track */}
         <path d={gaugeArc(CX, CY, R, 180, 0)} fill="none" stroke="#0f172a" strokeWidth={SW} strokeLinecap="butt" />
@@ -141,13 +178,25 @@ function SpeedoGauge({ value, max = 1000, displayText, label = "Score" }) {
 
         {/* Active arc */}
         {norm > 0.005 && (
-          <path d={gaugeArc(CX, CY, R, 180, valAngle)} fill="none" stroke={color} strokeWidth={SW}
-            strokeLinecap="round" filter="url(#g-glow)" strokeOpacity={0.9} />
+          <path
+            d={gaugeArc(CX, CY, R, 180, valAngle)}
+            fill="none"
+            stroke="url(#experian-gauge-gradient)"
+            strokeWidth={SW}
+            strokeLinecap="round"
+            filter="url(#g-glow)"
+            strokeOpacity={0.9}
+            pathLength="100"
+            strokeDasharray="100"
+            strokeDashoffset="100"
+            style={{ animation: "experianGaugeDraw 1.05s cubic-bezier(.2,.8,.2,1) forwards" }}
+          />
         )}
 
         {/* Needle */}
         <line x1={CX} y1={CY} x2={needle.x.toFixed(1)} y2={needle.y.toFixed(1)}
-          stroke="white" strokeWidth={2.5} strokeLinecap="round" filter="url(#g-glow)" opacity={0.9} />
+          stroke="white" strokeWidth={2.5} strokeLinecap="round" filter="url(#g-glow)" opacity={0.9}
+          style={{ transformOrigin: `${CX}px ${CY}px`, animation: "experianNeedleIn .85s cubic-bezier(.2,.8,.2,1) .18s both" }} />
         <circle cx={CX} cy={CY} r={7}   fill="#020617" stroke={color} strokeWidth={2.5} />
         <circle cx={CX} cy={CY} r={2.5} fill={color} />
 
@@ -160,7 +209,8 @@ function SpeedoGauge({ value, max = 1000, displayText, label = "Score" }) {
         <line x1="60" y1={CY + 16} x2="140" y2={CY + 16} stroke="#1e293b" strokeWidth={1} />
 
         {/* Value — clearly below pivot (pivot bottom at CY+7=93, text top at ~103) */}
-        <text x={CX} y={CY + 32} textAnchor="middle" fontSize={22} fontWeight="700" fill={color}>
+        <text x={CX} y={CY + 32} textAnchor="middle" fontSize={22} fontWeight="700" fill={color}
+          style={{ animation: "experianValueIn .55s ease-out .45s both" }}>
           {displayText ?? num}
         </text>
         <text x={CX} y={CY + 43} textAnchor="middle" fontSize={7} fill="#475569" letterSpacing="2">
@@ -257,6 +307,54 @@ function FactGrid({ items, columns = "md:grid-cols-2 xl:grid-cols-3" }) {
           <div className="mt-1.5 text-sm font-medium leading-snug text-slate-100">{item.value}</div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function AnimatedTrendBars({ items }) {
+  if (!items.length) return null;
+
+  return (
+    <div className="mt-5 overflow-hidden rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.035] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <style>{`
+        @keyframes experianBarGrow {
+          from { opacity: .35; transform: scaleX(0); }
+          to { opacity: 1; transform: scaleX(1); }
+        }
+      `}</style>
+      <div className="mb-4 flex items-end justify-between gap-4">
+        <div>
+          <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
+            Tendencia financiera
+          </div>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Comparativo visual de los valores más relevantes de la respuesta.
+          </p>
+        </div>
+        <div className="hidden rounded-full border border-white/[0.08] bg-white/[0.035] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 sm:block">
+          Barras
+        </div>
+      </div>
+      <div className="grid gap-3">
+        {items.map((item, index) => (
+          <div key={`${item.label}-${item.display}`} className="grid gap-2">
+            <div className="flex items-center justify-between gap-4 text-xs">
+              <span className="font-semibold text-slate-300">{item.label}</span>
+              <span className="font-bold text-slate-100">{item.display}</span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-slate-800/80 ring-1 ring-white/[0.04]">
+              <div
+                className="h-full origin-left rounded-full bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-300 shadow-[0_0_24px_rgba(45,212,191,0.22)]"
+                style={{
+                  width: `${item.width}%`,
+                  transform: "scaleX(0)",
+                  animation: `experianBarGrow 800ms cubic-bezier(.2,.8,.2,1) ${index * 90}ms forwards`,
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -578,7 +676,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
 
         if (!cancelled) setDetalle(data);
       } catch (loadError) {
-        if (!cancelled) setError(loadError.message || "No fue posible cargar el detalle de Experian.");
+        if (!cancelled) setError(loadError.message || "No fue posible cargar el detalle de Econfia Adjudicator.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -638,7 +736,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
       { label: "Documento",          value: `${detalle?.tipo_identificacion || ""} ${detalle?.numero_identificacion || ""}`.trim() },
       { label: isPj ? "Razon social" : "Titular", value: displayValue(context.datosBasicos?.nombreCompleto || context.datosBasicos?.razonSocial || detalle?.apellido_razon_social) },
       { label: "Estado interno",     value: displayValue(detalle?.estado) },
-      { label: "Respuesta central de riesgo", value: displayValue(detalle?.status_experian) },
+      { label: "Respuesta del producto", value: displayValue(detalle?.status_experian) },
       { label: "Estado contenido",   value: displayValue(detalle?.content_status) },
       { label: "Mensaje",            value: displayValue(detalle?.mensaje) },
     ];
@@ -688,6 +786,26 @@ export default function ExperianDetalleResultados({ consultaId }) {
     }));
   }, [context.endeudamiento, context.estadosFinancieros, isPj]);
 
+  const trendBars = useMemo(() => {
+    if (isPj) {
+      return buildTrendBars([
+        ["Ventas netas", context.estadosFinancieros?.ventasNetas],
+        ["Utilidad operacional", context.estadosFinancieros?.utilidadOperacional],
+        ["Utilidad neta", context.estadosFinancieros?.utilidadNeta],
+        ["Activos totales", context.estadosFinancieros?.activosTotales],
+        ["Pasivos totales", context.estadosFinancieros?.pasivosTotales],
+        ["Patrimonio", context.estadosFinancieros?.patrimonio],
+      ]);
+    }
+
+    return buildTrendBars([
+      ["Saldo actual", context.comportamiento?.saldoActual || context.endeudamiento?.saldoActual],
+      ["Valor cuota", context.comportamiento?.valorCuota || context.endeudamiento?.valorCuota],
+      ["Monto sugerido", detalle?.monto_sugerido || detalle?.resumen_json?.monto_sugerido],
+      ["Saldo en mora", context.comportamiento?.saldoMora || context.endeudamiento?.saldoMora],
+    ]);
+  }, [context.comportamiento, context.endeudamiento, context.estadosFinancieros, detalle?.monto_sugerido, detalle?.resumen_json, isPj]);
+
   if (loading) {
     return (
       <div className="flex h-full min-h-[60vh] items-center justify-center">
@@ -696,7 +814,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
             <div className="absolute inset-0 animate-ping rounded-full border border-cyan-500/25" />
             <div className="absolute inset-2 animate-spin rounded-full border-2 border-t-cyan-400 border-slate-800" />
           </div>
-          <p className="text-sm font-semibold text-slate-300">Cargando reporte de central de riesgo</p>
+          <p className="text-sm font-semibold text-slate-300">Cargando Econfia Adjudicator</p>
           <p className="mt-1 text-xs text-slate-600">Un momento por favor...</p>
         </div>
       </div>
@@ -710,7 +828,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-500/25 bg-rose-500/[0.08]">
             <AlertTriangle className="h-6 w-6 text-rose-400" />
           </div>
-          <h3 className="text-lg font-semibold text-white">Error al cargar central de riesgo</h3>
+          <h3 className="text-lg font-semibold text-white">Error al cargar Econfia Adjudicator</h3>
           <p className="mt-2 text-sm leading-6 text-rose-200/70">{error}</p>
         </div>
       </div>
@@ -735,7 +853,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
               <div className="flex min-w-0 flex-col justify-center">
                 <div className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.08)]">
                   <ShieldCheck className="h-3.5 w-3.5" />
-                  Central de riesgo
+                  Econfia Adjudicator
                 </div>
 
                 <h2 className="mt-5 max-w-4xl text-3xl font-black tracking-tight text-white md:text-4xl md:leading-tight">
@@ -844,13 +962,14 @@ export default function ExperianDetalleResultados({ consultaId }) {
             }
           >
             <FactGrid items={financeFacts} />
+            <AnimatedTrendBars items={trendBars} />
           </SectionCard>
 
           {!isPj ? (
             <SectionCard
               icon={BadgeCheck}
               title="Sugerencias"
-              description="Recomendaciones devueltas por la central de riesgo para apoyo en la decisión."
+              description="Recomendaciones devueltas para apoyo en la decisión."
             >
               <SugerenciasBlock sugerencias={context.sugerencias} />
             </SectionCard>

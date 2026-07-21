@@ -32,7 +32,7 @@ export function getExperianSubjectField(tipoIdentificacion) {
 export function isExperianConsulta(item) {
   const source = String(item?.source || "").trim().toLowerCase();
   const tipo = String(item?.tipo_consulta || item?.tipo || "").trim().toLowerCase();
-  return source === "experian" || tipo === "experian";
+  return source === "experian" || tipo === "experian" || tipo === "econfia adjudicator";
 }
 
 export function normalizeExperianConsulta(item) {
@@ -42,7 +42,7 @@ export function normalizeExperianConsulta(item) {
     row_id: `experian-${item.id}`,
     source: "experian",
     tipo: item.tipo_resultado === "pj" ? "EMPRESA" : "PERSONA",
-    tipo_consulta: "experian",
+    tipo_consulta: "Econfia Adjudicator",
     cedula: item.numero_identificacion || "",
     nit: item.numero_identificacion || "",
     nombre: item.nombre_mostrado || item.apellido_razon_social || "",
@@ -51,12 +51,12 @@ export function normalizeExperianConsulta(item) {
   };
 }
 
-// ── Historia de Crédito (HDC) ──────────────────────────────────────────────
+// ── Econfia Credit Report ──────────────────────────────────────────────────
 
 export function isHdcConsulta(item) {
   const source = String(item?.source || "").trim().toLowerCase();
   const tipo = String(item?.tipo_consulta || item?.tipo || "").trim().toLowerCase();
-  return source === "hdc" || tipo === "hdc";
+  return source === "hdc" || tipo === "hdc" || tipo === "historia de crédito" || tipo === "econfia credit report";
 }
 
 export function normalizeHdcConsulta(item) {
@@ -66,7 +66,7 @@ export function normalizeHdcConsulta(item) {
     row_id: `hdc-${item.id}`,
     source: "hdc",
     tipo: "PERSONA",
-    tipo_consulta: "Historia de Crédito",
+    tipo_consulta: "Econfia Credit Report",
     cedula: item.numero_identificacion || "",
     nombre: item.nombre_mostrado || item.apellido_razon_social || "",
     fecha: item.created_at || item.updated_at || null,
@@ -74,12 +74,12 @@ export function normalizeHdcConsulta(item) {
   };
 }
 
-// ── Reconocer Master ───────────────────────────────────────────────────────
+// ── Econfia Recognize ──────────────────────────────────────────────────────
 
 export function isReconocerConsulta(item) {
   const source = String(item?.source || "").trim().toLowerCase();
   const tipo = String(item?.tipo_consulta || item?.tipo || "").trim().toLowerCase();
-  return source === "reconocer" || tipo === "reconocer";
+  return source === "reconocer" || tipo === "reconocer" || tipo === "econfia recognize";
 }
 
 export function normalizeReconocerConsulta(item) {
@@ -89,7 +89,7 @@ export function normalizeReconocerConsulta(item) {
     row_id: `reconocer-${item.id}`,
     source: "reconocer",
     tipo: "PERSONA",
-    tipo_consulta: "Reconocer",
+    tipo_consulta: "Econfia Recognize",
     cedula: item.numero_identificacion || "",
     nombre: item.nombre_mostrado || item.apellido_razon_social || "",
     fecha: item.created_at || item.updated_at || null,

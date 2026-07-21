@@ -767,6 +767,7 @@ export default function App() {
               <Route path="/consulta"           element={<Consulta />}                />
               <Route path="/a1e6c4b8"          element={<ConsultaEssencialExpress />} />
               <Route path="/5c2e8f4a"          element={<ConsultaExperian />}         />
+              <Route path="/econfia-adjudicator" element={<ConsultaExperian />}       />
               <Route path="/experian"          element={<ConsultaExperian />}         />
               <Route path="/3e9f7c1d"          element={<ConsultaHistoriaCredito />}  />
               <Route path="/historia-credito"  element={<ConsultaHistoriaCredito />}  />

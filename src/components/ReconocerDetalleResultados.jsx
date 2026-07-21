@@ -85,7 +85,7 @@ export default function ReconocerDetalleResultados({ consultaId }) {
         if (!response.ok) throw new Error(json?.detail || `Error HTTP ${response.status}`);
         if (!cancelled) setDetalle(json);
       } catch (e) {
-        if (!cancelled) setError(e.message || "No fue posible cargar Reconocer.");
+        if (!cancelled) setError(e.message || "No fue posible cargar Econfia Recognize.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -127,7 +127,7 @@ export default function ReconocerDetalleResultados({ consultaId }) {
         <div className="relative flex flex-wrap items-center gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Reconocer Master
+            Econfia Recognize
           </div>
         </div>
         <h2 className="mt-4 text-2xl font-black tracking-tight text-white md:text-3xl">{fullName}</h2>
