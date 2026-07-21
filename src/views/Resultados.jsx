@@ -16,6 +16,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useLocation } from "react-router-dom";
 import { ArrowLeft, FileDown, FileText, Images } from "lucide-react";
 import {
   isExperianConsulta,
@@ -455,6 +456,7 @@ function ExportBatchModal({
 }
 
 export default function Resultados() {
+  const location = useLocation();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [consultaSeleccionada, setConsultaSeleccionada] = useState(null);
@@ -476,6 +478,7 @@ export default function Resultados() {
   const [liveConsultaId, setLiveConsultaId] = useState(null);
   const [experianPdfTheme, setExperianPdfTheme] = useState(readStoredExperianPdfTheme);
   const [savingExperianPdfTheme, setSavingExperianPdfTheme] = useState(false);
+  const handledOpenEmpresaRef = useRef(null);
   const API_URL = process.env.REACT_APP_API_URL;
 
   // Limpiar liveConsultaId cuando la consulta deje de estar en proceso
@@ -598,6 +601,23 @@ export default function Resultados() {
     const interval = setInterval(fetchResultados, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const targetNit = String(location.state?.openEmpresaNit || "").trim();
+    const marker = `${targetNit}-${location.state?.openEmpresaAt || ""}`;
+    if (!targetNit || handledOpenEmpresaRef.current === marker || !data.length) return;
+
+    const empresaRow = data.find((item) => {
+      const source = String(item.source || "").toLowerCase();
+      const nit = String(item.nit || item.cedula || "").trim();
+      return source === "empresa-rues" && nit === targetNit;
+    });
+
+    if (empresaRow) {
+      handledOpenEmpresaRef.current = marker;
+      setConsultaSeleccionada(empresaRow);
+    }
+  }, [data, location.state]);
 
   if (loading)
     return (

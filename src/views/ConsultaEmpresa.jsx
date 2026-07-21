@@ -28,6 +28,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 
 function SectionCard({ title, children, accent = "emerald", description }) {
   const accentMap = {
@@ -582,7 +583,7 @@ function CamaraAfiliadoCard({ item, index }) {
   );
 }
 
-function EmpresaConsultaExitosaModal({ empresa, onClose }) {
+function EmpresaConsultaExitosaModal({ empresa, onClose, onGoToConsultas }) {
   if (!empresa) return null;
 
   const estadoActivo = isActiveStatus(empresa.estado);
@@ -681,12 +682,13 @@ function EmpresaConsultaExitosaModal({ empresa, onClose }) {
                   <span className="text-sm font-semibold uppercase tracking-[0.12em] text-slate-600">
                     Abra el historial de consultas para revisar ficha, gráficos y PDF.
                   </span>
-                  <a
-                    href="/resultados"
+                  <button
+                    type="button"
+                    onClick={onGoToConsultas}
                     className="rounded-full border border-cyan-200/40 bg-white/70 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-700 transition hover:bg-white"
                   >
                     Ir a Consultas
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>
@@ -698,6 +700,7 @@ function EmpresaConsultaExitosaModal({ empresa, onClose }) {
 }
 
 export default function ConsultaEmpresa() {
+  const navigate = useNavigate();
   const [tipoDoc] = useState("NIT");
   const [nit, setNit] = useState("");
   const [acepta, setAcepta] = useState(false);
@@ -1325,6 +1328,18 @@ export default function ConsultaEmpresa() {
     <EmpresaConsultaExitosaModal
       empresa={resultadoEmpresa}
       onClose={() => setResultadoEmpresa(null)}
+      onGoToConsultas={() => {
+        if (!resultadoEmpresa?.nit) {
+          navigate("/d3b7f1e9");
+          return;
+        }
+        navigate("/d3b7f1e9", {
+          state: {
+            openEmpresaNit: resultadoEmpresa.nit,
+            openEmpresaAt: Date.now(),
+          },
+        });
+      }}
     />
     {capturaAmpliada && resultadoEmpresa?.captura_principal && (
       <div

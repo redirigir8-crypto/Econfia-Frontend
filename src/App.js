@@ -782,6 +782,7 @@ export default function App() {
               <Route path="/4a7e2b8f"          element={<ConsultaEmpresa />}          />
               <Route path="/8f5c3a1b/:nit"     element={<EmpresaRuesResult />}        />
               <Route path="/d3b7f1e9"          element={<Resultados />}               />
+              <Route path="/resultados"         element={<Resultados />}               />
               <Route path="/d3b7f1e9/:consultaId" element={<Resultados />}            />
               <Route path="/e9c4b2f7"          element={<Profile />}                  />
               <Route path="/f1d8a5c3"          element={<LogOut />}                   />
