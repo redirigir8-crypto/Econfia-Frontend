@@ -10,9 +10,12 @@ import {
 } from "lucide-react";
 import {
   CartesianGrid,
+  Cell,
   Legend,
   Line,
   LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -80,6 +83,33 @@ function sumField(list, field) {
     const value = Number(acc(item)[field]);
     return total + (Number.isFinite(value) && value > 0 ? value : 0);
   }, 0);
+}
+
+const DEBT_COMPOSITION_COLORS = ["#38bdf8", "#34d399", "#f59e0b", "#a78bfa", "#fb7185"];
+
+function buildDebtCompositionData({ liabilities, creditCard, global }) {
+  const direct = [
+    { name: "Obligaciones", value: sumField(liabilities, "debtBalance"), color: DEBT_COMPOSITION_COLORS[0] },
+    { name: "Tarjetas", value: sumField(creditCard, "debtBalance"), color: DEBT_COMPOSITION_COLORS[1] },
+  ].filter((item) => item.value > 0);
+
+  if (direct.length) return direct;
+
+  const grouped = new Map();
+  global.forEach((item) => {
+    const name = fmtText(item.typeOfCreditDesc || item.entity?.businessLineName || "Otros");
+    const value = numValue(item.capitalValue) * 1000;
+    if (value > 0) grouped.set(name, (grouped.get(name) || 0) + value);
+  });
+
+  return Array.from(grouped.entries())
+    .map(([name, value], index) => ({
+      name,
+      value,
+      color: DEBT_COMPOSITION_COLORS[index % DEBT_COMPOSITION_COLORS.length],
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
 }
 
 function buildDebtTrendData(root) {
@@ -179,6 +209,94 @@ function AccountCard({ titulo, subtitulo, estado, filas }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function DebtCompositionDonut({ data }) {
+  if (!data.length) return null;
+
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+
+  return (
+    <Section icon={Wallet} title="Distribución de endeudamiento actual">
+      <div className="grid gap-4 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-slate-900/80 via-[#0b2630]/80 to-slate-950/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] lg:grid-cols-[minmax(260px,0.9fr)_1.1fr]">
+        <div className="relative h-[280px] min-w-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <defs>
+                {data.map((item, index) => (
+                  <linearGradient key={item.name} id={`hdc-donut-${index}`} x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stopColor={item.color} stopOpacity={0.98} />
+                    <stop offset="100%" stopColor={item.color} stopOpacity={0.55} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius="58%"
+                outerRadius="82%"
+                paddingAngle={3}
+                cornerRadius={9}
+                stroke="rgba(2,6,23,0.72)"
+                strokeWidth={3}
+                isAnimationActive
+                animationDuration={950}
+              >
+                {data.map((item, index) => (
+                  <Cell key={item.name} fill={`url(#hdc-donut-${index})`} />
+                ))}
+              </Pie>
+              <Tooltip
+                cursor={false}
+                contentStyle={{
+                  background: "rgba(6, 24, 31, 0.96)",
+                  border: "1px solid rgba(103, 232, 249, 0.18)",
+                  borderRadius: 12,
+                  color: "#e8f1f2",
+                  boxShadow: "0 18px 48px rgba(2,6,23,.32)",
+                }}
+                formatter={(value, name) => [fmtMoney(value), name]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Total deuda</div>
+            <div className="mt-1 text-2xl font-black tracking-tight text-white">{fmtMoney(total)}</div>
+          </div>
+        </div>
+
+        <div className="grid content-center gap-2">
+          {data.map((item) => {
+            const percent = total > 0 ? (item.value / total) * 100 : 0;
+            return (
+              <div key={item.name} className="rounded-2xl border border-white/[0.07] bg-white/[0.035] p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="truncate text-sm font-bold text-white">{item.name}</span>
+                  </div>
+                  <span className="shrink-0 text-sm font-black text-cyan-100">{percent.toFixed(1)}%</span>
+                </div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.max(percent, 2)}%`,
+                      background: `linear-gradient(90deg, ${item.color}, rgba(255,255,255,0.56))`,
+                    }}
+                  />
+                </div>
+                <div className="mt-1.5 text-xs font-semibold text-slate-300">{fmtMoney(item.value)}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Section>
   );
 }
 
@@ -367,6 +485,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
 
   const totalDeuda = sumField(liabilities, "debtBalance") + sumField(creditCard, "debtBalance");
   const totalCuota = sumField(liabilities, "valueMonthlyPayment") + sumField(creditCard, "valueMonthlyPayment");
+  const debtCompositionData = buildDebtCompositionData({ liabilities, creditCard, global });
   const debtTrendData = buildDebtTrendData(pr);
 
   return (
@@ -406,6 +525,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
         <StatTile label="Antigüedad desde" value={fmtText(principals.maturationSince)} tone="slate" />
       </div>
 
+      <DebtCompositionDonut data={debtCompositionData} />
       <DebtTrendChart data={debtTrendData} />
 
       {/* Identificación */}

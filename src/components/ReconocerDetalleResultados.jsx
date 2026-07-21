@@ -1,5 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { Mail, MapPin, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { Activity, BarChart3, Mail, MapPin, Phone, ShieldCheck, UserRound } from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 function toArray(v) {
   return Array.isArray(v) ? v : [];
@@ -13,6 +25,32 @@ function tipoDireccion(d) {
   if (d.tipoLaboralOComercial) return "Laboral / Comercial";
   if (d.tipoCorrespondencia) return "Correspondencia";
   return fmtText(d.tipo);
+}
+
+function numValue(value) {
+  const n = Number(String(value ?? "").replace(/[^\d.-]/g, ""));
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+function parseDateValue(value) {
+  const text = String(value || "").trim();
+  if (!text || text === "—") return null;
+  const normalized = text.includes("/") ? text.split("/").reverse().join("-") : text.slice(0, 10);
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function shortDate(value) {
+  const date = parseDateValue(value);
+  if (!date) return "—";
+  return new Intl.DateTimeFormat("es-CO", { month: "short", year: "2-digit" }).format(date).replace(".", "");
+}
+
+function latestDateFrom(items, field) {
+  return items
+    .map((item) => parseDateValue(item?.[field]))
+    .filter(Boolean)
+    .sort((a, b) => b - a)[0] || null;
 }
 
 function Section({ icon: Icon, title, count, children }) {
@@ -38,6 +76,142 @@ function StatTile({ label, value }) {
       <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
       <div className="mt-1.5 text-sm font-bold text-white">{value}</div>
     </div>
+  );
+}
+
+const CHART_COLORS = ["#38bdf8", "#2dd4bf", "#a78bfa", "#f59e0b"];
+
+function ExecutiveChartPanel({ direcciones, celulares, telefonos, emails }) {
+  const channels = [
+    { name: "Direcciones", value: direcciones.length, color: CHART_COLORS[0] },
+    { name: "Celulares", value: celulares.length, color: CHART_COLORS[1] },
+    { name: "Fijos", value: telefonos.length, color: CHART_COLORS[2] },
+    { name: "Correos", value: emails.length, color: CHART_COLORS[3] },
+  ].filter((item) => item.value > 0);
+
+  const strength = [
+    { name: "Direcciones", reportes: direcciones.reduce((s, i) => s + numValue(i.numReportes), 0), entidades: direcciones.reduce((s, i) => s + numValue(i.numeroEntidades), 0) },
+    { name: "Celulares", reportes: celulares.reduce((s, i) => s + numValue(i.numReportes), 0), entidades: celulares.reduce((s, i) => s + numValue(i.numeroEntidades), 0) },
+    { name: "Fijos", reportes: telefonos.reduce((s, i) => s + numValue(i.numReportes), 0), entidades: telefonos.reduce((s, i) => s + numValue(i.numeroEntidades), 0) },
+    { name: "Correos", reportes: emails.reduce((s, i) => s + numValue(i.numReportes), 0), entidades: emails.reduce((s, i) => s + numValue(i.numeroEntidades), 0) },
+  ].filter((item) => item.reportes > 0 || item.entidades > 0);
+
+  const totalChannels = channels.reduce((sum, item) => sum + item.value, 0);
+  const principal = channels[0] || { name: "Sin datos", value: 0 };
+  const latest = latestDateFrom([...direcciones, ...celulares, ...telefonos, ...emails], "ultimoReporte");
+  const oldest = [...direcciones, ...celulares, ...telefonos, ...emails]
+    .map((item) => parseDateValue(item?.reportadoDesde))
+    .filter(Boolean)
+    .sort((a, b) => a - b)[0];
+
+  if (!channels.length && !strength.length) return null;
+
+  return (
+    <Section icon={Activity} title="Resumen de contactabilidad">
+      <div className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
+        <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-slate-900/85 via-[#0b2630]/75 to-slate-950/85 p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-black text-white">Cobertura por canal</div>
+              <div className="text-xs text-slate-400">Registros encontrados por tipo de dato.</div>
+            </div>
+            <BarChart3 className="h-5 w-5 text-cyan-300" />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-[220px_1fr]">
+            <div className="relative h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={channels}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="62%"
+                    outerRadius="82%"
+                    paddingAngle={4}
+                    cornerRadius={8}
+                    stroke="rgba(2,6,23,0.76)"
+                    strokeWidth={3}
+                    isAnimationActive
+                    animationDuration={900}
+                  >
+                    {channels.map((item) => <Cell key={item.name} fill={item.color} />)}
+                  </Pie>
+                  <Tooltip
+                    cursor={false}
+                    contentStyle={{
+                      background: "rgba(6, 24, 31, 0.96)",
+                      border: "1px solid rgba(103, 232, 249, 0.18)",
+                      borderRadius: 12,
+                      color: "#e8f1f2",
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                <div className="text-3xl font-black text-white">{totalChannels}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-200">registros</div>
+              </div>
+            </div>
+            <div className="grid content-center gap-2">
+              {channels.map((item) => {
+                const percent = totalChannels ? (item.value / totalChannels) * 100 : 0;
+                return (
+                  <div key={item.name} className="rounded-xl border border-white/[0.07] bg-white/[0.035] p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-white">
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                        {item.name}
+                      </span>
+                      <span className="text-sm font-black text-cyan-100">{percent.toFixed(0)}%</span>
+                    </div>
+                    <div className="mt-1 text-xs text-slate-400">{item.value} registro(s)</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-4">
+          {strength.length > 0 && (
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4">
+              <div className="mb-3">
+                <div className="text-sm font-black text-white">Solidez de los datos reportados</div>
+                <div className="text-xs text-slate-400">Cruza cantidad de reportes y entidades informantes.</div>
+              </div>
+              <div className="h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={strength} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
+                    <CartesianGrid stroke="#24424c" strokeOpacity={0.45} vertical={false} />
+                    <XAxis dataKey="name" tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <Tooltip
+                      cursor={{ fill: "rgba(103,232,249,0.06)" }}
+                      contentStyle={{
+                        background: "rgba(6, 24, 31, 0.96)",
+                        border: "1px solid rgba(103, 232, 249, 0.18)",
+                        borderRadius: 12,
+                        color: "#e8f1f2",
+                      }}
+                    />
+                    <Bar dataKey="reportes" name="Reportes" fill="#38bdf8" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={900} />
+                    <Bar dataKey="entidades" name="Entidades" fill="#2dd4bf" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1100} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <StatTile label="Canal principal" value={principal.name} />
+            <StatTile label="Último reporte" value={latest ? shortDate(latest) : "—"} />
+            <StatTile label="Primer registro" value={oldest ? shortDate(oldest) : "—"} />
+            <StatTile label="Fuentes acumuladas" value={String(strength.reduce((s, item) => s + item.entidades, 0) || "—")} />
+          </div>
+        </div>
+      </div>
+    </Section>
   );
 }
 
@@ -138,6 +312,13 @@ export default function ReconocerDetalleResultados({ consultaId }) {
           {rep.fechaConsulta && <span>Consulta: {String(rep.fechaConsulta).slice(0, 10)}</span>}
         </div>
       </div>
+
+      <ExecutiveChartPanel
+        direcciones={direcciones}
+        celulares={celulares}
+        telefonos={telefonos}
+        emails={emails}
+      />
 
       {/* Identificación */}
       <Section icon={UserRound} title="Identificación">
