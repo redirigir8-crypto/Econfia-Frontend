@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  AlertTriangle,
   CreditCard,
   Landmark,
   PiggyBank,
@@ -131,6 +132,70 @@ function buildDebtTrendData(root) {
     .filter((item) => item.period && (item.cupo > 0 || item.saldo > 0 || item.deuda > 0))
     .sort((a, b) => a.period.localeCompare(b.period))
     .slice(-8);
+}
+
+function firstValues(item) {
+  const values = Array.isArray(item?.values) ? item.values : [];
+  return values.find((value) => value && typeof value === "object") || {};
+}
+
+const NEGATIVE_TERMS = [
+  "mora",
+  "vencid",
+  "castig",
+  "cobro",
+  "jurid",
+  "prejurid",
+  "dudos",
+  "cancelad",
+  "recuper",
+  "reestructur",
+];
+
+function isNegativeCredit(item) {
+  const a = acc(item);
+  const values = firstValues(item);
+  const overdue = numValue(
+    values.businessValueBalanceOverdue ??
+      a.businessValueBalanceOverdue ??
+      values.totalValueBalanceOverdue ??
+      a.totalValueBalanceOverdue
+  );
+  const statusText = [
+    a.status?.account?.businessAccountStatusDesc,
+    item?.status?.account?.businessAccountStatusDesc,
+    a.paymentTypeDesc,
+    a.ratingDesc,
+    values.ratingDesc,
+    a.liabilitiesAccount?.businessBehaviourVectorProduct,
+    a.creditCardAccount?.businessBehaviourVectorProduct,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return overdue > 0 || NEGATIVE_TERMS.some((term) => statusText.includes(term));
+}
+
+function buildNegativeCreditSummary({ liabilities, creditCard, overviewCount }) {
+  const products = [
+    ...liabilities.map((item) => ({ item, product: "Obligación / crédito" })),
+    ...creditCard.map((item) => ({ item, product: "Tarjeta de crédito" })),
+  ];
+  const rows = products
+    .filter(({ item }) => isNegativeCredit(item))
+    .map(({ item, product }) => {
+      const a = acc(item);
+      const values = firstValues(item);
+      return {
+        entity: fmtText(a.businessLineName || a.businessLineCode),
+        product,
+        status: fmtText(a.status?.account?.businessAccountStatusDesc || item?.status?.account?.businessAccountStatusDesc || a.paymentTypeDesc),
+        overdue: numValue(values.businessValueBalanceOverdue ?? a.businessValueBalanceOverdue),
+      };
+    });
+  const entities = Array.from(new Set(rows.map((row) => row.entity).filter((entity) => entity !== "—")));
+  const count = Math.max(Number(overviewCount) || 0, rows.length);
+  return { count, rows, entities };
 }
 
 // ── UI atoms ────────────────────────────────────────────────────────────────
@@ -487,6 +552,11 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
   const totalCuota = sumField(liabilities, "valueMonthlyPayment") + sumField(creditCard, "valueMonthlyPayment");
   const debtCompositionData = buildDebtCompositionData({ liabilities, creditCard, global });
   const debtTrendData = buildDebtTrendData(pr);
+  const negativeSummary = buildNegativeCreditSummary({
+    liabilities,
+    creditCard,
+    overviewCount: principals.currentNegativeCredits,
+  });
 
   return (
     <div className="grid gap-4">
@@ -524,6 +594,59 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
         <StatTile label="Mora total" value={fmtMoney(Number(balances.totalValueBalanceOverdue) * 1000)} tone={Number(balances.totalValueBalanceOverdue) > 0 ? "rose" : "emerald"} />
         <StatTile label="Antigüedad desde" value={fmtText(principals.maturationSince)} tone="slate" />
       </div>
+
+      <section
+        className={`rounded-[22px] border p-5 backdrop-blur-xl ${
+          negativeSummary.count > 0
+            ? "border-rose-500/20 bg-rose-500/[0.07]"
+            : "border-emerald-500/20 bg-emerald-500/[0.06]"
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          <div
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
+              negativeSummary.count > 0
+                ? "border-rose-400/25 bg-rose-400/[0.10] text-rose-300"
+                : "border-emerald-400/25 bg-emerald-400/[0.10] text-emerald-300"
+            }`}
+          >
+            <AlertTriangle className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-base font-bold text-white">Aclaración ejecutiva sobre reportes negativos</h3>
+            <p className="mt-1 text-sm leading-6 text-slate-300">
+              {negativeSummary.count > 0
+                ? `Según la información reportada en Econfia Credit Report, el titular registra ${negativeSummary.count} producto(s) con señal negativa en centrales de riesgo.`
+                : "Según la información reportada en Econfia Credit Report, no se identifican productos con señal negativa en centrales de riesgo."}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-slate-300">
+              {negativeSummary.entities.length
+                ? `Entidad(es) asociada(s): ${negativeSummary.entities.join(", ")}.`
+                : negativeSummary.count > 0
+                  ? "El resumen del reporte indica señales negativas, pero no fue posible asociarlas a una entidad específica en el detalle evaluado."
+                  : "No se identifican entidades asociadas a reportes negativos en los datos evaluados."}
+            </p>
+            {negativeSummary.rows.length > 0 && (
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                {negativeSummary.rows.map((row, index) => (
+                  <div key={`${row.entity}-${index}`} className="rounded-xl border border-white/10 bg-slate-950/40 p-3">
+                    <div className="text-sm font-bold text-white">{row.entity}</div>
+                    <div className="mt-1 text-xs text-slate-400">{row.product}</div>
+                    <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-200">
+                      <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1">Estado: {row.status}</span>
+                      <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1">Mora: {fmtMoney(row.overdue)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="mt-3 text-xs leading-5 text-slate-400">
+              La señal negativa se determina por saldo en mora positivo o por estados/calificaciones de mora,
+              vencimiento, castigo, cobro jurídico o equivalentes presentes en el reporte.
+            </p>
+          </div>
+        </div>
+      </section>
 
       <DebtCompositionDonut data={debtCompositionData} />
       <DebtTrendChart data={debtTrendData} />

@@ -11,6 +11,16 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import {
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 function humanizeKey(key) {
   return String(key || "")
@@ -62,6 +72,31 @@ function numericValue(value) {
   if (!raw || raw === "-" || raw === "." || raw === "-.") return null;
   const numeric = Number(raw);
   return Number.isFinite(numeric) ? numeric : null;
+}
+
+function formatPercent(value) {
+  const numeric = numericValue(value);
+  if (numeric === null) return displayValue(value);
+  return `${Number.isInteger(numeric) ? numeric : numeric.toFixed(1)}%`;
+}
+
+function formatShortNumber(value) {
+  const numeric = numericValue(value);
+  if (numeric === null) return "";
+  return new Intl.NumberFormat("es-CO", {
+    notation: Math.abs(numeric) >= 1000000 ? "compact" : "standard",
+    maximumFractionDigits: 1,
+  }).format(numeric);
+}
+
+function formatPeriodLabel(value) {
+  const raw = String(value || "").trim();
+  const match = raw.match(/^(\d{4})[-/](\d{1,2})$/);
+  if (!match) return raw;
+  const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  const year = match[1].slice(-2);
+  const month = Number(match[2]);
+  return `${monthNames[Math.max(0, Math.min(11, month - 1))]} ${year}`;
 }
 
 function buildTrendBars(entries) {
@@ -623,6 +658,279 @@ function SugerenciasBlock({ sugerencias }) {
   );
 }
 
+const PAYMENT_STATUS = {
+  N: { label: "Normal", color: "bg-emerald-300", text: "text-emerald-200", border: "border-emerald-400/25" },
+  D: { label: "No se recibio / no existe", color: "bg-slate-400", text: "text-slate-300", border: "border-white/[0.08]" },
+  "30": { label: "Mora 30", color: "bg-yellow-300", text: "text-yellow-200", border: "border-yellow-400/25" },
+  "60": { label: "Mora 60", color: "bg-orange-400", text: "text-orange-200", border: "border-orange-400/25" },
+  "90": { label: "Mora 90 o mas", color: "bg-rose-500", text: "text-rose-200", border: "border-rose-400/25" },
+};
+
+function paymentStatusFor(value) {
+  const key = String(value || "").trim().toUpperCase();
+  return PAYMENT_STATUS[key] || PAYMENT_STATUS.D;
+}
+
+function buildAdjudicatorDebtData(crediticio) {
+  const trimestres = safeArray(crediticio?.evolucionRoPN?.trimestres);
+  const cuotas = safeArray(crediticio?.evolucionSaldoCuotaPN?.trimestres);
+  const cuotaByTrimester = new Map(
+    cuotas.map((item) => [String(item?.trimestre || ""), numericValue(item?.cuotaTotal) || 0])
+  );
+
+  return trimestres
+    .map((item) => {
+      const periodo = item?.trimestre || item?.periodo || item?.anioMes;
+      return {
+        periodo: formatPeriodLabel(periodo),
+        rawPeriodo: String(periodo || ""),
+        cupo: numericValue(item?.cupoTotal) || 0,
+        saldo: numericValue(item?.saldoTotal) || 0,
+        deuda: numericValue(item?.porcentajeDeuda) || 0,
+        cuota: cuotaByTrimester.get(String(periodo || "")) || 0,
+      };
+    })
+    .filter((item) => item.rawPeriodo);
+}
+
+function buildPaymentBehaviorData(crediticio) {
+  return safeArray(crediticio?.comportamientoPago?.vectorComportamiento)
+    .map((item) => {
+      const status = paymentStatusFor(item?.comportamiento);
+      return {
+        periodo: formatPeriodLabel(item?.anioMes),
+        code: String(item?.comportamiento || "-").toUpperCase(),
+        ...status,
+      };
+    })
+    .filter((item) => item.periodo)
+    .slice(-14);
+}
+
+function AdjudicatorTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-2xl border border-cyan-400/20 bg-slate-950/95 px-4 py-3 text-xs shadow-[0_18px_45px_rgba(2,6,23,0.45)] backdrop-blur-xl">
+      <div className="mb-2 font-bold text-white">{label}</div>
+      <div className="grid gap-1.5">
+        {payload.map((entry) => (
+          <div key={entry.dataKey} className="flex min-w-[190px] items-center justify-between gap-4">
+            <span className="flex items-center gap-2 text-slate-400">
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
+              {entry.name}
+            </span>
+            <span className="font-semibold text-slate-100">
+              {entry.dataKey === "deuda" ? formatPercent(entry.value) : formatMoney(entry.value)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function IncomeGauge({ ingreso, cuotaVsIngreso }) {
+  const percent = numericValue(cuotaVsIngreso) || 0;
+  const clamped = Math.max(0, Math.min(100, percent));
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.035] p-5">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-cyan-300/60 via-emerald-300/30 to-transparent" />
+      <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+        Analisis de ingresos
+      </div>
+      <div className="mt-2 text-2xl font-extrabold tracking-tight text-white">{formatMoney(ingreso)}</div>
+      <p className="mt-1 text-xs leading-5 text-slate-400">Ingreso estimado reportado frente a cuota mensual.</p>
+
+      <div className="mt-5 flex items-end gap-5">
+        <div className="relative h-36 w-16 overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/70 p-1.5">
+          <div className="absolute inset-x-2 bottom-2 top-2 grid grid-rows-5 gap-1">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="rounded bg-white/[0.05]" />
+            ))}
+          </div>
+          <div
+            className="absolute inset-x-1.5 bottom-1.5 rounded-xl bg-gradient-to-t from-cyan-400 to-emerald-300 shadow-[0_0_26px_rgba(45,212,191,0.28)] transition-all duration-700"
+            style={{ height: `${Math.max(5, clamped)}%` }}
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-3xl font-black text-cyan-200">{formatPercent(percent)}</div>
+          <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Cuota vs ingreso
+          </div>
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-800/80">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 transition-all duration-700"
+              style={{ width: `${clamped}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
+  const crediticio = context?.respuesta?.comportamientoCrediticio || {};
+  const chartData = buildAdjudicatorDebtData(crediticio);
+  const paymentData = buildPaymentBehaviorData(crediticio);
+  const ingreso = context?.endeudamiento?.ingreso || detalle?.ingreso_estimado;
+  const cuotaVsIngreso = context?.endeudamiento?.porcentajeCuotaVsIngreso || detalle?.porcentaje_cuota_vs_ingreso;
+  const hasVisualData = chartData.length || paymentData.length || ingreso || context.alertas.length;
+
+  if (!hasVisualData) return null;
+
+  return (
+    <SectionCard
+      icon={AlertTriangle}
+      title="Endeudamiento y comportamiento de pago"
+      description="Lectura visual de alertas, ingreso estimado y evolución trimestral del cupo, saldo y porcentaje de deuda."
+      action={
+        <div className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-3.5 py-1.5 text-xs font-semibold text-emerald-200">
+          Econfia Adjudicator
+        </div>
+      }
+    >
+      <div className="grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
+        <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.035] p-5">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
+                Evolucion de cupo, saldo y deuda
+              </div>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Comparativo trimestral con doble escala para valores reportados y porcentaje de deuda.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3 text-[10px] font-semibold text-slate-400">
+              <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-sky-400" />Cupo</span>
+              <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-emerald-400" />Saldo</span>
+              <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-amber-400" />% deuda</span>
+            </div>
+          </div>
+
+          {chartData.length ? (
+            <div className="h-[310px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chartData} margin={{ top: 18, right: 8, bottom: 6, left: 0 }}>
+                  <CartesianGrid stroke="rgba(148,163,184,0.13)" vertical={false} />
+                  <XAxis dataKey="periodo" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis
+                    yAxisId="money"
+                    tick={{ fill: "#94a3b8", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={formatShortNumber}
+                    width={58}
+                  />
+                  <YAxis
+                    yAxisId="percent"
+                    orientation="right"
+                    tick={{ fill: "#94a3b8", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(value) => `${value}%`}
+                    width={42}
+                  />
+                  <Tooltip content={<AdjudicatorTooltip />} cursor={{ fill: "rgba(56,189,248,0.06)" }} />
+                  <Bar
+                    yAxisId="money"
+                    dataKey="saldo"
+                    name="Saldo total"
+                    barSize={24}
+                    radius={[8, 8, 2, 2]}
+                    fill="#2dd4bf"
+                    fillOpacity={0.42}
+                  />
+                  <Line
+                    yAxisId="money"
+                    type="monotone"
+                    dataKey="cupo"
+                    name="Cupo total"
+                    stroke="#38bdf8"
+                    strokeWidth={3}
+                    dot={{ r: 4, fill: "#38bdf8", strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: "#67e8f9", stroke: "#082f49", strokeWidth: 2 }}
+                  />
+                  <Line
+                    yAxisId="percent"
+                    type="monotone"
+                    dataKey="deuda"
+                    name="% deuda"
+                    stroke="#f59e0b"
+                    strokeWidth={3}
+                    strokeDasharray="7 5"
+                    dot={{ r: 4, fill: "#f59e0b", strokeWidth: 0 }}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p className="py-16 text-center text-sm italic text-slate-500">
+              No se recibio evolución trimestral estructurada.
+            </p>
+          )}
+
+          {paymentData.length ? (
+            <div className="mt-5 border-t border-white/[0.06] pt-4">
+              <div className="mb-3 text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                Comportamiento de pago mensual
+              </div>
+              <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(64px,1fr))]">
+                {paymentData.map((item) => (
+                  <div
+                    key={`${item.periodo}-${item.code}`}
+                    title={`${item.periodo}: ${item.label}`}
+                    className={`rounded-xl border ${item.border} bg-white/[0.025] px-2 py-2 text-center`}
+                  >
+                    <div className={`mx-auto h-2.5 w-2.5 rounded-full ${item.color}`} />
+                    <div className="mt-1.5 text-[9px] font-semibold text-slate-400">{item.periodo}</div>
+                    <div className={`mt-0.5 text-[10px] font-black ${item.text}`}>{item.code}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="grid gap-4">
+          <IncomeGauge ingreso={ingreso} cuotaVsIngreso={cuotaVsIngreso} />
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.035] p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-500">Alertas</div>
+                <div className="mt-1 text-2xl font-black text-white">{context.alertas.length}</div>
+              </div>
+              <div className={`rounded-full px-3 py-1 text-xs font-bold ${
+                context.alertas.length ? "bg-amber-400/[0.10] text-amber-200" : "bg-emerald-400/[0.10] text-emerald-200"
+              }`}>
+                {context.alertas.length ? "Revisar" : "Sin alertas"}
+              </div>
+            </div>
+            <div className="mt-4 grid gap-2">
+              {context.alertas.length ? (
+                context.alertas.slice(0, 3).map((alerta, index) => (
+                  <div key={`${index}-${alerta?.alerta || alerta}`} className="rounded-xl border border-amber-400/15 bg-amber-400/[0.045] px-4 py-3">
+                    <div className="text-xs font-bold text-amber-100">{displayValue(alerta?.alerta || alerta)}</div>
+                    {alerta?.colocacion || alerta?.modificacion ? (
+                      <div className="mt-1 text-[11px] text-slate-500">
+                        {[alerta?.colocacion, alerta?.modificacion].filter(Boolean).join(" | ")}
+                      </div>
+                    ) : null}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm italic text-slate-500">No se reportaron alertas para esta consulta.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
 function buildExecutiveMetrics(detalle, isPj) {
   if (isPj) {
     return [
@@ -915,6 +1223,8 @@ export default function ExperianDetalleResultados({ consultaId }) {
           >
             <FactGrid items={validationFacts} />
           </SectionCard>
+
+          {!isPj ? <AdjudicatorCreditBehaviorPanel context={context} detalle={detalle} /> : null}
 
           <SectionCard
             icon={Landmark}

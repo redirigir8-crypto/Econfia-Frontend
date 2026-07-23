@@ -4,6 +4,17 @@ import huellaEidentidad from "../assets/eidentidad-fingerprint-light.png";
 
 function formatDate(value) {
   if (!value) return "No disponible";
+
+  // Las fechas "YYYY-MM-DD" (sin hora) las interpreta JS como medianoche UTC,
+  // y al mostrarlas en hora de Colombia (UTC-5) retroceden un dia. Para evitarlo
+  // se arman los componentes a mano, como fecha LOCAL.
+  const soloFecha = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (soloFecha) {
+    const [, anio, mes, dia] = soloFecha;
+    const local = new Date(Number(anio), Number(mes) - 1, Number(dia));
+    return local.toLocaleDateString("es-CO");
+  }
+
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
   return parsed.toLocaleDateString("es-CO");

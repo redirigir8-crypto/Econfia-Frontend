@@ -319,6 +319,25 @@ function normalizeCoreConsulta(item) {
   };
 }
 
+function isBlankIdentityValue(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  return !normalized || ["none", "null", "undefined", "nan", "sin nombre"].includes(normalized);
+}
+
+function hasDisplayableCoreIdentity(item) {
+  const source = String(item?.source || "consulta").toLowerCase();
+  if (source !== "consulta") return true;
+
+  const type = String(item?.tipo_consulta || item?.tipo || "").toLowerCase();
+  if (type !== "ecorefull") return true;
+
+  const name = String(item?.nombre || "").trim();
+  if (!name) return false;
+
+  const parts = name.split(/\s+/).filter(Boolean);
+  return !parts.every(isBlankIdentityValue);
+}
+
 function ExportBatchModal({
   isOpen,
   format = "excel",
@@ -572,7 +591,7 @@ export default function Resultados() {
         ...hdcRows,
         ...reconocerRows,
         ...empresaRows,
-      ].sort((left, right) => {
+      ].filter(hasDisplayableCoreIdentity).sort((left, right) => {
         const leftTime = left.fecha ? new Date(left.fecha).getTime() : 0;
         const rightTime = right.fecha ? new Date(right.fecha).getTime() : 0;
         return rightTime - leftTime;

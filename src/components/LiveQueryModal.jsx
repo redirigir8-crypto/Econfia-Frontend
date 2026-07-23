@@ -78,8 +78,11 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
 
         const resultadosPayload = Array.isArray(data?.resultados) ? data.resultados : [];
         setResultados(resultadosPayload);
-        setTotalFuentes(Number(data?.total_fuentes) || 0);
-        setCompletados(Number(data?.completados) || 0);
+        const reportedTotal = Number(data?.total_fuentes) || 0;
+        const reportedDone = Number(data?.completados) || 0;
+        const coherentTotal = Math.max(reportedTotal, resultadosPayload.length, reportedDone);
+        setTotalFuentes(coherentTotal);
+        setCompletados(Math.min(reportedDone, coherentTotal));
 
         if (data?.done) {
           setDone(true);
@@ -139,7 +142,7 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
   if (!consultaId) return null;
 
   const active = resultadosVisibles[activeIdx] || null;
-  const progress = totalFuentes > 0 ? Math.round((completados / totalFuentes) * 100) : 0;
+  const progress = totalFuentes > 0 ? Math.min(100, Math.round((completados / totalFuentes) * 100)) : 0;
 
   // Profesión encontrada en CUALQUIER fuente de profesión. Persistente: no depende
   // de qué tarjeta esté rotando, se queda fija mientras dura la consulta.
