@@ -163,7 +163,7 @@ export default function ConsultaReconocer() {
             <div className="group relative w-full rounded-[20px] border border-white/10 bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 p-6 shadow-2xl shadow-cyan-500/10 backdrop-blur-xl">
               <div className="relative z-10">
                 <div className="mb-4 flex items-center justify-center">
-                  <img src="/img/logo-econfia-rojo.png" alt="Econfia" className="max-h-10 w-auto" />
+                  <img src="/img/logo-econfia-1.png" alt="Econfia" className="h-16 w-16 object-contain" />
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-3">

@@ -562,9 +562,9 @@ export default function ConsultaMedida() {
               <div className="relative z-10">
                 <div className="flex items-center justify-center mb-4">
                   <img
-                    src="/img/logo-econfia-rojo.png"
+                    src="/img/logo-econfia-1.png"
                     alt="Econfía"
-                    className="max-h-10 w-auto"
+                    className="h-16 w-16 object-contain"
                   />
                 </div>
 

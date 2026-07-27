@@ -848,7 +848,10 @@ export default function DetalleResultados({ consultaId }) {
   };
 
   const renderEvidenceActions = (item, compact = false) => {
-    if (hasEvidenceFile(item.archivo)) {
+    // Las consultas FAST no deben mostrar capturas: aunque alguna fuente haya
+    // guardado un archivo, aquí se ignora y se cae en "Ver detalle".
+    const esFast = (item.tipo_consulta || "").toLowerCase().trim() === "econfiafast";
+    if (!esFast && hasEvidenceFile(item.archivo)) {
       return (
         <div className={`flex items-center ${compact ? "justify-start" : "justify-center"} gap-1.5`}>
           <a

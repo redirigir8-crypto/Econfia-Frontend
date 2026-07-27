@@ -197,7 +197,7 @@ export default function ConsultaExperian() {
               <div className="pointer-events-none absolute inset-0 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
               <div className="relative z-10">
                 <div className="mb-4 flex items-center justify-center">
-                  <img src="/img/logo-econfia-rojo.png" alt="Econfia" className="max-h-10 w-auto" />
+                  <img src="/img/logo-econfia-1.png" alt="Econfia" className="h-16 w-16 object-contain" />
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-3">

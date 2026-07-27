@@ -144,7 +144,7 @@ export default function Dashboard() {
               .econfia-title-shell {
                 position: relative;
                 display: inline-block;
-                padding: 2px 0;
+                padding: 0;
               }
               .econfia-title {
                 position: relative;
@@ -172,25 +172,25 @@ export default function Dashboard() {
                   drop-shadow(0 0 8px rgba(56,189,248,0.24));
               }
             `}</style>
-            <div className="relative flex w-[360px] items-center gap-3 bg-transparent px-2 py-2">
-              <div className="relative w-[58px] h-[58px] shrink-0">
+            <div className="relative flex w-[430px] items-center gap-4 bg-transparent px-2 py-2">
+              <div className="relative h-[76px] w-[76px] shrink-0">
                 <div className="absolute inset-1 rounded-2xl bg-red-500/10 blur-md transition-all duration-500 group-hover:bg-red-500/16" />
                 <div className="absolute inset-[5px] rounded-2xl bg-[#0a0e18]/55 border border-white/10 flex items-center justify-center shadow-[inset_0_0_10px_rgba(255,255,255,0.06)]">
                   <img
                     src="/img/logo-econfia-1.png"
                     alt="Econfía"
-                    className="w-10 h-10 object-contain drop-shadow-[0_0_6px_rgba(239,68,68,0.55)]"
+                    className="h-14 w-14 object-contain drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col justify-center leading-none">
+              <div className="flex flex-col justify-center gap-0 leading-none">
                 <div className="econfia-title-shell">
-                  <p className="econfia-title font-black text-xl tracking-[0.22em] uppercase leading-none">
+                  <p className="econfia-title font-black text-3xl tracking-[0.22em] uppercase leading-[0.78]">
                     Econfia
                   </p>
                 </div>
-                <p className="text-white/40 text-[8.5px] tracking-[0.15em] uppercase font-light mt-1 whitespace-nowrap">
+                <p className="-mt-0.5 whitespace-nowrap text-[10px] font-light uppercase leading-none tracking-[0.18em] text-white/45">
                   Una marca de Grupo Soluciones
                 </p>
               </div>

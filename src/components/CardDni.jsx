@@ -20,6 +20,14 @@ function formatDate(value) {
   return parsed.toLocaleDateString("es-CO");
 }
 
+// Para la fecha de NACIMIENTO se muestra solo el año: muchas fuentes solo traen
+// el año real y rellenan el día/mes con "01-01", lo que confunde al usuario.
+function soloAnio(value) {
+  if (!value) return "No disponible";
+  const m = String(value).match(/(\d{4})/);
+  return m ? m[1] : "No disponible";
+}
+
 function getInitials(nombre, apellido) {
   return `${String(nombre || "").trim().charAt(0)}${String(apellido || "").trim().charAt(0)}`
     .trim()
@@ -217,9 +225,9 @@ export default function CardDni({ data }) {
                 {sexo}
               </p>
 
-              <p className="text-[11px] sm:text-[13px] font-bold uppercase tracking-wide text-slate-700">Fecha nac.</p>
+              <p className="text-[11px] sm:text-[13px] font-bold uppercase tracking-wide text-slate-700">Año nac.</p>
               <p className="border-b border-slate-300/65 pb-1 text-[11px] sm:text-[13px] font-medium uppercase tracking-wide text-slate-800 sm:text-sm">
-                {formatDate(fechaNacimiento)}
+                {soloAnio(fechaNacimiento)}
               </p>
             </div>
 

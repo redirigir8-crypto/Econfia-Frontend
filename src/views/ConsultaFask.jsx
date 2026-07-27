@@ -118,7 +118,7 @@ export default function ConsultaBasicElemnt() {
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
             <div className="relative z-10">
               <div className="flex items-center justify-center mb-4">
-                <img src="/img/logo-econfia-rojo.png" alt="Econfía" className="max-h-10 w-auto" />
+                <img src="/img/logo-econfia-1.png" alt="Econfía" className="h-16 w-16 object-contain" />
               </div>  
               <form onSubmit={handleSubmit} className="space-y-2">
                 <div className="space-y-2">

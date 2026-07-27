@@ -177,7 +177,7 @@ if (isAdmin) {
         }
         .curve-track {
           position: relative;
-          height: 98px;
+          height: 112px;
         }
         .curve-item {
           position: absolute;
@@ -187,7 +187,7 @@ if (isAdmin) {
           flex-direction: column;
           align-items: center;
           gap: 7px;
-          width: 92px;
+          width: 100px;
           pointer-events: auto;
           z-index: 1;
           transition: transform 0.35s ease, opacity 0.2s ease, filter 0.2s ease;
@@ -195,8 +195,8 @@ if (isAdmin) {
         .curve-icon {
           position: relative;
           overflow: hidden;
-          width: 50px;
-          height: 50px;
+          width: 58px;
+          height: 58px;
           border-radius: 9999px;
           display: flex;
           align-items: center;
@@ -208,8 +208,8 @@ if (isAdmin) {
           z-index: 10;
         }
         .curve-item.active .curve-icon {
-          width: 60px;
-          height: 60px;
+          width: 72px;
+          height: 72px;
           background: linear-gradient(180deg,
             color-mix(in srgb, var(--item-color, #38bdf8) 85%, white 5%),
             color-mix(in srgb, var(--item-color, #38bdf8) 65%, black 25%));
@@ -226,12 +226,12 @@ if (isAdmin) {
           animation: taskbarShineSweep 2.4s ease-in-out infinite;
         }
         .curve-item:not(.active) {
-          opacity: 0.55;
-          filter: blur(1.5px);
+          opacity: 0.9;
+          filter: none;
         }
         .curve-item:not(.active):hover {
-          opacity: 0.9;
-          filter: blur(0);
+          opacity: 1;
+          filter: none;
         }
         .curve-label {
           font-size: 11px;
@@ -297,7 +297,7 @@ if (isAdmin) {
               >
                 <span className="curve-icon glass-pill" title={item.label}>
                   {isActive && <span className="curve-shine" />}
-                  <span className="relative flex items-center justify-center w-6 h-6 text-white [&>img]:w-[22px] [&>img]:h-[22px] [&>svg]:w-[22px] [&>svg]:h-[22px]">
+                  <span className="relative flex items-center justify-center w-7 h-7 text-white [&>img]:w-[26px] [&>img]:h-[26px] [&>svg]:w-[26px] [&>svg]:h-[26px]">
                     {item.icon}
                   </span>
                 </span>
