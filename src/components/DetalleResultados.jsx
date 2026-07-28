@@ -1409,6 +1409,63 @@ export default function DetalleResultados({ consultaId }) {
                       ))}
                     </section>
                   ) : null}
+
+                  {/* SECOP Integrado — contratación pública (informativo, sin riesgo) */}
+                  {resultadoModal.datos_extra?.contratos?.length > 0 ? (
+                    <section className="space-y-2">
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 px-1">
+                        Contratación Pública · SECOP ({resultadoModal.datos_extra.contratos.length})
+                      </h4>
+                      {resultadoModal.datos_extra.contratos.map((c, i) => (
+                        <div
+                          key={i}
+                          className="rounded-xl border border-emerald-500/20 bg-emerald-950/10 px-4 py-3"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-slate-100 text-xs font-semibold leading-snug">
+                              {c.nombre_de_la_entidad || "Entidad no especificada"}
+                            </p>
+                            {c.origen ? (
+                              <span className="flex-shrink-0 px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[9px] font-bold uppercase tracking-wide">
+                                {c.origen}
+                              </span>
+                            ) : null}
+                          </div>
+                          {c.nom_raz_social_contratista ? (
+                            <p className="text-slate-400 text-[11px] mt-1">
+                              {c.nom_raz_social_contratista}
+                            </p>
+                          ) : null}
+                          {c.valor_contrato && c.valor_contrato !== "N/A" ? (
+                            <p className="text-emerald-300 font-bold text-base mt-1">
+                              ${c.valor_contrato}
+                            </p>
+                          ) : null}
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-slate-500 text-[10px]">
+                            {c.fecha_de_firma_del_contrato && c.fecha_de_firma_del_contrato !== "N/A" ? (
+                              <span>Firma: {c.fecha_de_firma_del_contrato}</span>
+                            ) : null}
+                            {c.numero_del_contrato && c.numero_del_contrato !== "N/A" ? (
+                              <span>Contrato: {c.numero_del_contrato}</span>
+                            ) : null}
+                            {c.numero_de_proceso && c.numero_de_proceso !== "N/A" ? (
+                              <span>Proceso: {c.numero_de_proceso}</span>
+                            ) : null}
+                          </div>
+                          {c.url_contrato ? (
+                            <a
+                              href={c.url_contrato}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block mt-2 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-all"
+                            >
+                              Ver contrato ↗
+                            </a>
+                          ) : null}
+                        </div>
+                      ))}
+                    </section>
+                  ) : null}
                 </main>
 
                 <footer className="px-6 sm:px-8 py-4 bg-white/5 border-t border-white/5 flex items-center justify-between relative z-10">
