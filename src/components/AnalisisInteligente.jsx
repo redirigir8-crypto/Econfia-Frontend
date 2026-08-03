@@ -13,6 +13,7 @@ import {
   Signal,
   Sparkles,
   ChevronRight,
+  GraduationCap,
 } from "lucide-react";
 import { describirFuente } from "../utils/fuentesCatalogo";
 
@@ -27,6 +28,9 @@ const clasificar = (item) => {
   const estado = (item?.estado || "").toLowerCase().trim();
   if (estado === "offline") return "offline";
   if (estado === "error") return "error";
+  // "Sin validar" = la fuente no se pudo consultar (error de formulario, sesión,
+  // etc.). No es un hallazgo ni una fuente limpia: cuenta como no concluyente.
+  if (estado === "sin validar" || estado === "sin_validar") return "error";
   if (estado === "revalidando" || estado === "en_proceso") return "pendiente";
 
   const score = getNum(item?.score);
@@ -67,6 +71,7 @@ export default function AnalisisInteligente({
     };
 
     const porTipo = new Map();
+    const profesionesSet = new Set();
 
     for (const item of detalle) {
       const clase = clasificar(item);
@@ -77,6 +82,19 @@ export default function AnalisisInteligente({
       const ref = porTipo.get(tipo);
       ref.total += 1;
       if (clase === "alto" || clase === "medio") ref.hallazgos += 1;
+
+      // Profesión encontrada: los bots de colegios/consejos guardan la profesión
+      // en datos_extra cuando la persona sí está registrada (score > 0).
+      const de = item?.datos_extra && typeof item.datos_extra === "object" ? item.datos_extra : {};
+      if ((getNum(item?.score) || 0) > 0) {
+        const p = String(de.profesion || "").trim();
+        if (p) profesionesSet.add(p);
+        const arr = Array.isArray(de.profesiones_detectadas) ? de.profesiones_detectadas : [];
+        for (const x of arr) {
+          const s = String(x || "").trim();
+          if (s) profesionesSet.add(s);
+        }
+      }
     }
 
     const total = detalle.length;
@@ -104,6 +122,7 @@ export default function AnalisisInteligente({
       cobertura,
       nivel,
       tipos,
+      profesiones: [...profesionesSet],
     };
   }, [detalle]);
 
@@ -223,6 +242,23 @@ export default function AnalisisInteligente({
                 </span>
               )}
             </div>
+            {stats.profesiones.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  Profesión encontrada:
+                </span>
+                {stats.profesiones.map((p) => (
+                  <span
+                    key={p}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-2.5 py-1 text-xs font-bold text-cyan-100"
+                  >
+                    <GraduationCap size={13} />
+                    {p}
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div className={`mt-4 inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold ${nivelUI.chip}`}>
               <NivelIcon size={18} />
               {nivelUI.label}

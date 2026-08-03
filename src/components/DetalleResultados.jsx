@@ -771,10 +771,38 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
     return globalMatch && filtersMatch;
   });
 
+  // 🎓 En consultas de Contratista, las fuentes de profesión (colegios/consejos
+  // reguladores) van primero para que la verificación profesional quede arriba.
+  const esContratista = (consulta?.tipo_consulta || consulta?.tipo || "")
+    .toLowerCase()
+    .includes("contratista");
+
+  const esFuenteProfesion = (item) => {
+    const tipo = (item?.tipo_fuente || "").toLowerCase();
+    if (tipo.includes("colegio") || tipo.includes("regulador") || tipo.includes("profesion")) {
+      return true;
+    }
+    const de = item?.datos_extra && typeof item.datos_extra === "object" ? item.datos_extra : {};
+    return Boolean(
+      de.profesion ||
+        (Array.isArray(de.profesiones_detectadas) && de.profesiones_detectadas.length)
+    );
+  };
+
+  // Partición estable: profesión primero (y dentro de ellas, las que sí
+  // detectaron profesión arriba), conservando el orden original en cada grupo.
+  const datosOrdenados = esContratista
+    ? [
+        ...datosFiltrados.filter((i) => esFuenteProfesion(i) && (Number(i.score) || 0) > 0),
+        ...datosFiltrados.filter((i) => esFuenteProfesion(i) && !((Number(i.score) || 0) > 0)),
+        ...datosFiltrados.filter((i) => !esFuenteProfesion(i)),
+      ]
+    : datosFiltrados;
+
   // 📑 Paginación
-  const totalPaginas = Math.ceil(datosFiltrados.length / porPagina);
+  const totalPaginas = Math.ceil(datosOrdenados.length / porPagina);
   const startIndex = (pagina - 1) * porPagina;
-  const datosPagina = datosFiltrados.slice(startIndex, startIndex + porPagina);
+  const datosPagina = datosOrdenados.slice(startIndex, startIndex + porPagina);
 
   const getPages = () => {
     let pages = [];
