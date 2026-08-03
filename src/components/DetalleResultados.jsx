@@ -15,10 +15,13 @@ import {
   Users,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
+import AnalisisInteligente from "./AnalisisInteligente";
+import { describirFuente } from "../utils/fuentesCatalogo";
 
-export default function DetalleResultados({ consultaId }) {
+export default function DetalleResultados({ consultaId, consulta = null }) {
   const [detalle, setDetalle] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("analisis"); // "analisis" | "resultados"
   const [resultadoModal, setResultadoModal] = useState(null);
   const [procesosModal, setProcesosModal] = useState(null);
   const [garantiasModal, setGarantiasModal] = useState(null);
@@ -935,6 +938,37 @@ export default function DetalleResultados({ consultaId }) {
   return (
     <div className="w-full max-w-[1280px] mx-auto px-3 sm:px-4 md:px-12 pt-12 sm:pt-12 md:pt-10 lg:pt-10 pb-3 md:pb-4 h-full min-h-0 flex flex-col">
 
+      {/* Pestañas Análisis / Resultados */}
+      <div className="mb-2 md:mb-3 flex items-center gap-1.5 rounded-xl border border-cyan-500/15 bg-slate-900/40 p-1 backdrop-blur-md self-start">
+        {[
+          { key: "analisis", label: "Análisis" },
+          { key: "resultados", label: "Resultados" },
+        ].map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${
+              tab === t.key
+                ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                : "text-slate-300 hover:text-cyan-200"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "analisis" ? (
+        <div className="min-h-0 flex-1 overflow-y-auto max-h-[calc(100vh-12rem)]">
+          <AnalisisInteligente
+            detalle={detalle}
+            consulta={consulta}
+            onVerHallazgo={(item, e) => openResultadoModal(item, e)}
+            onIrAResultados={() => setTab("resultados")}
+          />
+        </div>
+      ) : (
+      <>
       {/* Barra de búsqueda y filtros */}
       <div className="flex flex-col gap-1.5 md:gap-2 mb-2 md:mb-2.5">
         {/* Fila 1: búsqueda principal */}
@@ -1006,6 +1040,12 @@ export default function DetalleResultados({ consultaId }) {
                       <h3 className="text-sm font-bold text-slate-100 leading-snug break-words">
                         {item.fuente}
                       </h3>
+                      <p className="mt-1 text-[11px] text-cyan-300/70 leading-snug break-words">
+                        {describirFuente(item).titulo}
+                      </p>
+                      <p className="mt-1 text-[11px] text-slate-400 leading-relaxed break-words">
+                        {describirFuente(item).desc}
+                      </p>
                     </div>
                     <div className="shrink-0">
                       <span className="inline-flex items-center justify-center min-w-[2.2rem] px-2 py-1 rounded-lg bg-gradient-to-r from-slate-800/60 to-slate-900/60 border border-cyan-500/20 text-cyan-300 font-bold text-sm">
@@ -1050,7 +1090,17 @@ export default function DetalleResultados({ consultaId }) {
                       key={item.id}
                       className="group hover:bg-gradient-to-r hover:from-cyan-500/5 hover:to-blue-500/5 transition-all duration-300"
                     >
-                      <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm leading-snug break-words pr-3">{item.fuente}</td>
+                      <td className="px-2 md:px-3 py-1.5 md:py-2 pr-3">
+                        <span
+                          className="block text-slate-200 font-semibold text-xs md:text-sm leading-snug break-words"
+                          title={describirFuente(item).desc}
+                        >
+                          {item.fuente}
+                        </span>
+                        <span className="block mt-0.5 text-[11px] text-cyan-300/70 leading-snug break-words">
+                          {describirFuente(item).titulo}
+                        </span>
+                      </td>
                       <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 text-xs md:text-sm leading-snug break-words pr-3">{item.tipo_fuente}</td>
                       <td className="px-2 md:px-3 py-1.5 md:py-2">
                         <EstadoCell item={item} />
@@ -1150,6 +1200,8 @@ export default function DetalleResultados({ consultaId }) {
           </button>
         </div>
       </div>
+      </>
+      )}
 
       {resultadoModal &&
         (() => {

@@ -1,6 +1,6 @@
 // src/components/Header.jsx
 import React, { useState, useRef, useEffect } from "react";
-import logo from "../assets/logo-econfia (1).png";
+import logoIcon from "../assets/logo-econfia-icon.png";
 import { Link, NavLink} from "react-router-dom";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { FaEnvelope } from "react-icons/fa";
@@ -39,12 +39,24 @@ export default function Header() {
         
         {/* Logo */}
         <div className="flex items-center">
-          <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
+          <Link
+            to="/"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="flex items-center gap-2 md:gap-3 cursor-pointer"
+          >
             <img
-              src={logo}
+              src={logoIcon}
               alt="Logo Econfia"
-              className="h-10 md:h-12 w-auto object-contain cursor-pointer"
+              className="h-9 md:h-11 w-auto object-contain"
             />
+            <div className="flex flex-col justify-center leading-none">
+              <span className="text-white font-bold tracking-[0.18em] text-lg md:text-2xl">
+                ECONFIA
+              </span>
+              <span className="text-white/60 tracking-[0.18em] text-[7px] md:text-[9px] mt-1 whitespace-nowrap">
+                UNA MARCA DE GRUPO SOLUCIONES
+              </span>
+            </div>
           </Link>
         </div>
 

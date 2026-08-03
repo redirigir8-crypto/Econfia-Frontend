@@ -1219,7 +1219,7 @@ export default function Resultados() {
             <SwiperSlide className="flex flex-col min-h-0 h-full">
               {/* 🔹 Detalle primero */}
               <div className="flex-1 min-h-0">
-                <DetalleResultados consultaId={consultaSeleccionada.id} />
+                <DetalleResultados consultaId={consultaSeleccionada.id} consulta={consultaSeleccionada} />
               </div>
 
             </SwiperSlide>
