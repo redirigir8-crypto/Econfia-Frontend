@@ -240,11 +240,9 @@ export default function ConsultaContratista() {
       // Mantiene compatibilidad con backend: `profesiones` + fallback `profesion`.
       profesiones: selectedList.length ? selectedList : undefined,
       profesion: selectedList[0] || (selectedProfLabel ? selectedProfLabel : profesionNormalizada),
-      // Si el usuario selecciona varias profesiones o activa el switch,
-      // ejecutar solo bots adicionales por profesión (sin predeterminados).
-      // Si el usuario selecciona varias profesiones, ejecutar solo bots adicionales por profesión
-      // (sin predeterminados) para evitar ruido y costos.
-      solo_profesion: selectedList.length > 1,
+      // Ejecutar SIEMPRE los bots predeterminados además de los de cada
+      // profesión, incluso cuando el contratista tiene varias profesiones.
+      solo_profesion: false,
       fondo_pension: fondoPension || undefined,
       email: String(email).trim().toLowerCase(),
       empresa: nombreEmpresa.trim(),

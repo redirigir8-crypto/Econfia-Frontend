@@ -252,8 +252,14 @@ export default function TablaResultados({
   exportingPdf = false,
   exportDisabled = false,
   exportCount = 0,
+  pagina: paginaProp,
+  setPagina: setPaginaProp,
 }) {
-  const [pagina, setPagina] = useState(1);
+  // Página controlada desde el padre (para conservarla al volver del detalle).
+  // Si no llegan props, cae a estado interno para no romper otros usos.
+  const [paginaInterna, setPaginaInterna] = useState(1);
+  const pagina = paginaProp ?? paginaInterna;
+  const setPagina = setPaginaProp ?? setPaginaInterna;
   const porPagina = 4;
 
   const totalPaginas = Math.ceil(data.length / porPagina);

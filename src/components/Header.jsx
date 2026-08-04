@@ -50,7 +50,7 @@ export default function Header() {
               className="h-9 md:h-11 w-auto object-contain"
             />
             <div className="flex flex-col justify-center leading-none">
-              <span className="text-white font-bold tracking-[0.18em] text-lg md:text-2xl">
+              <span className="text-white font-bold tracking-[0.35em] text-lg md:text-2xl">
                 ECONFIA
               </span>
               <span className="text-white/60 tracking-[0.18em] text-[7px] md:text-[9px] mt-1 whitespace-nowrap">

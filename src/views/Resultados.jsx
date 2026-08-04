@@ -490,6 +490,8 @@ export default function Resultados() {
   }, [consultaSeleccionada]);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({ estado: "", fecha: "" });
+  // Página del historial elevada aquí para conservarla al volver del detalle.
+  const [paginaHistorial, setPaginaHistorial] = useState(1);
   const [showModalIndividual, setShowModalIndividual] = useState(false);
   const [exportingExcel, setExportingExcel] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -1017,6 +1019,8 @@ export default function Resultados() {
             {/* Tabla de resultados */}
             <TablaResultados
               data={filteredData}
+              pagina={paginaHistorial}
+              setPagina={setPaginaHistorial}
               onVerResultados={setConsultaSeleccionada}
               onOpenLive={setLiveConsultaId}
               onExportExcel={() => openExportModal("excel")}
