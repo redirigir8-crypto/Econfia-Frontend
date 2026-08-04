@@ -5,9 +5,10 @@ import Toast from "../components/Toast";
 import CardDni from "../components/CardDni";
 import Terminos from "../components/Terminos";
 import ConsultaMasivaModal from "../components/ConsultaMasivaModal";
+import LotesFuentes from "../components/LotesFuentes";
 
 
-function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
+function ModalEssencialExpress({ isOpen, onClose, data, onSuccess, puedeUsarLotes }) {
   const [fuentes, setFuentes] = useState([]);
   const [seleccionadas, setSeleccionadas] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -142,7 +143,7 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
       <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
         <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="relative bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full p-6 text-white">
+        <div className="relative bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full mx-4 p-6 text-white max-h-[92vh] flex flex-col">
           <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
           <button
             onClick={onClose}
@@ -151,7 +152,7 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
           >
             ✕
           </button>
-          <div className="relative z-10">
+          <div className="relative z-10 flex flex-col min-h-0 flex-1">
             <div className="text-center mb-4">
               <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
                 <span className="text-cyan-300 text-xs font-medium">Personaliza tu consulta Express</span>
@@ -180,13 +181,23 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
                 {allSelected ? "Deseleccionar todas" : "Seleccionar todas"}
               </button>
             </div>
+            {/* Lotes de fuentes guardados (solo si el admin lo habilitó) */}
+            <LotesFuentes
+              modulo="essencial-express"
+              enabled={puedeUsarLotes}
+              fuentes={fuentes}
+              seleccionadas={seleccionadas}
+              setSeleccionadas={setSeleccionadas}
+              onToast={setToast}
+            />
+
             {/* Contador de fuentes seleccionadas */}
             <div className="mb-2 flex items-center justify-between">
               <span className="text-cyan-300 font-semibold text-sm">
                 {`Fuentes seleccionadas: ${seleccionadas.length}`}
               </span>
             </div>
-            <div className="max-h-72 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
               {filteredFuentes.length > 0 ? (
                 filteredFuentes.map((fuente) => {
                   const isDisabled = false;
@@ -220,17 +231,24 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
                 </p>
               )}
             </div>
-            <button
-              onClick={handleConsultar}
-              disabled={loading || seleccionadas.length === 0}
-              className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${
-                loading || seleccionadas.length === 0
-                  ? "bg-white/10 text-white/40 cursor-not-allowed"
-                  : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
-              }`}
-            >
-              {loading ? "Consultando..." : "Consultar Express"}
-            </button>
+            {/* Footer fijo: botón consultar siempre visible */}
+            <div className="flex-shrink-0 pt-3 border-t border-white/10">
+              <button
+                onClick={handleConsultar}
+                disabled={loading || seleccionadas.length === 0}
+                className={`w-full px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 ${
+                  loading || seleccionadas.length === 0
+                    ? "bg-white/10 text-white/40 cursor-not-allowed"
+                    : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
+                }`}
+              >
+                {loading
+                  ? "Consultando..."
+                  : seleccionadas.length === 0
+                  ? "Selecciona o aplica un lote para consultar"
+                  : `Consultar Express ${seleccionadas.length} fuente${seleccionadas.length === 1 ? "" : "s"}`}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -241,6 +259,7 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess }) {
 
 export default function ConsultaEssencialExpress() {
   const [puedeUsarMasivas, setPuedeUsarMasivas] = useState(false);
+  const [puedeUsarLotes, setPuedeUsarLotes] = useState(false);
   useEffect(() => {
     const token = localStorage.getItem("token");
     const API = process.env.REACT_APP_API_URL;
@@ -251,6 +270,7 @@ export default function ConsultaEssencialExpress() {
         const planes = data.perfil?.planes || [];
         const planActual = planes.find((p) => p.nombre === "essencial-express");
         setPuedeUsarMasivas(planActual ? ids.includes(planActual.id) : false);
+        setPuedeUsarLotes(!!data.perfil?.puede_usar_lotes);
       })
       .catch(() => {});
   }, []);
@@ -495,6 +515,7 @@ export default function ConsultaEssencialExpress() {
         isOpen={showEssencialExpress}
         onClose={() => setShowEssencialExpress(false)}
         data={datos}
+        puedeUsarLotes={puedeUsarLotes}
         onSuccess={(datosConsulta) => {
           setDatos(datosConsulta);
           setShowResultados(true);
