@@ -14,11 +14,11 @@ const EVENTOS = [
 
 // Clases por acento (Tailwind necesita clases completas, no interpoladas)
 const ACCENT = {
-  cyan:    { ring: "border-cyan-400/40",    glow: "bg-cyan-500/10",    text: "text-cyan-300",    dot: "bg-cyan-300" },
-  blue:    { ring: "border-blue-400/40",    glow: "bg-blue-500/10",    text: "text-blue-300",    dot: "bg-blue-300" },
-  emerald: { ring: "border-emerald-400/40", glow: "bg-emerald-500/10", text: "text-emerald-300", dot: "bg-emerald-300" },
-  rose:    { ring: "border-rose-400/40",    glow: "bg-rose-500/10",    text: "text-rose-300",    dot: "bg-rose-300" },
-  violet:  { ring: "border-violet-400/40",  glow: "bg-violet-500/10",  text: "text-violet-300",  dot: "bg-violet-300" },
+  cyan:    { ring: "border-brand/35",       glow: "bg-brand/10",       text: "text-brand",       dot: "bg-brand" },
+  blue:    { ring: "border-blue-400/35",    glow: "bg-blue-500/10",    text: "text-blue-400",    dot: "bg-blue-400" },
+  emerald: { ring: "border-ok/35",          glow: "bg-ok/10",          text: "text-ok",          dot: "bg-ok" },
+  rose:    { ring: "border-danger/35",      glow: "bg-danger/10",      text: "text-danger",      dot: "bg-danger" },
+  violet:  { ring: "border-violet-400/35",  glow: "bg-violet-500/10",  text: "text-violet-400",  dot: "bg-violet-400" },
 };
 
 const EMPTY_FORM = { nombre: "", evento: "login", volumen: 1, activo: true };
@@ -154,51 +154,53 @@ export default function AdminSonidos() {
   const totalConfigurados = EVENTOS.filter((ev) => sonidos.some((s) => s.evento === ev.value && s.activo)).length;
 
   return (
-    <section className="relative min-h-screen py-5 pb-32 bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 overflow-y-auto">
+    <section className="relative min-h-screen overflow-y-auto bg-transparent px-4 py-8 pb-32 sm:px-6">
       {/* Glows decorativos */}
-      <div className="pointer-events-none absolute top-10 right-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute bottom-24 left-0 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute right-10 top-10 h-72 w-72 rounded-full bg-brand/15 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-24 left-0 h-80 w-80 rounded-full bg-violet-500/10 blur-3xl" />
 
-      <div className="relative w-full max-w-4xl mx-auto px-3 md:px-6">
+      <div className="relative mx-auto w-full max-w-5xl">
         {toast && (
           <Toast {...toast} onClose={() => setToast(null)}
             sound={toast.type === "error" ? "/sounds/error-011-352286.mp3" : "/sounds/econfia-bot/econfia-1.wav"} />
         )}
 
         {/* Header */}
-        <div className="flex items-center gap-4 mb-7 mt-2">
-          <div className="flex-shrink-0 h-14 w-14 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-blue-500/20 border border-cyan-400/30 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <div className="mb-7 mt-2 overflow-hidden rounded-[28px] border border-line/15 bg-surface/90 p-6 shadow-[0_22px_65px_rgba(15,23,42,0.18)] backdrop-blur-xl sm:p-8">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 shadow-lg shadow-cyan-500/10">
             <span className="text-2xl">🔊</span>
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] text-cyan-400 font-semibold tracking-[0.2em] uppercase mb-0.5">Centro Administrativo</p>
-            <h2 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight">
+            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.28em] text-brand">Centro Administrativo</p>
+            <h2 className="text-3xl font-black leading-tight tracking-tight text-content md:text-4xl">
               Sonidos por evento
             </h2>
-            <p className="text-white/45 text-xs sm:text-sm mt-1">
-              <span className="text-cyan-300 font-semibold">{totalConfigurados}/{EVENTOS.length}</span> eventos con sonido activo. Solo el sonido activo de cada evento se reproduce.
+            <p className="mt-2 text-sm text-muted">
+              <span className="font-black text-brand">{totalConfigurados}/{EVENTOS.length}</span> eventos con sonido activo. Solo el sonido activo de cada evento se reproduce.
             </p>
+          </div>
           </div>
         </div>
 
         {/* Formulario */}
         <form onSubmit={handleSubmit}
-          className="relative rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/90 via-blue-950/40 to-slate-900/90 backdrop-blur-xl shadow-2xl shadow-cyan-500/10 p-5 md:p-7 mb-8 space-y-5 overflow-hidden">
+          className="relative mb-8 space-y-5 overflow-hidden rounded-[24px] border border-line/15 bg-surface/90 p-5 shadow-[0_22px_65px_rgba(15,23,42,0.16)] backdrop-blur-xl md:p-7">
           <div className={`pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl ${accentActual.glow}`} />
           <div className="relative flex items-center gap-2">
-            <h3 className="text-lg font-bold text-cyan-300">{editId ? "✏️ Editar sonido" : "➕ Nuevo sonido"}</h3>
+            <h3 className="text-lg font-black text-brand">{editId ? "✏️ Editar sonido" : "➕ Nuevo sonido"}</h3>
           </div>
 
           <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-white/55 mb-1.5 font-semibold uppercase tracking-wide">Nombre *</label>
+              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-muted">Nombre *</label>
               <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Ej: Campana de ingreso"
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/70 text-white border border-white/10 focus:border-cyan-400/60 focus:bg-slate-900 outline-none transition-all placeholder:text-white/30" />
+                className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 font-semibold text-content outline-none transition-all placeholder:text-muted/70 focus:border-brand/50 focus:ring-4 focus:ring-brand/10" />
             </div>
             <div>
-              <label className="block text-xs text-white/55 mb-1.5 font-semibold uppercase tracking-wide">Evento *</label>
+              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-muted">Evento *</label>
               <select name="evento" value={form.evento} onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/70 text-white border border-white/10 focus:border-cyan-400/60 outline-none transition-all">
+                className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 font-semibold text-content outline-none transition-all focus:border-brand/50 focus:ring-4 focus:ring-brand/10">
                 {EVENTOS.map((e) => <option key={e.value} value={e.value}>{e.icon} {e.label}</option>)}
               </select>
               <p className={`text-xs mt-1.5 ${accentActual.text}`}>{metaActual.icon} {metaActual.desc}</p>
@@ -207,35 +209,35 @@ export default function AdminSonidos() {
 
           {/* Archivo */}
           <div className="relative">
-            <label className="block text-xs text-white/55 mb-2 font-semibold uppercase tracking-wide">
+            <label className="mb-2 block text-xs font-black uppercase tracking-wide text-muted">
               Archivo de sonido {editId ? "(deja vacío para conservar el actual)" : "*"}
             </label>
             {existingUrl && (
-              <div className="flex items-center gap-3 mb-2 px-3 py-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
-                <span className="text-cyan-300 text-xs flex-1 truncate">🎵 {existingUrl.split("/").pop()}</span>
+              <div className="mb-2 flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/10 px-3 py-2">
+                <span className="flex-1 truncate text-xs text-brand">🎵 {existingUrl.split("/").pop()}</span>
                 <button type="button" onClick={() => probar(existingUrl, form.volumen)}
-                  className="px-3 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/35 text-cyan-200 text-xs font-semibold border border-cyan-500/30 transition-all">▶ Probar</button>
+                  className="rounded-lg border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-semibold text-brand transition-all hover:bg-brand/15">▶ Probar</button>
               </div>
             )}
             <input ref={archivoRef} type="file" accept="audio/*"
               onChange={(e) => setArchivoFile(e.target.files[0] || null)}
-              className="w-full text-white/70 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-cyan-600 file:to-blue-600 file:text-white file:font-semibold hover:file:opacity-90 cursor-pointer" />
-            <p className="text-white/30 text-xs mt-1">MP3, WAV u OGG</p>
+              className="w-full cursor-pointer text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-cyan-600 file:to-blue-600 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90" />
+            <p className="mt-1 text-xs text-muted/70">MP3, WAV u OGG</p>
           </div>
 
           {/* Volumen + activo */}
           <div className="relative flex flex-wrap items-center gap-5">
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-xs text-white/55 mb-1.5 font-semibold uppercase tracking-wide">
-                Volumen: <span className="text-cyan-300">{Math.round((form.volumen ?? 1) * 100)}%</span>
+              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-muted">
+                Volumen: <span className="text-brand">{Math.round((form.volumen ?? 1) * 100)}%</span>
               </label>
               <input type="range" min="0" max="1" step="0.05" name="volumen" value={form.volumen}
                 onChange={handleChange} className="w-full accent-cyan-500" />
             </div>
-            <label className="flex items-center gap-2 cursor-pointer select-none px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/40 transition-all">
+            <label className="flex cursor-pointer select-none items-center gap-2 rounded-xl border border-line/15 bg-surface-2/60 px-3 py-2 transition-all hover:border-brand/40">
               <input type="checkbox" name="activo" checked={form.activo} onChange={handleChange} className="w-5 h-5 rounded accent-cyan-400" />
-              <span className="text-white font-semibold text-sm">Activo</span>
-              <span className="text-white/35 text-xs hidden sm:inline">(reemplaza al actual)</span>
+              <span className="text-sm font-semibold text-content">Activo</span>
+              <span className="hidden text-xs text-muted sm:inline">(reemplaza al actual)</span>
             </label>
           </div>
 
@@ -247,7 +249,7 @@ export default function AdminSonidos() {
             </button>
             {editId && (
               <button type="button" onClick={resetForm}
-                className="px-6 py-3 rounded-xl bg-white/5 border border-white/15 hover:bg-white/10 text-white font-semibold transition-all">Cancelar</button>
+                className="rounded-xl border border-line/15 bg-surface px-6 py-3 font-semibold text-content transition-all hover:border-brand/40">Cancelar</button>
             )}
           </div>
         </form>
@@ -260,43 +262,43 @@ export default function AdminSonidos() {
             const tieneActivo = grupo.some((s) => s.activo);
             return (
               <div key={ev.value}
-                className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/70 to-slate-950/70 backdrop-blur p-4">
+                className="rounded-[22px] border border-line/15 bg-surface/90 p-4 shadow-[0_16px_42px_rgba(15,23,42,0.12)] backdrop-blur-xl">
                 {/* Cabecera del evento */}
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`flex-shrink-0 h-10 w-10 rounded-xl ${a.glow} border ${a.ring} flex items-center justify-center text-lg`}>
                     {ev.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-white font-bold leading-tight">{ev.label}</h4>
-                    <p className="text-white/35 text-xs truncate">{ev.desc}</p>
+                    <h4 className="font-black leading-tight text-content">{ev.label}</h4>
+                    <p className="truncate text-xs text-muted">{ev.desc}</p>
                   </div>
                   {tieneActivo
-                    ? <span className="flex-shrink-0 text-[10px] px-2.5 py-1 rounded-full bg-green-500/15 text-green-300 border border-green-500/30 font-semibold">● Activo</span>
-                    : <span className="flex-shrink-0 text-[10px] px-2.5 py-1 rounded-full bg-white/5 text-white/35 border border-white/10 font-semibold">Sin sonido</span>}
+                    ? <span className="flex-shrink-0 rounded-full border border-ok/30 bg-ok/10 px-2.5 py-1 text-[10px] font-bold text-ok">● Activo</span>
+                    : <span className="flex-shrink-0 rounded-full border border-line/15 bg-surface-2 px-2.5 py-1 text-[10px] font-bold text-muted">Sin sonido</span>}
                 </div>
 
                 {grupo.length === 0 ? (
-                  <p className="text-white/30 text-sm pl-1">Aún no hay sonidos para este evento.</p>
+                  <p className="pl-1 text-sm text-muted">Aún no hay sonidos para este evento.</p>
                 ) : (
                   <div className="space-y-2">
                     {grupo.map((s) => (
                       <div key={s.id}
                         className={`flex flex-wrap items-center gap-2.5 p-2.5 pl-3 rounded-xl border transition-all ${
-                          s.activo ? `${a.glow} ${a.ring}` : "bg-white/[0.03] border-white/10 hover:border-white/20"
+                          s.activo ? `${a.glow} ${a.ring}` : "bg-surface-2/60 border-line/10 hover:border-line/25"
                         }`}>
                         {s.activo && <span className={`flex-shrink-0 w-2 h-2 rounded-full ${a.dot} ${a.text} shadow-[0_0_8px_currentColor]`} />}
-                        <span className="text-white font-semibold text-sm flex-1 min-w-[120px] truncate">{s.nombre}</span>
-                        <span className="text-white/35 text-xs">Vol {Math.round((s.volumen ?? 1) * 100)}%</span>
+                        <span className="min-w-[120px] flex-1 truncate text-sm font-bold text-content">{s.nombre}</span>
+                        <span className="text-xs font-semibold text-muted">Vol {Math.round((s.volumen ?? 1) * 100)}%</span>
                         <button onClick={() => probar(s.archivo_url, s.volumen)}
-                          className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold border border-white/10 transition-all">▶ Probar</button>
+                          className="rounded-lg border border-brand/25 bg-brand/10 px-2.5 py-1.5 text-xs font-bold text-brand transition-all hover:bg-brand/15">▶ Probar</button>
                         <button onClick={() => toggleActivo(s)}
                           className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                            s.activo ? "bg-yellow-500/15 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/25" : "bg-green-500/15 text-green-300 border-green-500/30 hover:bg-green-500/25"
+                            s.activo ? "bg-warn/10 text-warn border-warn/30 hover:bg-warn/15" : "bg-ok/10 text-ok border-ok/30 hover:bg-ok/15"
                           }`}>{s.activo ? "Desactivar" : "Activar"}</button>
                         <button onClick={() => handleEditar(s)} title="Editar"
-                          className="px-2.5 py-1.5 rounded-lg bg-cyan-600/15 hover:bg-cyan-600/35 text-cyan-300 text-xs font-semibold border border-cyan-600/30 transition-all">✏️</button>
+                          className="rounded-lg border border-brand/25 bg-brand/10 px-2.5 py-1.5 text-xs font-bold text-brand transition-all hover:bg-brand/15">✏️</button>
                         <button onClick={() => handleEliminar(s.id)} title="Eliminar"
-                          className="px-2.5 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/30 text-rose-400 text-xs font-semibold border border-rose-500/30 transition-all">🗑</button>
+                          className="rounded-lg border border-danger/30 bg-danger/10 px-2.5 py-1.5 text-xs font-bold text-danger transition-all hover:bg-danger/15">🗑</button>
                       </div>
                     ))}
                   </div>

@@ -37,6 +37,18 @@ const animationStyles = `
   .animation-delay-100   { animation-delay: 0.1s; }
   .animation-delay-200   { animation-delay: 0.2s; }
   .animation-delay-300   { animation-delay: 0.3s; }
+  @keyframes contact-grid-drift {
+    0%, 100% { background-position: 0 0, 0 0; }
+    50% { background-position: 28px 18px, -22px 26px; }
+  }
+  .contact-grid {
+    background-image:
+      linear-gradient(rgb(var(--th-brand) / 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--th-brand) / 0.05) 1px, transparent 1px);
+    background-size: 72px 72px, 72px 72px;
+    animation: contact-grid-drift 18s ease-in-out infinite;
+    mask-image: radial-gradient(circle at center, black 0%, transparent 72%);
+  }
 `;
 
 function AnimStyles() {
@@ -44,13 +56,20 @@ function AnimStyles() {
 }
 
 /* ==== Avatar mascota oso polar ==== */
-function ChatAvatar({ talking = false, className = "" }) {
+function ChatAvatar({ talking = false, look = "center", className = "" }) {
+  const gaze = {
+    center: { x: 0, rotate: 0 },
+    nombre: { x: -10, rotate: -2 },
+    email: { x: -6, rotate: -1 },
+    asunto: { x: 6, rotate: 1 },
+    mensaje: { x: 10, rotate: 2 },
+  }[look] || { x: 0, rotate: 0 };
 
   return (
     <motion.div
       className={`relative flex items-end justify-center ${className}`}
       initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
+      animate={{ scale: 1, opacity: 1, x: gaze.x, rotate: gaze.rotate }}
       transition={{ type: "spring", stiffness: 160, damping: 15 }}
       style={{ height: "220px", width: "180px" }}
     >
@@ -228,7 +247,7 @@ export default function Contacto() {
   };
 
   return (
-    <main className="min-h-screen bg-[#020b18] text-white overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden bg-transparent text-content">
       <AnimStyles />
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <Header />
@@ -236,16 +255,20 @@ export default function Contacto() {
       <section className="relative pt-28 pb-20 px-4 sm:px-6 lg:px-8">
         {/* Decorado de fondo */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/[0.03] rounded-full blur-3xl" />
+          <div className="contact-grid absolute inset-0 opacity-80" />
         </div>
 
         <div className="relative max-w-6xl mx-auto">
           {/* Encabezado */}
           <div className="text-center mb-16 animate-fade-in-up">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(90deg, rgb(var(--th-content)), rgb(var(--th-brand)), rgb(var(--th-brand-2)))",
+                }}
+              >
                 Cómo nos
               </span>
               <br />
@@ -253,9 +276,9 @@ export default function Contacto() {
                 contactamos
               </span>
             </h1>
-            <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-muted md:text-xl">
               ¿Tienes preguntas sobre{" "}
-              <span className="text-cyan-300 font-semibold">planes, integraciones o cumplimiento</span>?
+              <span className="font-black text-brand">planes, integraciones o cumplimiento</span>?
               {" "}Escríbenos y un especialista te contactará pronto.
             </p>
           </div>
@@ -264,8 +287,8 @@ export default function Contacto() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
 
             {/* IZQUIERDA: Formulario */}
-            <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-6 md:p-10 shadow-[0_0_40px_rgba(34,211,238,0.08)] backdrop-blur-sm animate-fade-in-left">
-              <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+            <div className="animate-fade-in-left rounded-2xl border border-line/15 bg-surface/90 p-6 shadow-[0_22px_65px_rgba(15,23,42,0.12)] backdrop-blur-xl md:p-10">
+              <h2 className="mb-8 flex items-center gap-3 text-2xl font-black text-content">
                 <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-lg shadow-lg">
                   ✉
                 </span>
@@ -275,7 +298,7 @@ export default function Contacto() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Nombre */}
                 <div>
-                  <label className="block text-sm font-medium text-white/90 mb-2 flex items-center gap-2">
+                  <label className="mb-2 flex items-center gap-2 text-sm font-bold text-content">
                     <span className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">1</span>
                     Nombre completo
                   </label>
@@ -286,7 +309,7 @@ export default function Contacto() {
                     onFocus={() => { setLook("nombre"); speak("Tu nombre"); }}
                     onBlur={() => setLook("center")}
                     required
-                    className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400 focus:bg-white/10 transition-all text-white placeholder:text-white/40"
+                    className="w-full rounded-xl border border-line/15 bg-surface-2/80 px-4 py-3 text-content outline-none transition-all placeholder:text-muted/60 focus:border-brand/60 focus:bg-surface"
                     placeholder="Tu nombre completo"
                   />
                 </div>
@@ -294,7 +317,7 @@ export default function Contacto() {
                 {/* Email + Asunto */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/90 mb-2 flex items-center gap-2">
+                    <label className="mb-2 flex items-center gap-2 text-sm font-bold text-content">
                       <span className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">2</span>
                       Email
                     </label>
@@ -306,12 +329,12 @@ export default function Contacto() {
                       onFocus={() => { setLook("email"); speak("Tu correo"); }}
                       onBlur={() => setLook("center")}
                       required
-                      className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400 focus:bg-white/10 transition-all text-white placeholder:text-white/40"
+                      className="w-full rounded-xl border border-line/15 bg-surface-2/80 px-4 py-3 text-content outline-none transition-all placeholder:text-muted/60 focus:border-brand/60 focus:bg-surface"
                       placeholder="tu@email.com"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/90 mb-2 flex items-center gap-2">
+                    <label className="mb-2 flex items-center gap-2 text-sm font-bold text-content">
                       <span className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">3</span>
                       Asunto
                     </label>
@@ -321,7 +344,7 @@ export default function Contacto() {
                       onChange={handleType}
                       onFocus={() => { setLook("asunto"); speak("Asunto"); }}
                       onBlur={() => setLook("center")}
-                      className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400 focus:bg-white/10 transition-all text-white placeholder:text-white/40"
+                      className="w-full rounded-xl border border-line/15 bg-surface-2/80 px-4 py-3 text-content outline-none transition-all placeholder:text-muted/60 focus:border-brand/60 focus:bg-surface"
                       placeholder="Consulta sobre eConfia"
                     />
                   </div>
@@ -329,7 +352,7 @@ export default function Contacto() {
 
                 {/* Mensaje */}
                 <div>
-                  <label className="block text-sm font-medium text-white/90 mb-2 flex items-center gap-2">
+                  <label className="mb-2 flex items-center gap-2 text-sm font-bold text-content">
                     <span className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">4</span>
                     Mensaje
                   </label>
@@ -341,7 +364,7 @@ export default function Contacto() {
                     onBlur={() => setLook("center")}
                     rows={5}
                     required
-                    className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 outline-none focus:border-cyan-400 focus:bg-white/10 transition-all text-white placeholder:text-white/40 resize-none"
+                    className="w-full resize-none rounded-xl border border-line/15 bg-surface-2/80 px-4 py-3 text-content outline-none transition-all placeholder:text-muted/60 focus:border-brand/60 focus:bg-surface"
                     placeholder="Cuéntanos más sobre tu consulta..."
                   />
                 </div>
@@ -379,10 +402,11 @@ export default function Contacto() {
             <div className="space-y-6 animate-fade-in-right animation-delay-200">
 
               {/* Card del oso */}
-              <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-white/5 to-white/[0.02] p-6 md:p-8 shadow-[0_0_30px_rgba(34,211,238,0.1)] backdrop-blur-sm">
+              <div className="rounded-2xl border border-brand/20 bg-surface/90 p-6 shadow-[0_22px_65px_rgba(15,23,42,0.12)] backdrop-blur-xl md:p-8">
                 <div className="flex flex-col items-center text-center">
                   <ChatAvatar
                     talking={talking}
+                    look={look}
                     className="mb-4"
                   />
 
@@ -391,23 +415,23 @@ export default function Contacto() {
                     className={`text-sm px-5 py-2 rounded-full border transition-all ${
                       soundOn
                         ? "border-cyan-400 text-cyan-300 bg-cyan-500/20 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
-                        : "border-white/20 text-white/70 hover:border-cyan-400 hover:bg-cyan-500/10"
+                        : "border-line/20 text-muted hover:border-brand hover:bg-brand/10 hover:text-brand"
                     }`}
                     title="Activar/Desactivar sonido"
                   >
                     {soundOn ? "🔊 Sonido activado" : "🔇 Activar sonido"}
                   </button>
 
-                  <p className="text-white/80 text-sm mt-5 leading-relaxed">
-                    Soy <span className="text-cyan-300 font-bold">eBot</span>, tu asistente virtual.{" "}
-                    Sigo tu escritura en tiempo real y puedo guiarte con voz si activas el sonido. 🤖
+                  <p className="mt-5 text-sm leading-relaxed text-muted">
+                    Soy <span className="font-black text-brand">eBot</span>, tu asistente virtual.{" "}
+                    Sigo tu escritura en tiempo real y puedo guiarte con voz si activas el sonido.
                   </p>
                 </div>
               </div>
 
               {/* Card de información */}
-              <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-pink-500/5 p-6 shadow-[0_0_25px_rgba(168,85,247,0.1)] backdrop-blur-sm">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <div className="rounded-2xl border border-violet-400/20 bg-surface/90 p-6 shadow-[0_18px_48px_rgba(15,23,42,0.10)] backdrop-blur-xl">
+                <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-content">
                   <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">📞</span>
                   Información de contacto
                 </h3>
@@ -418,8 +442,8 @@ export default function Contacto() {
                       <FaEnvelope />
                     </div>
                     <div>
-                      <p className="text-white/60 text-xs">Email</p>
-                      <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">
+                      <p className="text-xs font-semibold text-muted">Email</p>
+                      <p className="font-semibold text-content transition-colors group-hover:text-brand">
                         coordinaciondesarrollo@solutionsgroupcol.com
                       </p>
                     </div>
@@ -430,8 +454,8 @@ export default function Contacto() {
                       <FaPhone />
                     </div>
                     <div>
-                      <p className="text-white/60 text-xs">Teléfono</p>
-                      <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">
+                      <p className="text-xs font-semibold text-muted">Teléfono</p>
+                      <p className="font-semibold text-content transition-colors group-hover:text-brand">
                         +57 305 422 6582
                       </p>
                     </div>
@@ -442,25 +466,25 @@ export default function Contacto() {
                       <FaMapMarkerAlt />
                     </div>
                     <div>
-                      <p className="text-white/60 text-xs">Ubicación</p>
-                      <p className="text-white font-medium group-hover:text-cyan-300 transition-colors">
+                      <p className="text-xs font-semibold text-muted">Ubicación</p>
+                      <p className="font-semibold text-content transition-colors group-hover:text-brand">
                         Bogotá, Colombia
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 pt-6 border-t border-white/10">
-                  <p className="text-white/60 text-xs mb-3">Redes Sociales</p>
+                <div className="mt-6 border-t border-line/15 pt-6">
+                  <p className="mb-3 text-xs font-semibold text-muted">Redes Sociales</p>
                   <div className="flex gap-3">
-                    <a href="#" target="_blank" rel="noopener noreferrer"
+                    <button type="button" aria-label="LinkedIn"
                       className="w-10 h-10 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-all hover:scale-110">
                       <FaLinkedin size={18} />
-                    </a>
-                    <a href="#" target="_blank" rel="noopener noreferrer"
+                    </button>
+                    <button type="button" aria-label="Twitter"
                       className="w-10 h-10 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 flex items-center justify-center text-cyan-400 hover:text-cyan-300 transition-all hover:scale-110">
                       <FaTwitter size={18} />
-                    </a>
+                    </button>
                     <a
                       href="https://www.facebook.com/profile.php?id=61589746611008&locale=es_LA"
                       target="_blank" rel="noopener noreferrer"

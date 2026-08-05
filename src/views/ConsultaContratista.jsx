@@ -353,12 +353,12 @@ export default function ConsultaContratista() {
                     Consulta Contratista
                   </span>
                 </div>
-                <h1 className="text-3xl md:text-4xl font-black bg-clip-text text-transparent leading-tight tracking-tight" style={{backgroundImage:"linear-gradient(to right, #ffffff, #bae6fd, #38bdf8, #0ea5e9)"}}>
+                <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
                   Econfia Contratista
                 </h1>
               </div>
 
-              <p className="text-sm text-white/70 leading-relaxed">
+              <p className="text-sm text-muted leading-relaxed">
                 Verifica experiencia profesional y antecedentes de forma segura y
                 veloz. Una experiencia clara, minimalista y centrada en la
                 confiabilidad.
@@ -367,19 +367,19 @@ export default function ConsultaContratista() {
               <div className="space-y-2 pt-2">
                 <div className="flex items-start gap-3">
                   <span className="mt-1 h-2 w-2 rounded-full bg-cyan-500 flex-shrink-0" />
-                  <span className="text-xs text-white/80">
+                  <span className="text-xs text-content/85">
                     Interfaz moderna y accesible, optimizada para velocidad.
                   </span>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
-                  <span className="text-xs text-white/80">
+                  <span className="text-xs text-content/85">
                     Resultados consistentes con tu flujo actual.
                   </span>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="mt-1 h-2 w-2 rounded-full bg-purple-500 flex-shrink-0" />
-                  <span className="text-xs text-white/80">
+                  <span className="text-xs text-content/85">
                     Privacidad respetada en cada paso.
                   </span>
                 </div>
@@ -388,7 +388,7 @@ export default function ConsultaContratista() {
 
             {/* Tarjeta del formulario (derecha) */}
             <div className="relative w-full max-w-sm md:max-w-md lg:max-w-lg mx-auto">
-              <div className="relative w-full bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[20px] border border-white/10 shadow-2xl shadow-cyan-500/10 p-5 md:p-6 group">
+              <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-5 md:p-6 group">
                 {/* Glow effect */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
@@ -409,31 +409,31 @@ export default function ConsultaContratista() {
                     {/* Fila 1: Tipo doc + Número doc */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-white/70">Tipo doc *</label>
+                        <label className="text-xs font-semibold text-content/80">Tipo doc *</label>
                         <select
                           required
                           value={tipoDoc}
                           onChange={(e) => setTipoDoc(e.target.value)}
-                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                          className="w-full px-2 py-1.5 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm appearance-none cursor-pointer"
                         >
-                          <option className="bg-slate-900 text-white" value="">Seleccione</option>
-                          <option className="bg-slate-900 text-white" value="CC">CC</option>
-                          <option className="bg-slate-900 text-white" value="TI">TI</option>
-                          <option className="bg-slate-900 text-white" value="CE">CE</option>
-                          <option className="bg-slate-900 text-white" value="PPT">PPT</option>
-                          <option className="bg-slate-900 text-white" value="PEP">PEP</option>
-                          <option className="bg-slate-900 text-white" value="NIT">NIT</option>
+                          <option className="bg-surface text-content" value="">Seleccione</option>
+                          <option className="bg-surface text-content" value="CC">CC</option>
+                          <option className="bg-surface text-content" value="TI">TI</option>
+                          <option className="bg-surface text-content" value="CE">CE</option>
+                          <option className="bg-surface text-content" value="PPT">PPT</option>
+                          <option className="bg-surface text-content" value="PEP">PEP</option>
+                          <option className="bg-surface text-content" value="NIT">NIT</option>
                         </select>
                       </div>
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-white/70">N° documento *</label>
+                        <label className="text-xs font-semibold text-content/80">N° documento *</label>
                         <input
                           required
                           type="text"
                           value={cedula}
                           onChange={(e) => setCedula(e.target.value)}
                           placeholder="Número de documento"
-                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm"
+                          className="w-full px-2 py-1.5 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
                         />
                       </div>
                     </div>
@@ -441,35 +441,35 @@ export default function ConsultaContratista() {
                     {/* Fila 2: Fecha expedición + Fondo de pensión */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-white/70">Fecha expedición</label>
+                        <label className="text-xs font-semibold text-content/80">Fecha expedición</label>
                         <input
                           type="date"
                           value={fechaExpedicion}
                           onChange={(e) => setFechaExpedicion(e.target.value)}
-                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm"
+                          className="w-full px-2 py-1.5 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
                         />
                       </div>
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-white/70">Fondo de pensión</label>
+                        <label className="text-xs font-semibold text-content/80">Fondo de pensión</label>
                         <select
                           value={fondoPension}
                           onChange={(e) => setFondoPension(e.target.value)}
-                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                          className="w-full px-2 py-1.5 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm appearance-none cursor-pointer"
                         >
-                          <option className="bg-slate-900 text-white" value="">Todos los fondos</option>
-                          <option className="bg-slate-900 text-white" value="porvenir">Porvenir</option>
-                          <option className="bg-slate-900 text-white" value="colpensiones">Colpensiones</option>
-                          <option className="bg-slate-900 text-white" value="proteccion">Protección</option>
-                          <option className="bg-slate-900 text-white" value="colfondos">Colfondos</option>
-                          <option className="bg-slate-900 text-white" value="skandia">Skandia</option>
+                          <option className="bg-surface text-content" value="">Todos los fondos</option>
+                          <option className="bg-surface text-content" value="porvenir">Porvenir</option>
+                          <option className="bg-surface text-content" value="colpensiones">Colpensiones</option>
+                          <option className="bg-surface text-content" value="proteccion">Protección</option>
+                          <option className="bg-surface text-content" value="colfondos">Colfondos</option>
+                          <option className="bg-surface text-content" value="skandia">Skandia</option>
                         </select>
                       </div>
                     </div>
 
                     {/* Profesión — ancho completo por el autocomplete */}
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-white/70">
-                        Profesión * <span className="font-normal text-white/45">(si tiene más de una, agréguela)</span>
+                      <label className="text-xs font-semibold text-content/80">
+                        Profesión * <span className="font-normal text-muted">(si tiene más de una, agréguela)</span>
                       </label>
 
                       {profesionesSeleccionadas.length > 0 && (
@@ -477,13 +477,13 @@ export default function ConsultaContratista() {
                           {profesionesSeleccionadas.map((p) => (
                             <span
                               key={p.nombre}
-                              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-white/80"
+                              className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-2 py-1 text-[11px] text-brand"
                               title={p.entidad_reguladora || p.nombre}
                             >
                               <span className="max-w-[200px] truncate">{p.nombre}</span>
                               <button
                                 type="button"
-                                className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70 hover:bg-white/10"
+                                className="rounded-full border border-line/15 bg-surface-2/70 px-2 py-0.5 text-[10px] text-muted hover:bg-danger/10 hover:text-danger"
                                 onClick={() => setProfesionesSeleccionadas((prev) => prev.filter((x) => x.nombre !== p.nombre))}
                               >
                                 Quitar
@@ -500,7 +500,7 @@ export default function ConsultaContratista() {
                         onChange={(e) => { setProfesion(e.target.value); setProfesionSeleccionada(null); setShowSugerencias(true); }}
                         placeholder="Escribe tu profesión"
                         autoComplete="off"
-                        className="w-full px-3 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        className="w-full px-3 py-1.5 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                         onFocus={() => setShowSugerencias(profesionSugerencias.length > 0)}
                         onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
                       />
@@ -508,16 +508,16 @@ export default function ConsultaContratista() {
                         <div style={{ position: "relative" }}>
                           <ul
                             style={{ position: "absolute", top: "100%", left: 0, width: "100%", marginTop: "4px", zIndex: 30 }}
-                            className="bg-slate-900 border border-cyan-500/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                            className="bg-surface border border-brand/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
                           >
-                            {profesionLoading && <li className="px-3 py-2 text-xs text-white/60">Cargando…</li>}
+                            {profesionLoading && <li className="px-3 py-2 text-xs text-muted">Cargando...</li>}
                             {!profesionLoading && profesionSugerenciasOrdenadas.length === 0 && (
-                              <li className="px-3 py-2 text-xs text-white/60">Sin coincidencias. Escribe la profesión completa.</li>
+                              <li className="px-3 py-2 text-xs text-muted">Sin coincidencias. Escribe la profesión completa.</li>
                             )}
                             {profesionSugerenciasOrdenadas.map((sug) => (
                               <li
                                 key={sug.nombre}
-                                className="px-3 py-2 text-xs text-white hover:bg-cyan-500/20 cursor-pointer"
+                                className="px-3 py-2 text-xs text-content hover:bg-brand/10 cursor-pointer"
                                 onMouseDown={() => {
                                   setProfesion("");
                                   setProfesionSeleccionada(sug);
@@ -531,10 +531,10 @@ export default function ConsultaContratista() {
                               >
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="min-w-0">
-                                    <div className="truncate font-semibold text-white/95">{sug.nombre}</div>
-                                    {sug.entidad_reguladora && <div className="truncate text-[11px] text-white/60">{sug.entidad_reguladora}</div>}
+                                    <div className="truncate font-semibold text-content">{sug.nombre}</div>
+                                    {sug.entidad_reguladora && <div className="truncate text-[11px] text-muted">{sug.entidad_reguladora}</div>}
                                   </div>
-                                  <span className="mt-0.5 inline-flex shrink-0 items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-white/70">Seleccionar</span>
+                                  <span className="mt-0.5 inline-flex shrink-0 items-center rounded-full border border-brand/20 bg-brand/10 px-2 py-0.5 text-[10px] text-brand">Seleccionar</span>
                                 </div>
                               </li>
                             ))}
@@ -545,7 +545,7 @@ export default function ConsultaContratista() {
 
                     {/* Correo — ancho completo */}
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-white/70">Correo electrónico *</label>
+                      <label className="text-xs font-semibold text-content/80">Correo electrónico *</label>
                       <input
                         required
                         type="email"
@@ -553,7 +553,7 @@ export default function ConsultaContratista() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="ejemplo@correo.com"
                         pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-                        className={`w-full px-3 py-1.5 rounded-lg bg-white/5 text-white text-xs placeholder-white/40 border transition-all backdrop-blur-sm focus:outline-none focus:shadow-lg focus:shadow-cyan-500/10 ${email && !isValidEmail(email) ? "border-red-400/50 focus:border-red-400 focus:ring-1 focus:ring-red-400/30" : "border-white/15 focus:border-cyan-400/50 focus:bg-white/10"}`}
+                        className={`w-full px-3 py-1.5 rounded-lg bg-surface-2/70 text-content text-xs placeholder:text-muted/70 border transition-all backdrop-blur-sm focus:outline-none focus:shadow-lg focus:shadow-cyan-500/10 ${email && !isValidEmail(email) ? "border-red-400/50 focus:border-red-400 focus:ring-1 focus:ring-red-400/30" : "border-line/15 focus:border-brand/50 focus:bg-surface"}`}
                       />
                       {email && !isValidEmail(email) && <span className="text-xs text-red-400">Formato de correo no válido</span>}
                     </div>
@@ -561,25 +561,25 @@ export default function ConsultaContratista() {
                     {/* Fila 3: Nombre empresa + NIT */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-white/70">Nombre Entidad *</label>
+                        <label className="text-xs font-semibold text-content/80">Nombre Entidad *</label>
                         <input
                           required
                           type="text"
                           value={nombreEmpresa}
                           onChange={(e) => setNombreEmpresa(e.target.value)}
                           placeholder="Razón social"
-                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm"
+                          className="w-full px-2 py-1.5 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
                         />
                       </div>
                       <div className="flex flex-col gap-1">
-                        <label className="text-xs font-semibold text-white/70">NIT Entidad *</label>
+                        <label className="text-xs font-semibold text-content/80">NIT Entidad *</label>
                         <input
                           required
                           type="text"
                           value={nitEmpresa}
                           onChange={(e) => setNitEmpresa(e.target.value)}
                           placeholder="830512262-1"
-                          className="w-full px-2 py-1.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 transition-all backdrop-blur-sm"
+                          className="w-full px-2 py-1.5 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
                         />
                       </div>
                     </div>
@@ -593,7 +593,7 @@ export default function ConsultaContratista() {
                           onChange={(e) => setAcepta(e.target.checked)}
                           className="accent-cyan-500 w-4 h-4 cursor-pointer"
                         />
-                        <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                        <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                           Acepto los{" "}
                           <Terminos
                             inline
@@ -609,7 +609,7 @@ export default function ConsultaContratista() {
                           onChange={(e) => setConsentimiento(e.target.checked)}
                           className="accent-cyan-500 w-4 h-4 cursor-pointer"
                         />
-                        <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                        <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                           Confirmo consentimiento del titular
                         </span>
                       </label>
@@ -622,7 +622,7 @@ export default function ConsultaContratista() {
                       className={`w-full mt-3 px-6 py-2 rounded-lg font-semibold text-xs transition-all duration-300
                           ${
                             !canSubmit || loading
-                              ? "bg-white/10 text-white/40 cursor-not-allowed"
+                              ? "bg-surface-2/70 text-muted cursor-not-allowed"
                               : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
                           }
                         `}
@@ -635,7 +635,7 @@ export default function ConsultaContratista() {
                       <button
                         type="button"
                         onClick={() => setShowMasiva(true)}
-                        className="mt-1.5 w-full px-6 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                        className="mt-1.5 w-full px-6 py-2 rounded-lg font-semibold text-xs border border-brand/40 text-brand hover:bg-brand/15 hover:border-brand/60 transition-all duration-300"
                       >
                         Consulta Masiva (hasta 50 documentos)
                       </button>
@@ -645,7 +645,7 @@ export default function ConsultaContratista() {
               </div>
 
               {/* Nota de privacidad pequeña */}
-              <p className="text-[10px] text-white/60 text-center mt-2">
+              <p className="text-[10px] text-muted text-center mt-2">
                 Al continuar, certificas contar con autorización válida y cumplir la
                 normatividad vigente.
               </p>

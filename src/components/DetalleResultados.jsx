@@ -276,7 +276,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
     if (normalized.includes("facebook")) return "border-blue-400/30 bg-blue-500/10 text-blue-200";
     if (normalized.includes("tiktok")) return "border-teal-400/30 bg-teal-500/10 text-teal-200";
     if (normalized.includes("youtube")) return "border-red-400/30 bg-red-500/10 text-red-200";
-    return "border-slate-400/30 bg-slate-500/10 text-slate-200";
+    return "border-slate-400/30 bg-muted/10 text-content";
   };
 
   const toTitleCase = (value) => {
@@ -343,7 +343,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
         scoreTone: "text-emerald-300",
         statusTone: "text-emerald-300 border-emerald-400/30 bg-emerald-500/10",
         bannerTone:
-          "border-emerald-400/30 bg-gradient-to-r from-emerald-500/12 to-cyan-500/12",
+          "border-emerald-400/30 bg-gradient-to-r from-emerald-500/12 to-brand/12",
         bannerTitle: "Análisis completado",
         bannerText: "Sin hallazgo relevante",
         badgeGlow: "shadow-[0_0_12px_rgba(16,185,129,0.55)]",
@@ -356,10 +356,10 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
       statusLabel: "Sin Clasificar",
       ringColor: "#38bdf8",
       dotClass: "bg-cyan-400",
-      scoreTone: "text-cyan-300",
-      statusTone: "text-cyan-300 border-cyan-400/30 bg-cyan-500/10",
+      scoreTone: "text-brand",
+      statusTone: "text-brand border-brand/30 bg-brand/10",
       bannerTone:
-        "border-cyan-400/30 bg-gradient-to-r from-cyan-500/12 to-blue-500/12",
+        "border-brand/30 bg-gradient-to-r from-brand/12 to-brand-2/12",
       bannerTitle: "Análisis completado",
       bannerText: "Información parcial disponible",
       badgeGlow: "shadow-[0_0_12px_rgba(56,189,248,0.55)]",
@@ -380,37 +380,37 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
 
     return (
       <section className="space-y-5">
-        <div className="rounded-2xl border border-cyan-300/20 bg-gradient-to-br from-cyan-500/10 via-white/[0.03] to-emerald-500/10 p-5 sm:p-6 overflow-hidden relative">
-          <div className="absolute right-0 top-0 h-full w-44 bg-cyan-300/5 skew-x-12 translate-x-10 pointer-events-none" />
+        <div className="rounded-2xl border border-brand/20 bg-gradient-to-br from-brand/10 via-content/[0.03] to-emerald-500/10 p-5 sm:p-6 overflow-hidden relative">
+          <div className="absolute right-0 top-0 h-full w-44 bg-brand/5 skew-x-12 translate-x-10 pointer-events-none" />
           <div className="relative grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-5">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-200">
+              <div className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
                 <Search size={13} />
                 Búsqueda OSINT
               </div>
-              <h4 className="mt-4 text-2xl sm:text-3xl font-black text-white leading-tight">
+              <h4 className="mt-4 text-2xl sm:text-3xl font-black text-content leading-tight">
                 {parsed.name}
               </h4>
-              <p className="mt-3 text-sm text-slate-300 max-w-2xl">
+              <p className="mt-3 text-sm text-muted max-w-2xl">
                 Resultados por similitud de nombre. Requiere revisión manual antes de asociar cualquier perfil a una identidad.
               </p>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-xl border border-white/10 bg-black/25 p-3">
-                <p className="text-[9px] uppercase tracking-widest text-slate-400">Similitud</p>
+              <div className="rounded-xl border border-line/10 bg-surface-2/70 p-3">
+                <p className="text-[9px] uppercase tracking-widest text-muted">Similitud</p>
                 <p className="text-2xl font-black text-emerald-300">{parsed.score || "N/A"}</p>
-                <p className="text-[10px] text-slate-400">sobre 100</p>
+                <p className="text-[10px] text-muted">sobre 100</p>
               </div>
-              <div className="rounded-xl border border-white/10 bg-black/25 p-3">
-                <p className="text-[9px] uppercase tracking-widest text-slate-400">Perfiles</p>
-                <p className="text-2xl font-black text-white">{parsed.total}</p>
-                <p className="text-[10px] text-slate-400">detectados</p>
+              <div className="rounded-xl border border-line/10 bg-surface-2/70 p-3">
+                <p className="text-[9px] uppercase tracking-widest text-muted">Perfiles</p>
+                <p className="text-2xl font-black text-content">{parsed.total}</p>
+                <p className="text-[10px] text-muted">detectados</p>
               </div>
-              <div className="rounded-xl border border-white/10 bg-black/25 p-3">
-                <p className="text-[9px] uppercase tracking-widest text-slate-400">Estado</p>
+              <div className="rounded-xl border border-line/10 bg-surface-2/70 p-3">
+                <p className="text-[9px] uppercase tracking-widest text-muted">Estado</p>
                 <p className="text-sm font-black text-amber-200 leading-tight">Revisión</p>
-                <p className="text-[10px] text-slate-400">manual</p>
+                <p className="text-[10px] text-muted">manual</p>
               </div>
             </div>
           </div>
@@ -425,9 +425,9 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             <p className="text-[10px] uppercase tracking-widest text-amber-200/70">Coincidencia media</p>
             <p className="text-2xl font-black text-amber-200">{mediumMatches}</p>
           </div>
-          <div className="rounded-xl border border-slate-400/20 bg-white/[0.03] p-4">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400">Redes rastreadas</p>
-            <p className="text-2xl font-black text-white">{parsed.networks.length || "N/A"}</p>
+          <div className="rounded-xl border border-slate-400/20 bg-content/[0.03] p-4">
+            <p className="text-[10px] uppercase tracking-widest text-muted">Redes rastreadas</p>
+            <p className="text-2xl font-black text-content">{parsed.networks.length || "N/A"}</p>
           </div>
         </div>
 
@@ -458,10 +458,10 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
 
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted">
               Perfiles encontrados
             </h4>
-            <span className="text-[9px] text-white/30 font-mono">
+            <span className="text-[9px] text-content/30 font-mono">
               CODE: RES_{item.id || "N/A"}
             </span>
           </div>
@@ -474,17 +474,17 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                     ? "text-emerald-200 bg-emerald-500/10 border-emerald-400/20"
                     : result.score >= 40
                     ? "text-amber-200 bg-amber-500/10 border-amber-400/20"
-                    : "text-slate-200 bg-white/[0.03] border-white/10";
+                    : "text-content bg-content/[0.03] border-line/10";
 
                 return (
                   <article
                     key={`${result.url || result.title}-${startIdx + index}`}
-                    className="rounded-2xl border border-white/10 bg-black/25 p-4 hover:border-cyan-300/30 transition-colors"
+                    className="rounded-2xl border border-line/10 bg-surface-2/70 p-4 hover:border-brand/30 transition-colors"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-slate-200">
+                          <span className="rounded-full bg-content/10 px-2.5 py-1 text-[10px] font-bold text-content">
                             #{startIdx + index + 1}
                           </span>
                           <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold ${getNetworkStyle(result.network)}`}>
@@ -494,11 +494,11 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                             Score {result.score}/100
                           </span>
                         </div>
-                        <h5 className="text-base sm:text-lg font-bold text-white leading-snug">
+                        <h5 className="text-base sm:text-lg font-bold text-content leading-snug">
                           {result.title || "Resultado sin título"}
                         </h5>
                         {result.detail && (
-                          <p className="mt-2 text-sm text-slate-300 leading-relaxed">
+                          <p className="mt-2 text-sm text-muted leading-relaxed">
                             {result.detail}
                           </p>
                         )}
@@ -509,13 +509,13 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                           href={result.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-3 py-2 text-xs font-bold text-cyan-100 hover:bg-cyan-300/15 transition-colors"
+                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-brand/25 bg-brand/10 px-3 py-2 text-xs font-bold text-brand hover:bg-brand/15 transition-colors"
                         >
                           Abrir
                           <ExternalLink size={14} />
                         </a>
                       ) : (
-                        <Globe2 size={18} className="text-slate-500" />
+                        <Globe2 size={18} className="text-muted" />
                       )}
                     </div>
                   </article>
@@ -523,17 +523,17 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
               })}
             </div>
           ) : (
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-slate-300">
+            <div className="rounded-2xl border border-line/10 bg-surface-2/70 p-5 text-sm text-muted">
               No hay perfiles estructurados para mostrar. El detalle original queda disponible en el registro técnico.
             </div>
           )}
 
           {parsed.results.length > pageSize && (
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="text-xs text-slate-300">
-                Mostrando <span className="font-bold text-white">{startIdx + 1}</span> a{" "}
-                <span className="font-bold text-white">{endIdx}</span> de{" "}
-                <span className="font-bold text-white">{parsed.results.length}</span>
+            <div className="mt-4 rounded-2xl border border-line/10 bg-surface-2/70 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="text-xs text-muted">
+                Mostrando <span className="font-bold text-content">{startIdx + 1}</span> a{" "}
+                <span className="font-bold text-content">{endIdx}</span> de{" "}
+                <span className="font-bold text-content">{parsed.results.length}</span>
               </div>
 
               <div className="flex items-center justify-between sm:justify-end gap-2">
@@ -542,14 +542,14 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                   disabled={safePage <= 1}
                   className={`px-3 py-2 rounded-lg border text-xs font-bold transition-colors ${
                     safePage <= 1
-                      ? "border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
-                      : "border-cyan-300/25 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/15"
+                      ? "border-line/10 bg-content/5 text-content/30 cursor-not-allowed"
+                      : "border-brand/25 bg-brand/10 text-brand hover:bg-brand/15"
                   }`}
                 >
                   Anterior
                 </button>
 
-                <div className="px-3 py-2 rounded-lg border border-white/10 bg-white/[0.03] text-xs font-bold text-white">
+                <div className="px-3 py-2 rounded-lg border border-line/10 bg-content/[0.03] text-xs font-bold text-content">
                   Página {safePage}/{totalPages}
                 </div>
 
@@ -558,8 +558,8 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                   disabled={safePage >= totalPages}
                   className={`px-3 py-2 rounded-lg border text-xs font-bold transition-colors ${
                     safePage >= totalPages
-                      ? "border-white/10 bg-white/5 text-white/30 cursor-not-allowed"
-                      : "border-cyan-300/25 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/15"
+                      ? "border-line/10 bg-content/5 text-content/30 cursor-not-allowed"
+                      : "border-brand/25 bg-brand/10 text-brand hover:bg-brand/15"
                   }`}
                 >
                   Siguiente
@@ -742,7 +742,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-4">
         <div className="w-16 h-16 rounded-full border-4 border-slate-800 border-t-cyan-400 animate-spin shadow-[0_0_20px_rgba(6,182,212,0.5)]" />
-        <p className="text-slate-300 text-sm font-semibold">Cargando detalles...</p>
+        <p className="text-muted text-sm font-semibold">Cargando detalles...</p>
       </div>
     );
   }
@@ -826,7 +826,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
     if (showRevalidandoUI) {
       return (
         <span
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-slate-600/20 to-slate-700/20 border border-slate-500/30 text-slate-300 font-semibold text-xs"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-surface-2/20 to-surface-2/20 border border-line/30 text-muted font-semibold text-xs"
           title="Revalidando..."
         >
           <RefreshCw size={14} className="animate-spin" />
@@ -872,7 +872,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
     }
 
     return (
-      <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 text-xs font-medium">
+      <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-surface-2/50 border border-slate-700/50 text-muted text-xs font-medium">
         {item.estado || "—"}
       </span>
     );
@@ -889,9 +889,9 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             href={buildMediaUrl(item.archivo)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white 
-                       bg-gradient-to-r from-blue-500 to-blue-600 
-                       hover:from-blue-400 hover:to-blue-500
+            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white
+                       bg-gradient-to-r from-blue-500 to-brand-2 
+                       hover:from-blue-400 hover:to-brand-2
                        shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]
                        transition-all duration-300
                        hover:scale-110 active:scale-95"
@@ -909,9 +909,9 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                   .toLowerCase()}_${consultaId}_${item.id}`
               )
             }
-            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white 
-                       bg-gradient-to-r from-cyan-500 to-blue-500 
-                       hover:from-cyan-400 hover:to-blue-400
+            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white
+                       bg-gradient-to-r from-brand to-brand-2 
+                       hover:from-brand hover:to-brand-2
                        shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]
                        transition-all duration-300
                        hover:scale-110 active:scale-95"
@@ -929,7 +929,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
         return (
           <button
             onClick={(e) => openResultadoModal(item, e)}
-            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-white
+            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-content
                        bg-gradient-to-r from-red-500/80 to-rose-500/80
                        hover:from-red-400 hover:to-rose-400
                        shadow-[0_0_15px_rgba(239,68,68,0.25)] hover:shadow-[0_0_20px_rgba(239,68,68,0.45)]
@@ -946,10 +946,10 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
       return (
         <button
           onClick={(e) => openResultadoModal(item, e)}
-          className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-slate-300
-                     bg-gradient-to-r from-slate-600/50 to-slate-700/50
-                     hover:from-slate-500/60 hover:to-slate-600/60
-                     border border-slate-500/30
+          className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-muted
+                     bg-gradient-to-r from-surface-2/50 to-surface-2/50
+                     hover:from-surface-2/60 hover:to-surface-2/60
+                     border border-line/30
                      transition-all duration-300
                      hover:scale-105 active:scale-95 text-xs font-semibold"
           title="Ver detalle"
@@ -960,14 +960,14 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
       );
     }
 
-    return <span className="text-slate-500 text-xs italic">Sin archivo</span>;
+    return <span className="text-muted text-xs italic">Sin archivo</span>;
   };
 
   return (
     <div className="w-full max-w-[1280px] mx-auto px-3 sm:px-4 md:px-12 pt-12 sm:pt-12 md:pt-10 lg:pt-10 pb-3 md:pb-4 h-full min-h-0 flex flex-col">
 
       {/* Pestañas Análisis / Resultados */}
-      <div className="mb-2 md:mb-3 flex items-center gap-1.5 rounded-xl border border-cyan-500/15 bg-slate-900/40 p-1 backdrop-blur-md self-start">
+      <div className="mb-2 md:mb-3 flex items-center gap-1.5 rounded-xl border border-brand/15 bg-surface/40 p-1 backdrop-blur-md self-start">
         {[
           { key: "analisis", label: "Análisis" },
           { key: "resultados", label: "Resultados" },
@@ -977,8 +977,8 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             onClick={() => setTab(t.key)}
             className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ${
               tab === t.key
-                ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
-                : "text-slate-300 hover:text-cyan-200"
+                ? "bg-gradient-to-r from-brand to-brand-2 text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                : "text-muted hover:text-brand"
             }`}
           >
             {t.label}
@@ -1005,7 +1005,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
           placeholder="🔍 Buscar..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-sm text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
+          className="w-full px-2 md:px-3 py-1.5 md:py-2 rounded-lg bg-surface-2 backdrop-blur-md border border-line/20 text-sm text-content placeholder-muted focus:outline-none focus:border-brand/40 focus:bg-surface transition-all"
         />
         {/* Fila 2: filtros secundarios */}
         <div className="flex flex-wrap gap-1.5">
@@ -1014,38 +1014,38 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             placeholder="Fuente"
             value={filters.fuente}
             onChange={(e) => setFilters({ ...filters, fuente: e.target.value })}
-            className="flex-1 min-w-[80px] px-2 py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
+            className="flex-1 min-w-[80px] px-2 py-1.5 rounded-lg bg-surface-2 backdrop-blur-md border border-line/20 text-xs text-content placeholder-muted focus:outline-none focus:border-brand/40 focus:bg-surface transition-all"
           />
           <input
             type="text"
             placeholder="Tipo"
             value={filters.tipo_fuente}
             onChange={(e) => setFilters({ ...filters, tipo_fuente: e.target.value })}
-            className="flex-1 min-w-[60px] px-2 py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
+            className="flex-1 min-w-[60px] px-2 py-1.5 rounded-lg bg-surface-2 backdrop-blur-md border border-line/20 text-xs text-content placeholder-muted focus:outline-none focus:border-brand/40 focus:bg-surface transition-all"
           />
           <select
             value={filters.estado}
             onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
-            className="flex-1 min-w-[90px] px-2 py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all appearance-none cursor-pointer"
+            className="flex-1 min-w-[90px] px-2 py-1.5 rounded-lg bg-surface-2 backdrop-blur-md border border-line/20 text-xs text-content focus:outline-none focus:border-brand/40 focus:bg-surface transition-all appearance-none cursor-pointer"
           >
-            <option className="bg-slate-900" value="">Todos</option>
-            <option className="bg-slate-900" value="validado">Validado</option>
-            <option className="bg-slate-900" value="offline">Offline</option>
-            <option className="bg-slate-900" value="error">Error</option>
-            <option className="bg-slate-900" value="revalidando">Revalidando</option>
+            <option className="bg-surface" value="">Todos</option>
+            <option className="bg-surface" value="validado">Validado</option>
+            <option className="bg-surface" value="offline">Offline</option>
+            <option className="bg-surface" value="error">Error</option>
+            <option className="bg-surface" value="revalidando">Revalidando</option>
           </select>
           <input
             type="text"
             placeholder="Score"
             value={filters.score}
             onChange={(e) => setFilters({ ...filters, score: e.target.value })}
-            className="w-14 sm:w-16 px-2 py-1.5 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
+            className="w-14 sm:w-16 px-2 py-1.5 rounded-lg bg-surface-2 backdrop-blur-md border border-line/20 text-xs text-content placeholder-muted focus:outline-none focus:border-brand/40 focus:bg-surface transition-all"
           />
           <button
             onClick={() =>
               setFilters({ fuente: "", tipo_fuente: "", estado: "", score: "" })
             }
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-white text-xs font-semibold bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-content text-xs font-semibold bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300"
           >
             Limpiar
           </button>
@@ -1053,30 +1053,30 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
       </div>
 
       {/* Contenedor con scroll para la tabla */}
-      <div className="min-h-0 flex-1 overflow-auto backdrop-blur-xl bg-gradient-to-br from-slate-900/50 via-blue-950/30 to-slate-900/50 border border-cyan-500/20 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-xl md:rounded-2xl mb-3 md:mb-4">
+      <div className="min-h-0 flex-1 overflow-auto backdrop-blur-xl bg-gradient-to-br from-surface/50 via-surface/30 to-surface/50 border border-brand/20 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-xl md:rounded-2xl mb-3 md:mb-4">
         {datosPagina.length > 0 ? (
           <>
             <div className="grid gap-3 p-3 sm:p-4 xl:hidden">
               {datosPagina.map((item) => (
                 <article
                   key={item.id}
-                  className="rounded-2xl border border-cyan-500/15 bg-[linear-gradient(135deg,rgba(15,23,42,.88),rgba(17,24,39,.82))] p-4 shadow-[0_12px_30px_rgba(2,8,23,0.2)]"
+                  className="rounded-2xl border border-brand/15 bg-[linear-gradient(135deg,rgba(15,23,42,.88),rgba(17,24,39,.82))] p-4 shadow-[0_12px_30px_rgba(2,8,23,0.2)]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300 mb-1">Fuente</div>
-                      <h3 className="text-sm font-bold text-slate-100 leading-snug break-words">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-brand mb-1">Fuente</div>
+                      <h3 className="text-sm font-bold text-content leading-snug break-words">
                         {item.fuente}
                       </h3>
-                      <p className="mt-1 text-[11px] text-cyan-300/70 leading-snug break-words">
+                      <p className="mt-1 text-[11px] text-brand/70 leading-snug break-words">
                         {describirFuente(item).titulo}
                       </p>
-                      <p className="mt-1 text-[11px] text-slate-400 leading-relaxed break-words">
+                      <p className="mt-1 text-[11px] text-muted leading-relaxed break-words">
                         {describirFuente(item).desc}
                       </p>
                     </div>
                     <div className="shrink-0">
-                      <span className="inline-flex items-center justify-center min-w-[2.2rem] px-2 py-1 rounded-lg bg-gradient-to-r from-slate-800/60 to-slate-900/60 border border-cyan-500/20 text-cyan-300 font-bold text-sm">
+                      <span className="inline-flex items-center justify-center min-w-[2.2rem] px-2 py-1 rounded-lg bg-gradient-to-r from-surface-2/60 to-surface/60 border border-brand/20 text-brand font-bold text-sm">
                         {item.score}
                       </span>
                     </div>
@@ -1084,17 +1084,17 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
 
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300/90 mb-1">Tipo</div>
-                      <p className="text-sm text-slate-300 leading-snug break-words">{item.tipo_fuente}</p>
+                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-brand/90 mb-1">Tipo</div>
+                      <p className="text-sm text-muted leading-snug break-words">{item.tipo_fuente}</p>
                     </div>
                     <div>
-                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300/90 mb-1">Estado</div>
+                      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-brand/90 mb-1">Estado</div>
                       <EstadoCell item={item} />
                     </div>
                   </div>
 
                   <div className="mt-4">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300/90 mb-2">Evidencia</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-brand/90 mb-2">Evidencia</div>
                     {renderEvidenceActions(item, true)}
                   </div>
                 </article>
@@ -1104,37 +1104,37 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             <div className="hidden xl:block">
               <table className="table-fixed text-left text-sm min-w-[860px] lg:min-w-0 w-full">
                 <thead>
-                  <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
-                    <th className="w-[38%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Fuente</th>
-                    <th className="w-[26%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Tipo</th>
-                    <th className="w-[14%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Estado</th>
-                    <th className="w-[8%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Score</th>
-                    <th className="w-[14%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider text-center">Evidencia</th>
+                  <tr className="bg-gradient-to-r from-surface-2/50 to-surface/50 border-b border-brand/20">
+                    <th className="w-[38%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Fuente</th>
+                    <th className="w-[26%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Tipo</th>
+                    <th className="w-[14%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Estado</th>
+                    <th className="w-[8%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Score</th>
+                    <th className="w-[14%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider text-center">Evidencia</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-cyan-500/10">
                   {datosPagina.map((item) => (
                     <tr
                       key={item.id}
-                      className="group hover:bg-gradient-to-r hover:from-cyan-500/5 hover:to-blue-500/5 transition-all duration-300"
+                      className="group hover:bg-gradient-to-r hover:from-brand/5 hover:to-brand-2/5 transition-all duration-300"
                     >
                       <td className="px-2 md:px-3 py-1.5 md:py-2 pr-3">
                         <span
-                          className="block text-slate-200 font-semibold text-xs md:text-sm leading-snug break-words"
+                          className="block text-content font-semibold text-xs md:text-sm leading-snug break-words"
                           title={describirFuente(item).desc}
                         >
                           {item.fuente}
                         </span>
-                        <span className="block mt-0.5 text-[11px] text-cyan-300/70 leading-snug break-words">
+                        <span className="block mt-0.5 text-[11px] text-brand/70 leading-snug break-words">
                           {describirFuente(item).titulo}
                         </span>
                       </td>
-                      <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 text-xs md:text-sm leading-snug break-words pr-3">{item.tipo_fuente}</td>
+                      <td className="px-2 md:px-3 py-1.5 md:py-2 text-muted text-xs md:text-sm leading-snug break-words pr-3">{item.tipo_fuente}</td>
                       <td className="px-2 md:px-3 py-1.5 md:py-2">
                         <EstadoCell item={item} />
                       </td>
                       <td className="px-2 md:px-3 py-1.5 md:py-2">
-                        <span className="inline-flex items-center justify-center px-2 py-0.5 md:py-1 rounded-lg bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 text-cyan-300 font-bold text-xs md:text-sm">
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 md:py-1 rounded-lg bg-gradient-to-r from-surface-2/50 to-surface/50 border border-brand/20 text-brand font-bold text-xs md:text-sm">
                           {item.score}
                         </span>
                       </td>
@@ -1150,12 +1150,12 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
         ) : (
           <div className="text-center py-12">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-cyan-500/20 flex items-center justify-center">
-                <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-surface-2/50 to-surface/50 border border-brand/20 flex items-center justify-center">
+                <svg className="w-8 h-8 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-slate-400 text-sm italic">No se encontraron resultados</p>
+              <p className="text-muted text-sm italic">No se encontraron resultados</p>
             </div>
           </div>
         )}
@@ -1166,7 +1166,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
         <button
           onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
           disabled={pagina === 1}
-          className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm"
+          className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-brand/20 to-brand-2/20 hover:from-brand/30 hover:to-brand-2/30 border border-brand/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-brand font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm"
         >
           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -1177,15 +1177,15 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
         <div className="flex items-center gap-1 sm:gap-2">
           {getPages().map((p, i) =>
             p === "..." ? (
-              <span key={i} className="px-1 text-slate-500 text-xs leading-none">...</span>
+              <span key={i} className="px-1 text-muted text-xs leading-none">...</span>
             ) : (
               <button
                 key={i}
                 onClick={() => setPagina(p)}
                 className={`min-w-[1.75rem] sm:min-w-[2.25rem] h-7 sm:h-9 px-1.5 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm leading-none flex items-center justify-center ${
                   p === pagina
-                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.5)]"
-                    : "bg-gradient-to-r from-slate-800/50 to-slate-900/50 border border-cyan-500/20 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300"
+                    ? "bg-gradient-to-r from-brand to-brand-2 text-white shadow-[0_0_20px_rgba(6,182,212,0.5)]"
+                    : "bg-gradient-to-r from-surface-2/50 to-surface/50 border border-brand/20 text-muted hover:border-brand/40 hover:text-brand"
                 }`}
               >
                 {p}
@@ -1197,7 +1197,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
         <button
           onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))}
           disabled={pagina === totalPaginas || totalPaginas === 0}
-          className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm"
+          className="px-2 sm:px-3 py-1.5 bg-gradient-to-r from-brand/20 to-brand-2/20 hover:from-brand/30 hover:to-brand-2/30 border border-brand/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-brand font-semibold transition-all duration-300 flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm"
         >
           <span className="hidden xs:inline">Siguiente</span>
           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1212,7 +1212,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             value={inputPage}
             onChange={(e) => setInputPage(e.target.value)}
             placeholder="Pág."
-            className="w-14 sm:w-16 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-gradient-to-br from-slate-900/50 to-slate-800/50 border border-cyan-500/20 text-center text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all text-xs sm:text-sm"
+            className="w-14 sm:w-16 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-gradient-to-br from-surface/50 to-surface-2/50 border border-brand/20 text-center text-content placeholder-muted focus:outline-none focus:border-brand/50 focus:shadow-[0_0_15px_rgba(6,182,212,0.2)] transition-all text-xs sm:text-sm"
           />
           <button
             onClick={() => {
@@ -1222,7 +1222,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                 setInputPage("");
               }
             }}
-            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:scale-105 text-xs sm:text-sm"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-brand to-brand-2 hover:from-brand hover:to-brand-2 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:scale-105 text-xs sm:text-sm"
           >
             Ir
           </button>
@@ -1243,12 +1243,12 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
               onClick={closeResultadoModal}
             >
               <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(0deg,transparent_24%,rgba(59,130,246,0.05)_25%,rgba(59,130,246,0.05)_26%,transparent_27%,transparent_74%,rgba(59,130,246,0.05)_75%,rgba(59,130,246,0.05)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,rgba(59,130,246,0.05)_25%,rgba(59,130,246,0.05)_26%,transparent_27%,transparent_74%,rgba(59,130,246,0.05)_75%,rgba(59,130,246,0.05)_76%,transparent_77%,transparent)] bg-[length:50px_50px] opacity-40" />
-              <div className="absolute top-1/4 -left-20 w-64 h-64 rounded-full blur-[100px] bg-cyan-500/10 animate-pulse" />
+              <div className="absolute top-1/4 -left-20 w-64 h-64 rounded-full blur-[100px] bg-brand/10 animate-pulse" />
               <div className="absolute bottom-1/4 -right-20 w-80 h-80 rounded-full blur-[100px] bg-emerald-500/10 animate-pulse" />
 
               <div
                 ref={modalCardRef}
-                className={`relative mx-auto w-full max-w-4xl rounded-[2rem] overflow-hidden backdrop-blur-xl bg-white/[0.03] border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.02)] transform-gpu will-change-transform transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                className={`relative mx-auto w-full max-w-4xl rounded-[2rem] overflow-hidden backdrop-blur-xl bg-content/[0.03] border border-line/10 shadow-[0_0_40px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(255,255,255,0.02)] transform-gpu will-change-transform transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                   modalAnimating ? "opacity-100" : "opacity-0"
                 }`}
                 style={{
@@ -1258,20 +1258,20 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-cyan-300/60 to-transparent" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-brand/60 to-transparent" />
 
-                <header className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-white/5 relative z-10">
+                <header className="flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 border-b border-line/5 relative z-10">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-1 text-cyan-300">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-1 text-brand">
                       Security Audit
                     </p>
-                    <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+                    <h3 className="text-lg sm:text-xl font-bold text-content tracking-tight">
                       Análisis de Integridad de Datos - Resultado
                     </h3>
                   </div>
                   <button
                     onClick={closeResultadoModal}
-                    className="group inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all duration-300 border border-white/5"
+                    className="group inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted hover:text-content bg-content/5 hover:bg-content/10 rounded-xl transition-all duration-300 border border-line/5"
                     aria-label="Cerrar modal"
                   >
                     <span>Cerrar</span>
@@ -1283,8 +1283,8 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                     <div className="md:col-span-5 flex justify-center">
                       <div className="relative w-48 h-48 flex items-center justify-center">
-                        <div className="absolute inset-0 rounded-full border border-white/5 animate-[spin_8s_linear_infinite]" />
-                        <div className="absolute inset-2 rounded-full border border-dashed border-cyan-300/20" />
+                        <div className="absolute inset-0 rounded-full border border-line/5 animate-[spin_8s_linear_infinite]" />
+                        <div className="absolute inset-2 rounded-full border border-dashed border-brand/20" />
 
                         {(() => {
                           const radius = 45;
@@ -1340,10 +1340,10 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                         })()}
 
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted">
                             Score
                           </span>
-                          <span className={`text-6xl font-black text-white ${visual.badgeGlow}`}>
+                          <span className={`text-6xl font-black text-content ${visual.badgeGlow}`}>
                             {visual.scoreText}
                           </span>
                           <span className={`text-[10px] font-bold uppercase tracking-wider ${visual.scoreTone}`}>
@@ -1354,25 +1354,25 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                     </div>
 
                     <div className="md:col-span-7 space-y-4">
-                      <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-cyan-300/30 transition-all duration-300">
+                      <div className="p-5 rounded-2xl bg-content/[0.03] border border-line/10 hover:border-brand/30 transition-all duration-300">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted">
                             Estado de Validación
                           </span>
                           <span className={`h-2.5 w-2.5 rounded-full ${visual.dotClass} ${visual.badgeGlow}`} />
                         </div>
-                        <p className="text-2xl font-semibold text-white capitalize">
+                        <p className="text-2xl font-semibold text-content capitalize">
                           {toTitleCase(resultadoModal.estado)}
                         </p>
                       </div>
 
-                      <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all duration-300">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
+                      <div className="p-5 rounded-2xl bg-content/[0.03] border border-line/10 hover:border-line/20 transition-all duration-300">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted block mb-2">
                           Fuente de Datos
                         </span>
                         <div className="flex items-center gap-3">
-                          <Database size={18} className="text-cyan-300" />
-                          <p className="text-white font-medium leading-snug">
+                          <Database size={18} className="text-brand" />
+                          <p className="text-content font-medium leading-snug">
                             {resultadoModal.fuente || "Sin fuente"}
                           </p>
                         </div>
@@ -1381,13 +1381,13 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                   </div>
 
                   <section className="relative">
-                    <div className="absolute -inset-0.5 rounded-2xl blur opacity-40 bg-gradient-to-r from-cyan-400/20 to-emerald-400/20" />
+                    <div className="absolute -inset-0.5 rounded-2xl blur opacity-40 bg-gradient-to-r from-brand/20 to-emerald-400/20" />
                     <div
                       className={`relative border rounded-2xl p-5 sm:p-6 overflow-hidden ${visual.bannerTone}`}
                     >
-                      <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 translate-x-10 pointer-events-none" />
+                      <div className="absolute right-0 top-0 h-full w-1/3 bg-content/5 skew-x-12 translate-x-10 pointer-events-none" />
                       <div className="flex items-center gap-4 sm:gap-6">
-                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-content/10 flex items-center justify-center border border-line/20">
                           {isPositiveResult(resultadoModal) ? (
                             <ShieldAlert size={28} className="text-rose-300" />
                           ) : (
@@ -1395,10 +1395,10 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                           )}
                         </div>
                         <div>
-                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-300 mb-1">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted mb-1">
                             {visual.bannerTitle}
                           </p>
-                          <p className="text-lg sm:text-xl font-bold text-white">
+                          <p className="text-lg sm:text-xl font-bold text-content">
                             {visual.bannerText}
                           </p>
                         </div>
@@ -1411,32 +1411,32 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                   ) : (
                     <section className="space-y-3">
                       <div className="flex items-center justify-between px-1">
-                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted">
                           Detalle Técnico del Registro
                         </h4>
-                        <span className="text-[9px] text-white/30 font-mono">
+                        <span className="text-[9px] text-content/30 font-mono">
                           CODE: RES_{resultadoModal.id || "N/A"}
                         </span>
                       </div>
 
-                      <div className="w-full p-5 rounded-2xl bg-black/40 border border-white/10 font-mono relative overflow-hidden">
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-300/40" />
+                      <div className="w-full p-5 rounded-2xl bg-surface-2/80 border border-line/10 font-mono relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand/40" />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 pl-3">
                           <div className="text-xs">
-                            <p className="text-slate-400 uppercase tracking-wider mb-1">Tipo</p>
-                            <p className="text-slate-100 font-semibold">
+                            <p className="text-muted uppercase tracking-wider mb-1">Tipo</p>
+                            <p className="text-content font-semibold">
                               {resultadoModal.tipo_fuente || "Sin categoría"}
                             </p>
                           </div>
                           <div className="text-xs sm:text-right">
-                            <p className="text-slate-400 uppercase tracking-wider mb-1">Score registrado</p>
+                            <p className="text-muted uppercase tracking-wider mb-1">Score registrado</p>
                             <p className={`font-bold ${visual.scoreTone}`}>
                               {resultadoModal.score ?? "N/A"}
                             </p>
                           </div>
                         </div>
 
-                        <pre className="pl-3 text-xs md:text-sm text-cyan-100/90 whitespace-pre-wrap break-words max-h-[32vh] overflow-auto leading-relaxed">
+                        <pre className="pl-3 text-xs md:text-sm text-brand/90 whitespace-pre-wrap break-words max-h-[32vh] overflow-auto leading-relaxed">
                           {normalizeMensaje(resultadoModal.mensaje)}
                         </pre>
                       </div>
@@ -1454,8 +1454,8 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                         <div key={i} className="flex items-center justify-between rounded-xl border border-amber-500/25 bg-amber-950/20 px-4 py-3">
                           <div className="space-y-0.5">
                             <p className="text-amber-300 font-mono text-xs font-bold">{proc.radicado || "Sin folio"}</p>
-                            <p className="text-slate-400 text-[11px]">Acreedor: {proc.despacho || "—"}</p>
-                            <p className="text-slate-500 text-[10px]">{proc.fecha_radicacion || ""}{proc.ultima_actuacion ? ` · ${proc.ultima_actuacion}` : ""}</p>
+                            <p className="text-muted text-[11px]">Acreedor: {proc.despacho || "—"}</p>
+                            <p className="text-muted text-[10px]">{proc.fecha_radicacion || ""}{proc.ultima_actuacion ? ` · ${proc.ultima_actuacion}` : ""}</p>
                           </div>
                           <button
                             onClick={() => setGarantiasModal(proc)}
@@ -1469,19 +1469,19 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                   ) : resultadoModal.datos_extra?.procesos?.length > 0 ? (
                     /* Procesos Rama Judicial — lista compacta con botón Ver */
                     <section className="space-y-2">
-                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted px-1">
                         Procesos encontrados ({resultadoModal.datos_extra.procesos.length})
                       </h4>
                       {resultadoModal.datos_extra.procesos.map((proc, i) => (
-                        <div key={i} className="flex items-center justify-between rounded-xl border border-cyan-500/20 bg-black/30 px-4 py-3">
+                        <div key={i} className="flex items-center justify-between rounded-xl border border-brand/20 bg-surface-2/80 px-4 py-3">
                           <div className="space-y-0.5">
-                            <p className="text-cyan-300 font-mono text-xs font-bold">{proc.radicado || "Sin radicado"}</p>
-                            <p className="text-slate-400 text-[11px]">{proc.despacho || "—"}</p>
-                            <p className="text-slate-500 text-[10px]">{proc.fecha_radicacion || ""}{proc.ultima_actuacion ? ` · Últ. act: ${proc.ultima_actuacion}` : ""}</p>
+                            <p className="text-brand font-mono text-xs font-bold">{proc.radicado || "Sin radicado"}</p>
+                            <p className="text-muted text-[11px]">{proc.despacho || "—"}</p>
+                            <p className="text-muted text-[10px]">{proc.fecha_radicacion || ""}{proc.ultima_actuacion ? ` · Últ. act: ${proc.ultima_actuacion}` : ""}</p>
                           </div>
                           <button
                             onClick={() => setProcesosModal(proc)}
-                            className="ml-3 flex-shrink-0 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 text-cyan-300 text-xs font-semibold transition-all"
+                            className="ml-3 flex-shrink-0 px-3 py-1.5 rounded-lg bg-brand/20 hover:bg-brand/30 border border-brand/30 text-brand text-xs font-semibold transition-all"
                           >
                             Ver detalle
                           </button>
@@ -1502,17 +1502,17 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                           className="rounded-xl border border-emerald-500/20 bg-emerald-950/10 px-4 py-3"
                         >
                           <div className="flex items-start justify-between gap-3">
-                            <p className="text-slate-100 text-xs font-semibold leading-snug">
+                            <p className="text-content text-xs font-semibold leading-snug">
                               {c.nombre_de_la_entidad || "Entidad no especificada"}
                             </p>
                             {c.origen ? (
-                              <span className="flex-shrink-0 px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[9px] font-bold uppercase tracking-wide">
+                              <span className="flex-shrink-0 px-2 py-0.5 rounded-full bg-brand/15 border border-brand/30 text-brand text-[9px] font-bold uppercase tracking-wide">
                                 {c.origen}
                               </span>
                             ) : null}
                           </div>
                           {c.nom_raz_social_contratista ? (
-                            <p className="text-slate-400 text-[11px] mt-1">
+                            <p className="text-muted text-[11px] mt-1">
                               {c.nom_raz_social_contratista}
                             </p>
                           ) : null}
@@ -1521,7 +1521,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                               ${c.valor_contrato}
                             </p>
                           ) : null}
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-slate-500 text-[10px]">
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-muted text-[10px]">
                             {c.fecha_de_firma_del_contrato && c.fecha_de_firma_del_contrato !== "N/A" ? (
                               <span>Firma: {c.fecha_de_firma_del_contrato}</span>
                             ) : null}
@@ -1548,13 +1548,13 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                   ) : null}
                 </main>
 
-                <footer className="px-6 sm:px-8 py-4 bg-white/5 border-t border-white/5 flex items-center justify-between relative z-10">
+                <footer className="px-6 sm:px-8 py-4 bg-content/5 border-t border-line/5 flex items-center justify-between relative z-10">
                   <div className="flex gap-2">
-                    <span className="w-1 h-3 bg-cyan-300/60 rounded-full" />
-                    <span className="w-1 h-3 bg-cyan-300/35 rounded-full" />
-                    <span className="w-1 h-3 bg-cyan-300/15 rounded-full" />
+                    <span className="w-1 h-3 bg-brand/60 rounded-full" />
+                    <span className="w-1 h-3 bg-brand/35 rounded-full" />
+                    <span className="w-1 h-3 bg-brand/15 rounded-full" />
                   </div>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-[0.22em] font-medium italic opacity-80">
+                  <p className="text-[10px] text-muted uppercase tracking-[0.22em] font-medium italic opacity-80">
                     Engineered for Integrity
                   </p>
                 </footer>
@@ -1568,17 +1568,17 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
       {garantiasModal && createPortal(
         <div className="fixed inset-0 z-[13000] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setGarantiasModal(null)} />
-          <div className="relative z-10 w-full max-w-2xl max-h-[92vh] overflow-auto rounded-3xl bg-gradient-to-br from-amber-950/90 via-slate-900 to-slate-900 border border-amber-500/30 shadow-[0_0_60px_rgba(245,158,11,0.15)]">
+          <div className="relative z-10 w-full max-w-2xl max-h-[92vh] overflow-auto rounded-3xl bg-gradient-to-br from-amber-950/90 via-surface to-surface border border-amber-500/30 shadow-[0_0_60px_rgba(245,158,11,0.15)]">
 
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-slate-900/90 border-b border-amber-500/20 backdrop-blur">
+            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-surface/90 border-b border-amber-500/20 backdrop-blur">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-amber-400/70 mb-1">Registro de Garantías Mobiliarias</p>
                 <p className="text-amber-300 font-mono font-bold text-sm tracking-wider">{garantiasModal.radicado}</p>
               </div>
               <button
                 onClick={() => setGarantiasModal(null)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-amber-500/20 flex items-center justify-center text-white transition-all"
+                className="w-8 h-8 rounded-full bg-content/10 hover:bg-amber-500/20 flex items-center justify-center text-content transition-all"
               >
                 <X size={16} />
               </button>
@@ -1588,21 +1588,21 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
 
               {/* Tarjetas resumen */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-black/30 border border-amber-500/15 p-4">
+                <div className="rounded-2xl bg-surface-2/80 border border-amber-500/15 p-4">
                   <span className="text-[10px] uppercase tracking-wider text-amber-400/60 block mb-1">Folio Electrónico</span>
                   <span className="text-amber-200 font-mono font-bold text-sm">{garantiasModal.radicado || "—"}</span>
                 </div>
-                <div className="rounded-2xl bg-black/30 border border-amber-500/15 p-4">
+                <div className="rounded-2xl bg-surface-2/80 border border-amber-500/15 p-4">
                   <span className="text-[10px] uppercase tracking-wider text-amber-400/60 block mb-1">Acreedor Principal</span>
-                  <span className="text-white font-semibold text-sm">{garantiasModal.despacho || "—"}</span>
+                  <span className="text-content font-semibold text-sm">{garantiasModal.despacho || "—"}</span>
                 </div>
-                <div className="rounded-2xl bg-black/30 border border-amber-500/15 p-4">
+                <div className="rounded-2xl bg-surface-2/80 border border-amber-500/15 p-4">
                   <span className="text-[10px] uppercase tracking-wider text-amber-400/60 block mb-1">Fecha de Inscripción</span>
-                  <span className="text-white text-sm">{garantiasModal.fecha_radicacion || "—"}</span>
+                  <span className="text-content text-sm">{garantiasModal.fecha_radicacion || "—"}</span>
                 </div>
-                <div className="rounded-2xl bg-black/30 border border-amber-500/15 p-4">
+                <div className="rounded-2xl bg-surface-2/80 border border-amber-500/15 p-4">
                   <span className="text-[10px] uppercase tracking-wider text-amber-400/60 block mb-1">Tipo de Formulario</span>
-                  <span className="text-white text-sm">{garantiasModal.ultima_actuacion || "—"}</span>
+                  <span className="text-content text-sm">{garantiasModal.ultima_actuacion || "—"}</span>
                 </div>
               </div>
 
@@ -1610,13 +1610,13 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
               {garantiasModal.datos_proceso && Object.keys(garantiasModal.datos_proceso).length > 0 && (
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-amber-400/70 font-bold mb-2">Datos del Registro</p>
-                  <div className="rounded-2xl bg-black/30 border border-amber-500/15 divide-y divide-white/5 overflow-hidden">
+                  <div className="rounded-2xl bg-surface-2/80 border border-amber-500/15 divide-y divide-white/5 overflow-hidden">
                     {Object.entries(garantiasModal.datos_proceso)
                       .filter(([, v]) => v && String(v).trim())
                       .map(([k, v]) => (
                         <div key={k} className="flex gap-3 px-4 py-2.5 text-xs hover:bg-amber-500/5 transition-colors">
                           <span className="text-amber-300/60 min-w-[200px] shrink-0">{k}</span>
-                          <span className="text-white/90 break-words">{v}</span>
+                          <span className="text-content/90 break-words">{v}</span>
                         </div>
                       ))}
                   </div>
@@ -1627,7 +1627,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
               {garantiasModal.sujetos_procesales && (
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-amber-400/70 font-bold mb-2">Partes Involucradas</p>
-                  <pre className="rounded-2xl bg-black/30 border border-amber-500/15 p-4 text-xs text-amber-100/75 whitespace-pre-wrap leading-relaxed font-mono">
+                  <pre className="rounded-2xl bg-surface-2/80 border border-amber-500/15 p-4 text-xs text-amber-100/75 whitespace-pre-wrap leading-relaxed font-mono">
                     {garantiasModal.sujetos_procesales}
                   </pre>
                 </div>
@@ -1639,12 +1639,12 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                   <p className="text-[10px] uppercase tracking-wider text-amber-400/70 font-bold mb-2">
                     Historial de Operaciones ({garantiasModal.actuaciones.length})
                   </p>
-                  <div className="rounded-2xl bg-black/30 border border-amber-500/15 divide-y divide-white/5">
+                  <div className="rounded-2xl bg-surface-2/80 border border-amber-500/15 divide-y divide-white/5">
                     {garantiasModal.actuaciones.map((a, j) => (
                       <div key={j} className="px-4 py-3 space-y-1">
                         <div className="flex gap-3 text-xs">
                           <span className="text-amber-300/60 min-w-[90px]">{a.fecha}</span>
-                          <span className="text-white font-medium">{a.actuacion}</span>
+                          <span className="text-content font-medium">{a.actuacion}</span>
                         </div>
                         {a.anotacion && (
                           <p className="text-amber-100/60 text-xs pl-[102px] italic">{a.anotacion}</p>
@@ -1657,9 +1657,9 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-3 border-t border-amber-500/15 bg-black/20 flex items-center justify-between">
+            <div className="px-6 py-3 border-t border-amber-500/15 bg-surface-2/60 flex items-center justify-between">
               <span className="text-[10px] text-amber-400/40 uppercase tracking-widest font-mono">RGM · Confecámaras</span>
-              <span className="text-[10px] text-slate-500 uppercase tracking-widest">Consulta Oficial</span>
+              <span className="text-[10px] text-muted uppercase tracking-widest">Consulta Oficial</span>
             </div>
           </div>
         </div>,
@@ -1670,14 +1670,14 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
       {procesosModal && createPortal(
         <div className="fixed inset-0 z-[13000] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setProcesosModal(null)} />
-          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-auto rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-cyan-500/30 shadow-[0_0_60px_rgba(6,182,212,0.2)]">
+          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-auto rounded-3xl bg-gradient-to-br from-surface via-surface-2 to-surface border border-brand/30 shadow-[0_0_60px_rgba(6,182,212,0.2)]">
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-slate-900/90 border-b border-white/10 backdrop-blur">
+            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-surface/90 border-b border-line/10 backdrop-blur">
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Detalle del Proceso</p>
-                <p className="text-cyan-300 font-mono font-bold text-sm">{procesosModal.radicado}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted mb-1">Detalle del Proceso</p>
+                <p className="text-brand font-mono font-bold text-sm">{procesosModal.radicado}</p>
               </div>
-              <button onClick={() => setProcesosModal(null)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+              <button onClick={() => setProcesosModal(null)} className="w-8 h-8 rounded-full bg-content/10 hover:bg-content/20 flex items-center justify-center text-content transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -1685,20 +1685,20 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             <div className="p-6 space-y-6">
               {/* Info básica */}
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div><span className="text-slate-400 block mb-0.5">Fecha radicación</span><span className="text-white">{procesosModal.fecha_radicacion || "—"}</span></div>
-                <div><span className="text-slate-400 block mb-0.5">Última actuación</span><span className="text-white">{procesosModal.ultima_actuacion || "—"}</span></div>
-                <div className="col-span-2"><span className="text-slate-400 block mb-0.5">Despacho</span><span className="text-white">{procesosModal.despacho || "—"}</span></div>
+                <div><span className="text-muted block mb-0.5">Fecha radicación</span><span className="text-content">{procesosModal.fecha_radicacion || "—"}</span></div>
+                <div><span className="text-muted block mb-0.5">Última actuación</span><span className="text-content">{procesosModal.ultima_actuacion || "—"}</span></div>
+                <div className="col-span-2"><span className="text-muted block mb-0.5">Despacho</span><span className="text-content">{procesosModal.despacho || "—"}</span></div>
               </div>
 
               {/* Datos del proceso */}
               {procesosModal.datos_proceso && Object.keys(procesosModal.datos_proceso).length > 0 && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">Datos del Proceso</p>
-                  <div className="rounded-xl bg-black/30 border border-white/10 p-4 space-y-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted font-bold mb-2">Datos del Proceso</p>
+                  <div className="rounded-xl bg-surface-2/80 border border-line/10 p-4 space-y-2">
                     {Object.entries(procesosModal.datos_proceso).map(([k, v]) => (
                       <div key={k} className="flex gap-2 text-xs">
-                        <span className="text-slate-400 min-w-[180px]">{k}:</span>
-                        <span className="text-white">{v || "—"}</span>
+                        <span className="text-muted min-w-[180px]">{k}:</span>
+                        <span className="text-content">{v || "—"}</span>
                       </div>
                     ))}
                   </div>
@@ -1708,26 +1708,26 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
               {/* Sujetos procesales */}
               {procesosModal.sujetos_procesales && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">Sujetos Procesales</p>
-                  <pre className="rounded-xl bg-black/30 border border-white/10 p-4 text-xs text-cyan-100/80 whitespace-pre-wrap">{procesosModal.sujetos_procesales}</pre>
+                  <p className="text-[10px] uppercase tracking-wider text-muted font-bold mb-2">Sujetos Procesales</p>
+                  <pre className="rounded-xl bg-surface-2/80 border border-line/10 p-4 text-xs text-brand/80 whitespace-pre-wrap">{procesosModal.sujetos_procesales}</pre>
                 </div>
               )}
 
               {/* Actuaciones */}
               {procesosModal.actuaciones?.length > 0 && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted font-bold mb-2">
                     Actuaciones ({procesosModal.actuaciones.length})
                   </p>
-                  <div className="rounded-xl bg-black/30 border border-white/10 divide-y divide-white/5">
+                  <div className="rounded-xl bg-surface-2/80 border border-line/10 divide-y divide-white/5">
                     {procesosModal.actuaciones.map((a, j) => (
                       <div key={j} className="px-4 py-3 space-y-1">
                         <div className="flex gap-3 text-xs">
-                          <span className="text-slate-400 min-w-[90px]">{a.fecha}</span>
-                          <span className="text-white font-medium">{a.actuacion}</span>
+                          <span className="text-muted min-w-[90px]">{a.fecha}</span>
+                          <span className="text-content font-medium">{a.actuacion}</span>
                         </div>
                         {a.anotacion && (
-                          <p className="text-cyan-100/70 text-xs pl-[102px] italic">{a.anotacion}</p>
+                          <p className="text-brand/70 text-xs pl-[102px] italic">{a.anotacion}</p>
                         )}
                       </div>
                     ))}

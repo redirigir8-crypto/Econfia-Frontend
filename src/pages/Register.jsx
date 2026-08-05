@@ -7,6 +7,8 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 const NATURAL_TYPE = "persona_natural";
 const COMPANY_TYPE = "empresa";
+const authInputClass =
+  "w-full rounded-lg border border-line/15 bg-surface-2/85 px-3 py-2.5 text-sm text-content outline-none backdrop-blur-sm transition-all duration-300 placeholder:text-muted/60 focus:border-brand/60 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -125,15 +127,15 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 md:p-10 relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
-      <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-transparent p-6 text-content md:p-10">
+      <div className="absolute right-20 top-20 h-72 w-72 animate-pulse rounded-full bg-brand/10 blur-3xl" />
       <div
-        className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+        className="absolute bottom-20 left-20 h-96 w-96 animate-pulse rounded-full bg-violet-500/10 blur-3xl"
         style={{ animationDelay: "1s" }}
       />
 
       {loading && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3 text-white">
             <Loader2 className="w-10 h-10 animate-spin" />
             <span className="text-sm">Creando tu cuenta...</span>
@@ -154,10 +156,21 @@ export default function Register() {
         />
       )}
 
-      <div className="relative w-[80vw] h-[80vh] bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[32px] border border-white/10 shadow-2xl shadow-cyan-500/10 flex overflow-hidden group">
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[32px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+      <div className="group relative flex h-[80vh] w-[80vw] overflow-hidden rounded-[32px] border border-line/15 bg-surface/90 shadow-2xl shadow-cyan-500/10 backdrop-blur-xl">
+        <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-gradient-to-r from-brand/10 via-transparent to-brand-2/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-        <div className="w-1/2 flex flex-col justify-center items-start px-8 z-10 relative overflow-y-auto">
+        <div className="relative z-10 flex w-1/2 flex-col items-start justify-center overflow-y-auto px-8">
+          <div className="pointer-events-none absolute inset-0">
+            <div
+              className="econfia-grid-wave absolute inset-0"
+              style={{
+                backgroundImage:
+                  "linear-gradient(0deg, transparent 24%, rgb(var(--th-brand) / 0.10) 25%, rgb(var(--th-brand) / 0.10) 26%, transparent 27%, transparent 74%, rgb(var(--th-brand) / 0.10) 75%, rgb(var(--th-brand) / 0.10) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgb(var(--th-brand) / 0.10) 25%, rgb(var(--th-brand) / 0.10) 26%, transparent 27%, transparent 74%, rgb(var(--th-brand) / 0.10) 75%, rgb(var(--th-brand) / 0.10) 76%, transparent 77%, transparent)",
+                backgroundSize: "56px 56px",
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-brand/10 via-transparent to-brand-2/10" />
+          </div>
           <div className="space-y-1 mb-5">
             <div className="inline-block">
               <div className="px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 flex items-center gap-2">
@@ -165,26 +178,32 @@ export default function Register() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
                 </span>
-                <span className="text-cyan-300 text-xs font-medium">Únete a nuestra comunidad</span>
+                <span className="text-xs font-bold text-brand">Únete a nuestra comunidad</span>
               </div>
             </div>
-            <h1 className="text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
+            <h1
+              className="bg-clip-text text-4xl font-black leading-tight tracking-tight text-transparent"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, rgb(var(--th-content)), rgb(var(--th-brand)), rgb(var(--th-brand-2)))",
+              }}
+            >
               Crear tu cuenta
             </h1>
-            <p className="mt-2 text-sm text-white/70 leading-relaxed max-w-md">
+            <p className="mt-2 max-w-md text-sm font-medium leading-relaxed text-muted">
               Regístrate y elige si tu acceso será como persona natural o empresa.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="w-full max-w-md space-y-3 mt-4">
-            <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
+            <div className="grid grid-cols-2 gap-2 rounded-2xl border border-line/15 bg-surface-2/80 p-1 backdrop-blur-sm">
               <button
                 type="button"
                 onClick={() => handleTypeChange(NATURAL_TYPE)}
                 className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 ${
                   !isCompany
                     ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/20"
-                    : "text-white/70 hover:bg-white/5"
+                    : "text-muted hover:bg-brand/10 hover:text-brand"
                 }`}
               >
                 Persona natural
@@ -195,7 +214,7 @@ export default function Register() {
                 className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 ${
                   isCompany
                     ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/20"
-                    : "text-white/70 hover:bg-white/5"
+                    : "text-muted hover:bg-brand/10 hover:text-brand"
                 }`}
               >
                 Empresa
@@ -212,7 +231,7 @@ export default function Register() {
                 required
                 disabled={loading}
                 autoComplete="username"
-                className="w-full rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                className={authInputClass}
               />
 
               {isCompany ? (
@@ -225,7 +244,7 @@ export default function Register() {
                   required
                   disabled={loading}
                   autoComplete="organization"
-                  className="w-full rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                  className={authInputClass}
                 />
               ) : (
                 <input
@@ -237,7 +256,7 @@ export default function Register() {
                   required
                   disabled={loading}
                   autoComplete="email"
-                  className="w-full rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                  className={authInputClass}
                 />
               )}
 
@@ -250,7 +269,7 @@ export default function Register() {
                 required
                 disabled={loading}
                 autoComplete="given-name"
-                className="w-full rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                className={authInputClass}
               />
               <input
                 type="text"
@@ -261,7 +280,7 @@ export default function Register() {
                 required
                 disabled={loading}
                 autoComplete="family-name"
-                className="w-full rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                className={authInputClass}
               />
 
               {isCompany && (
@@ -275,7 +294,7 @@ export default function Register() {
                     required
                     disabled={loading}
                     autoComplete="off"
-                    className="w-full rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                    className={authInputClass}
                   />
                   <input
                     type="email"
@@ -286,7 +305,7 @@ export default function Register() {
                     required
                     disabled={loading}
                     autoComplete="email"
-                    className="w-full rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                    className={authInputClass}
                   />
                 </>
               )}
@@ -301,12 +320,12 @@ export default function Register() {
                   required
                   disabled={loading}
                   autoComplete="new-password"
-                  className="w-full rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 px-3 py-2.5 pr-12 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                  className={`${authInputClass} pr-12`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted transition-colors hover:text-brand"
                   aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
                   tabIndex={0}
                 >
@@ -324,12 +343,12 @@ export default function Register() {
                   required
                   disabled={loading}
                   autoComplete="new-password"
-                  className="w-full rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 px-3 py-2.5 pr-12 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all duration-300 backdrop-blur-sm"
+                  className={`${authInputClass} pr-12`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted transition-colors hover:text-brand"
                   aria-label={showConfirm ? "Ocultar confirmación" : "Mostrar confirmación"}
                   tabIndex={0}
                 >
@@ -348,11 +367,11 @@ export default function Register() {
             </button>
           </form>
 
-          <p className="mt-4 text-xs text-white/70">
+          <p className="mt-4 text-xs font-medium text-muted">
             ¿Ya tienes una cuenta?{" "}
             <a
               href="/login"
-              className="font-medium text-cyan-400 hover:text-cyan-300 underline-offset-4 hover:underline transition-colors"
+              className="font-bold text-brand underline-offset-4 transition-colors hover:underline hover:opacity-80"
             >
               Inicia sesión
             </a>
@@ -369,8 +388,14 @@ export default function Register() {
             playsInline
             preload="metadata"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/40 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/30 to-blue-900/20 mix-blend-screen pointer-events-none" />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(90deg, rgb(var(--th-surface) / 0.95), rgb(var(--th-surface) / 0.50), transparent)",
+            }}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand/25 to-brand-2/20 mix-blend-multiply dark:mix-blend-screen" />
         </div>
       </div>
     </div>

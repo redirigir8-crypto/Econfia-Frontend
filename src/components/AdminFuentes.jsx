@@ -175,20 +175,46 @@ const AdminFuentes = () => {
   return (
     <>
       {ToastMsg}
-      <section className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 py-8">
-        <div className="max-w-6xl mx-auto px-4">
+      <section className="relative min-h-screen overflow-hidden bg-transparent px-4 py-8 sm:px-6">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute left-10 top-20 h-64 w-64 rounded-full bg-brand/15 blur-3xl" />
+          <div className="absolute right-20 top-28 h-80 w-80 rounded-full bg-brand-2/15 blur-3xl" />
+          <div className="absolute bottom-8 left-1/3 h-72 w-72 rounded-full bg-ok/10 blur-3xl" />
+        </div>
+
+        <div className="mx-auto max-w-7xl">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-4xl font-bold text-white">
-            Administración de Fuentes
-          </h2>
+        <div className="mb-6 overflow-hidden rounded-[28px] border border-line/15 bg-surface/90 p-6 shadow-[0_22px_65px_rgba(15,23,42,0.18)] backdrop-blur-xl sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.28em] text-brand">
+                Centro administrativo
+              </div>
+              <h2 className="text-4xl font-black tracking-tight text-content sm:text-5xl">
+                Administración de Fuentes
+              </h2>
+              <p className="mt-4 max-w-3xl text-base leading-7 text-muted">
+                Gestiona fuentes, nombres visibles y categorias de consulta desde una vista clara y consistente.
+              </p>
+            </div>
 
-          <div className="p-[1px] rounded-xl bg-gradient-to-r from-transparent via-cyan-500/60 to-transparent">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-4 shadow-inner">
+                <div className="text-[11px] font-black uppercase tracking-[0.24em] text-muted">Fuentes</div>
+                <div className="mt-2 text-3xl font-black text-brand">{fuentes.length}</div>
+              </div>
+              <div className="rounded-2xl border border-ok/25 bg-ok/10 px-5 py-4 shadow-inner">
+                <div className="text-[11px] font-black uppercase tracking-[0.24em] text-muted">Tipos</div>
+                <div className="mt-2 text-3xl font-black text-ok">{tipos.length}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-end">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-white font-semibold
-              hover:shadow-[0_0_14px_3px_rgba(34,211,238,0.6)] transition-all"
+              className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-3 font-black text-white shadow-[0_16px_35px_rgba(14,165,233,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(14,165,233,0.38)]"
             >
               Crear nueva fuente
             </button>
@@ -196,20 +222,20 @@ const AdminFuentes = () => {
         </div>
 
         {/* CONTENEDOR CRUD */}
-        <div className="bg-slate-800/80 rounded-2xl border border-cyan-900/40 p-6 shadow-2xl">
+        <div className="overflow-hidden rounded-[24px] border border-line/15 bg-surface/90 shadow-[0_22px_65px_rgba(15,23,42,0.16)] backdrop-blur-xl">
 
           {/* FILTROS */}
-          <div className="flex gap-4 mb-4">
+          <div className="grid gap-4 border-b border-line/10 bg-surface-2/60 p-5 md:grid-cols-[1fr_340px]">
             <input
               placeholder="Filtrar por nombre..."
               value={filterNombre}
               onChange={(e) => setFilterNombre(e.target.value)}
-              className="flex-1 px-4 py-2 rounded-lg bg-slate-900 border border-cyan-700/40 text-white"
+              className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 font-semibold text-content outline-none transition placeholder:text-muted/70 focus:border-brand/50 focus:ring-4 focus:ring-brand/10"
             />
             <select
               value={filterTipo}
               onChange={(e) => setFilterTipo(e.target.value)}
-              className="px-4 py-2 rounded-lg bg-slate-900 border border-cyan-700/40 text-white"
+              className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 font-semibold text-content outline-none transition focus:border-brand/50 focus:ring-4 focus:ring-brand/10"
             >
               <option value="">Todos</option>
               {tipos.map((t) => (
@@ -221,14 +247,15 @@ const AdminFuentes = () => {
           </div>
 
           {/* TABLA */}
-          <table className="w-full text-white text-sm">
+          <div className="overflow-x-auto px-5 py-5">
+          <table className="min-w-[860px] w-full text-sm text-content">
             <thead>
-              <tr className="bg-cyan-900/40 text-cyan-300">
-                <th className="px-3 py-2">ID</th>
-                <th className="px-3 py-2">Nombre</th>
-                <th className="px-3 py-2">Nombre Pila</th>
-                <th className="px-3 py-2">Tipo</th>
-                <th className="px-3 py-2">Acciones</th>
+              <tr className="bg-surface-2/80 text-left text-[12px] uppercase tracking-[0.18em] text-muted">
+                <th className="px-4 py-4">ID</th>
+                <th className="px-4 py-4">Nombre</th>
+                <th className="px-4 py-4">Nombre Pila</th>
+                <th className="px-4 py-4">Tipo</th>
+                <th className="px-4 py-4">Acciones</th>
               </tr>
             </thead>
 
@@ -236,25 +263,25 @@ const AdminFuentes = () => {
               {pageFuentes.map((f) => (
                 <tr
                   key={f.id}
-                  className="border-b border-slate-700/40 hover:bg-cyan-900/20"
+                  className="border-b border-line/10 transition-colors hover:bg-cyan-500/[0.06]"
                 >
-                  <td className="px-3 py-2">{f.id}</td>
+                  <td className="px-4 py-4 font-bold text-muted">{f.id}</td>
 
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-4 font-bold">
                     {editId === f.id ? (
                       <input
                         value={editData.nombre}
                         onChange={(e) =>
                           setEditData({ ...editData, nombre: e.target.value })
                         }
-                        className="w-full px-2 py-1 rounded bg-slate-900 border border-cyan-700/40"
+                        className="w-full rounded-lg border border-line/15 bg-surface px-3 py-2 text-content outline-none focus:border-brand/50"
                       />
                     ) : (
                       f.nombre
                     )}
                   </td>
 
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-4 text-content/90">
                     {editId === f.id ? (
                       <input
                         value={editData.nombre_pila}
@@ -264,21 +291,21 @@ const AdminFuentes = () => {
                             nombre_pila: e.target.value,
                           })
                         }
-                        className="w-full px-2 py-1 rounded bg-slate-900 border border-cyan-700/40"
+                        className="w-full rounded-lg border border-line/15 bg-surface px-3 py-2 text-content outline-none focus:border-brand/50"
                       />
                     ) : (
                       f.nombre_pila
                     )}
                   </td>
 
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-4 text-content/90">
                     {editId === f.id ? (
                       <select
                         value={editData.tipo}
                         onChange={(e) =>
                           setEditData({ ...editData, tipo: e.target.value })
                         }
-                        className="w-full px-2 py-1 rounded bg-slate-900 border border-cyan-700/40"
+                        className="w-full rounded-lg border border-line/15 bg-surface px-3 py-2 text-content outline-none focus:border-brand/50"
                       >
                         {tipos.map((t) => (
                           <option key={t.id} value={t.id}>
@@ -293,56 +320,53 @@ const AdminFuentes = () => {
                     )}
                   </td>
 
-                  <td className="px-3 py-2">
+                  <td className="px-4 py-4">
                     {editId === f.id ? (
                       <div className="flex gap-2">
                         <button
                           onClick={saveEdit}
-                          className="px-3 py-1 rounded-lg bg-green-600/80 text-white font-semibold"
+                          className="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-black text-white shadow-lg shadow-emerald-500/20"
                         >
                           Guardar
                         </button>
                         <button
                           onClick={() => setEditId(null)}
-                          className="px-3 py-1 rounded-lg bg-slate-600 text-white font-semibold"
+                          className="rounded-lg border border-line/15 bg-surface px-3 py-2 text-sm font-black text-content"
                         >
                           Cancelar
                         </button>
                       </div>
                       ) : (
-                    <div className="inline-block w-fit p-[1px] rounded-lg 
-                        bg-gradient-to-r from-transparent via-purple-500/60 to-transparent">
                       <button
                         onClick={() => startEdit(f)}
-                        className="px-3 py-1 rounded-lg bg-slate-700 text-white font-semibold
-                        hover:shadow-[0_0_12px_2px_rgba(147,51,234,0.7)] transition-all"
+                        className="rounded-lg border border-brand/25 bg-brand/10 px-4 py-2 text-sm font-black text-brand transition-all hover:-translate-y-0.5 hover:bg-brand/15"
                       >
                         Editar
                       </button>
-                    </div>
                     )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
 
           {/* PAGINACIÓN */}
-          <div className="flex justify-center gap-4 mt-6">
+          <div className="flex flex-wrap items-center justify-center gap-4 border-t border-line/10 px-5 py-5">
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-40"
+              className="rounded-xl border border-line/15 bg-surface px-4 py-2 font-bold text-content transition hover:border-brand/40 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Anterior
             </button>
-            <span className="text-cyan-300 font-semibold">
-              Página {currentPage} de {totalPages}
+            <span className="rounded-xl border border-brand/20 bg-brand/10 px-4 py-2 font-black text-brand">
+              Página {currentPage} de {totalPages || 1}
             </span>
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-40"
+              className="rounded-xl border border-line/15 bg-surface px-4 py-2 font-bold text-content transition hover:border-brand/40 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Siguiente
             </button>
@@ -352,7 +376,8 @@ const AdminFuentes = () => {
         {/* MODAL CREAR */}
         {showCreateModal && (
           <Modal onClose={() => setShowCreateModal(false)}>
-            <h3 className="text-lg font-bold mb-4">Crear nueva fuente</h3>
+            <h3 className="mb-2 text-xl font-black text-content">Crear nueva fuente</h3>
+            <p className="mb-5 text-sm text-muted">Registra el nombre tecnico, nombre visible y tipo de fuente.</p>
             <div className="flex flex-col gap-3">
               <input
                 placeholder="Nombre"
@@ -360,7 +385,7 @@ const AdminFuentes = () => {
                 onChange={(e) =>
                   setNewFuente({ ...newFuente, nombre: e.target.value })
                 }
-                className="px-3 py-2 border rounded"
+                className="rounded-xl border border-line/15 bg-surface px-4 py-3 text-content outline-none placeholder:text-muted/70 focus:border-brand/50"
               />
               <input
                 placeholder="Nombre pila"
@@ -371,14 +396,14 @@ const AdminFuentes = () => {
                     nombre_pila: e.target.value,
                   })
                 }
-                className="px-3 py-2 border rounded"
+                className="rounded-xl border border-line/15 bg-surface px-4 py-3 text-content outline-none placeholder:text-muted/70 focus:border-brand/50"
               />
               <select
                 value={newFuente.tipo}
                 onChange={(e) =>
                   setNewFuente({ ...newFuente, tipo: e.target.value })
                 }
-                className="px-3 py-2 border rounded"
+                className="rounded-xl border border-line/15 bg-surface px-4 py-3 text-content outline-none focus:border-brand/50"
               >
                 <option value="">Tipo...</option>
                 {tipos.map((t) => (
@@ -389,7 +414,7 @@ const AdminFuentes = () => {
               </select>
               <button
                 onClick={createFuente}
-                className="px-4 py-2 rounded bg-cyan-600 text-white font-semibold"
+                className="mt-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-3 font-black text-white shadow-lg shadow-cyan-500/20"
               >
                 Crear
               </button>

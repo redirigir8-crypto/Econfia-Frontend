@@ -68,35 +68,35 @@ function ContactContent() {
 		<div className="space-y-4 pt-1">
 			<a
 				href="mailto:coordinaciondesarrollo@solutionsgroupcol.com"
-				className="flex items-center gap-3 p-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/20 transition-all group"
+				className="group flex items-center gap-3 rounded-xl border border-line/15 bg-surface-2/70 p-3 transition-all hover:border-brand/30 hover:bg-surface"
 			>
-				<span className="w-9 h-9 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 group-hover:bg-cyan-500/30 transition-all">
+				<span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400 transition-all group-hover:bg-cyan-500/25">
 					<Mail size={17} />
 				</span>
 				<div>
-					<p className="text-cyan-300/70 text-xs font-medium">Email</p>
-					<p className="text-white font-semibold text-sm group-hover:text-cyan-300 transition-colors">coordinaciondesarrollo@solutionsgroupcol.com</p>
+					<p className="text-xs font-medium text-muted">Email</p>
+					<p className="text-sm font-semibold text-content transition-colors group-hover:text-brand">coordinaciondesarrollo@solutionsgroupcol.com</p>
 				</div>
 			</a>
 			<a
 				href="tel:+573170815394"
-				className="flex items-center gap-3 p-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/20 transition-all group"
+				className="group flex items-center gap-3 rounded-xl border border-line/15 bg-surface-2/70 p-3 transition-all hover:border-brand/30 hover:bg-surface"
 			>
-				<span className="w-9 h-9 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 group-hover:bg-cyan-500/30 transition-all">
+				<span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400 transition-all group-hover:bg-cyan-500/25">
 					<Phone size={17} />
 				</span>
 				<div>
-					<p className="text-cyan-300/70 text-xs font-medium">Teléfono</p>
-					<p className="text-white font-semibold text-sm group-hover:text-cyan-300 transition-colors">+57 (317) 081 5394</p>
+					<p className="text-xs font-medium text-muted">Teléfono</p>
+					<p className="text-sm font-semibold text-content transition-colors group-hover:text-brand">+57 (317) 081 5394</p>
 				</div>
 			</a>
-			<div className="flex items-center gap-3 p-3 rounded-xl bg-cyan-500/10 border border-cyan-400/20">
-				<span className="w-9 h-9 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">
+			<div className="flex items-center gap-3 rounded-xl border border-line/15 bg-surface-2/70 p-3">
+				<span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
 					<MapPin size={17} />
 				</span>
 				<div>
-					<p className="text-cyan-300/70 text-xs font-medium">Ubicación</p>
-					<p className="text-white font-semibold text-sm">Bogotá, Colombia</p>
+					<p className="text-xs font-medium text-muted">Ubicación</p>
+					<p className="text-sm font-semibold text-content">Bogotá, Colombia</p>
 				</div>
 			</div>
 		</div>
@@ -112,10 +112,10 @@ function FaqItem({ q, a, idx, isContact }) {
 		<div
 			className={[
 				"w-full",
-				"relative rounded-2xl border-2 transition-all duration-300",
+				"relative rounded-2xl border transition-all duration-300 shadow-xl shadow-black/5",
 				open
-					? "border-cyan-400/60 bg-gradient-to-br from-cyan-500/15 to-blue-500/15 shadow-[0_0_30px_rgba(34,211,238,0.25)]"
-					: "border-white/15 bg-white/[0.06] hover:border-cyan-400/30 hover:bg-white/[0.09]",
+					? "border-cyan-400/50 bg-gradient-to-br from-cyan-500/15 via-surface to-blue-500/10 shadow-[0_18px_45px_rgba(34,211,238,0.12)]"
+					: "border-line/15 bg-surface/85 hover:border-brand/30 hover:bg-surface",
 				"overflow-hidden",
 			].join(" ")}
 		>
@@ -125,19 +125,19 @@ function FaqItem({ q, a, idx, isContact }) {
 				onClick={() => setOpen((v) => !v)}
 				aria-expanded={open}
 				className={`relative w-full min-h-[68px] pl-5 pr-14 py-4 flex items-center justify-start text-left select-none transition-all duration-300 ${
-					open ? "bg-cyan-900/20" : "hover:bg-white/5"
+					open ? "bg-cyan-500/10" : "hover:bg-surface-2/70"
 				}`}
 			>
 				<div className="flex items-center gap-4">
 					<span className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
 						open
-							? "bg-cyan-400/40 text-cyan-100 shadow-[0_0_12px_rgba(34,211,238,0.4)]"
-							: "bg-cyan-500/20 text-cyan-300"
+							? "bg-cyan-400/25 text-brand shadow-[0_0_12px_rgba(34,211,238,0.25)]"
+							: "bg-cyan-500/15 text-brand"
 					}`}>
 						{idx + 1}
 					</span>
 					<span className={`font-semibold text-base leading-snug transition-all duration-300 ${
-						open ? "text-cyan-200" : "text-white/95"
+						open ? "text-brand" : "text-content"
 					}`}>
 						{q}
 					</span>
@@ -145,7 +145,7 @@ function FaqItem({ q, a, idx, isContact }) {
 
 				<ChevronDown
 					className={`absolute right-5 top-1/2 -translate-y-1/2 size-5 transition-all duration-300 ${
-						open ? "rotate-180 text-cyan-400" : "text-white/40"
+						open ? "rotate-180 text-brand" : "text-muted"
 					}`}
 				/>
 			</button>
@@ -159,13 +159,13 @@ function FaqItem({ q, a, idx, isContact }) {
 						animate={{ opacity: 1, height: contentHeight }}
 						exit={{ opacity: 0, height: 0 }}
 						transition={{ duration: 0.28 }}
-						className="overflow-hidden border-t border-cyan-400/20"
+						className="overflow-hidden border-t border-line/15"
 					>
-						<div className="px-5 py-4 h-full overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgba(34,211,238,0.35)_rgba(255,255,255,0.05)]">
+						<div className="h-full overflow-y-auto px-5 py-4 [scrollbar-width:thin] [scrollbar-color:rgba(34,211,238,0.35)_rgba(148,163,184,0.12)]">
 							{isContact ? (
 								<ContactContent />
 							) : (
-								<p className="text-white/90 text-[0.95rem] leading-relaxed">{a}</p>
+								<p className="text-[0.95rem] leading-relaxed text-content/85">{a}</p>
 							)}
 						</div>
 					</motion.div>
@@ -198,39 +198,63 @@ export default function Ayuda() {
 	};
 
 	return (
-		<section className="w-screen h-[80vh] text-white flex items-center justify-center overflow-hidden p-0 relative">
-			<div className={["ayuda max-w-[1200px] w-full px-6 relative z-10","grid grid-rows-[auto_auto_1fr] gap-6",SAFE_TOP,SAFE_BOTTOM,].join(" ")}>
+		<section className="relative flex min-h-[80vh] w-screen items-center justify-center overflow-hidden p-0 text-content">
+			<div className="pointer-events-none absolute left-[12%] top-[22%] h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+			<div className="pointer-events-none absolute right-[14%] top-[16%] h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />
+			<div className={["ayuda relative z-10 grid w-full max-w-[1220px] grid-rows-[auto_auto_1fr] gap-5 px-6", SAFE_TOP, SAFE_BOTTOM].join(" ")}>
 				{/* Encabezado */}
-				<div className="grid grid-cols-1 md:grid-cols-2 items-center text-center md:text-left gap-3">
-					<p className="text-white/70 text-base font-normal">
-						Resuelve dudas frecuentes. Toca una pregunta para ver la respuesta.
-					</p>
-					<div className="flex items-center justify-center md:justify-end gap-3">
-						<HelpCircle className="text-cyan-400" size={28} />
-						<h1
-							className="text-[clamp(1.8rem,3vw,2.5rem)] font-black leading-tight bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
-							style={{ fontFamily: "poppins, sans-serif" }}
-						>
-							Centro de ayuda
-						</h1>
+				<div className="relative overflow-hidden rounded-[26px] border border-line/15 bg-surface/80 px-5 py-5 shadow-2xl shadow-black/5 backdrop-blur-xl md:px-7">
+					<div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-cyan-500/15 blur-3xl" />
+					<div className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl" />
+					<div className="relative grid grid-cols-1 items-center gap-4 md:grid-cols-[1fr_auto]">
+						<div className="text-center md:text-left">
+							<div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
+								<HelpCircle size={14} />
+								Soporte Econfia
+							</div>
+							<h1
+								className="text-[clamp(2rem,4vw,3.2rem)] font-black leading-tight text-content"
+								style={{ fontFamily: "poppins, sans-serif" }}
+							>
+								Centro de ayuda
+							</h1>
+							<p className="mt-2 max-w-2xl text-sm leading-6 text-muted md:text-base">
+								Resuelve dudas frecuentes sobre consultas, cumplimiento, reportes y soporte operativo.
+							</p>
+						</div>
+
+						<div className="grid grid-cols-3 gap-2 text-center">
+							<div className="rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3">
+								<div className="text-lg font-black text-content">{faqs.length}</div>
+								<div className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted">Preguntas</div>
+							</div>
+							<div className="rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3">
+								<div className="text-lg font-black text-brand">{page + 1}/{totalPages}</div>
+								<div className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted">Página</div>
+							</div>
+							<div className="rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3">
+								<div className="text-lg font-black text-emerald-500">24/7</div>
+								<div className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted">Ayuda</div>
+							</div>
+						</div>
 					</div>
 				</div>
 
 				{/* Controles de paginación */}
-				<div className="flex items-center justify-center gap-4">
+				<div className="flex flex-wrap items-center justify-center gap-4">
 					<button
 						onClick={prev}
 						disabled={page === 0}
-						className={`inline-flex items-center gap-2 px-5 py-2 rounded-full border border-cyan-400/40 bg-cyan-500/10 text-white font-semibold text-sm shadow-md transition-all duration-200 hover:bg-cyan-500/20 hover:border-cyan-400/70 active:scale-95 ${page === 0 ? "opacity-30 cursor-not-allowed" : ""}`}
+						className={`inline-flex items-center gap-2 rounded-full border border-line/15 bg-surface/85 px-5 py-2 text-sm font-semibold text-content shadow-lg shadow-black/5 backdrop-blur-xl transition-all duration-200 hover:border-brand/35 hover:bg-surface-2/90 hover:text-brand active:scale-95 ${page === 0 ? "cursor-not-allowed opacity-40" : ""}`}
 					>
 						<ChevronLeft className="size-4" /> Anterior
 					</button>
 
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-2 rounded-full border border-line/15 bg-surface/70 px-3 py-2 shadow-lg shadow-black/5 backdrop-blur-xl">
 						{Array.from({ length: totalPages }).map((_, i) => (
 							<span
 								key={i}
-								className={["h-2.5 w-2.5 rounded-full transition-all duration-300", i === page ? "bg-cyan-400 scale-110 shadow-[0_0_8px_rgba(6,182,212,0.6)]" : "bg-white/25"].join(" ")}
+								className={["h-2.5 rounded-full transition-all duration-300", i === page ? "w-7 bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.45)]" : "w-2.5 bg-muted/35"].join(" ")}
 							/>
 						))}
 					</div>
@@ -238,7 +262,7 @@ export default function Ayuda() {
 					<button
 						onClick={next}
 						disabled={page === totalPages - 1}
-						className={`inline-flex items-center gap-2 px-5 py-2 rounded-full border border-cyan-400/40 bg-cyan-500/10 text-white font-semibold text-sm shadow-md transition-all duration-200 hover:bg-cyan-500/20 hover:border-cyan-400/70 active:scale-95 ${page === totalPages - 1 ? "opacity-30 cursor-not-allowed" : ""}`}
+						className={`inline-flex items-center gap-2 rounded-full border border-cyan-400/35 bg-cyan-500/15 px-5 py-2 text-sm font-semibold text-content shadow-lg shadow-black/5 backdrop-blur-xl transition-all duration-200 hover:border-brand/60 hover:bg-cyan-500/25 hover:text-brand active:scale-95 ${page === totalPages - 1 ? "cursor-not-allowed opacity-40" : ""}`}
 					>
 						Siguiente <ChevronRight className="size-4" />
 					</button>
@@ -254,7 +278,7 @@ export default function Ayuda() {
 							animate={{ x: 0, opacity: 1 }}
 							exit={{ x: dir === 1 ? -40 : 40, opacity: 0 }}
 							transition={{ duration: 0.25 }}
-							className="grid grid-cols-1 lg:grid-cols-2 auto-rows-max gap-7 w-full justify-items-center items-start"
+							className="grid w-full grid-cols-1 auto-rows-max items-start justify-items-center gap-5 lg:grid-cols-2"
 						>
 							{items.map((item, i) => (
 								<FaqItem key={item.q} q={item.q} a={item.a} idx={start + i} isContact={!!item.isContact} />

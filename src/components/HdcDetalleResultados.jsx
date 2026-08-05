@@ -202,30 +202,30 @@ function buildNegativeCreditSummary({ liabilities, creditCard, overviewCount }) 
 
 function StatTile({ label, value, tone = "cyan" }) {
   const tones = {
-    cyan: "border-cyan-500/20 from-cyan-500/10 to-blue-500/5 text-cyan-200",
-    emerald: "border-emerald-500/20 from-emerald-500/10 to-cyan-500/5 text-emerald-200",
-    amber: "border-amber-500/20 from-amber-500/10 to-orange-500/5 text-amber-200",
-    rose: "border-rose-500/20 from-rose-500/10 to-pink-500/5 text-rose-200",
-    slate: "border-white/10 from-white/[0.05] to-white/[0.02] text-slate-200",
+    cyan: "border-cyan-500/25 from-cyan-500/10 to-blue-500/5",
+    emerald: "border-emerald-500/25 from-emerald-500/10 to-cyan-500/5",
+    amber: "border-amber-500/25 from-amber-500/10 to-orange-500/5",
+    rose: "border-rose-500/25 from-rose-500/10 to-pink-500/5",
+    slate: "border-line/15 from-surface-2/80 to-surface/70",
   };
   return (
-    <div className={`rounded-2xl border bg-gradient-to-br p-4 ${tones[tone] || tones.cyan}`}>
-      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
-      <div className="mt-1.5 text-lg font-black leading-tight text-white">{value}</div>
+    <div className={`rounded-2xl border bg-gradient-to-br p-4 shadow-lg shadow-black/5 ${tones[tone] || tones.cyan}`}>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">{label}</div>
+      <div className="mt-1.5 text-lg font-black leading-tight text-content">{value}</div>
     </div>
   );
 }
 
 function Section({ icon: Icon, title, count, children }) {
   return (
-    <section className="rounded-[22px] border border-white/[0.08] bg-slate-950/60 p-5 backdrop-blur-xl">
+    <section className="rounded-[22px] border border-line/15 bg-surface/90 p-5 shadow-xl shadow-black/5 backdrop-blur-xl">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] text-cyan-300">
           <Icon className="h-5 w-5" />
         </div>
-        <h3 className="text-base font-bold text-white">{title}</h3>
+        <h3 className="text-base font-bold text-content">{title}</h3>
         {count !== undefined && (
-          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-semibold text-slate-300">
+          <span className="rounded-full border border-line/15 bg-surface-2/70 px-2.5 py-0.5 text-xs font-semibold text-muted">
             {count}
           </span>
         )}
@@ -246,7 +246,7 @@ function Badge({ children, tone = "slate" }) {
   const tones = {
     emerald: "border-emerald-500/25 bg-emerald-500/10 text-emerald-300",
     rose: "border-rose-500/25 bg-rose-500/10 text-rose-300",
-    slate: "border-white/10 bg-white/5 text-slate-300",
+    slate: "border-line/15 bg-surface-2/70 text-muted",
   };
   return (
     <span className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tones[tone]}`}>
@@ -257,19 +257,19 @@ function Badge({ children, tone = "slate" }) {
 
 function AccountCard({ titulo, subtitulo, estado, filas }) {
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 transition hover:border-white/15 hover:bg-white/[0.05]">
+    <div className="rounded-2xl border border-line/15 bg-surface-2/70 p-4 transition hover:border-brand/25 hover:bg-surface">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="truncate text-sm font-bold text-white">{titulo}</div>
-          {subtitulo && <div className="mt-0.5 text-xs text-slate-400">{subtitulo}</div>}
+          <div className="truncate text-sm font-bold text-content">{titulo}</div>
+          {subtitulo && <div className="mt-0.5 text-xs text-muted">{subtitulo}</div>}
         </div>
         {estado && <Badge tone={estadoTone(estado)}>{estado}</Badge>}
       </div>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
         {filas.filter((f) => f && f.value !== "—" && f.value !== "$0").map((f) => (
           <div key={f.label}>
-            <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">{f.label}</div>
-            <div className="mt-0.5 text-xs font-medium text-slate-100">{f.value}</div>
+            <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-muted">{f.label}</div>
+            <div className="mt-0.5 text-xs font-medium text-content">{f.value}</div>
           </div>
         ))}
       </div>
@@ -284,7 +284,7 @@ function DebtCompositionDonut({ data }) {
 
   return (
     <Section icon={Wallet} title="Distribución de endeudamiento actual">
-      <div className="grid gap-4 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-slate-900/80 via-[#0b2630]/80 to-slate-950/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] lg:grid-cols-[minmax(260px,0.9fr)_1.1fr]">
+      <div className="grid gap-4 rounded-2xl border border-line/15 bg-gradient-to-br from-surface-2/95 via-surface/90 to-surface-2/80 p-4 shadow-lg shadow-black/5 lg:grid-cols-[minmax(260px,0.9fr)_1.1fr]">
         <div className="relative h-[280px] min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -318,10 +318,10 @@ function DebtCompositionDonut({ data }) {
               <Tooltip
                 cursor={false}
                 contentStyle={{
-                  background: "rgba(6, 24, 31, 0.96)",
-                  border: "1px solid rgba(103, 232, 249, 0.18)",
+                  background: "rgb(var(--th-surface))",
+                  border: "1px solid rgb(var(--th-line) / 0.18)",
                   borderRadius: 12,
-                  color: "#e8f1f2",
+                  color: "rgb(var(--th-content))",
                   boxShadow: "0 18px 48px rgba(2,6,23,.32)",
                 }}
                 formatter={(value, name) => [fmtMoney(value), name]}
@@ -329,8 +329,8 @@ function DebtCompositionDonut({ data }) {
             </PieChart>
           </ResponsiveContainer>
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Total deuda</div>
-            <div className="mt-1 text-2xl font-black tracking-tight text-white">{fmtMoney(total)}</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted">Total deuda</div>
+            <div className="mt-1 text-2xl font-black tracking-tight text-content">{fmtMoney(total)}</div>
           </div>
         </div>
 
@@ -338,15 +338,15 @@ function DebtCompositionDonut({ data }) {
           {data.map((item) => {
             const percent = total > 0 ? (item.value / total) * 100 : 0;
             return (
-              <div key={item.name} className="rounded-2xl border border-white/[0.07] bg-white/[0.035] p-3">
+              <div key={item.name} className="rounded-2xl border border-line/15 bg-surface/80 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-2">
                     <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="truncate text-sm font-bold text-white">{item.name}</span>
+                    <span className="truncate text-sm font-bold text-content">{item.name}</span>
                   </div>
-                  <span className="shrink-0 text-sm font-black text-cyan-100">{percent.toFixed(1)}%</span>
+                  <span className="shrink-0 text-sm font-black text-brand">{percent.toFixed(1)}%</span>
                 </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -355,7 +355,7 @@ function DebtCompositionDonut({ data }) {
                     }}
                   />
                 </div>
-                <div className="mt-1.5 text-xs font-semibold text-slate-300">{fmtMoney(item.value)}</div>
+                <div className="mt-1.5 text-xs font-semibold text-muted">{fmtMoney(item.value)}</div>
               </div>
             );
           })}
@@ -370,7 +370,7 @@ function DebtTrendChart({ data }) {
 
   return (
     <Section icon={Wallet} title="Evolución de cupo, saldo y % de deuda">
-      <div className="rounded-2xl border border-white/[0.08] bg-[#0b2630]/80 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="rounded-2xl border border-line/15 bg-surface-2/70 p-4 shadow-lg shadow-black/5">
         <div className="h-[320px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 14, right: 28, left: 4, bottom: 8 }}>
@@ -384,38 +384,38 @@ function DebtTrendChart({ data }) {
                   <stop offset="100%" stopColor="#10b981" />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="#22424c" strokeOpacity={0.62} vertical={false} />
+              <CartesianGrid stroke="rgb(var(--th-line))" strokeOpacity={0.62} vertical={false} />
               <XAxis
                 dataKey="period"
-                tick={{ fill: "#9bb9c3", fontSize: 12 }}
-                axisLine={{ stroke: "#2b5662" }}
+                tick={{ fill: "rgb(var(--th-muted))", fontSize: 12 }}
+                axisLine={{ stroke: "rgb(var(--th-line))" }}
                 tickLine={false}
               />
               <YAxis
                 yAxisId="money"
                 tickFormatter={fmtAxis}
-                tick={{ fill: "#9bb9c3", fontSize: 12 }}
-                axisLine={{ stroke: "#2b5662" }}
+                tick={{ fill: "rgb(var(--th-muted))", fontSize: 12 }}
+                axisLine={{ stroke: "rgb(var(--th-line))" }}
                 tickLine={false}
-                label={{ value: "Valor reportado", angle: -90, position: "insideLeft", fill: "#9bb9c3", fontSize: 12 }}
+                label={{ value: "Valor reportado", angle: -90, position: "insideLeft", fill: "rgb(var(--th-muted))", fontSize: 12 }}
               />
               <YAxis
                 yAxisId="percent"
                 orientation="right"
                 domain={[0, 100]}
                 tickFormatter={(value) => `${value}%`}
-                tick={{ fill: "#9bb9c3", fontSize: 12 }}
-                axisLine={{ stroke: "#2b5662" }}
+                tick={{ fill: "rgb(var(--th-muted))", fontSize: 12 }}
+                axisLine={{ stroke: "rgb(var(--th-line))" }}
                 tickLine={false}
-                label={{ value: "% deuda", angle: 90, position: "insideRight", fill: "#9bb9c3", fontSize: 12 }}
+                label={{ value: "% deuda", angle: 90, position: "insideRight", fill: "rgb(var(--th-muted))", fontSize: 12 }}
               />
               <Tooltip
                 cursor={{ stroke: "#67e8f9", strokeOpacity: 0.18 }}
                 contentStyle={{
-                  background: "rgba(6, 24, 31, 0.96)",
-                  border: "1px solid rgba(103, 232, 249, 0.18)",
+                  background: "rgb(var(--th-surface))",
+                  border: "1px solid rgb(var(--th-line) / 0.18)",
                   borderRadius: 12,
-                  color: "#e8f1f2",
+                  color: "rgb(var(--th-content))",
                   boxShadow: "0 18px 48px rgba(2,6,23,.32)",
                 }}
                 formatter={(value, name) => {
@@ -427,7 +427,7 @@ function DebtTrendChart({ data }) {
                 verticalAlign="top"
                 height={36}
                 iconType="circle"
-                wrapperStyle={{ color: "#c8d9de", fontSize: 12 }}
+                wrapperStyle={{ color: "rgb(var(--th-muted))", fontSize: 12 }}
               />
               <Line
                 yAxisId="money"
@@ -436,7 +436,7 @@ function DebtTrendChart({ data }) {
                 name="Cupo total"
                 stroke="url(#hdc-cupo-line)"
                 strokeWidth={3}
-                dot={{ r: 4, strokeWidth: 2, fill: "#0b2630", stroke: "#38bdf8" }}
+                dot={{ r: 4, strokeWidth: 2, fill: "rgb(var(--th-surface))", stroke: "#38bdf8" }}
                 activeDot={{ r: 6 }}
                 isAnimationActive
                 animationDuration={900}
@@ -448,7 +448,7 @@ function DebtTrendChart({ data }) {
                 name="Saldo total"
                 stroke="url(#hdc-saldo-line)"
                 strokeWidth={3}
-                dot={{ r: 4, strokeWidth: 2, fill: "#0b2630", stroke: "#34d399" }}
+                dot={{ r: 4, strokeWidth: 2, fill: "rgb(var(--th-surface))", stroke: "#34d399" }}
                 activeDot={{ r: 6 }}
                 isAnimationActive
                 animationDuration={1050}
@@ -461,7 +461,7 @@ function DebtTrendChart({ data }) {
                 stroke="#f59e0b"
                 strokeWidth={3}
                 strokeDasharray="7 5"
-                dot={{ r: 4, strokeWidth: 2, fill: "#0b2630", stroke: "#f59e0b" }}
+                dot={{ r: 4, strokeWidth: 2, fill: "rgb(var(--th-surface))", stroke: "#f59e0b" }}
                 activeDot={{ r: 6 }}
                 isAnimationActive
                 animationDuration={1200}
@@ -561,7 +561,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
   return (
     <div className="grid gap-4">
       {/* Encabezado */}
-      <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-slate-950/70 p-6 backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-[24px] border border-line/15 bg-surface/90 p-6 shadow-2xl shadow-black/5 backdrop-blur-xl">
         <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-cyan-500/[0.06] blur-3xl" />
         <div className="relative flex flex-wrap items-center gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
@@ -570,8 +570,8 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
           </div>
           {responseDesc && <Badge tone="emerald">{responseDesc}</Badge>}
         </div>
-        <h2 className="mt-4 text-2xl font-black tracking-tight text-white md:text-3xl">{fullName}</h2>
-        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-400">
+        <h2 className="mt-4 text-2xl font-black tracking-tight text-content md:text-3xl">{fullName}</h2>
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted">
           <span>Doc: {fmtText(basic.personId?.personIdNumber || consultaObj?.numero_identificacion)}</span>
           {genero && <span>Género: {genero}</span>}
           <span>Edad: {edad}</span>
@@ -596,10 +596,10 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
       </div>
 
       <section
-        className={`rounded-[22px] border p-5 backdrop-blur-xl ${
+        className={`rounded-[22px] border p-5 shadow-xl shadow-black/5 backdrop-blur-xl ${
           negativeSummary.count > 0
-            ? "border-rose-500/20 bg-rose-500/[0.07]"
-            : "border-emerald-500/20 bg-emerald-500/[0.06]"
+            ? "border-rose-500/25 bg-rose-500/[0.07]"
+            : "border-emerald-500/25 bg-emerald-500/[0.06]"
         }`}
       >
         <div className="flex items-start gap-3">
@@ -613,13 +613,13 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
             <AlertTriangle className="h-5 w-5" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-base font-bold text-white">Aclaración ejecutiva sobre reportes negativos</h3>
-            <p className="mt-1 text-sm leading-6 text-slate-300">
+            <h3 className="text-base font-bold text-content">Aclaración ejecutiva sobre reportes negativos</h3>
+            <p className="mt-1 text-sm leading-6 text-muted">
               {negativeSummary.count > 0
                 ? `Según la información reportada en Econfia Credit Report, el titular registra ${negativeSummary.count} producto(s) con señal negativa en centrales de riesgo.`
                 : "Según la información reportada en Econfia Credit Report, no se identifican productos con señal negativa en centrales de riesgo."}
             </p>
-            <p className="mt-1 text-sm leading-6 text-slate-300">
+            <p className="mt-1 text-sm leading-6 text-muted">
               {negativeSummary.entities.length
                 ? `Entidad(es) asociada(s): ${negativeSummary.entities.join(", ")}.`
                 : negativeSummary.count > 0
@@ -629,18 +629,18 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
             {negativeSummary.rows.length > 0 && (
               <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {negativeSummary.rows.map((row, index) => (
-                  <div key={`${row.entity}-${index}`} className="rounded-xl border border-white/10 bg-slate-950/40 p-3">
-                    <div className="text-sm font-bold text-white">{row.entity}</div>
-                    <div className="mt-1 text-xs text-slate-400">{row.product}</div>
-                    <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-200">
-                      <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1">Estado: {row.status}</span>
-                      <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1">Mora: {fmtMoney(row.overdue)}</span>
+                  <div key={`${row.entity}-${index}`} className="rounded-xl border border-line/15 bg-surface/80 p-3">
+                    <div className="text-sm font-bold text-content">{row.entity}</div>
+                    <div className="mt-1 text-xs text-muted">{row.product}</div>
+                    <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-semibold text-content">
+                      <span className="rounded-md border border-line/15 bg-surface-2/70 px-2 py-1">Estado: {row.status}</span>
+                      <span className="rounded-md border border-line/15 bg-surface-2/70 px-2 py-1">Mora: {fmtMoney(row.overdue)}</span>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-            <p className="mt-3 text-xs leading-5 text-slate-400">
+            <p className="mt-3 text-xs leading-5 text-muted">
               La señal negativa se determina por saldo en mora positivo o por estados/calificaciones de mora,
               vencimiento, castigo, cobro jurídico o equivalentes presentes en el reporte.
             </p>
@@ -768,10 +768,10 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
         <Section icon={Search} title="Huellas de consulta" count={footprints.length}>
           <div className="grid gap-2 md:grid-cols-2">
             {footprints.map((item, i) => (
-              <div key={item.primaryKey || i} className="flex items-center justify-between rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+              <div key={item.primaryKey || i} className="flex items-center justify-between rounded-xl border border-line/15 bg-surface-2/70 px-4 py-3">
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold text-white">{fmtText(item.inquiryBusinessName)}</div>
-                  <div className="text-xs text-slate-400">{fmtText(item.inquiryReasonDesc)}</div>
+                  <div className="truncate text-sm font-semibold text-content">{fmtText(item.inquiryBusinessName)}</div>
+                  <div className="text-xs text-muted">{fmtText(item.inquiryReasonDesc)}</div>
                 </div>
                 <div className="shrink-0 text-xs font-medium text-cyan-300">{fmtText(item.inquiryDate)}</div>
               </div>
@@ -790,7 +790,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
           {showJson ? "Ocultar" : "Ver"} respuesta completa (JSON)
         </button>
         {showJson && (
-          <pre className="mt-2 max-h-[28rem] overflow-auto rounded-xl border border-white/10 bg-[#02040a] p-4 text-[11px] leading-5 text-cyan-100/80">
+          <pre className="mt-2 max-h-[28rem] overflow-auto rounded-xl border border-line/15 bg-[#02040a] p-4 text-[11px] leading-5 text-cyan-100/80">
             {JSON.stringify(respuesta, null, 2)}
           </pre>
         )}

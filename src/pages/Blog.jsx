@@ -37,10 +37,10 @@ if (!API_URL.endsWith("/")) API_URL += "/";
 const Tag = ({ children, onClick, active }) => (
   <span 
     onClick={onClick}
-    className={`text-xs px-4 py-2 rounded-full border cursor-pointer transition-all ${
+    className={`cursor-pointer rounded-full border px-4 py-2 text-xs font-semibold transition-all ${
       active 
-        ? 'border-cyan-400 bg-cyan-400/20 text-cyan-300' 
-        : 'border-white/20 bg-white/5 hover:border-cyan-400/50 hover:bg-white/10'
+        ? 'border-brand/40 bg-brand/15 text-brand' 
+        : 'border-line/15 bg-surface/70 text-muted hover:border-brand/50 hover:bg-brand/10 hover:text-brand'
     }`}
   >
     {children}
@@ -52,11 +52,11 @@ function FeaturedPost({ post }) {
   return (
     <article
       onClick={() => navigate(`/blog/${post.slug}`)}
-      className="cursor-pointer rounded-3xl overflow-hidden border border-cyan-500/30 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 transform hover:scale-[1.02] group"
+      className="group cursor-pointer overflow-hidden rounded-3xl border border-brand/25 bg-surface/90 shadow-[0_22px_65px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-brand/45 hover:shadow-cyan-500/20"
     >
       <div className="grid md:grid-cols-2 gap-0">
         {/* Imagen */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-black/40 rounded-3xl flex items-center justify-center">
+        <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-3xl bg-surface-2">
           <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
             <FaFire /> Destacado
           </div>
@@ -72,8 +72,8 @@ function FeaturedPost({ post }) {
         </div>
 
         {/* Contenido */}
-        <div className="p-8 flex flex-col justify-center">
-          <div className="flex items-center gap-4 text-cyan-300 text-sm mb-4">
+        <div className="flex flex-col justify-center p-8">
+          <div className="mb-4 flex items-center gap-4 text-sm font-semibold text-brand">
             <span className="flex items-center gap-1">
               <FaCalendar /> {post.date}
             </span>
@@ -82,17 +82,17 @@ function FeaturedPost({ post }) {
             </span>
           </div>
 
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight group-hover:text-cyan-300 transition-colors">
+          <h2 className="mb-4 text-3xl font-black leading-tight text-content transition-colors group-hover:text-brand md:text-4xl">
             {post.title}
           </h2>
 
-          <p className="text-white/80 text-lg leading-relaxed mb-6">
+          <p className="mb-6 text-lg leading-relaxed text-muted">
             {post.excerpt}
           </p>
 
           <div className="flex flex-wrap gap-2 mb-6">
             {post.tags?.map((t) => (
-              <span key={t} className="text-xs px-3 py-1 rounded-full border border-cyan-400/50 bg-cyan-400/10 text-cyan-300">
+              <span key={t} className="rounded-full border border-brand/40 bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
                 {t}
               </span>
             ))}
@@ -112,10 +112,10 @@ function PostCard({ post }) {
   return (
     <article
       onClick={() => navigate(`/blog/${post.slug}`)}
-      className="cursor-pointer rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm shadow-lg hover:border-cyan-300/40 hover:shadow-cyan-500/20 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.03] flex flex-col h-full group"
+      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-line/15 bg-surface/90 shadow-[0_16px_42px_rgba(15,23,42,0.12)] backdrop-blur-sm transition-all duration-300 hover:scale-[1.03] hover:border-brand/40 hover:shadow-cyan-500/20"
     >
       {/* cover con overlay gradient */}
-      <div className="aspect-[4/3] w-full overflow-hidden relative bg-black/40 rounded-2xl flex items-center justify-center">
+      <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl bg-surface-2">
         <img
           src={post.cover}
           alt={post.title}
@@ -130,7 +130,7 @@ function PostCard({ post }) {
 
       {/* body */}
       <div className="flex flex-col flex-1 p-6">
-        <div className="flex items-center gap-3 text-white/60 text-sm mb-3">
+        <div className="mb-3 flex items-center gap-3 text-sm font-semibold text-muted">
           <span className="flex items-center gap-1">
             <FaCalendar className="text-cyan-400" /> {post.date}
           </span>
@@ -139,11 +139,11 @@ function PostCard({ post }) {
           </span>
         </div>
 
-        <h3 className="text-white font-bold text-xl mb-3 line-clamp-2 group-hover:text-cyan-300 transition-colors">
+        <h3 className="mb-3 line-clamp-2 text-xl font-black text-content transition-colors group-hover:text-brand">
           {post.title}
         </h3>
 
-        <p className="text-white/70 text-sm leading-relaxed line-clamp-3 mb-4">
+        <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-muted">
           {post.excerpt}
         </p>
 
@@ -196,21 +196,27 @@ export default function Blog() {
   const regularPosts = filteredPosts.filter((p) => !p.featured);
 
   return (
-    <main className="min-h-screen pt-20 md:pt-24 pb-20 text-white bg-gradient-to-b from-gray-900 via-blue-900/20 to-gray-900">
+    <main className="min-h-screen bg-transparent pb-20 pt-20 text-content md:pt-24">
       <Header />
       
       <section className="max-w-7xl mx-auto px-6">
         {/* Header del blog con animación */}
         <header className="mb-12 text-center">
           <div className="inline-block mb-4">
-            <span className="px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-sm font-semibold">
+            <span className="rounded-full border border-brand/30 bg-brand/10 px-4 py-2 text-sm font-black text-brand">
               📚 Centro de Conocimiento
             </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-4 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
+          <h1
+            className="mb-4 bg-clip-text text-4xl font-black leading-tight tracking-tight text-transparent md:text-5xl"
+            style={{
+              backgroundImage:
+                "linear-gradient(90deg, rgb(var(--th-content)), rgb(var(--th-brand)), rgb(var(--th-brand-2)))",
+            }}
+          >
             Blog Econfia
           </h1>
-          <p className="text-xl text-white/70 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-xl text-muted">
             Ideas, guías y novedades sobre verificación, cumplimiento normativo y debida diligencia
           </p>
         </header>
@@ -219,13 +225,13 @@ export default function Blog() {
         <div className="mb-10 space-y-6">
           {/* Búsqueda */}
           <div className="relative max-w-2xl mx-auto">
-            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/40" />
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 transform text-muted" />
             <input
               type="text"
               placeholder="Buscar artículos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all backdrop-blur-sm"
+              className="w-full rounded-2xl border border-line/15 bg-surface/90 py-4 pl-12 pr-4 text-content placeholder:text-muted/70 backdrop-blur-sm transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
             />
           </div>
 
@@ -273,22 +279,22 @@ export default function Blog() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-white/60 text-lg">No se encontraron artículos con esos filtros</p>
+            <p className="text-lg text-muted">No se encontraron artículos con esos filtros</p>
           </div>
         )}
 
         {/* Newsletter CTA */}
-        <div className="mt-16 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-3xl p-8 md:p-12 text-center">
-          <h3 className="text-3xl font-bold text-white mb-4">
+        <div className="mt-16 rounded-3xl border border-brand/25 bg-surface/90 p-8 text-center shadow-[0_22px_65px_rgba(15,23,42,0.16)] backdrop-blur-xl md:p-12">
+          <h3 className="mb-4 text-3xl font-black text-content">
             ¿Quieres recibir nuestras últimas publicaciones?
           </h3>
-          <p className="text-white/70 mb-6 max-w-2xl mx-auto">
+          <p className="mx-auto mb-6 max-w-2xl text-muted">
             Suscríbete a nuestro newsletter y recibe contenido exclusivo sobre compliance, 
             verificación y las últimas tendencias en debida diligencia.
           </p>
           <Link
             to="/contacto"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-cyan-500 text-black font-semibold rounded-full hover:bg-cyan-400 transition transform hover:scale-105 shadow-lg shadow-cyan-500/50"
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 px-8 py-4 font-black text-white shadow-lg shadow-cyan-500/30 transition hover:scale-105"
           >
             Suscribirse ahora
             <FaArrowRight />

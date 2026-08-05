@@ -213,8 +213,14 @@ export default function AdminBlog() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <section className="relative min-h-screen py-4 pb-28 bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 overflow-y-auto">
-      <div className="w-full max-w-5xl mx-auto px-3 md:px-6">
+    <section className="relative min-h-screen overflow-y-auto bg-transparent px-4 py-8 pb-28 sm:px-6">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-12 top-20 h-64 w-64 rounded-full bg-brand/15 blur-3xl" />
+        <div className="absolute right-14 top-32 h-80 w-80 rounded-full bg-brand-2/15 blur-3xl" />
+        <div className="absolute bottom-10 left-1/3 h-72 w-72 rounded-full bg-ok/10 blur-3xl" />
+      </div>
+
+      <div className="mx-auto w-full max-w-6xl">
 
         {toast && (
           <Toast {...toast} onClose={() => setToast(null)}
@@ -223,101 +229,115 @@ export default function AdminBlog() {
         )}
 
         {/* ── Header ── */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 mt-2">
-          <div>
-            <p className="text-xs text-cyan-400 font-semibold tracking-widest uppercase mb-1">Centro Administrativo</p>
-            <h2 className="text-3xl font-black text-white drop-shadow-lg">Blog & Noticias</h2>
-            <p className="text-white/50 text-sm mt-1">
-              {totalPublicados} publicado{totalPublicados !== 1 ? "s" : ""} · {totalBorradores} borrador{totalBorradores !== 1 ? "es" : ""}
+        <div className="mb-6 overflow-hidden rounded-[28px] border border-line/15 bg-surface/90 p-6 shadow-[0_22px_65px_rgba(15,23,42,0.18)] backdrop-blur-xl sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="mb-4 inline-flex rounded-full border border-brand/25 bg-brand/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.28em] text-brand">Centro Administrativo</p>
+            <h2 className="text-4xl font-black tracking-tight text-content sm:text-5xl">Blog & Noticias</h2>
+            <p className="mt-4 text-base leading-7 text-muted">
+              Administra publicaciones, estados, destacados y contenido multimedia del blog.
             </p>
           </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-ok/25 bg-ok/10 px-5 py-4 shadow-inner">
+              <div className="text-[11px] font-black uppercase tracking-[0.24em] text-muted">Publicados</div>
+              <div className="mt-2 text-3xl font-black text-ok">{totalPublicados}</div>
+            </div>
+            <div className="rounded-2xl border border-warn/25 bg-warn/10 px-5 py-4 shadow-inner">
+              <div className="text-[11px] font-black uppercase tracking-[0.24em] text-muted">Borradores</div>
+              <div className="mt-2 text-3xl font-black text-warn">{totalBorradores}</div>
+            </div>
+          </div>
+          </div>
+          <div className="mt-6 flex justify-end">
           <button
             onClick={() => { resetForm(); setVista(vista === "form" ? "lista" : "form"); }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white transition-all"
-            style={{ background: vista === "form" ? "#334155" : "linear-gradient(135deg,#06b6d4,#3b82f6)" }}
+            className="flex items-center gap-2 rounded-xl px-5 py-3 font-black text-white shadow-[0_16px_35px_rgba(14,165,233,0.28)] transition-all hover:-translate-y-0.5"
+            style={{ background: vista === "form" ? "linear-gradient(135deg,#475569,#334155)" : "linear-gradient(135deg,#06b6d4,#3b82f6)" }}
           >
             {vista === "form" ? "← Volver a la lista" : "+ Nueva publicación"}
           </button>
+          </div>
         </div>
 
         {/* ══════════════════════════════════════════════════════
             FORMULARIO
         ══════════════════════════════════════════════════════ */}
         {vista === "form" && (
-          <form onSubmit={handleSubmit} className="bg-slate-800/80 rounded-2xl border border-cyan-900/40 shadow-2xl p-5 md:p-8 mb-8 space-y-5">
-            <h3 className="text-xl font-bold text-cyan-300 mb-2">
+          <form onSubmit={handleSubmit} className="mb-8 space-y-5 rounded-[24px] border border-line/15 bg-surface/90 p-5 shadow-[0_22px_65px_rgba(15,23,42,0.16)] backdrop-blur-xl md:p-8">
+            <h3 className="mb-2 text-xl font-black text-brand">
               {editId ? "✏️ Editar publicación" : "📝 Nueva publicación"}
             </h3>
 
             {/* Título */}
             <div>
-              <label className="block text-xs text-white/60 mb-1 font-semibold uppercase tracking-wide">Título *</label>
+              <label className="mb-1 block text-xs font-black uppercase tracking-wide text-muted">Título *</label>
               <input name="titulo" value={form.titulo} onChange={handleChange} required
                 placeholder="Título de la publicación"
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none text-base"
+                className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 text-base font-semibold text-content outline-none transition placeholder:text-muted/70 focus:border-brand/50 focus:ring-4 focus:ring-brand/10"
               />
             </div>
 
             {/* Extracto */}
             <div>
-              <label className="block text-xs text-white/60 mb-1 font-semibold uppercase tracking-wide">Extracto * <span className="normal-case text-white/40">(resumen corto para la lista)</span></label>
+              <label className="mb-1 block text-xs font-black uppercase tracking-wide text-muted">Extracto * <span className="normal-case text-muted/70">(resumen corto para la lista)</span></label>
               <textarea name="extracto" value={form.extracto} onChange={handleChange} required rows={2}
                 placeholder="Breve descripción que aparece en la lista del blog..."
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none resize-none"
+                className="w-full resize-none rounded-xl border border-line/15 bg-surface px-4 py-3 text-content outline-none transition placeholder:text-muted/70 focus:border-brand/50 focus:ring-4 focus:ring-brand/10"
               />
             </div>
 
             {/* Contenido */}
             <div>
-              <label className="block text-xs text-white/60 mb-2 font-semibold uppercase tracking-wide">
-                Contenido * <span className="normal-case text-white/40">(texto completo del artículo)</span>
+              <label className="mb-2 block text-xs font-black uppercase tracking-wide text-muted">
+                Contenido * <span className="normal-case text-muted/70">(texto completo del artículo)</span>
               </label>
 
               {/* ── Barra de herramientas ── */}
-              <div className="flex flex-wrap gap-1.5 mb-2 p-2 rounded-t-xl bg-slate-900 border border-cyan-700/40 border-b-0">
+              <div className="mb-2 flex flex-wrap gap-1.5 rounded-t-xl border border-line/15 border-b-0 bg-surface-2/70 p-2">
                 {/* Formato inline */}
                 <button type="button" title="Negrita" onClick={() => insertAtCursor("**", "**", "texto en negrita")}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-white text-xs font-bold border border-white/10 transition-all">B</button>
+                  className="rounded-lg border border-line/15 bg-surface px-2.5 py-1 text-xs font-bold text-content transition-all hover:bg-brand/10">B</button>
                 <button type="button" title="Cursiva" onClick={() => insertAtCursor("*", "*", "texto en cursiva")}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-white/80 text-xs italic border border-white/10 transition-all">I</button>
+                  className="rounded-lg border border-line/15 bg-surface px-2.5 py-1 text-xs italic text-content/80 transition-all hover:bg-brand/10">I</button>
 
-                <span className="w-px bg-white/10 mx-1" />
+                <span className="mx-1 w-px bg-line/10" />
 
                 {/* Encabezados */}
                 <button type="button" title="Título grande" onClick={() => insertBlock("# Título de sección")}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-cyan-300 text-xs font-bold border border-white/10 transition-all">H1</button>
+                  className="rounded-lg border border-line/15 bg-surface px-2.5 py-1 text-xs font-bold text-brand transition-all hover:bg-brand/10">H1</button>
                 <button type="button" title="Subtítulo" onClick={() => insertBlock("## Subtítulo")}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold border border-white/10 transition-all">H2</button>
+                  className="rounded-lg border border-line/15 bg-surface px-2.5 py-1 text-xs font-semibold text-brand transition-all hover:bg-brand/10">H2</button>
                 <button type="button" title="Título pequeño" onClick={() => insertBlock("### Título pequeño")}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-cyan-300 text-xs border border-white/10 transition-all">H3</button>
+                  className="rounded-lg border border-line/15 bg-surface px-2.5 py-1 text-xs text-brand transition-all hover:bg-brand/10">H3</button>
 
-                <span className="w-px bg-white/10 mx-1" />
+                <span className="mx-1 w-px bg-line/10" />
 
                 {/* Bloques */}
                 <button type="button" title="Cita destacada" onClick={() => insertBlock('> "Escribe aquí una cita o frase destacada."')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-white/70 text-xs italic border border-white/10 transition-all">" "</button>
+                  className="rounded-lg border border-line/15 bg-surface px-2.5 py-1 text-xs italic text-content/70 transition-all hover:bg-brand/10">" "</button>
                 <button type="button" title="Lista con puntos" onClick={() => insertBlock("- Punto uno\n- Punto dos\n- Punto tres")}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-white text-xs border border-white/10 transition-all">• Lista</button>
+                  className="rounded-lg border border-line/15 bg-surface px-2.5 py-1 text-xs text-content transition-all hover:bg-brand/10">• Lista</button>
                 <button type="button" title="Lista numerada" onClick={() => insertBlock("1. Primer paso\n2. Segundo paso\n3. Tercer paso")}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-white text-xs border border-white/10 transition-all">1. Lista</button>
+                  className="rounded-lg border border-line/15 bg-surface px-2.5 py-1 text-xs text-content transition-all hover:bg-brand/10">1. Lista</button>
                 <button type="button" title="Bloque destacado" onClick={() => insertBlock("💡 Texto de consejo o dato importante")}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-yellow-300 text-xs border border-white/10 transition-all">💡 Destacado</button>
+                  className="rounded-lg border border-warn/20 bg-warn/10 px-2.5 py-1 text-xs text-warn transition-all hover:bg-warn/15">💡 Destacado</button>
                 <button type="button" title="Línea separadora" onClick={() => insertBlock("---")}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-cyan-500/20 text-white/50 text-xs border border-white/10 transition-all">— Separador</button>
+                  className="rounded-lg border border-line/15 bg-surface px-2.5 py-1 text-xs text-muted transition-all hover:bg-brand/10">— Separador</button>
 
-                <span className="w-px bg-white/10 mx-1" />
+                <span className="mx-1 w-px bg-line/10" />
 
                 {/* Sección especial */}
                 <button type="button" title="Insertar tarjetas de beneficios" onClick={() => insertBlock(GRID_TEMPLATE)}
-                  className="px-3 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/35 text-cyan-300 text-xs font-bold border border-cyan-500/40 transition-all flex items-center gap-1">
+                  className="flex items-center gap-1 rounded-lg border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-bold text-brand transition-all hover:bg-brand/15">
                   ▦ Tarjetas
                 </button>
                 <button type="button" title="Insertar galería de imágenes con flip" onClick={() => insertBlock("[gallery]\nhttps://url-imagen-1.jpg :: Descripción de la primera imagen\nhttps://url-imagen-2.jpg :: Descripción de la segunda imagen\n[/gallery]")}
-                  className="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/35 text-emerald-300 text-xs font-bold border border-emerald-500/40 transition-all flex items-center gap-1">
+                  className="flex items-center gap-1 rounded-lg border border-ok/30 bg-ok/10 px-3 py-1 text-xs font-bold text-ok transition-all hover:bg-ok/15">
                   🖼️ Galería
                 </button>
                 <button type="button" title="Insertar video embebido en el contenido" onClick={() => insertBlock("[video]https://youtube.com/watch?v=XXXXXXXXXX[/video]")}
-                  className="px-3 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/35 text-purple-300 text-xs font-bold border border-purple-500/40 transition-all flex items-center gap-1">
+                  className="flex items-center gap-1 rounded-lg border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs font-bold text-violet-400 transition-all hover:bg-violet-500/15">
                   ▶ Video
                 </button>
               </div>
@@ -326,9 +346,9 @@ export default function AdminBlog() {
                 ref={contenidoRef}
                 name="contenido" value={form.contenido} onChange={handleChange} required rows={12}
                 placeholder={"Escribe el contenido aquí...\n\nEjemplo:\nUsa los botones de arriba para dar formato.\nSepara los párrafos con una línea en blanco."}
-                className="w-full px-4 py-3 rounded-b-xl bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none resize-y font-mono text-sm"
+                className="w-full resize-y rounded-b-xl border border-line/15 bg-surface px-4 py-3 font-mono text-sm text-content outline-none placeholder:text-muted/70 focus:border-brand/50"
               />
-              <p className="text-white/25 text-xs mt-1">
+              <p className="mt-1 text-xs text-muted/70">
                 Formatos: **negrita** · *cursiva* · # Título · &gt; cita · - lista · 💡 destacado · [grid]...[/grid] tarjetas · [gallery]url :: desc[/gallery] imágenes · [video]url[/video] video
               </p>
             </div>
@@ -336,46 +356,46 @@ export default function AdminBlog() {
             {/* Fila: Autor + Tiempo lectura + Fecha */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs text-white/60 mb-1 font-semibold uppercase tracking-wide">Autor</label>
+                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-muted">Autor</label>
                 <input name="autor" value={form.autor} onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none"
+                  className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 text-content outline-none focus:border-brand/50"
                 />
               </div>
               <div>
-                <label className="block text-xs text-white/60 mb-1 font-semibold uppercase tracking-wide">Tiempo lectura</label>
+                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-muted">Tiempo lectura</label>
                 <input name="tiempo_lectura" value={form.tiempo_lectura} onChange={handleChange} placeholder="5 min"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none"
+                  className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 text-content outline-none placeholder:text-muted/70 focus:border-brand/50"
                 />
               </div>
               <div>
-                <label className="block text-xs text-white/60 mb-1 font-semibold uppercase tracking-wide">Fecha publicación</label>
+                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-muted">Fecha publicación</label>
                 <input name="fecha_publicacion" type="date" value={form.fecha_publicacion} onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none"
+                  className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 text-content outline-none focus:border-brand/50"
                 />
               </div>
             </div>
 
             {/* Tags */}
             <div>
-              <label className="block text-xs text-white/60 mb-1 font-semibold uppercase tracking-wide">Tags <span className="normal-case text-white/40">(separados por coma)</span></label>
+              <label className="mb-1 block text-xs font-black uppercase tracking-wide text-muted">Tags <span className="normal-case text-muted/70">(separados por coma)</span></label>
               <input name="tags" value={form.tags} onChange={handleChange}
                 placeholder="cumplimiento, riesgo, automatización"
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none"
+                className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 text-content outline-none placeholder:text-muted/70 focus:border-brand/50"
               />
             </div>
 
             {/* Imagen portada */}
             <div>
-              <label className="block text-xs text-white/60 mb-2 font-semibold uppercase tracking-wide">Imagen de portada</label>
+              <label className="mb-2 block text-xs font-black uppercase tracking-wide text-muted">Imagen de portada</label>
               <div className="flex flex-col sm:flex-row gap-4 items-start">
                 {portadaPreview && (
-                  <img src={portadaPreview} alt="preview" className="w-32 h-24 object-cover rounded-xl border border-cyan-700/40" />
+                  <img src={portadaPreview} alt="preview" className="h-24 w-32 rounded-xl border border-line/15 object-cover" />
                 )}
                 <div className="flex-1">
                   <input ref={portadaRef} type="file" accept="image/*" onChange={handlePortada}
-                    className="w-full text-white/70 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white file:font-semibold hover:file:bg-cyan-500 cursor-pointer"
+                    className="w-full cursor-pointer text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-brand file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90"
                   />
-                  <p className="text-white/30 text-xs mt-1">PNG, JPG, WebP — máx. 5MB</p>
+                  <p className="mt-1 text-xs text-muted/70">PNG, JPG, WebP — máx. 5MB</p>
                 </div>
               </div>
             </div>
@@ -383,22 +403,22 @@ export default function AdminBlog() {
             {/* Video */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-white/60 mb-1 font-semibold uppercase tracking-wide">Video URL <span className="normal-case text-white/40">(YouTube / Vimeo)</span></label>
+                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-muted">Video URL <span className="normal-case text-muted/70">(YouTube / Vimeo)</span></label>
                 <input name="video_url" value={form.video_url} onChange={handleChange}
                   placeholder="https://youtube.com/watch?v=..."
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none text-sm"
+                  className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 text-sm text-content outline-none placeholder:text-muted/70 focus:border-brand/50"
                 />
               </div>
               <div>
-                <label className="block text-xs text-white/60 mb-2 font-semibold uppercase tracking-wide">Video archivo <span className="normal-case text-white/40">(MP4)</span></label>
+                <label className="mb-2 block text-xs font-black uppercase tracking-wide text-muted">Video archivo <span className="normal-case text-muted/70">(MP4)</span></label>
 
                 {/* Video existente en edición */}
                 {existingVideoUrl && !clearVideo && (
-                  <div className="flex items-center gap-3 mb-2 px-3 py-2 rounded-xl bg-purple-500/10 border border-purple-500/30">
-                    <span className="text-purple-300 text-xs flex-1 truncate">🎬 {existingVideoUrl.split("/").pop()}</span>
+                  <div className="mb-2 flex items-center gap-3 rounded-xl border border-violet-400/30 bg-violet-500/10 px-3 py-2">
+                    <span className="flex-1 truncate text-xs text-violet-400">🎬 {existingVideoUrl.split("/").pop()}</span>
                     <button type="button"
                       onClick={() => { setClearVideo(true); if (videoRef.current) videoRef.current.value = ""; }}
-                      className="flex-shrink-0 px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/35 text-red-400 text-xs font-semibold border border-red-500/30 transition-all"
+                      className="flex-shrink-0 rounded-lg border border-danger/30 bg-danger/10 px-3 py-1 text-xs font-semibold text-danger transition-all hover:bg-danger/15"
                     >
                       ✕ Quitar video
                     </button>
@@ -406,18 +426,18 @@ export default function AdminBlog() {
                 )}
 
                 {clearVideo && (
-                  <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/30">
-                    <span className="text-red-400 text-xs flex-1">Video será eliminado al guardar</span>
+                  <div className="mb-2 flex items-center gap-2 rounded-xl border border-danger/30 bg-danger/10 px-3 py-2">
+                    <span className="flex-1 text-xs text-danger">Video será eliminado al guardar</span>
                     <button type="button"
                       onClick={() => setClearVideo(false)}
-                      className="text-white/50 hover:text-white text-xs underline"
+                      className="text-xs text-muted underline hover:text-content"
                     >Deshacer</button>
                   </div>
                 )}
 
                 {(!existingVideoUrl || clearVideo) && (
                   <input ref={videoRef} type="file" accept="video/*" onChange={(e) => { const f = e.target.files[0]; if (f) { setVideoFile(f); setClearVideo(false); } }}
-                    className="w-full text-white/70 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:font-semibold hover:file:bg-purple-500 cursor-pointer"
+                    className="w-full cursor-pointer text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-violet-500 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90"
                   />
                 )}
               </div>
@@ -429,20 +449,20 @@ export default function AdminBlog() {
                 <input type="checkbox" name="destacado" checked={form.destacado} onChange={handleChange}
                   className="w-5 h-5 rounded accent-cyan-400"
                 />
-                <span className="text-white font-semibold">⭐ Destacado</span>
-                <span className="text-white/40 text-xs">(aparece como post principal)</span>
+                <span className="font-semibold text-content">⭐ Destacado</span>
+                <span className="text-xs text-muted">(aparece como post principal)</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input type="checkbox" name="importante" checked={form.importante} onChange={handleChange}
                   className="w-5 h-5 rounded accent-yellow-400"
                 />
-                <span className="text-white font-semibold">🔥 Importante</span>
-                <span className="text-white/40 text-xs">(badge amarillo)</span>
+                <span className="font-semibold text-content">🔥 Importante</span>
+                <span className="text-xs text-muted">(badge amarillo)</span>
               </label>
               <div className="ml-auto flex items-center gap-3">
-                <label className="text-xs text-white/60 font-semibold uppercase tracking-wide">Estado</label>
+                <label className="text-xs font-black uppercase tracking-wide text-muted">Estado</label>
                 <select name="estado" value={form.estado} onChange={handleChange}
-                  className="px-4 py-2.5 rounded-xl bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none font-semibold"
+                  className="rounded-xl border border-line/15 bg-surface px-4 py-2.5 font-semibold text-content outline-none focus:border-brand/50"
                 >
                   <option value="borrador">📝 Borrador</option>
                   <option value="publicado">✅ Publicado</option>
@@ -459,7 +479,7 @@ export default function AdminBlog() {
                 {loading ? "Guardando…" : editId ? "Actualizar publicación" : "Publicar"}
               </button>
               <button type="button" onClick={() => { resetForm(); setVista("lista"); }}
-                className="px-6 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold transition-all"
+                className="rounded-xl border border-line/15 bg-surface px-6 py-3 font-semibold text-content transition-all hover:border-brand/40"
               >
                 Cancelar
               </button>
@@ -473,14 +493,14 @@ export default function AdminBlog() {
         {vista === "lista" && (
           <>
             {/* Filtros */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-5">
+            <div className="mb-5 grid gap-3 rounded-[24px] border border-line/15 bg-surface/90 p-4 shadow-[0_16px_42px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:grid-cols-[1fr_240px]">
               <input
                 value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
                 placeholder="🔍 Buscar publicaciones..."
-                className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none"
+                className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 font-semibold text-content outline-none transition placeholder:text-muted/70 focus:border-brand/50 focus:ring-4 focus:ring-brand/10"
               />
               <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}
-                className="px-4 py-2.5 rounded-xl bg-slate-800/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none"
+                className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 font-semibold text-content outline-none transition focus:border-brand/50 focus:ring-4 focus:ring-brand/10"
               >
                 <option value="todos">Todos los estados</option>
                 <option value="publicado">✅ Publicados</option>
@@ -490,23 +510,23 @@ export default function AdminBlog() {
 
             {/* Tarjetas */}
             {postsFiltrados.length === 0 ? (
-              <div className="text-center py-16 text-white/40">
+              <div className="rounded-[24px] border border-line/15 bg-surface/90 py-16 text-center text-muted shadow-[0_16px_42px_rgba(15,23,42,0.12)]">
                 <p className="text-4xl mb-3">📭</p>
-                <p className="text-lg">No hay publicaciones</p>
-                <p className="text-sm mt-1">Crea tu primera publicación con el botón de arriba</p>
+                <p className="text-lg font-black text-content">No hay publicaciones</p>
+                <p className="mt-1 text-sm">Crea tu primera publicación con el botón de arriba</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {postsFiltrados.map((post) => (
                   <div key={post.id}
-                    className="bg-slate-800/80 rounded-2xl border border-cyan-900/30 shadow-lg p-4 flex flex-col sm:flex-row gap-4 hover:border-cyan-500/40 transition-all"
+                    className="flex flex-col gap-4 rounded-[24px] border border-line/15 bg-surface/90 p-4 shadow-[0_16px_42px_rgba(15,23,42,0.12)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-brand/35 sm:flex-row"
                   >
                     {/* Portada thumbnail */}
-                    <div className="w-full sm:w-28 h-20 rounded-xl overflow-hidden bg-slate-700 flex-shrink-0">
+                    <div className="h-24 w-full flex-shrink-0 overflow-hidden rounded-2xl border border-line/10 bg-surface-2 sm:h-24 sm:w-36">
                       {post.portada_url ? (
                         <img src={post.portada_url} alt={post.titulo} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-3xl text-white/20">📰</div>
+                        <div className="flex h-full w-full items-center justify-center text-3xl text-muted/50">📰</div>
                       )}
                     </div>
 
@@ -515,22 +535,22 @@ export default function AdminBlog() {
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
                           post.estado === "publicado"
-                            ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                            : "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                            ? "bg-ok/10 text-ok border border-ok/30"
+                            : "bg-warn/10 text-warn border border-warn/30"
                         }`}>
                           {post.estado === "publicado" ? "✅ Publicado" : "📝 Borrador"}
                         </span>
-                        {post.destacado && <span className="text-xs px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">⭐ Destacado</span>}
-                        {post.importante && <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/20 text-yellow-300 border border-yellow-400/30">🔥 Importante</span>}
+                        {post.destacado && <span className="rounded-full border border-danger/30 bg-danger/10 px-2.5 py-0.5 text-xs font-bold text-danger">⭐ Destacado</span>}
+                        {post.importante && <span className="rounded-full border border-warn/30 bg-warn/10 px-2.5 py-0.5 text-xs font-bold text-warn">🔥 Importante</span>}
                         {(post.video_url || post.video_archivo_url) && (
-                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">🎬 Video</span>
+                          <span className="rounded-full border border-violet-400/30 bg-violet-500/10 px-2.5 py-0.5 text-xs font-bold text-violet-400">🎬 Video</span>
                         )}
                       </div>
 
-                      <h3 className="text-white font-bold text-base truncate">{post.titulo}</h3>
-                      <p className="text-white/50 text-sm truncate mt-0.5">{post.extracto}</p>
+                      <h3 className="truncate text-base font-black text-content">{post.titulo}</h3>
+                      <p className="mt-0.5 truncate text-sm text-muted">{post.extracto}</p>
 
-                      <div className="flex flex-wrap gap-3 mt-1 text-xs text-white/40">
+                      <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold text-muted">
                         {post.fecha_publicacion && <span>📅 {post.fecha_publicacion}</span>}
                         <span>⏱ {post.tiempo_lectura}</span>
                         <span>✍️ {post.autor}</span>
@@ -541,21 +561,21 @@ export default function AdminBlog() {
                     {/* Acciones */}
                     <div className="flex sm:flex-col gap-2 justify-end flex-shrink-0">
                       <button onClick={() => handleEditar(post)}
-                        className="px-4 py-2 rounded-lg bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 text-sm font-semibold border border-cyan-600/30 transition-all"
+                        className="rounded-lg border border-brand/30 bg-brand/10 px-4 py-2 text-sm font-black text-brand transition-all hover:bg-brand/15"
                       >
                         ✏️ Editar
                       </button>
                       <button onClick={() => toggleEstado(post)}
                         className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all ${
                           post.estado === "publicado"
-                            ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border-yellow-500/30"
-                            : "bg-green-500/20 hover:bg-green-500/30 text-green-300 border-green-500/30"
+                            ? "bg-warn/10 hover:bg-warn/15 text-warn border-warn/30"
+                            : "bg-ok/10 hover:bg-ok/15 text-ok border-ok/30"
                         }`}
                       >
                         {post.estado === "publicado" ? "⬇ Borrador" : "✅ Publicar"}
                       </button>
                       <button onClick={() => handleEliminar(post.id)}
-                        className="px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm font-semibold border border-red-500/30 transition-all"
+                        className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-2 text-sm font-black text-danger transition-all hover:bg-danger/15"
                       >
                         🗑 Eliminar
                       </button>

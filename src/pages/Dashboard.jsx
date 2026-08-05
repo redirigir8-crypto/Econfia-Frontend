@@ -151,6 +151,29 @@ export default function Dashboard() {
                 display: inline-block;
                 background:
                   linear-gradient(100deg,
+                    rgb(var(--th-content)) 0%,
+                    rgb(var(--th-brand)) 28%,
+                    rgb(var(--th-content)) 42%,
+                    rgb(var(--th-brand-2)) 49%,
+                    rgb(var(--th-content)) 56%,
+                    rgb(var(--th-brand)) 72%,
+                    rgb(var(--th-brand-2)) 100%);
+                background-size: 240% 100%;
+                background-position: 130% 50%;
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                animation: econfiaLetterSweep 3.8s ease-in-out infinite;
+                text-shadow:
+                  0 1px 0 rgb(var(--th-surface) / 0.85),
+                  0 0 8px rgb(var(--th-brand) / 0.24);
+                filter:
+                  drop-shadow(0 0 3px rgb(var(--th-surface) / 0.45))
+                  drop-shadow(0 0 8px rgb(var(--th-brand) / 0.24));
+              }
+              html[data-theme="dark"] .econfia-title {
+                background:
+                  linear-gradient(100deg,
                     #eef7ff 0%,
                     #ffffff 28%,
                     #ffffff 42%,
@@ -162,8 +185,6 @@ export default function Dashboard() {
                 background-position: 130% 50%;
                 -webkit-background-clip: text;
                 background-clip: text;
-                color: transparent;
-                animation: econfiaLetterSweep 3.8s ease-in-out infinite;
                 text-shadow:
                   0 0 2px rgba(255,255,255,0.56),
                   0 0 8px rgba(125,211,252,0.28);
@@ -171,11 +192,38 @@ export default function Dashboard() {
                   drop-shadow(0 0 3px rgba(255,255,255,0.45))
                   drop-shadow(0 0 8px rgba(56,189,248,0.24));
               }
+              html[data-theme="light"] .econfia-title {
+                background:
+                  linear-gradient(100deg,
+                    #07111f 0%,
+                    #0f172a 24%,
+                    #07111f 40%,
+                    #0f766e 49%,
+                    #07111f 58%,
+                    #0f172a 76%,
+                    #07111f 100%);
+                background-size: 240% 100%;
+                background-position: 130% 50%;
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-stroke: 0.35px rgba(15,23,42,0.72);
+                text-shadow:
+                  0 1px 0 rgba(255,255,255,0.88),
+                  0 7px 18px rgba(15,23,42,0.22),
+                  0 0 10px rgba(13,148,136,0.18);
+                filter:
+                  drop-shadow(0 1px 0 rgba(255,255,255,0.78))
+                  drop-shadow(0 0 5px rgba(13,148,136,0.18));
+              }
+              html[data-theme="light"] .econfia-logo-tagline {
+                color: rgb(51 65 85);
+                text-shadow: 0 1px 0 rgba(255,255,255,0.72);
+              }
             `}</style>
             <div className="relative flex w-[430px] items-center gap-4 bg-transparent px-2 py-2">
               <div className="relative h-[76px] w-[76px] shrink-0">
                 <div className="absolute inset-1 rounded-2xl bg-red-500/10 blur-md transition-all duration-500 group-hover:bg-red-500/16" />
-                <div className="absolute inset-[5px] rounded-2xl bg-[#0a0e18]/55 border border-white/10 flex items-center justify-center shadow-[inset_0_0_10px_rgba(255,255,255,0.06)]">
+                <div className="absolute inset-[5px] flex items-center justify-center rounded-2xl border border-line/15 bg-surface/65 shadow-[inset_0_0_10px_rgb(var(--th-content)/0.06)]">
                   <img
                     src="/img/logo-econfia-1.png"
                     alt="Econfía"
@@ -190,7 +238,7 @@ export default function Dashboard() {
                     Econfia
                   </p>
                 </div>
-                <p className="-mt-0.5 whitespace-nowrap text-[10px] font-light uppercase leading-none tracking-[0.18em] text-white/45">
+                <p className="econfia-logo-tagline -mt-0.5 whitespace-nowrap text-[10px] font-semibold uppercase leading-none tracking-[0.18em] text-muted">
                   Una marca de Grupo Soluciones
                 </p>
               </div>

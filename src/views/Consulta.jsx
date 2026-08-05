@@ -99,17 +99,17 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
         />
       )}
       <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-        <div className="bg-gradient-to-br from-slate-900/95 to-blue-900/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl shadow-cyan-500/20 max-w-2xl w-full p-6 relative">
+        <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl border border-line/15 rounded-2xl shadow-2xl shadow-cyan-500/20 max-w-2xl w-full p-6 relative text-content">
           {/* Botón cerrar */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/60 hover:text-cyan-400 text-2xl font-bold transition-colors"
+            className="absolute top-4 right-4 text-muted hover:text-brand text-2xl font-bold transition-colors"
             aria-label="Cerrar"
           >
             ✕
           </button>
 
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-cyan-300 bg-clip-text text-transparent mb-4 text-center">
+          <h2 className="text-2xl font-bold text-content mb-4 text-center">
             Consulta a la Medida
           </h2>
 
@@ -120,9 +120,9 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar fuente..."
-              className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+              className="w-full px-3 py-2.5 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-sm focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
             />
-            <p className="text-xs text-white/60 mt-1">
+            <p className="text-xs text-muted mt-1">
               {filteredFuentes.length} fuente{filteredFuentes.length === 1 ? "" : "s"} encontrada{filteredFuentes.length === 1 ? "" : "s"}
             </p>
           </div>
@@ -133,7 +133,7 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
               filteredFuentes.map((fuente) => (
                 <label
                   key={fuente.id}
-                  className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 hover:border-cyan-500/30 cursor-pointer transition-all"
+                  className="flex items-center gap-3 bg-surface-2/60 hover:bg-brand/10 p-3 rounded-lg border border-line/15 hover:border-brand/30 cursor-pointer transition-all"
                 >
                   <input
                     type="checkbox"
@@ -142,15 +142,15 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
                     onChange={() => handleCheckbox(fuente.nombre)}
                   />
                   <div className="flex flex-col">
-                    <span className="font-medium text-white">{fuente.nombre_pila || fuente.nombre}</span>
+                    <span className="font-medium text-content">{fuente.nombre_pila || fuente.nombre}</span>
                     {fuente.nombre && (
-                      <span className="text-xs text-white/50">{fuente.nombre}</span>
+                      <span className="text-xs text-muted">{fuente.nombre}</span>
                     )}
                   </div>
                 </label>
               ))
             ) : (
-              <p className="text-white/60 text-center text-sm py-4">
+              <p className="text-muted text-center text-sm py-4">
                 {fuentes.length === 0
                   ? "No hay fuentes disponibles."
                   : "No hay coincidencias con el filtro."}
@@ -164,7 +164,7 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
             disabled={loading || seleccionadas.length === 0}
             className={`w-full px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
               loading || seleccionadas.length === 0
-                ? "bg-white/10 text-white/40 cursor-not-allowed"
+                ? "bg-surface-2/70 text-muted cursor-not-allowed"
                 : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
             }`}
           >
@@ -378,23 +378,23 @@ export default function Consulta() {
                 </span>
                 <span className="text-cyan-300 text-xs font-medium">Consulta Completa</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
+              <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
                 Econfia Core Full
               </h1>
             </div>
-            <p className="text-sm text-white/70 leading-relaxed">
+            <p className="text-sm text-muted leading-relaxed">
               Verifica antecedentes de manera rápida, segura y confiable.
             </p>
-            <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-lg p-3">
-              <p className="text-xs text-white/80 leading-relaxed">
-                <span className="text-cyan-400 font-semibold">⚠️ Declaración:</span> Al realizar esta consulta, declara y certifica que cuenta con la autorización válida del titular.
+            <div className="bg-gradient-to-r from-brand/10 to-brand-2/10 border border-brand/20 rounded-lg p-3 shadow-sm shadow-black/5">
+              <p className="text-xs text-content/85 leading-relaxed">
+                <span className="text-brand font-semibold">Declaración:</span> Al realizar esta consulta, declara y certifica que cuenta con la autorización válida del titular.
               </p>
             </div>
           </div>
 
           {/* Lado derecho: Formulario */}
           <div className="relative w-full max-w-sm mx-auto">
-            <div className="relative w-full bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[20px] border border-white/10 shadow-2xl shadow-cyan-500/10 p-6 group">
+            <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
               {/* Glow effect */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
@@ -407,38 +407,38 @@ export default function Consulta() {
                     </span>
                     <span className="text-cyan-300 text-xs font-medium">Verificación segura</span>
                   </div>
-                  <h2 className="text-xl font-bold text-white">Verificar Ahora</h2>
+                  <h2 className="text-xl font-bold text-content">Verificar Ahora</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-2">
                   {/* Select Tipo de Documento */}
                   <div>
-                    <label className="text-xs font-semibold text-white/70 mb-1 block">Tipo de Documento *</label>
+                    <label className="text-xs font-semibold text-content/80 mb-1 block">Tipo de Documento *</label>
                     <select
                       required
                       value={tipoDoc}
                       onChange={(e) => setTipoDoc(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
                     >
-                      <option className="bg-slate-900 text-white" value="">
+                      <option className="bg-surface text-content" value="">
                         Seleccione tipo de documento
                       </option>
-                      <option className="bg-slate-900 text-white" value="CC">
+                      <option className="bg-surface text-content" value="CC">
                         Cédula de Ciudadanía (CC)
                       </option>
-                      <option className="bg-slate-900 text-white" value="TI">
+                      <option className="bg-surface text-content" value="TI">
                         Tarjeta de Identidad (TI)
                       </option>
-                      <option className="bg-slate-900 text-white" value="CE">
+                      <option className="bg-surface text-content" value="CE">
                         Cédula de Extranjería (CE)
                       </option>
-                      <option className="bg-slate-900 text-white" value="PPT">
+                      <option className="bg-surface text-content" value="PPT">
                         Permiso de Protección Temporal (PPT)
                       </option>
-                      <option className="bg-slate-900 text-white" value="PEP">
+                      <option className="bg-surface text-content" value="PEP">
                         Permiso Especial de Permanencia (PEP)
                       </option>
-                      <option className="bg-slate-900 text-white" value="NIT">
+                      <option className="bg-surface text-content" value="NIT">
                         NIT
                       </option>
                     </select>
@@ -446,31 +446,31 @@ export default function Consulta() {
 
                   {/* Input Cédula */}
                   <div>
-                    <label className="text-xs font-semibold text-white/70 mb-1 block">Número de Documento *</label>
+                    <label className="text-xs font-semibold text-content/80 mb-1 block">Número de Documento *</label>
                     <input
                       required
                       type="text"
                       value={cedula}
                       onChange={(e) => setCedula(e.target.value)}
                       placeholder="Ej: 1234567890"
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                     />
                   </div>
 
                   {/* Input Fecha */}
                   <div>
-                    <label className="text-xs font-semibold text-white/70 mb-1 block">Fecha de Expedición (Opcional)</label>
+                    <label className="text-xs font-semibold text-content/80 mb-1 block">Fecha de Expedición (Opcional)</label>
                     <input
                       type="date"
                       value={fechaExpedicion}
                       onChange={(e) => setFechaExpedicion(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                     />
                   </div>
 
                   {/* Alcance de búsqueda */}
                   <div>
-                    <label className="text-xs font-semibold text-white/70 mb-1 block">Alcance de Búsqueda</label>
+                    <label className="text-xs font-semibold text-content/80 mb-1 block">Alcance de Búsqueda</label>
                     <div className="flex gap-4">
                       {[
                         { value: "todas", label: "Todas" },
@@ -486,7 +486,7 @@ export default function Consulta() {
                             onChange={() => setAlcance(value)}
                             className="accent-cyan-500 w-3.5 h-3.5 cursor-pointer"
                           />
-                          <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">{label}</span>
+                          <span className="text-xs text-content/85 group-hover:text-content transition-colors">{label}</span>
                         </label>
                       ))}
                     </div>
@@ -501,7 +501,7 @@ export default function Consulta() {
                         onChange={(e) => setAcepta(e.target.checked)}
                         className="accent-cyan-500 w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                      <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                         Acepto los{" "}
                         <Terminos
                           inline
@@ -516,7 +516,7 @@ export default function Consulta() {
                         onChange={(e) => setConsentimiento(e.target.checked)}
                         className="accent-cyan-500 w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                      <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                         Confirmo tener consentimiento del titular
                       </span>
                     </label>
@@ -528,7 +528,7 @@ export default function Consulta() {
                     disabled={!tipoDoc || !cedula || !acepta || !consentimiento || loading}
                     className={`w-full mt-3 px-6 py-2 rounded-lg font-semibold text-xs transition-all duration-300 ${
                       !tipoDoc || !cedula || !acepta || !consentimiento || loading
-                        ? "bg-white/10 text-white/40 cursor-not-allowed"
+                        ? "bg-surface-2/70 text-muted cursor-not-allowed"
                         : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
                     }`}
                   >
@@ -540,7 +540,7 @@ export default function Consulta() {
                     <button
                       type="button"
                       onClick={() => setShowMasiva(true)}
-                      className="w-full mt-1.5 px-6 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                      className="w-full mt-1.5 px-6 py-2 rounded-lg font-semibold text-xs border border-brand/40 text-brand hover:bg-brand/15 hover:border-brand/60 transition-all duration-300"
                     >
                       Consulta Masiva (hasta 50 documentos)
                     </button>

@@ -136,7 +136,7 @@ export default function AnalisisInteligente({
       Icon: ShieldAlert,
       ring: "#fb7185",
       text: "text-rose-300",
-      chip: "text-rose-200 border-rose-400/30 bg-rose-500/10",
+      chip: "text-danger border-danger/30 bg-danger/10",
       banner: "border-rose-400/30 from-rose-500/15 to-red-500/10",
       glow: "shadow-[0_0_30px_rgba(251,113,133,0.25)]",
     },
@@ -145,7 +145,7 @@ export default function AnalisisInteligente({
       Icon: AlertTriangle,
       ring: "#f59e0b",
       text: "text-amber-300",
-      chip: "text-amber-200 border-amber-400/30 bg-amber-500/10",
+      chip: "text-warn border-warn/30 bg-warn/10",
       banner: "border-amber-400/30 from-amber-500/15 to-orange-500/10",
       glow: "shadow-[0_0_30px_rgba(245,158,11,0.22)]",
     },
@@ -154,7 +154,7 @@ export default function AnalisisInteligente({
       Icon: ShieldCheck,
       ring: "#10b981",
       text: "text-emerald-300",
-      chip: "text-emerald-200 border-emerald-400/30 bg-emerald-500/10",
+      chip: "text-ok border-ok/30 bg-ok/10",
       banner: "border-emerald-400/30 from-emerald-500/15 to-cyan-500/10",
       glow: "shadow-[0_0_30px_rgba(16,185,129,0.22)]",
     },
@@ -162,8 +162,8 @@ export default function AnalisisInteligente({
       label: "Cobertura incompleta",
       Icon: Signal,
       ring: "#38bdf8",
-      text: "text-cyan-300",
-      chip: "text-cyan-200 border-cyan-400/30 bg-cyan-500/10",
+      text: "text-brand",
+      chip: "text-brand border-brand/30 bg-brand/10",
       banner: "border-cyan-400/30 from-cyan-500/15 to-blue-500/10",
       glow: "shadow-[0_0_30px_rgba(56,189,248,0.22)]",
     },
@@ -208,10 +208,10 @@ export default function AnalisisInteligente({
   const maxTipo = Math.max(1, ...stats.tipos.map((t) => t.total));
 
   const kpis = [
-    { label: "Fuentes consultadas", value: stats.total, tone: "text-white" },
-    { label: "Con hallazgo", value: stats.hallazgos.length, tone: "text-rose-300" },
-    { label: "Sin hallazgo", value: stats.buckets.limpio.length, tone: "text-emerald-300" },
-    { label: "No concluyentes", value: stats.noConcluyentes, tone: "text-amber-300" },
+    { label: "Fuentes consultadas", value: stats.total, tone: "text-content" },
+    { label: "Con hallazgo", value: stats.hallazgos.length, tone: "text-danger" },
+    { label: "Sin hallazgo", value: stats.buckets.limpio.length, tone: "text-ok" },
+    { label: "No concluyentes", value: stats.noConcluyentes, tone: "text-warn" },
   ];
 
   return (
@@ -220,37 +220,37 @@ export default function AnalisisInteligente({
       <section
         className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br ${nivelUI.banner} ${nivelUI.glow} p-5 sm:p-6`}
       >
-        <div className="absolute right-0 top-0 h-full w-48 bg-white/[0.03] skew-x-12 translate-x-16 pointer-events-none" />
+        <div className="absolute right-0 top-0 h-full w-48 bg-content/[0.03] skew-x-12 translate-x-16 pointer-events-none" />
         <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-5 items-center">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-200">
+            <div className="inline-flex items-center gap-2 rounded-full border border-line/15 bg-surface-2/60 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-content">
               <Sparkles size={12} />
               Análisis de la consulta
             </div>
-            <h3 className="mt-3 text-2xl sm:text-3xl font-black text-white leading-tight truncate">
+            <h3 className="mt-3 text-2xl sm:text-3xl font-black text-content leading-tight truncate">
               {nombre}
             </h3>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-300">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
               {documento && (
-                <span className="rounded-md bg-black/25 border border-white/10 px-2 py-1 font-mono">
+                <span className="rounded-md bg-surface-2/70 border border-line/15 px-2 py-1 font-mono">
                   Doc. {documento}
                 </span>
               )}
               {tipoConsulta && (
-                <span className="rounded-md bg-black/25 border border-white/10 px-2 py-1 uppercase tracking-wide">
+                <span className="rounded-md bg-surface-2/70 border border-line/15 px-2 py-1 uppercase tracking-wide">
                   {tipoConsulta}
                 </span>
               )}
             </div>
             {stats.profesiones.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted">
                   Profesión encontrada:
                 </span>
                 {stats.profesiones.map((p) => (
                   <span
                     key={p}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-2.5 py-1 text-xs font-bold text-cyan-100"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-brand/25 bg-brand/10 px-2.5 py-1 text-xs font-bold text-brand"
                   >
                     <GraduationCap size={13} />
                     {p}
@@ -269,7 +269,7 @@ export default function AnalisisInteligente({
           <div className="justify-self-center lg:justify-self-end">
             <div className="relative w-32 h-32 sm:w-36 sm:h-36">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgb(var(--th-line) / 0.15)" strokeWidth="7" />
                 <circle
                   cx="50"
                   cy="50"
@@ -284,8 +284,8 @@ export default function AnalisisInteligente({
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl sm:text-3xl font-black text-white">{stats.cobertura}%</span>
-                <span className="text-[9px] uppercase tracking-widest text-slate-400">Cobertura</span>
+                <span className="text-2xl sm:text-3xl font-black text-content">{stats.cobertura}%</span>
+                <span className="text-[9px] uppercase tracking-widest text-muted">Cobertura</span>
               </div>
             </div>
           </div>
@@ -293,32 +293,32 @@ export default function AnalisisInteligente({
       </section>
 
       {/* Resumen ejecutivo (slot para IA) */}
-      <section className="rounded-2xl border border-cyan-300/15 bg-white/[0.02] p-4 sm:p-5">
+      <section className="rounded-2xl th-panel p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3 mb-2">
-          <h4 className="text-[11px] font-bold uppercase tracking-widest text-cyan-300 flex items-center gap-2">
+          <h4 className="text-[11px] font-bold uppercase tracking-widest text-brand flex items-center gap-2">
             <Search size={14} /> Resumen ejecutivo
           </h4>
           {typeof onGenerarIA === "function" ? (
             <button
               onClick={onGenerarIA}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-2.5 py-1 text-[11px] font-bold text-cyan-100 hover:bg-cyan-300/15 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-brand/25 bg-brand/10 px-2.5 py-1 text-[11px] font-bold text-brand hover:bg-brand/15 transition-colors"
             >
               <Sparkles size={12} /> Analizar con IA
             </button>
           ) : (
-            <span className="rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+            <span className="rounded-full bg-content/5 border border-line/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-muted">
               Automático
             </span>
           )}
         </div>
-        <p className="text-sm text-slate-200 leading-relaxed">{narrativa}</p>
+        <p className="text-sm text-content leading-relaxed">{narrativa}</p>
       </section>
 
       {/* KPIs */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="rounded-xl border border-white/10 bg-black/25 p-4">
-            <p className="text-[9px] uppercase tracking-widest text-slate-400">{kpi.label}</p>
+          <div key={kpi.label} className="th-card rounded-xl p-4">
+            <p className="text-[9px] uppercase tracking-widest text-muted">{kpi.label}</p>
             <p className={`mt-1 text-2xl sm:text-3xl font-black ${kpi.tone}`}>{kpi.value}</p>
           </div>
         ))}
@@ -326,28 +326,28 @@ export default function AnalisisInteligente({
 
       {/* Distribución por tipo de fuente */}
       {stats.tipos.length > 0 && (
-        <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
-          <h4 className="text-[11px] font-bold uppercase tracking-widest text-slate-300 flex items-center gap-2 mb-3">
+        <section className="rounded-2xl th-panel p-4 sm:p-5">
+          <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted flex items-center gap-2 mb-3">
             <Layers size={14} /> Distribución por tipo de fuente
           </h4>
           <div className="space-y-2.5">
             {stats.tipos.map((t) => (
               <div key={t.nombre}>
                 <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-slate-200 font-semibold truncate pr-2">{t.nombre}</span>
-                  <span className="text-slate-400 shrink-0">
+                  <span className="text-content font-semibold truncate pr-2">{t.nombre}</span>
+                  <span className="text-muted shrink-0">
                     {t.hallazgos > 0 && (
-                      <span className="text-rose-300 font-bold mr-1">{t.hallazgos} alerta{t.hallazgos === 1 ? "" : "s"} ·</span>
+                      <span className="text-danger font-bold mr-1">{t.hallazgos} alerta{t.hallazgos === 1 ? "" : "s"} ·</span>
                     )}
                     {t.total}
                   </span>
                 </div>
-                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                <div className="h-2 rounded-full bg-content/5 overflow-hidden">
                   <div
                     className={`h-full rounded-full ${
                       t.hallazgos > 0
                         ? "bg-gradient-to-r from-rose-500/70 to-amber-400/70"
-                        : "bg-gradient-to-r from-cyan-500/60 to-blue-500/60"
+                        : "bg-gradient-to-r from-brand/60 to-brand-2/60"
                     }`}
                     style={{ width: `${(t.total / maxTipo) * 100}%` }}
                   />
@@ -359,15 +359,15 @@ export default function AnalisisInteligente({
       )}
 
       {/* Hallazgos relevantes */}
-      <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
+      <section className="rounded-2xl th-panel p-4 sm:p-5">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-[11px] font-bold uppercase tracking-widest text-slate-300 flex items-center gap-2">
+          <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted flex items-center gap-2">
             <ShieldAlert size={14} /> Hallazgos relevantes
           </h4>
           {typeof onIrAResultados === "function" && (
             <button
               onClick={onIrAResultados}
-              className="inline-flex items-center gap-1 text-[11px] font-bold text-cyan-300 hover:text-cyan-200 transition-colors"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-brand hover:text-cyan-200 transition-colors"
             >
               Ver todos <ChevronRight size={13} />
             </button>
@@ -376,8 +376,8 @@ export default function AnalisisInteligente({
 
         {stats.hallazgos.length === 0 ? (
           <div className="flex items-center gap-3 rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-4">
-            <ShieldCheck size={20} className="text-emerald-300 shrink-0" />
-            <p className="text-sm text-emerald-100/90">
+            <ShieldCheck size={20} className="text-ok shrink-0" />
+            <p className="text-sm text-ok">
               No se detectaron hallazgos con alerta en las fuentes validadas de esta consulta.
             </p>
           </div>
@@ -390,7 +390,7 @@ export default function AnalisisInteligente({
                   ? "border-rose-400/25 bg-rose-500/10"
                   : "border-amber-400/25 bg-amber-500/10";
               const label = clase === "alto" ? "Riesgo alto" : "Riesgo medio";
-              const labelTone = clase === "alto" ? "text-rose-200" : "text-amber-200";
+              const labelTone = clase === "alto" ? "text-danger" : "text-warn";
               const info = describirFuente(item);
               return (
                 <button
@@ -400,30 +400,30 @@ export default function AnalisisInteligente({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-white leading-snug break-words">
+                      <p className="text-sm font-bold text-content leading-snug break-words">
                         {info.titulo}
                       </p>
-                      <p className="mt-0.5 text-[11px] text-slate-400 break-words">
+                      <p className="mt-0.5 text-[11px] text-muted break-words">
                         {item.fuente}
                         {item.tipo_fuente ? ` · ${item.tipo_fuente}` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`rounded-lg border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-bold ${labelTone}`}>
+                      <span className={`rounded-lg border border-line/15 bg-surface-2/60 px-2 py-1 text-[10px] font-bold ${labelTone}`}>
                         {label}
                       </span>
-                      <span className="rounded-lg bg-black/30 border border-white/10 px-2 py-1 text-xs font-black text-white">
+                      <span className="rounded-lg bg-surface-2/80 border border-line/15 px-2 py-1 text-xs font-black text-content">
                         {item.score ?? "—"}
                       </span>
-                      <ChevronRight size={16} className="text-slate-400 group-hover:text-white transition-colors" />
+                      <ChevronRight size={16} className="text-muted group-hover:text-content transition-colors" />
                     </div>
                   </div>
 
-                  <p className="mt-2 text-xs text-slate-300 leading-relaxed">{info.desc}</p>
+                  <p className="mt-2 text-xs text-muted leading-relaxed">{info.desc}</p>
 
-                  <div className="mt-2 flex items-start gap-2 rounded-lg border border-white/10 bg-black/25 px-2.5 py-2">
+                  <div className="mt-2 flex items-start gap-2 rounded-lg border border-line/15 bg-surface-2/70 px-2.5 py-2">
                     <AlertTriangle size={13} className={`mt-0.5 shrink-0 ${labelTone}`} />
-                    <p className="text-[11px] text-slate-200 leading-relaxed">
+                    <p className="text-[11px] text-content leading-relaxed">
                       <span className="font-bold">Qué implica: </span>
                       {info.hallazgo}
                     </p>
@@ -436,22 +436,22 @@ export default function AnalisisInteligente({
       </section>
 
       {/* Cobertura de fuentes */}
-      <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
-        <h4 className="text-[11px] font-bold uppercase tracking-widest text-slate-300 flex items-center gap-2 mb-3">
+      <section className="rounded-2xl th-panel p-4 sm:p-5">
+        <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted flex items-center gap-2 mb-3">
           <Signal size={14} /> Cobertura de fuentes
         </h4>
         <div className="flex flex-wrap gap-2 text-xs">
-          <span className="rounded-lg border border-emerald-400/20 bg-emerald-500/10 px-3 py-1.5 font-semibold text-emerald-200">
+          <span className="rounded-lg border border-emerald-400/20 bg-emerald-500/10 px-3 py-1.5 font-semibold text-ok">
             Validadas: {stats.validadas}
           </span>
-          <span className="rounded-lg border border-amber-400/20 bg-amber-500/10 px-3 py-1.5 font-semibold text-amber-200">
+          <span className="rounded-lg border border-amber-400/20 bg-amber-500/10 px-3 py-1.5 font-semibold text-warn">
             Offline: {stats.buckets.offline.length}
           </span>
-          <span className="rounded-lg border border-rose-400/20 bg-rose-500/10 px-3 py-1.5 font-semibold text-rose-200">
+          <span className="rounded-lg border border-rose-400/20 bg-rose-500/10 px-3 py-1.5 font-semibold text-danger">
             Error: {stats.buckets.error.length}
           </span>
           {stats.buckets.pendiente.length > 0 && (
-            <span className="rounded-lg border border-slate-400/20 bg-white/5 px-3 py-1.5 font-semibold text-slate-300">
+            <span className="rounded-lg border border-slate-400/20 bg-content/5 px-3 py-1.5 font-semibold text-muted">
               Pendientes: {stats.buckets.pendiente.length}
             </span>
           )}

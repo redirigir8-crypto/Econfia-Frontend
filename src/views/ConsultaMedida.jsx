@@ -160,14 +160,14 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
         <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
-        <div className="relative bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full mx-4 p-6 text-white max-h-[92vh] flex flex-col">
+        <div className="relative bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl border border-line/15 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full mx-4 p-6 text-content max-h-[92vh] flex flex-col">
           {/* Glow effect */}
           <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
           {/* Botón cerrar */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 text-white/60 hover:text-red-400 text-xl font-bold transition-colors z-10"
+            className="absolute top-3 right-3 text-muted hover:text-danger text-xl font-bold transition-colors z-10"
             aria-label="Cerrar"
           >
             ✕
@@ -178,7 +178,7 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
               <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
                 <span className="text-cyan-300 text-xs font-medium">Personaliza tu consulta</span>
               </div>
-              <h2 className="text-2xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+              <h2 className="text-2xl font-black text-content">
                 Consulta a la Medida
               </h2>
             </div>
@@ -190,15 +190,15 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filtrar fuentes por nombre..."
-                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-sm focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={handleToggleAll}
                 className={`mt-2 md:mt-0 md:ml-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 border border-cyan-400/40 ${
                   allSelected
-                    ? "bg-cyan-500/80 text-white hover:bg-cyan-400"
-                    : "bg-white/10 text-cyan-300 hover:bg-cyan-500/20"
+                    ? "bg-brand text-white hover:opacity-90"
+                    : "bg-brand/10 text-brand hover:bg-brand/20"
                 }`}
               >
                 {allSelected ? "Deseleccionar todas" : "Seleccionar todas"}
@@ -216,14 +216,14 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
             />
 
             {/* Panel colapsable de fuentes seleccionadas */}
-            <div className="mb-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5">
+            <div className="mb-3 rounded-xl border border-brand/20 bg-brand/5">
               <button
                 type="button"
                 onClick={() => setPanelMin((v) => !v)}
                 className="w-full flex items-center justify-between px-3 py-2 text-left"
               >
-                <span className="text-cyan-300 font-semibold text-sm flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-cyan-500/30 text-cyan-100 text-xs font-bold">
+                <span className="text-brand font-semibold text-sm flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-brand/20 text-brand text-xs font-bold">
                     {seleccionadas.length}
                   </span>
                   Fuentes seleccionadas
@@ -236,13 +236,13 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
                         e.stopPropagation();
                         setSeleccionadas([]);
                       }}
-                      className="text-[11px] text-white/50 hover:text-red-300 transition-colors"
+                      className="text-[11px] text-muted hover:text-danger transition-colors"
                     >
                       Limpiar
                     </span>
                   )}
                   <svg
-                    className={`w-4 h-4 text-cyan-300 transition-transform duration-300 ${panelMin ? "" : "rotate-180"}`}
+                    className={`w-4 h-4 text-brand transition-transform duration-300 ${panelMin ? "" : "rotate-180"}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -258,19 +258,19 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
               {!panelMin && (
                 <div className="px-3 pb-3">
                   {seleccionadas.length === 0 ? (
-                    <p className="text-xs text-white/40">Aún no has seleccionado fuentes.</p>
+                    <p className="text-xs text-muted">Aún no has seleccionado fuentes.</p>
                   ) : (
                     <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto custom-scrollbar">
                       {seleccionadas.map((nombre) => (
                         <span
                           key={nombre}
-                          className="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-gradient-to-r from-cyan-500/25 to-blue-500/25 border border-cyan-400/30 text-cyan-100 text-[11px] font-semibold"
+                          className="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 text-brand text-[11px] font-semibold"
                         >
                           <span className="truncate max-w-[220px]">{nombreToDisplay(nombre)}</span>
                           <button
                             type="button"
                             onClick={() => handleCheckbox(nombre)}
-                            className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-red-500/50 text-cyan-200 hover:text-white transition-colors text-[10px]"
+                            className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-red-500/50 text-brand hover:text-white transition-colors text-[10px]"
                             aria-label={`Quitar ${nombreToDisplay(nombre)}`}
                           >
                             ✕
@@ -291,7 +291,7 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
                   return (
                   <label
                     key={fuente.id}
-                    className={`flex items-center gap-3 bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 transition-all hover:shadow-md hover:shadow-cyan-500/10 group ${
+                    className={`flex items-center gap-3 bg-surface-2/60 hover:bg-brand/10 p-3 rounded-lg border border-line/15 transition-all hover:shadow-md hover:shadow-cyan-500/10 group ${
                       isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                     }`}
                   >
@@ -305,13 +305,13 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
                       disabled={isDisabled}
                     />
                     <div className="flex flex-col">
-                      <span className="font-medium text-white group-hover:text-cyan-300 transition-colors">{fuente.nombre_pila || fuente.nombre}</span>
+                      <span className="font-medium text-content group-hover:text-brand transition-colors">{fuente.nombre_pila || fuente.nombre}</span>
                     </div>
                   </label>
                   );
                 })
               ) : (
-                <p className="text-white/60 text-center py-4">
+                <p className="text-muted text-center py-4">
                   {fuentes.length === 0
                     ? "No hay fuentes disponibles."
                     : "No hay coincidencias con el filtro."}
@@ -320,13 +320,13 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
             </div>
 
             {/* Footer fijo: botón consultar siempre visible */}
-            <div className="flex-shrink-0 pt-3 border-t border-white/10">
+            <div className="flex-shrink-0 pt-3 border-t border-line/15">
               <button
                 onClick={handleConsultar}
                 disabled={loading || seleccionadas.length === 0}
                 className={`w-full px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 ${
                   loading || seleccionadas.length === 0
-                    ? "bg-white/10 text-white/40 cursor-not-allowed"
+                    ? "bg-surface-2/70 text-muted cursor-not-allowed"
                     : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
                 }`}
               >
@@ -544,27 +544,27 @@ export default function ConsultaMedida() {
                 </span>
                 <span className="text-cyan-300 text-xs font-medium">Consulta Personalizada</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
+              <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
                 Econfia Essential
               </h1>
             </div>
 
-            <p className="text-sm text-white/70 leading-relaxed">
+            <p className="text-sm text-muted leading-relaxed">
               Seleccione el tipo de documento e ingrese el número. Luego elija las fuentes específicas que desea consultar.
             </p>
 
             <div className="space-y-2 pt-2">
               <div className="flex items-start gap-3">
                 <span className="mt-1 h-2 w-2 rounded-full bg-cyan-500 flex-shrink-0" />
-                <span className="text-xs text-white/80">Personaliza completamente tu búsqueda.</span>
+                <span className="text-xs text-content/85">Personaliza completamente tu búsqueda.</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
-                <span className="text-xs text-white/80">Selecciona solo las fuentes que necesitas.</span>
+                <span className="text-xs text-content/85">Selecciona solo las fuentes que necesitas.</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="mt-1 h-2 w-2 rounded-full bg-purple-500 flex-shrink-0" />
-                <span className="text-xs text-white/80">Resultados precisos y eficientes.</span>
+                <span className="text-xs text-content/85">Resultados precisos y eficientes.</span>
               </div>
             </div>
 
@@ -574,7 +574,7 @@ export default function ConsultaMedida() {
           </div>
 
           <div className="relative w-full max-w-sm mx-auto">
-            <div className="relative w-full bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[20px] border border-white/10 shadow-2xl shadow-cyan-500/10 p-6 group">
+            <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
               {/* Glow effect */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
@@ -591,56 +591,56 @@ export default function ConsultaMedida() {
                 {/* Inputs */}
                 <div className="space-y-2">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Tipo de documento *</label>
+                    <label className="text-xs font-semibold text-content/80">Tipo de documento *</label>
                     <select
                       required
                       value={tipoDoc}
                       onChange={(e) => setTipoDoc(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
                     >
-                      <option className="bg-slate-900 text-white" value="">
+                      <option className="bg-surface text-content" value="">
                         Seleccione tipo de documento
                       </option>
-                      <option className="bg-slate-900 text-white" value="CC">
+                      <option className="bg-surface text-content" value="CC">
                         Cédula de Ciudadanía (CC)
                       </option>
-                      <option className="bg-slate-900 text-white" value="TI">
+                      <option className="bg-surface text-content" value="TI">
                         Tarjeta de Identidad (TI)
                       </option>
-                      <option className="bg-slate-900 text-white" value="CE">
+                      <option className="bg-surface text-content" value="CE">
                         Cédula de Extranjería (CE)
                       </option>
-                      <option className="bg-slate-900 text-white" value="PPT">
+                      <option className="bg-surface text-content" value="PPT">
                         Permiso de Protección Temporal (PPT)
                       </option>
-                      <option className="bg-slate-900 text-white" value="PEP">
+                      <option className="bg-surface text-content" value="PEP">
                         Permiso Especial de Permanencia (PEP)
                       </option>
-                      <option className="bg-slate-900 text-white" value="NIT">
+                      <option className="bg-surface text-content" value="NIT">
                         NIT
                       </option>
                     </select>
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Número de documento *</label>
+                    <label className="text-xs font-semibold text-content/80">Número de documento *</label>
                     <input
                       required
                       type="text"
                       value={cedula}
                       onChange={(e) => setCedula(e.target.value)}
                       placeholder="Ingrese número de documento"
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                     />
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Fecha de expedición (Opcional)</label>
+                    <label className="text-xs font-semibold text-content/80">Fecha de expedición (Opcional)</label>
                     <input
                       type="date"
                       value={fechaExpedicion}
                       onChange={(e) => setFechaExpedicion(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                     />
                   </div>
                 </div>
@@ -654,7 +654,7 @@ export default function ConsultaMedida() {
                       onChange={(e) => setAcepta(e.target.checked)}
                       className="accent-cyan-500 w-4 h-4 cursor-pointer"
                     />
-                    <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                    <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Acepto los{" "}
                         <Terminos
                           inline
@@ -669,7 +669,7 @@ export default function ConsultaMedida() {
                       onChange={(e) => setConsentimiento(e.target.checked)}
                       className="accent-cyan-500 w-4 h-4 cursor-pointer"
                     />
-                    <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                    <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Confirmo consentimiento del titular
                     </span>
                   </label>
@@ -694,7 +694,7 @@ export default function ConsultaMedida() {
                   className={`mt-3 w-full px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-300
                     ${
                       !tipoDoc || !cedula || !acepta || !consentimiento
-                        ? "bg-white/10 text-white/40 cursor-not-allowed"
+                        ? "bg-surface-2/70 text-muted cursor-not-allowed"
                         : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
                     }`}
                 >
@@ -706,7 +706,7 @@ export default function ConsultaMedida() {
                   <button
                     type="button"
                     onClick={() => setShowMasiva(true)}
-                    className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                    className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-brand/40 text-brand hover:bg-brand/15 hover:border-brand/60 transition-all duration-300"
                   >
                     Consulta Masiva (hasta 50 documentos)
                   </button>
@@ -715,7 +715,7 @@ export default function ConsultaMedida() {
               </div>
             </div>
             {/* Nota de privacidad */}
-            <p className="text-[10px] text-white/60 text-center mt-2">
+            <p className="text-[10px] text-muted text-center mt-2">
               Cumplimiento normativo y uso responsable de la información.
             </p>
           </div>

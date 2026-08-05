@@ -5,7 +5,8 @@ import ParticlesBackground from "./components/ParticlesBackground";
 import "react-horizontal-scrolling-menu/dist/styles.css";
 import React from "react";
 import { ConfigProvider } from "antd";
-import { antdTheme } from "./theme/antdTheme";
+import { getAntdTheme } from "./theme/antdTheme";
+import { useTheme } from "./context/ThemeContext";
 import "./theme/global.css";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -89,8 +90,8 @@ const premiumStyles = `
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      linear-gradient(rgb(var(--th-line) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--th-line) / 0.06) 1px, transparent 1px);
     background-size: 48px 48px;
     mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
     animation: gridMove 7s linear infinite alternate;
@@ -99,10 +100,10 @@ const premiumStyles = `
 
   /* Panel de vidrio */
   .glass-panel {
-    background: rgba(15,23,42,0.55);
+    background: linear-gradient(160deg, rgb(var(--th-surface) / 0.88), rgb(var(--th-surface-2) / 0.78));
     backdrop-filter: blur(18px);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 20px 80px rgba(2,8,23,0.45);
+    border: 1px solid rgb(var(--th-line) / 0.14);
+    box-shadow: 0 20px 80px rgba(15,23,42,0.14);
   }
 
   /* Tarjeta premium */
@@ -110,33 +111,33 @@ const premiumStyles = `
     position: relative;
     overflow: hidden;
     border-radius: 1.5rem;
-    background: linear-gradient(180deg, rgba(15,23,42,0.82) 0%, rgba(2,6,23,0.88) 100%);
-    border: 1px solid rgba(148,163,184,0.12);
+    background: linear-gradient(180deg, rgb(var(--th-surface) / 0.92) 0%, rgb(var(--th-surface-2) / 0.88) 100%);
+    border: 1px solid rgb(var(--th-line) / 0.12);
     transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease;
   }
   .premium-card:hover {
     transform: translateY(-8px);
     border-color: rgba(34,211,238,0.34);
-    box-shadow: 0 24px 80px rgba(8,145,178,0.18);
+    box-shadow: 0 24px 80px rgb(var(--th-brand) / 0.16);
   }
   .premium-card::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at top right, rgba(34,211,238,0.14), transparent 35%);
+    background: radial-gradient(circle at top right, rgb(var(--th-brand) / 0.13), transparent 35%);
     pointer-events: none;
   }
 
   /* Métrica pequeña */
   .metric-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: rgb(var(--th-surface) / 0.78);
+    border: 1px solid rgb(var(--th-line) / 0.10);
     backdrop-filter: blur(12px);
     transition: all .3s ease;
   }
   .metric-card:hover {
-    background: rgba(34,211,238,0.08);
-    border-color: rgba(34,211,238,0.28);
+    background: rgb(var(--th-brand) / 0.08);
+    border-color: rgb(var(--th-brand) / 0.28);
     transform: translateY(-4px);
   }
 
@@ -144,11 +145,14 @@ const premiumStyles = `
   .glow-soft     { animation: pulseGlow 4s ease-in-out infinite; }
 `;
 
-if (typeof document !== "undefined" && !document.getElementById("econfia-premium-styles")) {
-  const tag = document.createElement("style");
-  tag.id = "econfia-premium-styles";
+if (typeof document !== "undefined") {
+  let tag = document.getElementById("econfia-premium-styles");
+  if (!tag) {
+    tag = document.createElement("style");
+    tag.id = "econfia-premium-styles";
+    document.head.appendChild(tag);
+  }
   tag.innerHTML = premiumStyles;
-  document.head.appendChild(tag);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -410,25 +414,31 @@ function Home() {
   ];
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-screen text-content">
       <IntroVideoOverlay />
       <Header />
 
       <main className="relative overflow-hidden">
         {/* HERO */}
         <section className="hero-grid relative overflow-hidden pt-28 md:pt-32">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.18),transparent_32%),radial-gradient(circle_at_center,rgba(14,165,233,0.10),transparent_45%)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/10 via-slate-950/20 to-slate-950/70" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgb(var(--th-brand)/0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgb(var(--th-brand-2)/0.18),transparent_32%),radial-gradient(circle_at_center,rgb(var(--th-brand)/0.08),transparent_45%)]" />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgb(var(--th-app) / 0.05), rgb(var(--th-app) / 0.10), rgb(var(--th-app) / 0.40))",
+            }}
+          />
 
           <div className="relative mx-auto grid min-h-[80vh] max-w-7xl grid-cols-1 items-center gap-10 px-4 pb-14 pt-6 md:px-6 lg:grid-cols-[1.1fr_.9fr]">
             {/* Left */}
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-200 shadow-[0_0_25px_rgba(34,211,238,0.08)]">
-                <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-4 py-2 text-sm font-semibold text-brand shadow-[0_0_25px_rgb(var(--th-brand)/0.08)]">
+                <span className="h-2 w-2 rounded-full bg-brand animate-pulse" />
                 Plataforma de verificación, riesgo y cumplimiento
               </div>
 
-              <h1 className="mt-5 max-w-4xl text-3xl font-bold leading-[1.15] text-white sm:text-4xl md:text-[2.75rem] xl:text-5xl">
+              <h1 className="mt-5 max-w-4xl text-3xl font-black leading-[1.15] text-content sm:text-4xl md:text-[2.75rem] xl:text-5xl">
                 Inteligencia para
                 <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
                   {" "}verificar, analizar{" "}
@@ -436,7 +446,7 @@ function Home() {
                 y decidir con confianza.
               </h1>
 
-              <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
+              <p className="mt-5 max-w-2xl text-base leading-7 text-muted md:text-lg">
                 ECONFIA transforma procesos de validación en una experiencia visual,
                 sólida y ejecutiva. Centraliza consultas, evidencia, scoring de riesgo
                 y reportes profesionales en una sola plataforma.
@@ -445,13 +455,13 @@ function Home() {
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="/consulta"
-                  className="group rounded-full bg-cyan-500 px-7 py-3 text-center text-base font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:bg-cyan-400 hover:shadow-[0_12px_40px_rgba(34,211,238,0.25)]"
+                  className="group rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 px-7 py-3 text-center text-base font-black text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(34,211,238,0.25)]"
                 >
                   Iniciar consulta
                 </a>
                 <a
                   href="/precios"
-                  className="rounded-full border border-white/15 bg-white/5 px-7 py-3 text-center text-base font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-400/40 hover:bg-white/10"
+                  className="rounded-full border border-line/15 bg-surface/70 px-7 py-3 text-center text-base font-bold text-content transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:bg-brand/10"
                 >
                   Ver planes
                 </a>
@@ -461,10 +471,10 @@ function Home() {
                 {highlights.map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-2xl border border-white/10 bg-white/[0.05] p-4 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/25 hover:bg-cyan-400/[0.08]"
+                    className="rounded-2xl border border-line/10 bg-surface/75 p-4 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-brand/30 hover:bg-brand/10"
                   >
-                    <p className="text-xl font-bold text-cyan-300 md:text-2xl">{item.value}</p>
-                    <p className="mt-1 text-sm text-slate-400">{item.label}</p>
+                    <p className="text-xl font-black text-brand md:text-2xl">{item.value}</p>
+                    <p className="mt-1 text-sm text-muted">{item.label}</p>
                   </div>
                 ))}
               </div>
@@ -502,10 +512,10 @@ function Home() {
 
                 <div className="premium-card p-5">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand">
                       Riesgo y scoring
                     </p>
-                    <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-1 text-[10px] text-cyan-300">
+                    <span className="rounded-full border border-brand/20 bg-brand/10 px-2 py-1 text-[10px] text-brand">
                       SARLAFT
                     </span>
                   </div>
@@ -518,18 +528,18 @@ function Home() {
                       { label: "Crítico", width: "95%", color: "bg-red-500" },
                     ].map((item) => (
                       <div key={item.label}>
-                        <div className="mb-1 flex items-center justify-between text-xs text-slate-400">
+                        <div className="mb-1 flex items-center justify-between text-xs text-muted">
                           <span>{item.label}</span>
                           <span>{item.width}</span>
                         </div>
-                        <div className="h-2 rounded-full bg-white/10">
+                        <div className="h-2 rounded-full bg-line/10">
                           <div className={`h-2 rounded-full ${item.color}`} style={{ width: item.width }} />
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <p className="mt-4 text-xs leading-5 text-slate-500">
+                  <p className="mt-4 text-xs leading-5 text-muted">
                     Evaluación estructurada para priorización y toma de decisiones.
                   </p>
                 </div>
@@ -540,7 +550,7 @@ function Home() {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                       <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
                     </span>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-ok">
                       Estado de plataforma
                     </p>
                   </div>
@@ -553,13 +563,13 @@ function Home() {
                       ["Disponibilidad", "24/7"],
                     ].map(([label, value]) => (
                       <div key={label} className="flex items-center justify-between">
-                        <span className="text-sm text-slate-400">{label}</span>
-                        <span className="text-sm font-semibold text-white">{value}</span>
+                        <span className="text-sm text-muted">{label}</span>
+                        <span className="text-sm font-semibold text-content">{value}</span>
                       </div>
                     ))}
                   </div>
 
-                  <p className="mt-4 text-xs leading-5 text-slate-500">
+                  <p className="mt-4 text-xs leading-5 text-muted">
                     Arquitectura pensada para trazabilidad, velocidad y cumplimiento.
                   </p>
                 </div>
@@ -572,13 +582,13 @@ function Home() {
         <section className="relative py-24">
           <div className="mx-auto max-w-7xl px-4 md:px-6">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+              <p className="text-sm font-black uppercase tracking-[0.25em] text-brand">
                 ¿Por qué ECONFIA?
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
+              <h2 className="mt-3 text-3xl font-black text-content md:text-4xl">
                 Un ecosistema de verificación con presencia, claridad y valor corporativo
               </h2>
-              <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
+              <p className="mt-5 text-base leading-7 text-muted md:text-lg">
                 Pensado para procesos de vinculación, debida diligencia, análisis de terceros,
                 cumplimiento y revisión documental con una estética más ejecutiva y confiable.
               </p>
@@ -587,11 +597,11 @@ function Home() {
             <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
               {capabilities.map((item) => (
                 <div key={item.title} className="premium-card p-6">
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-300 ring-1 ring-cyan-400/20 shadow-[0_0_30px_rgba(34,211,238,0.10)]">
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand ring-1 ring-brand/20 shadow-[0_0_30px_rgb(var(--th-brand)/0.10)]">
                     <item.icon className="h-7 w-7" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white">{item.title}</h3>
-                  <p className="mt-3 leading-7 text-slate-300">{item.text}</p>
+                  <h3 className="text-xl font-black text-content">{item.title}</h3>
+                  <p className="mt-3 leading-7 text-muted">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -604,13 +614,13 @@ function Home() {
             <div className="glass-panel rounded-[2rem] p-8 md:p-12">
               <div className="grid gap-12 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+                  <p className="text-sm font-black uppercase tracking-[0.25em] text-brand">
                     Soluciones ECONFIA
                   </p>
-                  <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
+                  <h2 className="mt-3 text-3xl font-black text-content md:text-4xl">
                     Diferentes consultas, una sola experiencia premium
                   </h2>
-                  <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
+                  <p className="mt-5 max-w-2xl text-base leading-7 text-muted md:text-lg">
                     Integra procesos de consulta, validación y análisis desde un mismo panel,
                     con una navegación limpia, moderna y mucho más elegante.
                   </p>
@@ -620,9 +630,9 @@ function Home() {
                       <a
                         key={label}
                         href={href}
-                        className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/35 hover:bg-cyan-400/10"
+                        className="group flex items-center gap-3 rounded-2xl border border-line/10 bg-surface/70 px-5 py-4 text-sm font-bold text-content transition-all duration-300 hover:-translate-y-1 hover:border-brand/35 hover:bg-brand/10"
                       >
-                        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300 ring-1 ring-cyan-400/15 transition group-hover:scale-105 group-hover:bg-cyan-400/15">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand ring-1 ring-brand/15 transition group-hover:scale-105 group-hover:bg-brand/15">
                           <Icon className="h-5 w-5" />
                         </span>
                         <span>{label}</span>
@@ -632,23 +642,23 @@ function Home() {
                 </div>
 
                 <div className="premium-card p-7 md:p-8">
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+                  <p className="text-sm font-black uppercase tracking-[0.25em] text-brand">
                     Valor diferencial
                   </p>
 
                   <div className="mt-6 space-y-5">
                     {advantages.map((point) => (
                       <div key={point} className="flex items-start gap-3">
-                        <div className="mt-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-400/10 ring-1 ring-cyan-400/20">
-                          <BadgeCheck className="h-3.5 w-3.5 text-cyan-300" />
+                        <div className="mt-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-brand/10 ring-1 ring-brand/20">
+                          <BadgeCheck className="h-3.5 w-3.5 text-brand" />
                         </div>
-                        <p className="text-slate-300 leading-relaxed">{point}</p>
+                        <p className="leading-relaxed text-muted">{point}</p>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5">
-                    <p className="text-sm font-semibold text-white">
+                  <div className="mt-8 rounded-2xl border border-line/10 bg-surface/70 p-5">
+                    <p className="text-sm font-black text-content">
                       Diseñado para empresas que necesitan:
                     </p>
                     <div className="mt-4 grid grid-cols-2 gap-3">
@@ -662,7 +672,7 @@ function Home() {
                       ].map((tag) => (
                         <div
                           key={tag}
-                          className="rounded-xl border border-white/10 bg-slate-900/50 px-3 py-2 text-center text-sm text-slate-300"
+                          className="rounded-xl border border-line/10 bg-surface-2/70 px-3 py-2 text-center text-sm font-semibold text-muted"
                         >
                           {tag}
                         </div>
@@ -681,13 +691,13 @@ function Home() {
             <div className="premium-card rounded-[2rem] p-8 md:p-14">
               <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+                  <p className="text-sm font-black uppercase tracking-[0.25em] text-brand">
                     Empieza ahora
                   </p>
-                  <h2 className="mt-4 text-3xl font-bold text-white md:text-4xl">
+                  <h2 className="mt-4 text-3xl font-black text-content md:text-4xl">
                     Haz que la verificación se vea tan sólida como tu servicio.
                   </h2>
-                  <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+                  <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">
                     Una interfaz más elegante genera más confianza, comunica más valor y
                     posiciona mejor a ECONFIA frente a clientes, aliados y equipos corporativos.
                   </p>
@@ -696,13 +706,13 @@ function Home() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <a
                     href="/register"
-                    className="rounded-2xl bg-cyan-500 px-6 py-5 text-center font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-1 hover:bg-cyan-400 hover:shadow-[0_14px_40px_rgba(34,211,238,0.25)]"
+                    className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-5 text-center font-black text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_40px_rgba(34,211,238,0.25)]"
                   >
                     Comenzar 
                   </a>
                   <a
                     href="/contacto"
-                    className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5 text-center font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/35 hover:bg-white/10"
+                    className="rounded-2xl border border-line/10 bg-surface/70 px-6 py-5 text-center font-black text-content transition-all duration-300 hover:-translate-y-1 hover:border-brand/35 hover:bg-brand/10"
                   >
                     Hablar con nosotros
                   </a>
@@ -720,6 +730,8 @@ function Home() {
    App — router raíz
 ───────────────────────────────────────────────────────────── */
 export default function App() {
+  const { theme } = useTheme();
+
   // Activar sonidos automáticamente en la primera interacción del usuario
   React.useEffect(() => {
     if (window.__userInteracted) return;
@@ -735,7 +747,7 @@ export default function App() {
   }, []);
 
   return (
-    <ConfigProvider theme={antdTheme}>
+    <ConfigProvider theme={getAntdTheme(theme)}>
       <CardProvider>
         <Router>
           <ParticlesBackground />

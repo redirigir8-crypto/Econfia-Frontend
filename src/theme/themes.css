@@ -1,0 +1,138 @@
+/* ==========================================================================
+   Paletas de tema de la app.
+   Tokens en canales RGB (sin coma) para que Tailwind pueda usar
+   rgb(var(--th-x) / <alpha-value>) y así soportar /opacidad y gradientes.
+   El tema se controla con el atributo data-theme en <html> (ThemeContext).
+   Default = dark (idéntico al look actual, para no afectar páginas sin convertir).
+   ========================================================================== */
+
+:root,
+html[data-theme="dark"] {
+  --th-app: 2 1 10;          /* #02010a fondo general */
+  --th-surface: 15 23 42;    /* slate-900 tarjetas */
+  --th-surface-2: 30 41 59;  /* slate-800 cabeceras/filas */
+  --th-content: 255 255 255; /* texto principal */
+  --th-muted: 148 163 184;   /* slate-400 texto secundario */
+  --th-line: 148 163 184;    /* divisores (se usan con baja opacidad) */
+  --th-brand: 34 211 238;    /* cyan-400 acento */
+  --th-brand-2: 59 130 246;  /* blue-500 acento gradiente */
+  --th-ok: 52 211 153;       /* emerald-400 éxito */
+  --th-danger: 253 164 175;  /* rose-300 (legible sobre oscuro) */
+  --th-warn: 252 211 77;     /* amber-300 */
+}
+
+html[data-theme="light"] {
+  --th-app: 214 238 223;     /* #d6eedf verde suave (base del gradiente) */
+  --th-surface: 255 255 255; /* tarjetas blancas */
+  --th-surface-2: 219 240 228;/* #dbf0e4 verde claro (da sheen blanco→verde a las cards) */
+  --th-content: 15 23 42;    /* #0f172a casi negro */
+  --th-muted: 71 85 105;     /* slate-600 texto secundario */
+  --th-line: 15 23 42;       /* divisores negros (con baja opacidad) */
+  --th-brand: 13 148 136;    /* teal-600 acento */
+  --th-brand-2: 5 150 105;   /* emerald-600 acento gradiente */
+  --th-ok: 5 150 105;        /* emerald-600 éxito */
+  --th-danger: 190 18 60;    /* rose-700 (legible sobre claro) */
+  --th-warn: 180 83 9;       /* amber-700 */
+}
+
+/* IMPORTANTE: el tema OSCURO NO debe tocar el fondo original (lo da el canvas
+   de partículas #tsparticles con su degradado). Por eso el fondo del tema solo
+   se aplica en CLARO; en oscuro no ponemos ningún background y todo queda igual
+   que antes (partículas + degradado + mesh). */
+html[data-theme="light"],
+html[data-theme="light"] body {
+  background-color: rgb(var(--th-app));
+  /* Fondo verde con profundidad (mesh) en lugar de un plano insípido. */
+  background-image:
+    radial-gradient(at 12% 8%,  rgba(16, 185, 129, 0.16) 0%, transparent 42%),
+    radial-gradient(at 88% 12%, rgba(20, 184, 166, 0.14) 0%, transparent 45%),
+    radial-gradient(at 70% 85%, rgba(52, 211, 153, 0.14) 0%, transparent 48%),
+    radial-gradient(at 25% 95%, rgba(5, 150, 105, 0.10) 0%, transparent 45%),
+    linear-gradient(160deg, #e2f4ea 0%, #d3ecdd 55%, #cfeada 100%);
+  background-attachment: fixed;
+}
+
+/* En tema claro ocultamos el starfield oscuro (canvas a pantalla completa)
+   para que se vea el fondo claro. En oscuro se muestra igual que siempre. */
+html[data-theme="light"] #tsparticles {
+  display: none !important;
+}
+
+/* Fondo VIVO para el tema claro: blobs verdes/teal que flotan lentamente,
+   para que no se sienta plano (equivale al starfield del tema oscuro).
+   Es un pseudo-elemento fijo a pantalla completa, detrás del contenido,
+   animado con transform (GPU) => liviano. */
+html[data-theme="light"] body::after {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(38rem 38rem at 16% 22%, rgba(16, 185, 129, 0.40), transparent 60%),
+    radial-gradient(34rem 34rem at 84% 16%, rgba(20, 184, 166, 0.38), transparent 60%),
+    radial-gradient(42rem 42rem at 74% 84%, rgba(45, 212, 191, 0.34), transparent 60%),
+    radial-gradient(30rem 30rem at 26% 88%, rgba(5, 150, 105, 0.30), transparent 60%);
+  animation: th-light-drift 20s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes th-light-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1)    rotate(0deg); }
+  50%  { transform: translate3d(4.5%, -4%, 0) scale(1.12) rotate(1.2deg); }
+  100% { transform: translate3d(-4%, 3.5%, 0) scale(1.06) rotate(-1.2deg); }
+}
+
+/* Respeta a quien prefiere menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="light"] body::after { animation: none; }
+}
+
+/* ==========================================================================
+   Tarjetas con tema: gradiente sutil (no plano) + sombra + efecto al pasar
+   el cursor. Reutilizable en toda la app. Funciona en claro y oscuro.
+   .th-card  -> interactiva (se eleva + brillo que barre + glow del acento)
+   .th-panel -> panel grande (glow suave al hover, sin desplazarse)
+   ========================================================================== */
+.th-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgb(var(--th-surface)) 0%, rgb(var(--th-surface-2)) 100%);
+  border: 1px solid rgb(var(--th-line) / 0.12);
+  box-shadow: 0 2px 10px rgba(2, 12, 27, 0.06);
+  transition: transform .25s ease, box-shadow .3s ease, border-color .3s ease;
+}
+.th-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgb(var(--th-brand) / 0.22);
+  border-color: rgb(var(--th-brand) / 0.45);
+}
+.th-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -70%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgb(var(--th-content) / 0.08), transparent);
+  transform: skewX(-18deg);
+  transition: left .7s ease;
+  pointer-events: none;
+}
+.th-card:hover::after {
+  left: 140%;
+}
+
+.th-panel {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgb(var(--th-surface)) 0%, rgb(var(--th-surface-2)) 100%);
+  border: 1px solid rgb(var(--th-line) / 0.12);
+  box-shadow: 0 2px 10px rgba(2, 12, 27, 0.05);
+  transition: box-shadow .3s ease, border-color .3s ease;
+}
+.th-panel:hover {
+  box-shadow: 0 8px 24px rgb(var(--th-brand) / 0.14);
+  border-color: rgb(var(--th-brand) / 0.30);
+}

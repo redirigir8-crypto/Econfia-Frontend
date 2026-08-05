@@ -149,11 +149,35 @@ const AdminPlanes = () => {
   };
 
   return (
-        <section className="relative h-screen py-4 md:py-6 pb-20 md:pb-24 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
-      <div className="w-full max-w-5xl mx-auto px-2 md:px-6">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 mt-2 text-center drop-shadow-lg">
-          Administración de Planes
-        </h2>
+    <section className="relative min-h-screen overflow-hidden bg-transparent px-3 py-4 pb-28 sm:px-5 md:py-6">
+      <div className="pointer-events-none absolute left-[16%] top-[18%] h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute right-[18%] top-[28%] h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
+      <div className="relative z-10 mx-auto w-full max-w-6xl">
+        <div className="mb-5 overflow-hidden rounded-[26px] border border-line/15 bg-surface/90 px-5 py-5 shadow-2xl shadow-black/5 backdrop-blur-xl md:px-7">
+          <div className="inline-flex rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
+            Centro administrativo
+          </div>
+          <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-3xl font-black tracking-tight text-content md:text-4xl">
+                Administración de Planes
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+                Crea, edita y asigna planes operativos a usuarios desde una vista centralizada.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="rounded-2xl border border-line/15 bg-surface-2/70 px-5 py-3">
+                <div className="text-2xl font-black text-content">{planes.length}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">Planes</div>
+              </div>
+              <div className="rounded-2xl border border-line/15 bg-surface-2/70 px-5 py-3">
+                <div className="text-2xl font-black text-brand">{editId ? "Edit" : "New"}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">Modo</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {toast && (
           <Toast
@@ -167,17 +191,17 @@ const AdminPlanes = () => {
           />
         )}
 
-        <div className="bg-slate-800/80 rounded-2xl shadow-2xl border border-cyan-900/40 p-6 mb-8 overflow-x-auto">
+        <div className="mb-8 overflow-hidden rounded-[28px] border border-line/15 bg-surface/90 shadow-2xl shadow-black/5 backdrop-blur-xl">
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col md:flex-row gap-3 mb-6 items-center"
+            className="flex flex-col gap-3 border-b border-line/15 bg-surface-2/60 px-5 py-5 md:flex-row md:items-center"
           >
             <input
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
               placeholder="Nombre"
               required
-              className="px-3 py-2 rounded-lg bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none"
+              className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 text-sm text-content outline-none transition placeholder:text-muted/70 focus:border-brand/50 md:max-w-xs"
             />
 
             <input
@@ -185,12 +209,12 @@ const AdminPlanes = () => {
               onChange={(e) => setDescripcion(e.target.value)}
               placeholder="Descripción"
               required
-              className="px-3 py-2 rounded-lg bg-slate-900/80 text-white border border-cyan-700/40 focus:border-cyan-400 outline-none"
+              className="w-full rounded-xl border border-line/15 bg-surface px-4 py-3 text-sm text-content outline-none transition placeholder:text-muted/70 focus:border-brand/50 md:flex-1"
             />
 
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold shadow hover:from-cyan-400 hover:to-blue-400 transition-all"
+              className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/20 transition-all hover:from-cyan-400 hover:to-blue-400"
             >
               {editId ? "Actualizar" : "Crear"}
             </button>
@@ -203,16 +227,17 @@ const AdminPlanes = () => {
                   setNombre("");
                   setDescripcion("");
                 }}
-                className="px-4 py-2 rounded-lg bg-slate-700 text-white font-semibold shadow hover:bg-slate-600 transition-all"
+                className="rounded-xl border border-line/15 bg-surface px-5 py-3 text-sm font-bold text-content transition-all hover:bg-surface-2"
               >
                 Cancelar
               </button>
             )}
           </form>
 
-          <table className="w-full text-sm md:text-base text-left text-white/90">
+          <div className="overflow-x-auto px-5 py-5">
+          <table className="w-full min-w-[780px] text-left text-sm text-content">
             <thead>
-              <tr className="bg-gradient-to-r from-cyan-900/60 to-blue-900/60 text-cyan-300">
+              <tr className="border-b border-line/15 bg-surface-2/80 text-[11px] uppercase tracking-[0.18em] text-muted">
                 <th className="px-3 py-2 font-semibold">ID</th>
                 <th className="px-3 py-2 font-semibold">Nombre</th>
                 <th className="px-3 py-2 font-semibold">Descripción</th>
@@ -223,56 +248,51 @@ const AdminPlanes = () => {
               {planes.map((plan) => (
                 <tr
                   key={plan.id}
-                  className="border-b border-slate-700/40 hover:bg-cyan-900/20 transition"
+                  className="border-b border-line/10 transition hover:bg-cyan-500/[0.06]"
                 >
-                  <td className="px-3 py-2">{plan.id}</td>
-                  <td className="px-3 py-2">{plan.nombre}</td>
-                  <td className="px-3 py-2">{plan.descripcion}</td>
-                  <td className="px-3 py-2 flex gap-2">
+                  <td className="px-3 py-3 font-mono text-muted">#{plan.id}</td>
+                  <td className="px-3 py-3 font-bold text-content">{plan.nombre}</td>
+                  <td className="px-3 py-3 text-muted">{plan.descripcion || "Sin descripción"}</td>
+                  <td className="flex gap-2 px-3 py-3">
 
-                    <div className="p-[1px] rounded-lg bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent">
                     <button
                       onClick={() => handleEdit(plan)}
-                      className="px-3 py-1 rounded-lg bg-slate-700/50 text-white font-semibold shadow-none hover:bg-slate-700/100 hover:shadow-[0_0_12px_2px_rgba(21,94,117,0.7)] transition-all"
+                      className="rounded-lg border border-cyan-400/25 bg-cyan-500/10 px-3 py-1.5 font-semibold text-brand transition-all hover:bg-cyan-500/20"
                     >
                       Editar
                     </button>
-                    </div>
-                    <div className="p-[1px] rounded-lg bg-gradient-to-r from-transparent via-red-500/40 to-transparent">
                     <button
                       onClick={() => handleDelete(plan.id)}
-                      className="px-3 py-1 rounded-lg bg-slate-600/50 text-white font-semibold shadow-none hover:bg-slate-600/100 hover:shadow-[0_0_12px_2px_rgba(220,38,38,0.7)] transition-all"
+                      className="rounded-lg border border-red-400/25 bg-red-500/10 px-3 py-1.5 font-semibold text-red-600 transition-all hover:bg-red-500/20 dark:text-red-300"
                     >
                       Eliminar
                     </button>
-                    </div>
 
-                    <div className="p-[1.5px] rounded-lg bg-gradient-to-r from-transparent via-purple-500/40 to-transparent">
-                      <button
+                    <button
                       onClick={() => handleAsignar(plan)}
-                      className="px-3 py-1 rounded-lg bg-slate-600/50 text-white font-semibold shadow-none hover:bg-slate-600/100 hover:shadow-[0_0_12px_2px_rgba(147,51,234,0.7)] transition-all"
+                      className="rounded-lg border border-violet-400/25 bg-violet-500/10 px-3 py-1.5 font-semibold text-violet-600 transition-all hover:bg-violet-500/20 dark:text-violet-300"
                     >
                       Asignar
                     </button>
-                    </div>
 
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
       {/* Modal para asignar usuarios (fuera de la tabla) */}
       {showModal && (
         <Modal onClose={() => setShowModal(false)}>
-          <h3 className="text-xl font-bold mb-4 text-slate-900">Asignar usuarios al plan: <span className="text-cyan-700">{selectedPlan?.nombre}</span></h3>
-          <div className="max-h-64 overflow-y-auto mb-4 bg-slate-800/80 rounded-lg p-4 border border-cyan-900/40">
+          <h3 className="mb-4 text-xl font-bold text-content">Asignar usuarios al plan: <span className="text-brand">{selectedPlan?.nombre}</span></h3>
+          <div className="mb-4 max-h-64 overflow-y-auto rounded-xl border border-line/15 bg-surface-2/70 p-4">
             {users.length === 0 ? (
-              <div className="text-center text-slate-400">No hay usuarios disponibles</div>
+              <div className="text-center text-muted">No hay usuarios disponibles</div>
             ) : (
               users.map((u) => (
-                <label key={u.id} className="flex items-center gap-3 mb-3 p-2 rounded-lg bg-slate-900/80 hover:bg-cyan-900/30 transition border border-cyan-700/20">
+                <label key={u.id} className="mb-3 flex items-center gap-3 rounded-lg border border-line/15 bg-surface p-2 transition hover:border-brand/30 hover:bg-surface-2">
                   <input
                     type="checkbox"
                     checked={selectedUsers.includes(u.id)}
@@ -285,8 +305,8 @@ const AdminPlanes = () => {
                     }}
                     className="accent-cyan-500 w-5 h-5"
                   />
-                  <span className="text-white font-semibold">{u.username}</span>
-                  <span className="text-cyan-300">{u.email}</span>
+                  <span className="font-semibold text-content">{u.username}</span>
+                  <span className="text-brand">{u.email}</span>
                 </label>
               ))
             )}

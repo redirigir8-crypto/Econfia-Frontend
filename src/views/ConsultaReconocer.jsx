@@ -116,10 +116,10 @@ export default function ConsultaReconocer() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-2xl font-black text-transparent">
+              <h2 className="text-2xl font-black text-content">
                 Consulta completada
               </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-300">
+              <p className="mt-3 text-sm leading-6 text-muted">
                 El resultado quedó almacenado. Te llevamos al panel de resultados para ver el detalle.
               </p>
             </div>
@@ -143,12 +143,12 @@ export default function ConsultaReconocer() {
                 </span>
                 <span className="text-xs font-medium text-cyan-300">Econfia Recognize</span>
               </div>
-              <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-3xl font-black leading-tight tracking-tight text-transparent md:text-4xl">
+              <h1 className="text-3xl font-black leading-tight tracking-tight text-content md:text-4xl">
                 Econfia Recognize
               </h1>
             </div>
 
-            <p className="text-sm leading-relaxed text-white/70">
+            <p className="text-sm leading-relaxed text-muted">
               Localiza y valida datos de contacto del titular. El resultado queda
               disponible en el panel de resultados.
             </p>
@@ -160,7 +160,7 @@ export default function ConsultaReconocer() {
           </div>
 
           <div className="relative mx-auto w-full max-w-sm">
-            <div className="group relative w-full rounded-[20px] border border-white/10 bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 p-6 shadow-2xl shadow-cyan-500/10 backdrop-blur-xl">
+            <div className="group relative w-full rounded-[20px] border border-line/15 bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 p-6 shadow-2xl shadow-cyan-500/10 backdrop-blur-xl">
               <div className="relative z-10">
                 <div className="mb-4 flex items-center justify-center">
                   <img src="/img/logo-econfia-1.png" alt="Econfia" className="h-16 w-16 object-contain" />
@@ -168,16 +168,16 @@ export default function ConsultaReconocer() {
 
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Tipo de documento *</label>
+                    <label className="text-xs font-semibold text-content/80">Tipo de documento *</label>
                     <select
                       required
                       value={tipoIdentificacion}
                       onChange={(e) => setTipoIdentificacion(e.target.value)}
-                      className="w-full cursor-pointer appearance-none rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs text-white transition-all focus:border-cyan-400/50 focus:bg-white/10 focus:outline-none"
+                      className="w-full cursor-pointer appearance-none rounded-lg border border-line/15 bg-surface-2/70 px-3 py-2 text-xs text-content transition-all focus:border-brand/50 focus:bg-surface focus:outline-none"
                     >
-                      <option className="bg-slate-900" value="">Seleccione tipo de documento</option>
+                      <option className="bg-surface text-content" value="">Seleccione tipo de documento</option>
                       {EXPERIAN_DOCUMENT_OPTIONS.map((option) => (
-                        <option key={option.value} className="bg-slate-900" value={option.value}>
+                        <option key={option.value} className="bg-surface text-content" value={option.value}>
                           {option.label}
                         </option>
                       ))}
@@ -185,44 +185,44 @@ export default function ConsultaReconocer() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Número de documento *</label>
+                    <label className="text-xs font-semibold text-content/80">Número de documento *</label>
                     <input
                       required
                       type="text"
                       value={numeroIdentificacion}
                       onChange={(e) => setNumeroIdentificacion(e.target.value)}
                       placeholder="Ingrese número de documento"
-                      className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs text-white placeholder:text-white/40 transition-all focus:border-cyan-400/50 focus:bg-white/10 focus:outline-none"
+                      className="w-full rounded-lg border border-line/15 bg-surface-2/70 px-3 py-2 text-xs text-content placeholder:text-muted/70 transition-all focus:border-brand/50 focus:bg-surface focus:outline-none"
                     />
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">{fieldConfig.label} *</label>
+                    <label className="text-xs font-semibold text-content/80">{fieldConfig.label} *</label>
                     <input
                       required
                       type="text"
                       value={apellidoRazonSocial}
                       onChange={(e) => setApellidoRazonSocial(e.target.value)}
                       placeholder={fieldConfig.placeholder}
-                      className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs text-white placeholder:text-white/40 transition-all focus:border-cyan-400/50 focus:bg-white/10 focus:outline-none"
+                      className="w-full rounded-lg border border-line/15 bg-surface-2/70 px-3 py-2 text-xs text-content placeholder:text-muted/70 transition-all focus:border-brand/50 focus:bg-surface focus:outline-none"
                     />
                   </div>
 
                   <div className="space-y-1 pt-1">
                     <label className="group flex cursor-pointer items-center gap-2">
                       <input type="checkbox" checked={forzarConsulta} onChange={(e) => setForzarConsulta(e.target.checked)} className="h-4 w-4 cursor-pointer accent-cyan-500" />
-                      <span className="text-xs text-white/80">Forzar consulta nueva</span>
+                      <span className="text-xs text-content/85">Forzar consulta nueva</span>
                     </label>
                     <label className="group flex cursor-pointer items-center gap-2">
                       <input type="checkbox" checked={acepta} onChange={(e) => setAcepta(e.target.checked)} className="h-4 w-4 cursor-pointer accent-cyan-500" />
-                      <span className="text-xs text-white/80">
+                      <span className="text-xs text-content/85">
                         Acepto los{" "}
                         <Terminos inline triggerClassName="font-medium text-cyan-400 underline underline-offset-4 hover:text-cyan-300" />
                       </span>
                     </label>
                     <label className="group flex cursor-pointer items-center gap-2">
                       <input type="checkbox" checked={consentimiento} onChange={(e) => setConsentimiento(e.target.checked)} className="h-4 w-4 cursor-pointer accent-cyan-500" />
-                      <span className="text-xs text-white/80">Confirmo consentimiento del titular</span>
+                      <span className="text-xs text-content/85">Confirmo consentimiento del titular</span>
                     </label>
                   </div>
 
@@ -231,7 +231,7 @@ export default function ConsultaReconocer() {
                     disabled={disabled}
                     className={`mt-2 w-full rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-300 ${
                       disabled
-                        ? "cursor-not-allowed bg-white/10 text-white/40"
+                        ? "cursor-not-allowed bg-surface-2/70 text-muted"
                         : "transform bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:scale-105 hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
                     }`}
                   >

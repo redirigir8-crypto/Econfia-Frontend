@@ -50,14 +50,14 @@ function isActiveStatus(value) {
 
 function Section({ icon: Icon, title, count, children }) {
   return (
-    <section className="rounded-[22px] border border-white/[0.08] bg-slate-950/60 p-5 backdrop-blur-xl">
+    <section className="rounded-[22px] border border-line/15 bg-surface/90 p-5 shadow-xl shadow-black/5 backdrop-blur-xl">
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] text-cyan-300">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] text-brand">
           <Icon className="h-5 w-5" />
         </div>
-        <h3 className="text-base font-bold text-white">{title}</h3>
+        <h3 className="text-base font-bold text-content">{title}</h3>
         {count !== undefined && (
-          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-semibold text-slate-300">
+          <span className="rounded-full border border-line/15 bg-surface-2/70 px-2.5 py-0.5 text-xs font-semibold text-muted">
             {count}
           </span>
         )}
@@ -69,16 +69,16 @@ function Section({ icon: Icon, title, count, children }) {
 
 function StatTile({ label, value, tone = "cyan" }) {
   const tones = {
-    cyan: "border-cyan-500/20 from-cyan-500/10 to-blue-500/5 text-cyan-200",
-    emerald: "border-emerald-500/20 from-emerald-500/10 to-cyan-500/5 text-emerald-200",
-    amber: "border-amber-500/20 from-amber-500/10 to-orange-500/5 text-amber-200",
-    rose: "border-rose-500/20 from-rose-500/10 to-pink-500/5 text-rose-200",
-    slate: "border-white/10 from-white/[0.05] to-white/[0.02] text-slate-200",
+    cyan: "border-cyan-500/25 from-cyan-500/10 to-blue-500/5",
+    emerald: "border-emerald-500/25 from-emerald-500/10 to-cyan-500/5",
+    amber: "border-amber-500/25 from-amber-500/10 to-orange-500/5",
+    rose: "border-rose-500/25 from-rose-500/10 to-pink-500/5",
+    slate: "border-line/15 from-surface-2/80 to-surface/70",
   };
   return (
-    <div className={`rounded-2xl border bg-gradient-to-br p-4 ${tones[tone] || tones.cyan}`}>
-      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
-      <div className="mt-1.5 text-lg font-black leading-tight text-white">{value}</div>
+    <div className={`rounded-2xl border bg-gradient-to-br p-4 shadow-lg shadow-black/5 ${tones[tone] || tones.cyan}`}>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">{label}</div>
+      <div className="mt-1.5 text-lg font-black leading-tight text-content">{value}</div>
     </div>
   );
 }
@@ -87,9 +87,9 @@ function FactGrid({ items }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {items.filter((item) => item.value && item.value !== "—").map((item) => (
-        <div key={item.label} className="rounded-2xl border border-white/[0.07] bg-white/[0.035] p-4">
-          <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">{item.label}</div>
-          <div className="mt-1 text-sm font-bold text-white">{item.value}</div>
+        <div key={item.label} className="rounded-2xl border border-line/15 bg-surface-2/70 p-4">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-muted">{item.label}</div>
+          <div className="mt-1 text-sm font-bold text-content">{item.value}</div>
         </div>
       ))}
     </div>
@@ -133,10 +133,10 @@ function EmpresaCharts({ empresa }) {
   return (
     <Section icon={Activity} title="Lectura gráfica empresarial">
       <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-slate-900/85 via-[#0b2630]/75 to-slate-950/85 p-4">
+        <div className="rounded-2xl border border-line/15 bg-gradient-to-br from-surface-2/95 via-surface/90 to-surface-2/80 p-4 shadow-lg shadow-black/5">
           <div className="mb-3">
-            <div className="text-sm font-black text-white">Cobertura de fuentes</div>
-            <div className="text-xs text-slate-400">Qué tan completa llegó la consulta empresarial.</div>
+            <div className="text-sm font-black text-content">Cobertura de fuentes</div>
+            <div className="text-xs text-muted">Qué tan completa llegó la consulta empresarial.</div>
           </div>
           <div className="grid gap-3 sm:grid-cols-[210px_1fr]">
             <div className="relative h-[210px]">
@@ -164,28 +164,28 @@ function EmpresaCharts({ empresa }) {
                   <Tooltip
                     cursor={false}
                     contentStyle={{
-                      background: "rgba(6,24,31,0.96)",
-                      border: "1px solid rgba(103,232,249,0.18)",
+                      background: "rgb(var(--th-surface))",
+                      border: "1px solid rgb(var(--th-line) / 0.18)",
                       borderRadius: 12,
-                      color: "#e8f1f2",
+                      color: "rgb(var(--th-content))",
                     }}
                     formatter={(value) => [value ? "Disponible" : "No disponible", "Estado"]}
                   />
                 </PieChart>
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-3xl font-black text-white">{coveragePct}%</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-200">cobertura</div>
+                <div className="text-3xl font-black text-content">{coveragePct}%</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand">cobertura</div>
               </div>
             </div>
             <div className="grid content-center gap-2">
               {coverage.map((item) => (
-                <div key={item.name} className="flex items-center justify-between rounded-xl border border-white/[0.07] bg-white/[0.035] px-3 py-2">
-                  <span className="flex items-center gap-2 text-sm font-bold text-white">
+                <div key={item.name} className="flex items-center justify-between rounded-xl border border-line/15 bg-surface/80 px-3 py-2">
+                  <span className="flex items-center gap-2 text-sm font-bold text-content">
                     <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.value ? item.color : "rgba(148,163,184,0.45)" }} />
                     {item.name}
                   </span>
-                  <span className={item.value ? "text-xs font-black text-emerald-200" : "text-xs font-black text-slate-500"}>
+                  <span className={item.value ? "text-xs font-black text-emerald-500" : "text-xs font-black text-muted"}>
                     {item.value ? "OK" : "Pendiente"}
                   </span>
                 </div>
@@ -194,24 +194,24 @@ function EmpresaCharts({ empresa }) {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4">
+        <div className="rounded-2xl border border-line/15 bg-surface-2/70 p-4 shadow-lg shadow-black/5">
           <div className="mb-3">
-            <div className="text-sm font-black text-white">Señales para calificación</div>
-            <div className="text-xs text-slate-400">Lectura visual para priorizar revisión.</div>
+            <div className="text-sm font-black text-content">Señales para calificación</div>
+            <div className="text-xs text-muted">Lectura visual para priorizar revisión.</div>
           </div>
           <div className="h-[230px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={signals} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                <CartesianGrid stroke="#24424c" strokeOpacity={0.45} vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis domain={[0, 100]} tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <CartesianGrid stroke="rgb(var(--th-line))" strokeOpacity={0.45} vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "rgb(var(--th-muted))", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis domain={[0, 100]} tick={{ fill: "rgb(var(--th-muted))", fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip
                   cursor={{ fill: "rgba(103,232,249,0.06)" }}
                   contentStyle={{
-                    background: "rgba(6,24,31,0.96)",
-                    border: "1px solid rgba(103,232,249,0.18)",
+                    background: "rgb(var(--th-surface))",
+                    border: "1px solid rgb(var(--th-line) / 0.18)",
                     borderRadius: 12,
-                    color: "#e8f1f2",
+                    color: "rgb(var(--th-content))",
                   }}
                 />
                 <Bar dataKey="valor" name="Indicador" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1000}>
@@ -226,25 +226,25 @@ function EmpresaCharts({ empresa }) {
       </div>
 
       {financial.length > 0 && (
-        <div className="mt-4 rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4">
+        <div className="mt-4 rounded-2xl border border-line/15 bg-surface-2/70 p-4 shadow-lg shadow-black/5">
           <div className="mb-3">
-            <div className="text-sm font-black text-white">Indicadores financieros reportados</div>
-            <div className="text-xs text-slate-400">Información complementaria de afiliados cuando está disponible.</div>
+            <div className="text-sm font-black text-content">Indicadores financieros reportados</div>
+            <div className="text-xs text-muted">Información complementaria de afiliados cuando está disponible.</div>
           </div>
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={financial} margin={{ top: 8, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid stroke="#24424c" strokeOpacity={0.45} vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#9bb9c3", fontSize: 10 }} axisLine={false} tickLine={false} interval={0} />
-                <YAxis tickFormatter={(value) => `${Math.round(value / 1000000)}M`} tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} />
+                <CartesianGrid stroke="rgb(var(--th-line))" strokeOpacity={0.45} vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: "rgb(var(--th-muted))", fontSize: 10 }} axisLine={false} tickLine={false} interval={0} />
+                <YAxis tickFormatter={(value) => `${Math.round(value / 1000000)}M`} tick={{ fill: "rgb(var(--th-muted))", fontSize: 11 }} axisLine={false} tickLine={false} />
                 <Tooltip
                   cursor={{ fill: "rgba(103,232,249,0.06)" }}
                   formatter={(value, name) => [fmtMoney(value), name]}
                   contentStyle={{
-                    background: "rgba(6,24,31,0.96)",
-                    border: "1px solid rgba(103,232,249,0.18)",
+                    background: "rgb(var(--th-surface))",
+                    border: "1px solid rgb(var(--th-line) / 0.18)",
                     borderRadius: 12,
-                    color: "#e8f1f2",
+                    color: "rgb(var(--th-content))",
                   }}
                 />
                 <Bar dataKey="ingresos" name="Ingresos" fill="#38bdf8" radius={[8, 8, 0, 0]} />
@@ -273,24 +273,24 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
 
   return (
     <div className="grid gap-4">
-      <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-slate-950/70 p-6 backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-[24px] border border-line/15 bg-surface/90 p-6 shadow-2xl shadow-black/5 backdrop-blur-xl">
         <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-emerald-500/[0.06] blur-3xl" />
         <div className="relative flex flex-wrap items-center gap-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-ok/30 bg-ok/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-ok">
             <ShieldCheck className="h-3.5 w-3.5" />
             Empresa RUES
           </div>
           <span className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-            alertaDian ? "border-amber-500/25 bg-amber-500/10 text-amber-200" : "border-emerald-500/25 bg-emerald-500/10 text-emerald-300"
+            alertaDian ? "border-warn/30 bg-warn/10 text-warn" : "border-ok/30 bg-ok/10 text-ok"
           }`}>
             {alertaDian ? "Alerta DIAN" : "Sin alerta DIAN"}
           </span>
-          <span className="rounded-md border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-200">
+          <span className="rounded-md border border-brand/25 bg-brand/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
             Adjudicator pendiente
           </span>
         </div>
-        <h2 className="mt-4 text-2xl font-black tracking-tight text-white md:text-3xl">{data.nombre || "Empresa consultada"}</h2>
-        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-400">
+        <h2 className="mt-4 text-2xl font-black tracking-tight text-content md:text-3xl">{data.nombre || "Empresa consultada"}</h2>
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted">
           <span>NIT: {fmtText(data.nit)}</span>
           <span>Estado: {fmtText(data.estado)}</span>
           <span>Cámara: {fmtText(data.camara_comercio)}</span>
@@ -300,7 +300,7 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
           <button
             type="button"
             onClick={() => onDownloadPdf(data.nit)}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-cyan-400 hover:to-blue-400"
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-brand to-brand-2 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
           >
             <FileText className="h-4 w-4" /> Descargar informe empresarial
           </button>
@@ -332,13 +332,13 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
       <Section icon={Factory} title="Actividades económicas" count={actividades.length}>
         <div className="grid gap-2.5">
           {actividades.length ? actividades.map((item, index) => (
-            <div key={`${item.codigo}-${index}`} className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-300">
+            <div key={`${item.codigo}-${index}`} className="rounded-2xl border border-line/15 bg-surface-2/70 p-4">
+              <div className="text-xs font-bold uppercase tracking-[0.16em] text-ok">
                 {index === 0 ? "Principal" : `Actividad ${index + 1}`} · CIIU {item.codigo || "—"}
               </div>
-              <div className="mt-2 text-sm leading-6 text-slate-100">{item.descripcion || "Sin descripción"}</div>
+              <div className="mt-2 text-sm leading-6 text-content">{item.descripcion || "Sin descripción"}</div>
             </div>
-          )) : <div className="text-sm text-slate-400">Sin actividades económicas disponibles.</div>}
+          )) : <div className="text-sm text-muted">Sin actividades económicas disponibles.</div>}
         </div>
       </Section>
 
@@ -346,24 +346,24 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
         <Section icon={UserRound} title="Representante legal" count={representantes.length}>
           <div className="grid gap-2.5">
             {representantes.length ? representantes.map((item, index) => (
-              <div key={`${item.nombre || item.valor}-${index}`} className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
-                <div className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-300">{item.cargo || item.etiqueta || "Cargo"}</div>
-                <div className="mt-2 text-sm font-bold text-white">{item.nombre || item.valor || "No disponible"}</div>
-                {item.identificacion && <div className="mt-1 text-xs text-slate-400">{item.identificacion}</div>}
+              <div key={`${item.nombre || item.valor}-${index}`} className="rounded-2xl border border-line/15 bg-surface-2/70 p-4">
+                <div className="text-xs font-bold uppercase tracking-[0.16em] text-brand">{item.cargo || item.etiqueta || "Cargo"}</div>
+                <div className="mt-2 text-sm font-bold text-content">{item.nombre || item.valor || "No disponible"}</div>
+                {item.identificacion && <div className="mt-1 text-xs text-muted">{item.identificacion}</div>}
               </div>
-            )) : <div className="text-sm leading-6 text-slate-300">{data.representante_legal?.mensaje || "Información no disponible."}</div>}
+            )) : <div className="text-sm leading-6 text-muted">{data.representante_legal?.mensaje || "Información no disponible."}</div>}
           </div>
         </Section>
 
         <Section icon={CalendarDays} title="Historia registral" count={historia.length}>
           <div className="grid gap-2.5">
             {historia.length ? historia.map((item, index) => (
-              <div key={`${item.titulo}-${index}`} className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
-                <div className="text-xs font-bold uppercase tracking-[0.16em] text-amber-300">{item.titulo}</div>
-                <div className="mt-2 text-lg font-black text-white">{item.valor || "—"}</div>
-                <div className="mt-1 text-xs text-slate-400">{item.detalle || "Sin detalle"}</div>
+              <div key={`${item.titulo}-${index}`} className="rounded-2xl border border-line/15 bg-surface-2/70 p-4">
+                <div className="text-xs font-bold uppercase tracking-[0.16em] text-warn">{item.titulo}</div>
+                <div className="mt-2 text-lg font-black text-content">{item.valor || "—"}</div>
+                <div className="mt-1 text-xs text-muted">{item.detalle || "Sin detalle"}</div>
               </div>
-            )) : <div className="text-sm text-slate-400">Sin historia registral estructurada.</div>}
+            )) : <div className="text-sm text-muted">Sin historia registral estructurada.</div>}
           </div>
         </Section>
       </div>
@@ -371,7 +371,7 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
       <div className="grid gap-4 xl:grid-cols-2">
         <Section icon={AlertTriangle} title="Proveedores ficticios DIAN">
           <div className={`rounded-2xl border px-4 py-4 text-sm leading-6 ${
-            alertaDian ? "border-amber-400/20 bg-amber-500/10 text-amber-100" : "border-emerald-400/20 bg-emerald-500/10 text-emerald-100"
+            alertaDian ? "border-warn/30 bg-warn/10 text-warn" : "border-ok/30 bg-ok/10 text-ok"
           }`}>
             {proveedores.mensaje || "Validación DIAN no disponible."}
           </div>
@@ -380,18 +380,18 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
         <Section icon={Store} title="Propietario / establecimiento" count={propietarios.length}>
           <div className="grid gap-2.5">
             {propietarios.length ? propietarios.slice(0, 3).map((item, index) => (
-              <div key={`${item.titulo}-${index}`} className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
-                <div className="text-sm font-bold text-white">{item.titulo || `Establecimiento ${index + 1}`}</div>
+              <div key={`${item.titulo}-${index}`} className="rounded-2xl border border-line/15 bg-surface-2/70 p-4">
+                <div className="text-sm font-bold text-content">{item.titulo || `Establecimiento ${index + 1}`}</div>
                 <div className="mt-2 grid gap-2 sm:grid-cols-2">
                   {Object.entries(item.campos || {}).slice(0, 4).map(([label, value]) => (
                     <div key={label}>
-                      <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</div>
-                      <div className="mt-0.5 text-xs font-medium text-slate-100">{fmtText(value)}</div>
+                      <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</div>
+                      <div className="mt-0.5 text-xs font-medium text-content">{fmtText(value)}</div>
                     </div>
                   ))}
                 </div>
               </div>
-            )) : <div className="text-sm text-slate-400">{data.propietario_establecimiento?.mensaje || "Sin establecimientos disponibles."}</div>}
+            )) : <div className="text-sm text-muted">{data.propietario_establecimiento?.mensaje || "Sin establecimientos disponibles."}</div>}
           </div>
         </Section>
       </div>
@@ -401,7 +401,7 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
           <button
             type="button"
             onClick={() => setPreviewOpen(true)}
-            className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] text-left"
+            className="group relative block overflow-hidden rounded-2xl border border-line/15 bg-surface-2/70 text-left"
           >
             <img src={data.captura_principal} alt="Captura de la empresa" className="max-h-[360px] w-full object-cover opacity-90 transition group-hover:scale-[1.01] group-hover:opacity-100" />
             <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-slate-950/90 to-transparent px-4 py-4">

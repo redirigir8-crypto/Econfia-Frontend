@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Search, FileText, LogOut, User, HelpCircle, HardHat, Target, ArrowUpCircle, BookOpen, ShieldCheck, Volume2,
-  ChevronLeft, ChevronRight,
+  Search, FileText, LogOut, User, HelpCircle, HardHat, BookOpen, ShieldCheck, Volume2,
+  ChevronLeft, ChevronRight, Sun, Moon,
 } from "lucide-react";
 import { Fuel } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 import HardHatIcon from '../assets/icons8-contratista-64 (1).png';
 import UserCogIcon from '../assets/icons8-lista-de-verificación-64.png';
 import UserBaseIcon from '../assets/icons8-usuario-48 (1).png';
@@ -41,7 +42,6 @@ export default function Taskbar() {
   }, []);
 
   const hasPlanes = user?.perfil?.planes && user.perfil.planes.length > 0;
-  const hasConsultas = (user?.perfil?.consultas_disponibles ?? 0) > 0;
   const isAdmin = user?.is_superuser || user?.is_staff;
 
 // Accesos de consulta según los planes asignados
@@ -109,6 +109,7 @@ if (isAdmin) {
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   const COLOR_HEX = {
     amber: "#f59e0b",
@@ -153,11 +154,11 @@ if (isAdmin) {
     <div className="fixed top-5 left-0 right-0 z-50 flex justify-center pointer-events-none">
       <style>{`
         .glass-pill {
-          background: linear-gradient(180deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.02) 100%),
-                      rgba(15,20,35,0.55);
+          background: linear-gradient(180deg, rgb(var(--th-surface) / 0.72) 0%, rgb(var(--th-surface-2) / 0.58) 100%);
           backdrop-filter: blur(10px) saturate(160%);
           -webkit-backdrop-filter: blur(10px) saturate(160%);
-          border: 1px solid rgba(120,170,255,0.22);
+          border: 1px solid rgb(var(--th-line) / 0.20);
+          box-shadow: 0 10px 28px rgb(var(--th-line) / 0.08);
         }
         @keyframes taskbarShineSweep {
           0% { transform: translateX(-130%) rotate(20deg); }
@@ -167,12 +168,12 @@ if (isAdmin) {
           0%, 100% {
             box-shadow:
               0 0 14px 2px color-mix(in srgb, var(--item-color, #38bdf8) 55%, transparent),
-              inset 0 0 0 1px rgba(255,255,255,0.25);
+              inset 0 0 0 1px rgb(var(--th-content) / 0.18);
           }
           50% {
             box-shadow:
               0 0 26px 6px color-mix(in srgb, var(--item-color, #38bdf8) 80%, transparent),
-              inset 0 0 0 1px rgba(255,255,255,0.4);
+              inset 0 0 0 1px rgb(var(--th-content) / 0.26);
           }
         }
         .curve-track {
@@ -201,7 +202,8 @@ if (isAdmin) {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid color-mix(in srgb, var(--item-color, #38bdf8) 45%, rgba(120,170,255,0.22));
+          color: rgb(var(--th-content) / 0.78);
+          border: 1px solid color-mix(in srgb, var(--item-color, #38bdf8) 40%, rgb(var(--th-line) / 0.28));
           transition: all 0.2s ease;
         }
         .curve-item.active {
@@ -222,7 +224,7 @@ if (isAdmin) {
           left: 0;
           width: 45%;
           height: 180%;
-          background: linear-gradient(120deg, transparent, rgba(255,255,255,0.7), transparent);
+          background: linear-gradient(120deg, transparent, rgb(var(--th-content) / 0.45), transparent);
           animation: taskbarShineSweep 2.4s ease-in-out infinite;
         }
         .curve-item:not(.active) {
@@ -235,8 +237,8 @@ if (isAdmin) {
         }
         .curve-label {
           font-size: 11px;
-          font-weight: 600;
-          color: rgba(255,255,255,0.6);
+          font-weight: 800;
+          color: rgb(var(--th-content) / 0.70);
           text-align: center;
           line-height: 1.15;
           white-space: nowrap;
@@ -245,7 +247,7 @@ if (isAdmin) {
           text-overflow: ellipsis;
         }
         .curve-item.active .curve-label {
-          color: #ffffff;
+          color: rgb(var(--th-content));
           font-size: 12px;
           text-shadow: 0 0 10px color-mix(in srgb, var(--item-color, #38bdf8) 70%, transparent);
         }
@@ -258,8 +260,48 @@ if (isAdmin) {
           display: flex;
           align-items: center;
           justify-content: center;
-          color: rgba(255,255,255,0.75);
+          color: rgb(var(--th-content) / 0.78);
           transition: all 0.15s ease;
+        }
+        html[data-theme="light"] .curve-item.active .curve-label {
+          color: #07111f;
+          font-weight: 900;
+          text-shadow: 0 1px 0 rgb(var(--th-surface) / 0.96), 0 0 12px color-mix(in srgb, var(--item-color, #38bdf8) 28%, transparent);
+        }
+        html[data-theme="light"] .curve-label {
+          color: #475569;
+          font-weight: 800;
+          text-shadow: 0 1px 0 rgb(var(--th-surface) / 0.88);
+        }
+        html[data-theme="light"] .curve-item:not(.active):hover .curve-label {
+          color: #0f172a;
+        }
+        html[data-theme="light"] .curve-icon {
+          background: linear-gradient(180deg, rgb(var(--th-surface) / 0.92), rgb(var(--th-surface-2) / 0.84));
+          color: #334155;
+        }
+        html[data-theme="light"] .curve-icon img {
+          filter: brightness(0) saturate(100%) invert(24%) sepia(14%) saturate(1368%) hue-rotate(176deg) brightness(92%) contrast(88%);
+          opacity: 0.88;
+        }
+        html[data-theme="light"] .curve-item:not(.active):hover .curve-icon {
+          color: #0f172a;
+          border-color: color-mix(in srgb, var(--item-color, #38bdf8) 58%, rgb(var(--th-line) / 0.18));
+        }
+        html[data-theme="light"] .curve-item:not(.active):hover .curve-icon img {
+          opacity: 1;
+          filter: brightness(0) saturate(100%) invert(12%) sepia(28%) saturate(1125%) hue-rotate(176deg) brightness(92%) contrast(95%);
+        }
+        html[data-theme="light"] .curve-item.active .curve-icon {
+          color: #ffffff;
+        }
+        html[data-theme="light"] .curve-item.active .curve-icon img {
+          filter: brightness(0) invert(1);
+          opacity: 1;
+        }
+        html[data-theme="dark"] .curve-icon,
+        html[data-theme="dark"] .curve-page-btn {
+          color: rgb(255 255 255 / 0.82);
         }
       `}</style>
 
@@ -268,7 +310,7 @@ if (isAdmin) {
         <button
           type="button"
           onClick={() => canPagePrev && setAnchor((a) => Math.max(0, a - 1))}
-          className={`curve-page-btn glass-pill hover:bg-white/10 ${
+          className={`curve-page-btn glass-pill hover:bg-brand/10 ${
             canPagePrev ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
           aria-label="Módulos anteriores"
@@ -297,7 +339,7 @@ if (isAdmin) {
               >
                 <span className="curve-icon glass-pill" title={item.label}>
                   {isActive && <span className="curve-shine" />}
-                  <span className="relative flex items-center justify-center w-7 h-7 text-white [&>img]:w-[26px] [&>img]:h-[26px] [&>svg]:w-[26px] [&>svg]:h-[26px]">
+                  <span className="relative flex items-center justify-center w-7 h-7 text-current [&>img]:w-[26px] [&>img]:h-[26px] [&>svg]:w-[26px] [&>svg]:h-[26px]">
                     {item.icon}
                   </span>
                 </span>
@@ -311,12 +353,23 @@ if (isAdmin) {
         <button
           type="button"
           onClick={() => canPageNext && setAnchor((a) => Math.min(menuItems.length - 1, a + 1))}
-          className={`curve-page-btn glass-pill hover:bg-white/10 ${
+          className={`curve-page-btn glass-pill hover:bg-brand/10 ${
             canPageNext ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
           aria-label="Más módulos"
         >
           <ChevronRight size={18} />
+        </button>
+
+        {/* Cambio de tema (claro / oscuro) */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="curve-page-btn glass-pill hover:bg-brand/10"
+          aria-label="Cambiar tema"
+          title={theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+        >
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
       </div>

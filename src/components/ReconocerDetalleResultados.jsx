@@ -55,14 +55,14 @@ function latestDateFrom(items, field) {
 
 function Section({ icon: Icon, title, count, children }) {
   return (
-    <section className="rounded-[22px] border border-white/[0.08] bg-slate-950/60 p-5 backdrop-blur-xl">
+    <section className="rounded-[22px] border border-line/15 bg-surface/90 p-5 shadow-xl shadow-black/5 backdrop-blur-xl">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] text-cyan-300">
           <Icon className="h-5 w-5" />
         </div>
-        <h3 className="text-base font-bold text-white">{title}</h3>
+        <h3 className="text-base font-bold text-content">{title}</h3>
         {count !== undefined && (
-          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-semibold text-slate-300">{count}</span>
+          <span className="rounded-full border border-line/15 bg-surface-2/70 px-2.5 py-0.5 text-xs font-semibold text-muted">{count}</span>
         )}
       </div>
       {children}
@@ -72,9 +72,9 @@ function Section({ icon: Icon, title, count, children }) {
 
 function StatTile({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</div>
-      <div className="mt-1.5 text-sm font-bold text-white">{value}</div>
+    <div className="rounded-2xl border border-line/15 bg-surface-2/70 p-4 shadow-lg shadow-black/5">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">{label}</div>
+      <div className="mt-1.5 text-sm font-bold text-content">{value}</div>
     </div>
   );
 }
@@ -109,11 +109,11 @@ function ExecutiveChartPanel({ direcciones, celulares, telefonos, emails }) {
   return (
     <Section icon={Activity} title="Resumen de contactabilidad">
       <div className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
-        <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-slate-900/85 via-[#0b2630]/75 to-slate-950/85 p-4">
+        <div className="rounded-2xl border border-line/15 bg-gradient-to-br from-surface-2/95 via-surface/90 to-surface-2/80 p-4 shadow-lg shadow-black/5">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <div className="text-sm font-black text-white">Cobertura por canal</div>
-              <div className="text-xs text-slate-400">Registros encontrados por tipo de dato.</div>
+              <div className="text-sm font-black text-content">Cobertura por canal</div>
+              <div className="text-xs text-muted">Registros encontrados por tipo de dato.</div>
             </div>
             <BarChart3 className="h-5 w-5 text-cyan-300" />
           </div>
@@ -141,32 +141,32 @@ function ExecutiveChartPanel({ direcciones, celulares, telefonos, emails }) {
                   <Tooltip
                     cursor={false}
                     contentStyle={{
-                      background: "rgba(6, 24, 31, 0.96)",
-                      border: "1px solid rgba(103, 232, 249, 0.18)",
+                      background: "rgb(var(--th-surface))",
+                      border: "1px solid rgb(var(--th-line) / 0.18)",
                       borderRadius: 12,
-                      color: "#e8f1f2",
+                      color: "rgb(var(--th-content))",
                     }}
                   />
                 </PieChart>
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                <div className="text-3xl font-black text-white">{totalChannels}</div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-200">registros</div>
+                <div className="text-3xl font-black text-content">{totalChannels}</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand">registros</div>
               </div>
             </div>
             <div className="grid content-center gap-2">
               {channels.map((item) => {
                 const percent = totalChannels ? (item.value / totalChannels) * 100 : 0;
                 return (
-                  <div key={item.name} className="rounded-xl border border-white/[0.07] bg-white/[0.035] p-3">
+                  <div key={item.name} className="rounded-xl border border-line/15 bg-surface/80 p-3">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-white">
+                      <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-content">
                         <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
                         {item.name}
                       </span>
-                      <span className="text-sm font-black text-cyan-100">{percent.toFixed(0)}%</span>
+                      <span className="text-sm font-black text-brand">{percent.toFixed(0)}%</span>
                     </div>
-                    <div className="mt-1 text-xs text-slate-400">{item.value} registro(s)</div>
+                    <div className="mt-1 text-xs text-muted">{item.value} registro(s)</div>
                   </div>
                 );
               })}
@@ -176,24 +176,24 @@ function ExecutiveChartPanel({ direcciones, celulares, telefonos, emails }) {
 
         <div className="grid gap-4">
           {strength.length > 0 && (
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4">
+            <div className="rounded-2xl border border-line/15 bg-surface-2/70 p-4 shadow-lg shadow-black/5">
               <div className="mb-3">
-                <div className="text-sm font-black text-white">Solidez de los datos reportados</div>
-                <div className="text-xs text-slate-400">Cruza cantidad de reportes y entidades informantes.</div>
+                <div className="text-sm font-black text-content">Solidez de los datos reportados</div>
+                <div className="text-xs text-muted">Cruza cantidad de reportes y entidades informantes.</div>
               </div>
               <div className="h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={strength} margin={{ top: 8, right: 10, left: -18, bottom: 0 }}>
-                    <CartesianGrid stroke="#24424c" strokeOpacity={0.45} vertical={false} />
-                    <XAxis dataKey="name" tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: "#9bb9c3", fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <CartesianGrid stroke="rgb(var(--th-line))" strokeOpacity={0.45} vertical={false} />
+                    <XAxis dataKey="name" tick={{ fill: "rgb(var(--th-muted))", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: "rgb(var(--th-muted))", fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
                     <Tooltip
                       cursor={{ fill: "rgba(103,232,249,0.06)" }}
                       contentStyle={{
-                        background: "rgba(6, 24, 31, 0.96)",
-                        border: "1px solid rgba(103, 232, 249, 0.18)",
+                        background: "rgb(var(--th-surface))",
+                        border: "1px solid rgb(var(--th-line) / 0.18)",
                         borderRadius: 12,
-                        color: "#e8f1f2",
+                        color: "rgb(var(--th-content))",
                       }}
                     />
                     <Bar dataKey="reportes" name="Reportes" fill="#38bdf8" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={900} />
@@ -217,9 +217,9 @@ function ExecutiveChartPanel({ direcciones, celulares, telefonos, emails }) {
 
 function InfoCard({ titulo, badge, filas }) {
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 transition hover:border-white/15 hover:bg-white/[0.05]">
+    <div className="rounded-2xl border border-line/15 bg-surface-2/70 p-4 shadow-lg shadow-black/5 transition hover:border-brand/25 hover:bg-surface">
       <div className="mb-2 flex items-start justify-between gap-3">
-        <div className="truncate text-sm font-bold text-white">{titulo}</div>
+        <div className="truncate text-sm font-bold text-content">{titulo}</div>
         {badge && (
           <span className="shrink-0 rounded-md border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-300">
             {badge}
@@ -229,8 +229,8 @@ function InfoCard({ titulo, badge, filas }) {
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 sm:grid-cols-4">
         {filas.filter((f) => f && f.value !== "—").map((f) => (
           <div key={f.label}>
-            <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">{f.label}</div>
-            <div className="mt-0.5 text-xs font-medium text-slate-100">{f.value}</div>
+            <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-muted">{f.label}</div>
+            <div className="mt-0.5 text-xs font-medium text-content">{f.value}</div>
           </div>
         ))}
       </div>
@@ -296,7 +296,7 @@ export default function ReconocerDetalleResultados({ consultaId }) {
   return (
     <div className="grid gap-4">
       {/* Encabezado */}
-      <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-slate-950/70 p-6 backdrop-blur-xl">
+      <div className="relative overflow-hidden rounded-[24px] border border-line/15 bg-surface/90 p-6 shadow-2xl shadow-black/5 backdrop-blur-xl">
         <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-cyan-500/[0.06] blur-3xl" />
         <div className="relative flex flex-wrap items-center gap-3">
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
@@ -304,8 +304,8 @@ export default function ReconocerDetalleResultados({ consultaId }) {
             Econfia Recognize
           </div>
         </div>
-        <h2 className="mt-4 text-2xl font-black tracking-tight text-white md:text-3xl">{fullName}</h2>
-        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-400">
+        <h2 className="mt-4 text-2xl font-black tracking-tight text-content md:text-3xl">{fullName}</h2>
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted">
           <span>Doc: {fmtText(basica.numeroIdentificacion || detalle.numero_identificacion)}</span>
           {basica.genero && <span>Género: {basica.genero === "M" ? "Masculino" : basica.genero === "F" ? "Femenino" : basica.genero}</span>}
           <span>Edad: {edad}</span>
@@ -391,10 +391,10 @@ export default function ReconocerDetalleResultados({ consultaId }) {
         <Section icon={Mail} title="Correos electrónicos" count={emails.length}>
           <div className="grid gap-2 md:grid-cols-2">
             {emails.map((e, i) => (
-              <div key={i} className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+              <div key={i} className="flex items-center justify-between gap-3 rounded-xl border border-line/15 bg-surface-2/70 px-4 py-3 shadow-lg shadow-black/5">
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold text-white">{fmtText(e.email)}</div>
-                  <div className="text-xs text-slate-400">
+                  <div className="truncate text-sm font-semibold text-content">{fmtText(e.email)}</div>
+                  <div className="text-xs text-muted">
                     {fmtText(e.reportadoDesde)} → {fmtText(e.ultimoReporte)} · {fmtText(e.numReportes)} reportes
                   </div>
                 </div>
@@ -411,7 +411,7 @@ export default function ReconocerDetalleResultados({ consultaId }) {
           {showJson ? "Ocultar" : "Ver"} respuesta completa (JSON)
         </button>
         {showJson && (
-          <pre className="mt-2 max-h-[28rem] overflow-auto rounded-xl border border-white/10 bg-[#02040a] p-4 text-[11px] leading-5 text-cyan-100/80">
+          <pre className="mt-2 max-h-[28rem] overflow-auto rounded-xl border border-line/15 bg-[#02040a] p-4 text-[11px] leading-5 text-cyan-100/80">
             {JSON.stringify(detalle.respuesta_json, null, 2)}
           </pre>
         )}

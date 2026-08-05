@@ -105,16 +105,16 @@ export default function ConsultaBasicElemnt() {
               </span>
               <span className="text-cyan-300 text-xs font-medium">Consulta Especial</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent leading-tight tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
               Econfia Basic Element
             </h1>
           </div>
-          <p className="text-sm text-white/70 leading-relaxed">
+          <p className="text-sm text-muted leading-relaxed">
             Consulta con 20 bots predefinidos. Resultados precisos de forma inmediata.
           </p>
         </div>
         <div className="relative w-full max-w-sm mx-auto">
-          <div className="relative w-full bg-gradient-to-br from-slate-900/80 via-blue-900/20 to-slate-900/80 backdrop-blur-xl rounded-[20px] border border-white/10 shadow-2xl shadow-cyan-500/10 p-6 group">
+          <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
             <div className="relative z-10">
               <div className="flex items-center justify-center mb-4">
@@ -123,54 +123,54 @@ export default function ConsultaBasicElemnt() {
               <form onSubmit={handleSubmit} className="space-y-2">
                 <div className="space-y-2">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Tipo de documento *</label>
+                    <label className="text-xs font-semibold text-content/80">Tipo de documento *</label>
                     <select
                       required
                       value={tipoDoc}
                       onChange={(e) => setTipoDoc(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
                     >
-                      <option className="bg-slate-900 text-white" value="">
+                      <option className="bg-surface text-content" value="">
                         Seleccione tipo de documento
                       </option>
-                      <option className="bg-slate-900 text-white" value="CC">
+                      <option className="bg-surface text-content" value="CC">
                         Cédula de Ciudadanía (CC)
                       </option>
-                      <option className="bg-slate-900 text-white" value="TI">
+                      <option className="bg-surface text-content" value="TI">
                         Tarjeta de Identidad (TI)
                       </option>
-                      <option className="bg-slate-900 text-white" value="CE">
+                      <option className="bg-surface text-content" value="CE">
                         Cédula de Extranjería (CE)
                       </option>
-                      <option className="bg-slate-900 text-white" value="PPT">
+                      <option className="bg-surface text-content" value="PPT">
                         Permiso de Protección Temporal (PPT)
                       </option>
-                      <option className="bg-slate-900 text-white" value="PEP">
+                      <option className="bg-surface text-content" value="PEP">
                         Permiso Especial de Permanencia (PEP)
                       </option>
-                      <option className="bg-slate-900 text-white" value="NIT">
+                      <option className="bg-surface text-content" value="NIT">
                         NIT
                       </option>
                     </select>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Número de documento *</label>
+                    <label className="text-xs font-semibold text-content/80">Número de documento *</label>
                     <input
                       required
                       type="text"
                       value={cedula}
                       onChange={(e) => setCedula(e.target.value)}
                       placeholder="Ingrese número de documento"
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-white/70">Fecha de expedición (Opcional)</label>
+                    <label className="text-xs font-semibold text-content/80">Fecha de expedición (Opcional)</label>
                     <input
                       type="date"
                       value={fechaExpedicion}
                       onChange={(e) => setFechaExpedicion(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
                     />
                   </div>
                 </div>
@@ -182,7 +182,7 @@ export default function ConsultaBasicElemnt() {
                       onChange={(e) => setAcepta(e.target.checked)}
                       className="accent-cyan-500 w-4 h-4 cursor-pointer"
                     />
-                    <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                    <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Acepto los{" "}
                       <Terminos
                         inline
@@ -197,7 +197,7 @@ export default function ConsultaBasicElemnt() {
                       onChange={(e) => setConsentimiento(e.target.checked)}
                       className="accent-cyan-500 w-4 h-4 cursor-pointer"
                     />
-                    <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors">
+                    <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Confirmo consentimiento del titular
                     </span>
                   </label>
@@ -207,7 +207,7 @@ export default function ConsultaBasicElemnt() {
                   disabled={!tipoDoc || !cedula || !acepta || !consentimiento || loading}
                   className={`mt-3 w-full px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-300
                     ${!tipoDoc || !cedula || !acepta || !consentimiento || loading
-                      ? "bg-white/10 text-white/40 cursor-not-allowed"
+                      ? "bg-surface-2/70 text-muted cursor-not-allowed"
                       : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
                     }`}
                 >
@@ -219,7 +219,7 @@ export default function ConsultaBasicElemnt() {
                   <button
                     type="button"
                     onClick={() => setShowMasiva(true)}
-                    className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-purple-500/40 text-purple-300 hover:bg-purple-500/15 hover:border-purple-400/60 transition-all duration-300"
+                    className="mt-1.5 w-full px-4 py-2 rounded-lg font-semibold text-xs border border-brand/40 text-brand hover:bg-brand/15 hover:border-brand/60 transition-all duration-300"
                   >
                     Consulta Masiva (hasta 50 documentos)
                   </button>

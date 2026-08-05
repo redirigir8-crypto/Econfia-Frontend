@@ -32,6 +32,21 @@
         fontFamily: {
           sans: ["Poppins", "sans-serif"],
         },
+        // Tokens semánticos de tema: cambian según [data-theme] en <html>.
+        // Usan canales RGB en variables CSS para soportar /opacidad y gradientes.
+        colors: {
+          app:         "rgb(var(--th-app) / <alpha-value>)",
+          surface:     "rgb(var(--th-surface) / <alpha-value>)",
+          "surface-2": "rgb(var(--th-surface-2) / <alpha-value>)",
+          content:     "rgb(var(--th-content) / <alpha-value>)",
+          muted:       "rgb(var(--th-muted) / <alpha-value>)",
+          line:        "rgb(var(--th-line) / <alpha-value>)",
+          brand:       "rgb(var(--th-brand) / <alpha-value>)",
+          "brand-2":   "rgb(var(--th-brand-2) / <alpha-value>)",
+          ok:          "rgb(var(--th-ok) / <alpha-value>)",
+          danger:      "rgb(var(--th-danger) / <alpha-value>)",
+          warn:        "rgb(var(--th-warn) / <alpha-value>)",
+        },
       },
     },
   };

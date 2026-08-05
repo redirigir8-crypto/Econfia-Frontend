@@ -827,48 +827,48 @@ export default function ConsultaEmpresa() {
 
   return (
     <>
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-40 h-16 border-b border-white/10 bg-slate-950/96 backdrop-blur-xl md:h-20" />
     <div className="relative z-0 mx-auto max-w-7xl px-4 pb-8 pt-24 md:px-6 md:pb-10 md:pt-28">
       <div className="space-y-8">
-        <div className="relative overflow-hidden rounded-[2rem] border border-sky-400/15 bg-[linear-gradient(135deg,rgba(7,13,34,0.98),rgba(15,45,70,0.94)_48%,rgba(20,41,102,0.92))] p-5 shadow-[0_30px_80px_rgba(2,6,23,0.35)]">
-          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-sky-400/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-28 left-10 h-56 w-56 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="relative overflow-hidden rounded-[2rem] border border-line/15 bg-[linear-gradient(135deg,rgb(var(--th-surface)/0.96),rgb(var(--th-surface-2)/0.9)_48%,rgb(var(--th-surface)/0.96))] p-5 shadow-[0_30px_80px_rgba(2,6,23,0.16)]">
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-sky-400/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-28 left-10 h-56 w-56 rounded-full bg-emerald-400/15 blur-3xl" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,rgb(var(--th-brand)/0.08)_45%,transparent_62%)]" />
           <div className="relative grid gap-6 xl:grid-cols-[0.85fr_1.45fr] xl:items-center">
             <div className="max-w-md">
-              <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-sky-200">
-                <FaBuilding className="text-sky-300" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-brand">
+                <FaBuilding className="text-brand" />
                 Empresa RUES
               </div>
-              <h2 className="mt-5 text-2xl font-black leading-tight text-white md:text-3xl">
+              <h2 className="mt-5 text-2xl font-black leading-tight text-content md:text-3xl">
                 Consulta mercantil empresarial
               </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-300">
+              <p className="mt-3 text-sm leading-6 text-muted">
                 Valida RUES, Cámara de Comercio, actividad económica, representación legal y señales de proveedor desde una sola consulta.
               </p>
-              <div className="mt-5 grid gap-2 text-xs text-slate-300 sm:grid-cols-3 xl:grid-cols-1">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                  <div className="font-black uppercase tracking-[0.16em] text-sky-200">Fuente</div>
-                  <div className="mt-1 font-semibold text-white">RUES + complementarias</div>
+              <div className="mt-5 grid gap-2 text-xs text-muted sm:grid-cols-3 xl:grid-cols-1">
+                <div className="rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3 shadow-sm shadow-black/5">
+                  <div className="font-black uppercase tracking-[0.16em] text-brand">Fuente</div>
+                  <div className="mt-1 font-semibold text-content">RUES + complementarias</div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                  <div className="font-black uppercase tracking-[0.16em] text-emerald-200">Salida</div>
-                  <div className="mt-1 font-semibold text-white">Ficha + PDF empresarial</div>
+                <div className="rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3 shadow-sm shadow-black/5">
+                  <div className="font-black uppercase tracking-[0.16em] text-ok">Salida</div>
+                  <div className="mt-1 font-semibold text-content">Ficha + PDF empresarial</div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                  <div className="font-black uppercase tracking-[0.16em] text-cyan-200">Cruce futuro</div>
-                  <div className="mt-1 font-semibold text-white">Adjudicator pendiente</div>
+                <div className="rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3 shadow-sm shadow-black/5">
+                  <div className="font-black uppercase tracking-[0.16em] text-brand-2">Cruce futuro</div>
+                  <div className="mt-1 font-semibold text-content">Adjudicator pendiente</div>
                 </div>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="rounded-[1.5rem] border border-white/10 bg-slate-950/36 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl">
+            <form onSubmit={handleSubmit} className="rounded-[1.5rem] border border-line/15 bg-surface/70 p-4 shadow-[inset_0_1px_0_rgb(var(--th-content)/0.05),0_18px_50px_rgba(2,6,23,0.10)] backdrop-blur-xl">
               <div className="grid gap-4 lg:grid-cols-[150px_1fr]">
                 <div>
-                  <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-sky-100">
+                  <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-content/80">
                     Tipo
                   </label>
                   <select
-                    className="h-14 w-full rounded-2xl border border-white/10 bg-slate-950/55 px-4 text-base font-bold text-white outline-none"
+                    className="h-14 w-full rounded-2xl border border-line/15 bg-surface-2/80 px-4 text-base font-bold text-content outline-none"
                     value={tipoDoc}
                     disabled
                   >
@@ -877,12 +877,12 @@ export default function ConsultaEmpresa() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-sky-100">
+                  <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-content/80">
                     NIT persona natural o jurídica
                   </label>
                   <input
                     type="text"
-                    className="h-14 w-full rounded-2xl border border-white/10 bg-slate-950/55 px-4 text-lg font-bold text-white outline-none transition placeholder:text-slate-500 focus:border-sky-300/45 focus:ring-2 focus:ring-sky-400/15"
+                    className="h-14 w-full rounded-2xl border border-line/15 bg-surface-2/80 px-4 text-lg font-bold text-content outline-none transition placeholder:text-muted/70 focus:border-brand/45 focus:bg-surface focus:ring-2 focus:ring-brand/15"
                     placeholder="Ej: 900000001"
                     value={nit}
                     onChange={(e) => setNit(e.target.value)}
@@ -892,12 +892,12 @@ export default function ConsultaEmpresa() {
               </div>
 
               <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_220px] lg:items-stretch">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                  <div className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                <div className="rounded-2xl border border-line/15 bg-surface-2/55 p-4">
+                  <div className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-muted">
                     Autorización requerida
                   </div>
                   <div className="grid gap-3 md:grid-cols-2">
-                    <label htmlFor="acepta" className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/8 bg-slate-950/35 px-3 py-3 text-sm leading-5 text-slate-300 transition hover:border-sky-300/25 hover:bg-sky-400/10">
+                    <label htmlFor="acepta" className="flex cursor-pointer items-start gap-3 rounded-xl border border-line/15 bg-surface/70 px-3 py-3 text-sm leading-5 text-content/85 transition hover:border-brand/35 hover:bg-brand/10">
                       <input
                         type="checkbox"
                         id="acepta"
@@ -908,7 +908,7 @@ export default function ConsultaEmpresa() {
                       <span>Acepto los <Terminos inline />.</span>
                     </label>
 
-                    <label htmlFor="consentimiento" className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/8 bg-slate-950/35 px-3 py-3 text-sm leading-5 text-slate-300 transition hover:border-sky-300/25 hover:bg-sky-400/10">
+                    <label htmlFor="consentimiento" className="flex cursor-pointer items-start gap-3 rounded-xl border border-line/15 bg-surface/70 px-3 py-3 text-sm leading-5 text-content/85 transition hover:border-brand/35 hover:bg-brand/10">
                       <input
                         type="checkbox"
                         id="consentimiento"
@@ -938,8 +938,8 @@ export default function ConsultaEmpresa() {
               {toast && (
                 <div className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
                   toast.type === "error"
-                    ? "border-red-400/20 bg-red-500/10 text-red-200"
-                    : "border-emerald-400/20 bg-emerald-500/10 text-emerald-200"
+                    ? "border-red-400/25 bg-red-500/10 text-danger"
+                    : "border-emerald-400/25 bg-emerald-500/10 text-ok"
                 }`}>
                   {toast.message}
                 </div>

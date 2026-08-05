@@ -259,14 +259,14 @@ function SpeedoGauge({ value, max = 1000, displayText, label = "Score" }) {
 // ── Metric palette ────────────────────────────────────────────────────────────
 
 const METRIC_COLORS = {
-  Viabilidad:       { top: "border-t-emerald-500/60", text: "text-emerald-200" },
-  Riesgo:           { top: "border-t-amber-500/60",   text: "text-amber-200"   },
-  "Monto sugerido": { top: "border-t-emerald-500/60", text: "text-emerald-200" },
-  Alertas:          { top: "border-t-rose-500/60",    text: "text-rose-200"    },
+  Viabilidad:       { top: "border-t-emerald-500/60", text: "text-emerald-500" },
+  Riesgo:           { top: "border-t-amber-500/60",   text: "text-amber-500"   },
+  "Monto sugerido": { top: "border-t-emerald-500/60", text: "text-emerald-500" },
+  Alertas:          { top: "border-t-rose-500/60",    text: "text-rose-500"    },
 };
 
 function MetricCard({ label, value }) {
-  const palette = METRIC_COLORS[label] ?? { top: "border-t-cyan-500/50", text: "text-cyan-100" };
+  const palette = METRIC_COLORS[label] ?? { top: "border-t-cyan-500/50", text: "text-brand" };
   const Icon =
     label === "Monto sugerido" ? Wallet :
     label === "Alertas" ? AlertTriangle :
@@ -275,15 +275,15 @@ function MetricCard({ label, value }) {
 
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl border border-white/[0.08] border-t-2 ${palette.top} bg-white/[0.035] px-5 py-4 shadow-[0_18px_45px_rgba(2,6,23,0.35)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/[0.14] hover:bg-white/[0.055]`}
+      className={`group relative overflow-hidden rounded-2xl border border-line/15 border-t-2 ${palette.top} bg-surface-2/70 px-5 py-4 shadow-lg shadow-black/5 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-brand/25 hover:bg-surface`}
     >
       <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-cyan-400/[0.06] blur-2xl transition group-hover:bg-cyan-400/[0.10]" />
       <div className="relative flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.045] text-cyan-300 shadow-inner">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-line/15 bg-surface/80 text-cyan-300 shadow-inner">
           <Icon className="h-4.5 w-4.5" />
         </div>
         <div className="min-w-0">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">{label}</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">{label}</div>
           <div className={`mt-2 text-2xl font-extrabold tracking-tight ${palette.text}`}>{displayValue(value)}</div>
         </div>
       </div>
@@ -293,16 +293,16 @@ function MetricCard({ label, value }) {
 
 function StatBadge({ label, value }) {
   return (
-    <div className="group flex min-w-[150px] flex-col rounded-2xl border border-white/[0.08] bg-white/[0.035] px-4 py-3 shadow-[0_12px_30px_rgba(2,6,23,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-cyan-400/20 hover:bg-white/[0.055]">
-      <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-400 transition group-hover:text-cyan-200/80">{label}</div>
-      <div className="mt-1 text-sm font-bold text-slate-50">{displayValue(value)}</div>
+    <div className="group flex min-w-[150px] flex-col rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3 shadow-lg shadow-black/5 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-brand/25 hover:bg-surface">
+      <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-muted transition group-hover:text-brand">{label}</div>
+      <div className="mt-1 text-sm font-bold text-content">{displayValue(value)}</div>
     </div>
   );
 }
 
 function SectionCard({ icon: Icon, title, description, children, action }) {
   return (
-    <section className="relative overflow-hidden rounded-[26px] border border-white/[0.08] bg-slate-950/65 p-6 shadow-[0_24px_70px_rgba(2,6,23,0.34)] backdrop-blur-xl transition duration-300 hover:border-white/[0.13]">
+    <section className="relative overflow-hidden rounded-[26px] border border-line/15 bg-surface/90 p-6 shadow-xl shadow-black/5 backdrop-blur-xl transition duration-300 hover:border-brand/20">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/35 to-transparent" />
       <div className="pointer-events-none absolute -left-24 -top-24 h-52 w-52 rounded-full bg-cyan-500/[0.035] blur-3xl" />
       <div className="relative flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -311,9 +311,9 @@ function SectionCard({ icon: Icon, title, description, children, action }) {
             <Icon className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold tracking-tight text-white">{title}</h3>
+            <h3 className="text-lg font-bold tracking-tight text-content">{title}</h3>
             {description ? (
-              <p className="mt-1.5 max-w-3xl text-sm leading-6 text-slate-400">{description}</p>
+              <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted">{description}</p>
             ) : null}
           </div>
         </div>
@@ -327,19 +327,19 @@ function SectionCard({ icon: Icon, title, description, children, action }) {
 function FactGrid({ items, columns = "md:grid-cols-2 xl:grid-cols-3" }) {
   const filteredItems = items.filter(Boolean);
   if (!filteredItems.length)
-    return <p className="text-sm italic text-slate-500">No hay información relevante para mostrar.</p>;
+    return <p className="text-sm italic text-muted">No hay información relevante para mostrar.</p>;
 
   return (
     <div className={`grid gap-2.5 ${columns}`}>
       {filteredItems.map((item) => (
         <div
           key={`${item.label}-${item.value}`}
-          className="group rounded-2xl border border-white/[0.07] bg-white/[0.035] px-5 py-4 shadow-[0_12px_30px_rgba(2,6,23,0.18)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/[0.13] hover:bg-white/[0.055]"
+          className="group rounded-2xl border border-line/15 bg-surface-2/70 px-5 py-4 shadow-lg shadow-black/5 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-brand/25 hover:bg-surface"
         >
-          <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500 transition group-hover:text-slate-400">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-muted transition group-hover:text-brand">
             {item.label}
           </div>
-          <div className="mt-1.5 text-sm font-medium leading-snug text-slate-100">{item.value}</div>
+          <div className="mt-1.5 text-sm font-medium leading-snug text-content">{item.value}</div>
         </div>
       ))}
     </div>
@@ -350,7 +350,7 @@ function AnimatedTrendBars({ items }) {
   if (!items.length) return null;
 
   return (
-    <div className="mt-5 overflow-hidden rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.035] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <div className="mt-5 overflow-hidden rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] p-5 shadow-lg shadow-black/5">
       <style>{`
         @keyframes experianBarGrow {
           from { opacity: .35; transform: scaleX(0); }
@@ -359,14 +359,14 @@ function AnimatedTrendBars({ items }) {
       `}</style>
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
-          <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-brand">
             Tendencia financiera
           </div>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
+          <p className="mt-1 text-xs leading-5 text-muted">
             Comparativo visual de los valores más relevantes de la respuesta.
           </p>
         </div>
-        <div className="hidden rounded-full border border-white/[0.08] bg-white/[0.035] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 sm:block">
+        <div className="hidden rounded-full border border-line/15 bg-surface/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted sm:block">
           Barras
         </div>
       </div>
@@ -374,10 +374,10 @@ function AnimatedTrendBars({ items }) {
         {items.map((item, index) => (
           <div key={`${item.label}-${item.display}`} className="grid gap-2">
             <div className="flex items-center justify-between gap-4 text-xs">
-              <span className="font-semibold text-slate-300">{item.label}</span>
-              <span className="font-bold text-slate-100">{item.display}</span>
+              <span className="font-semibold text-muted">{item.label}</span>
+              <span className="font-bold text-content">{item.display}</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-slate-800/80 ring-1 ring-white/[0.04]">
+            <div className="h-2.5 overflow-hidden rounded-full bg-surface-2 ring-1 ring-line/10">
               <div
                 className="h-full origin-left rounded-full bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-300 shadow-[0_0_24px_rgba(45,212,191,0.22)]"
                 style={{
@@ -396,27 +396,27 @@ function AnimatedTrendBars({ items }) {
 
 function CompactList({ items, emptyLabel = "Sin registros relevantes." }) {
   if (!items.length)
-    return <p className="text-sm italic text-slate-500">{emptyLabel}</p>;
+    return <p className="text-sm italic text-muted">{emptyLabel}</p>;
 
   return (
     <div className="grid gap-2">
       {items.map((item, index) => (
         <div
           key={`${index}-${displayValue(item?.numeroDocumento || item?.nombre || item)}`}
-          className="group rounded-2xl border border-white/[0.07] bg-white/[0.035] px-5 py-4 shadow-[0_12px_30px_rgba(2,6,23,0.18)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white/[0.13] hover:bg-white/[0.055]"
+          className="group rounded-2xl border border-line/15 bg-surface-2/70 px-5 py-4 shadow-lg shadow-black/5 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-brand/25 hover:bg-surface"
         >
           {typeof item === "string" ? (
-            <div className="text-sm leading-6 text-slate-200">{item}</div>
+            <div className="text-sm leading-6 text-content">{item}</div>
           ) : (
             <div className="grid gap-2.5 md:grid-cols-2">
               {Object.entries(item)
                 .filter(([, value]) => value !== null && value !== undefined && value !== "")
                 .map(([key, value]) => (
                   <div key={key}>
-                    <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500 transition group-hover:text-slate-400">
+                    <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-muted transition group-hover:text-brand">
                       {humanizeKey(key)}
                     </div>
-                    <div className="mt-1 text-sm leading-snug text-slate-100">
+                    <div className="mt-1 text-sm leading-snug text-content">
                       {Array.isArray(value) ? value.join(", ") : String(value)}
                     </div>
                   </div>
@@ -431,7 +431,7 @@ function CompactList({ items, emptyLabel = "Sin registros relevantes." }) {
 
 const GRUPO_COLORS = {
   principales:      "border-cyan-500/25 bg-cyan-500/[0.07] text-cyan-300",
-  suplentes:        "border-slate-400/20 bg-slate-400/[0.06] text-slate-300",
+  suplentes:        "border-line/20 bg-surface-2/70 text-muted",
   "empresa auditora":"border-violet-500/25 bg-violet-500/[0.07] text-violet-300",
 };
 
@@ -440,14 +440,14 @@ function grupoColor(grupo) {
   for (const [token, cls] of Object.entries(GRUPO_COLORS)) {
     if (k.includes(token)) return cls;
   }
-  return "border-slate-500/20 bg-white/[0.04] text-slate-400";
+  return "border-line/20 bg-surface-2/70 text-muted";
 }
 
 function PersonCard({ item }) {
   if (typeof item === "string") {
     return (
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] px-4 py-3">
-        <p className="text-sm text-slate-200">{item}</p>
+      <div className="rounded-xl border border-line/15 bg-surface-2/70 px-4 py-3">
+        <p className="text-sm text-content">{item}</p>
       </div>
     );
   }
@@ -469,45 +469,45 @@ function PersonCard({ item }) {
   const extras   = Object.entries(rest).filter(([, v]) => v !== null && v !== undefined && v !== "");
 
   return (
-    <div className="group overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.025] transition hover:border-white/[0.10] hover:bg-white/[0.04]">
+    <div className="group overflow-hidden rounded-xl border border-line/15 bg-surface-2/70 transition hover:border-brand/20 hover:bg-surface">
       {/* badge strip */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.05] px-4 py-2.5">
+      <div className="flex flex-wrap items-center gap-2 border-b border-line/10 px-4 py-2.5">
         {grupo && (
           <span className={`rounded-md border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] ${grupoColor(grupo)}`}>
             {grupo}
           </span>
         )}
-        {cargo && <span className="text-xs font-medium text-slate-300">{cargo}</span>}
+        {cargo && <span className="text-xs font-medium text-muted">{cargo}</span>}
       </div>
 
       {/* body */}
       <div className="px-4 py-3">
-        {fullName && <p className="mb-3 text-sm font-semibold text-white">{fullName}</p>}
+        {fullName && <p className="mb-3 text-sm font-semibold text-content">{fullName}</p>}
         <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
           {estado && (
             <div>
-              <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-slate-400">Estado</div>
-              <div className="mt-0.5 text-xs font-medium text-slate-200">{estado}</div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted transition group-hover:text-brand">Estado</div>
+              <div className="mt-0.5 text-xs font-medium text-content">{estado}</div>
             </div>
           )}
           {docInfo && (
             <div>
-              <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-slate-400">Documento</div>
-              <div className="mt-0.5 text-xs font-medium text-slate-200">{docInfo}</div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted transition group-hover:text-brand">Documento</div>
+              <div className="mt-0.5 text-xs font-medium text-content">{docInfo}</div>
             </div>
           )}
           {fechaNombramiento && (
             <div>
-              <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-slate-400">Nombramiento</div>
-              <div className="mt-0.5 text-xs font-medium text-slate-200">{fechaNombramiento}</div>
+              <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted transition group-hover:text-brand">Nombramiento</div>
+              <div className="mt-0.5 text-xs font-medium text-content">{fechaNombramiento}</div>
             </div>
           )}
           {extras.map(([k, v]) => (
             <div key={k}>
-              <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-slate-400">
+              <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted transition group-hover:text-brand">
                 {humanizeKey(k)}
               </div>
-              <div className="mt-0.5 text-xs font-medium text-slate-200">
+              <div className="mt-0.5 text-xs font-medium text-content">
                 {Array.isArray(v) ? v.join(", ") : String(v)}
               </div>
             </div>
@@ -519,7 +519,7 @@ function PersonCard({ item }) {
 }
 
 function PersonList({ items, emptyLabel = "Sin registros relevantes." }) {
-  if (!items.length) return <p className="text-sm italic text-slate-500">{emptyLabel}</p>;
+  if (!items.length) return <p className="text-sm italic text-muted">{emptyLabel}</p>;
   return (
     <div className="grid gap-2">
       {items.map((item, index) => (
@@ -531,14 +531,14 @@ function PersonList({ items, emptyLabel = "Sin registros relevantes." }) {
 
 function JsonBlock({ title, value }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-white/[0.07] bg-[#02040a]">
+    <div className="overflow-hidden rounded-xl border border-line/15 bg-[#02040a]">
       <div className="flex items-center gap-3 border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
         <div className="flex gap-1.5">
           <div className="h-2.5 w-2.5 rounded-full bg-rose-500/50" />
           <div className="h-2.5 w-2.5 rounded-full bg-amber-500/50" />
           <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/50" />
         </div>
-        <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">{title}</div>
+        <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-cyan-100/60">{title}</div>
       </div>
       <pre className="max-h-[26rem] overflow-auto p-4 text-[11px] leading-6 text-cyan-100/80">
         {JSON.stringify(value || {}, null, 2)}
@@ -634,24 +634,24 @@ function SugerenciasBlock({ sugerencias }) {
 
       {recomendaciones.length > 0 ? (
         <div className="grid gap-2.5">
-          <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-muted">
             Recomendaciones
           </div>
           {recomendaciones.map((texto, index) => (
             <div
               key={`${index}-${texto.slice(0, 24)}`}
-              className="flex gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.035] px-5 py-4 shadow-[0_12px_30px_rgba(2,6,23,0.18)] backdrop-blur-xl transition hover:border-white/[0.13] hover:bg-white/[0.055]"
+              className="flex gap-3 rounded-2xl border border-line/15 bg-surface-2/70 px-5 py-4 shadow-lg shadow-black/5 backdrop-blur-xl transition hover:border-brand/25 hover:bg-surface"
             >
               <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] text-[11px] font-bold text-cyan-300">
                 {index + 1}
               </div>
-              <p className="text-sm leading-6 text-slate-100">{texto}</p>
+              <p className="text-sm leading-6 text-content">{texto}</p>
             </div>
           ))}
         </div>
       ) : (
         meta.length === 0 && (
-          <p className="text-sm italic text-slate-500">No se recibieron sugerencias estructuradas.</p>
+          <p className="text-sm italic text-muted">No se recibieron sugerencias estructuradas.</p>
         )
       )}
     </div>
@@ -660,7 +660,7 @@ function SugerenciasBlock({ sugerencias }) {
 
 const PAYMENT_STATUS = {
   N: { label: "Normal", color: "bg-emerald-300", text: "text-emerald-200", border: "border-emerald-400/25" },
-  D: { label: "No se recibio / no existe", color: "bg-slate-400", text: "text-slate-300", border: "border-white/[0.08]" },
+  D: { label: "No se recibio / no existe", color: "bg-slate-400", text: "text-muted", border: "border-line/15" },
   "30": { label: "Mora 30", color: "bg-yellow-300", text: "text-yellow-200", border: "border-yellow-400/25" },
   "60": { label: "Mora 60", color: "bg-orange-400", text: "text-orange-200", border: "border-orange-400/25" },
   "90": { label: "Mora 90 o mas", color: "bg-rose-500", text: "text-rose-200", border: "border-rose-400/25" },
@@ -710,16 +710,16 @@ function buildPaymentBehaviorData(crediticio) {
 function AdjudicatorTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-2xl border border-cyan-400/20 bg-slate-950/95 px-4 py-3 text-xs shadow-[0_18px_45px_rgba(2,6,23,0.45)] backdrop-blur-xl">
-      <div className="mb-2 font-bold text-white">{label}</div>
+    <div className="rounded-2xl border border-line/15 bg-surface px-4 py-3 text-xs shadow-xl shadow-black/10 backdrop-blur-xl">
+      <div className="mb-2 font-bold text-content">{label}</div>
       <div className="grid gap-1.5">
         {payload.map((entry) => (
           <div key={entry.dataKey} className="flex min-w-[190px] items-center justify-between gap-4">
-            <span className="flex items-center gap-2 text-slate-400">
+            <span className="flex items-center gap-2 text-muted">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
               {entry.name}
             </span>
-            <span className="font-semibold text-slate-100">
+            <span className="font-semibold text-content">
               {entry.dataKey === "deuda" ? formatPercent(entry.value) : formatMoney(entry.value)}
             </span>
           </div>
@@ -734,19 +734,19 @@ function IncomeGauge({ ingreso, cuotaVsIngreso }) {
   const clamped = Math.max(0, Math.min(100, percent));
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.035] p-5">
+    <div className="relative overflow-hidden rounded-2xl border border-line/15 bg-surface-2/70 p-5 shadow-lg shadow-black/5">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-cyan-300/60 via-emerald-300/30 to-transparent" />
-      <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+      <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">
         Analisis de ingresos
       </div>
-      <div className="mt-2 text-2xl font-extrabold tracking-tight text-white">{formatMoney(ingreso)}</div>
-      <p className="mt-1 text-xs leading-5 text-slate-400">Ingreso estimado reportado frente a cuota mensual.</p>
+      <div className="mt-2 text-2xl font-extrabold tracking-tight text-content">{formatMoney(ingreso)}</div>
+      <p className="mt-1 text-xs leading-5 text-muted">Ingreso estimado reportado frente a cuota mensual.</p>
 
       <div className="mt-5 flex items-end gap-5">
-        <div className="relative h-36 w-16 overflow-hidden rounded-2xl border border-white/[0.08] bg-slate-900/70 p-1.5">
+        <div className="relative h-36 w-16 overflow-hidden rounded-2xl border border-line/15 bg-surface p-1.5">
           <div className="absolute inset-x-2 bottom-2 top-2 grid grid-rows-5 gap-1">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="rounded bg-white/[0.05]" />
+              <div key={index} className="rounded bg-surface-2" />
             ))}
           </div>
           <div
@@ -756,10 +756,10 @@ function IncomeGauge({ ingreso, cuotaVsIngreso }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-3xl font-black text-cyan-200">{formatPercent(percent)}</div>
-          <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+          <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">
             Cuota vs ingreso
           </div>
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-800/80">
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-surface-2">
             <div
               className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 transition-all duration-700"
               style={{ width: `${clamped}%` }}
@@ -793,17 +793,17 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
       }
     >
       <div className="grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
-        <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.035] p-5">
+        <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] p-5 shadow-lg shadow-black/5">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
+              <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-brand">
                 Evolucion de cupo, saldo y deuda
               </div>
-              <p className="mt-1 text-xs leading-5 text-slate-500">
+              <p className="mt-1 text-xs leading-5 text-muted">
                 Comparativo trimestral con doble escala para valores reportados y porcentaje de deuda.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3 text-[10px] font-semibold text-slate-400">
+            <div className="flex flex-wrap gap-3 text-[10px] font-semibold text-muted">
               <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-sky-400" />Cupo</span>
               <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-emerald-400" />Saldo</span>
               <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-amber-400" />% deuda</span>
@@ -815,10 +815,10 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={chartData} margin={{ top: 18, right: 8, bottom: 6, left: 0 }}>
                   <CartesianGrid stroke="rgba(148,163,184,0.13)" vertical={false} />
-                  <XAxis dataKey="periodo" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="periodo" tick={{ fill: "rgb(var(--th-muted))", fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis
                     yAxisId="money"
-                    tick={{ fill: "#94a3b8", fontSize: 11 }}
+                    tick={{ fill: "rgb(var(--th-muted))", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={formatShortNumber}
@@ -827,7 +827,7 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
                   <YAxis
                     yAxisId="percent"
                     orientation="right"
-                    tick={{ fill: "#94a3b8", fontSize: 11 }}
+                    tick={{ fill: "rgb(var(--th-muted))", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(value) => `${value}%`}
@@ -867,14 +867,14 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="py-16 text-center text-sm italic text-slate-500">
+            <p className="py-16 text-center text-sm italic text-muted">
               No se recibio evolución trimestral estructurada.
             </p>
           )}
 
           {paymentData.length ? (
-            <div className="mt-5 border-t border-white/[0.06] pt-4">
-              <div className="mb-3 text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <div className="mt-5 border-t border-line/10 pt-4">
+              <div className="mb-3 text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">
                 Comportamiento de pago mensual
               </div>
               <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(64px,1fr))]">
@@ -882,10 +882,10 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
                   <div
                     key={`${item.periodo}-${item.code}`}
                     title={`${item.periodo}: ${item.label}`}
-                    className={`rounded-xl border ${item.border} bg-white/[0.025] px-2 py-2 text-center`}
+                    className={`rounded-xl border ${item.border} bg-surface-2/70 px-2 py-2 text-center`}
                   >
                     <div className={`mx-auto h-2.5 w-2.5 rounded-full ${item.color}`} />
-                    <div className="mt-1.5 text-[9px] font-semibold text-slate-400">{item.periodo}</div>
+                    <div className="mt-1.5 text-[9px] font-semibold text-muted">{item.periodo}</div>
                     <div className={`mt-0.5 text-[10px] font-black ${item.text}`}>{item.code}</div>
                   </div>
                 ))}
@@ -896,14 +896,14 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
 
         <div className="grid gap-4">
           <IncomeGauge ingreso={ingreso} cuotaVsIngreso={cuotaVsIngreso} />
-          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.035] p-5">
+          <div className="rounded-2xl border border-line/15 bg-surface-2/70 p-5 shadow-lg shadow-black/5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-500">Alertas</div>
-                <div className="mt-1 text-2xl font-black text-white">{context.alertas.length}</div>
+                <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">Alertas</div>
+                <div className="mt-1 text-2xl font-black text-content">{context.alertas.length}</div>
               </div>
               <div className={`rounded-full px-3 py-1 text-xs font-bold ${
-                context.alertas.length ? "bg-amber-400/[0.10] text-amber-200" : "bg-emerald-400/[0.10] text-emerald-200"
+                context.alertas.length ? "bg-amber-400/[0.10] text-amber-600 dark:text-amber-200" : "bg-emerald-400/[0.10] text-emerald-600 dark:text-emerald-200"
               }`}>
                 {context.alertas.length ? "Revisar" : "Sin alertas"}
               </div>
@@ -912,16 +912,16 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
               {context.alertas.length ? (
                 context.alertas.slice(0, 3).map((alerta, index) => (
                   <div key={`${index}-${alerta?.alerta || alerta}`} className="rounded-xl border border-amber-400/15 bg-amber-400/[0.045] px-4 py-3">
-                    <div className="text-xs font-bold text-amber-100">{displayValue(alerta?.alerta || alerta)}</div>
+                    <div className="text-xs font-bold text-amber-700 dark:text-amber-100">{displayValue(alerta?.alerta || alerta)}</div>
                     {alerta?.colocacion || alerta?.modificacion ? (
-                      <div className="mt-1 text-[11px] text-slate-500">
+                      <div className="mt-1 text-[11px] text-muted">
                         {[alerta?.colocacion, alerta?.modificacion].filter(Boolean).join(" | ")}
                       </div>
                     ) : null}
                   </div>
                 ))
               ) : (
-                <p className="text-sm italic text-slate-500">No se reportaron alertas para esta consulta.</p>
+                <p className="text-sm italic text-muted">No se reportaron alertas para esta consulta.</p>
               )}
             </div>
           </div>
@@ -1122,8 +1122,8 @@ export default function ExperianDetalleResultados({ consultaId }) {
             <div className="absolute inset-0 animate-ping rounded-full border border-cyan-500/25" />
             <div className="absolute inset-2 animate-spin rounded-full border-2 border-t-cyan-400 border-slate-800" />
           </div>
-          <p className="text-sm font-semibold text-slate-300">Cargando Econfia Adjudicator</p>
-          <p className="mt-1 text-xs text-slate-600">Un momento por favor...</p>
+          <p className="text-sm font-semibold text-content">Cargando Econfia Adjudicator</p>
+          <p className="mt-1 text-xs text-muted">Un momento por favor...</p>
         </div>
       </div>
     );
@@ -1136,7 +1136,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-500/25 bg-rose-500/[0.08]">
             <AlertTriangle className="h-6 w-6 text-rose-400" />
           </div>
-          <h3 className="text-lg font-semibold text-white">Error al cargar Econfia Adjudicator</h3>
+          <h3 className="text-lg font-semibold text-content">Error al cargar Econfia Adjudicator</h3>
           <p className="mt-2 text-sm leading-6 text-rose-200/70">{error}</p>
         </div>
       </div>
@@ -1151,7 +1151,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
         <div className="grid gap-4 pb-8">
 
           {/* ── Hero header ─────────────────────────────────────────────── */}
-          <section className="relative overflow-hidden rounded-[30px] border border-white/[0.08] bg-slate-950/70 px-6 py-7 shadow-[0_30px_90px_rgba(2,6,23,0.48)] backdrop-blur-xl md:px-8 md:py-8">
+          <section className="relative overflow-hidden rounded-[30px] border border-line/15 bg-surface/90 px-6 py-7 shadow-2xl shadow-black/5 backdrop-blur-xl md:px-8 md:py-8">
             <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-cyan-500/[0.055] blur-3xl" />
             <div className="pointer-events-none absolute -left-40 bottom-0 h-80 w-80 rounded-full bg-violet-500/[0.035] blur-3xl" />
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
@@ -1164,11 +1164,11 @@ export default function ExperianDetalleResultados({ consultaId }) {
                   Econfia Adjudicator
                 </div>
 
-                <h2 className="mt-5 max-w-4xl text-3xl font-black tracking-tight text-white md:text-4xl md:leading-tight">
+                <h2 className="mt-5 max-w-4xl text-3xl font-black tracking-tight text-content md:text-4xl md:leading-tight">
                   {displayName}
                 </h2>
 
-                <p className="mt-4 max-w-2xl text-base leading-8 text-slate-400">
+                <p className="mt-4 max-w-2xl text-base leading-8 text-muted">
                   Lectura consolidada para decisión comercial — validación, riesgo y capacidad financiera en una sola vista.
                 </p>
 
@@ -1183,7 +1183,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
               </div>
 
               {/* ── Center: gauge ───────────────────────────────────────── */}
-              <div className="flex min-h-[260px] items-center justify-center rounded-[26px] border border-white/[0.08] bg-white/[0.025] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_18px_50px_rgba(2,6,23,0.26)] backdrop-blur-xl">
+              <div className="flex min-h-[260px] items-center justify-center rounded-[26px] border border-line/15 bg-surface-2/70 p-5 shadow-lg shadow-black/5 backdrop-blur-xl">
                 <SpeedoGauge {...gaugeProps} />
               </div>
 
@@ -1192,7 +1192,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
                 <button
                   type="button"
                   onClick={() => setShowEvidence(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.035] px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/25 hover:text-white"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3 text-sm font-semibold text-content shadow-lg shadow-black/5 transition hover:border-brand/25 hover:bg-surface hover:text-brand"
                 >
                   <FileSearch className="h-4 w-4 text-cyan-300" />
                   Ver evidencia tecnica
@@ -1200,8 +1200,8 @@ export default function ExperianDetalleResultados({ consultaId }) {
                 {metrics.map((metric) => (
                   <MetricCard key={metric.label} label={metric.label} value={metric.value} />
                 ))}
-                <div className="rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.04] px-5 py-4 text-sm leading-6 text-slate-300">
-                  <span className="font-semibold text-cyan-200">Nivel de lectura:</span>{" "}
+                <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] px-5 py-4 text-sm leading-6 text-muted shadow-lg shadow-black/5">
+                  <span className="font-semibold text-brand">Nivel de lectura:</span>{" "}
                   úselo como apoyo para la decisión; no reemplaza el análisis crediticio completo.
                 </div>
               </div>
@@ -1235,7 +1235,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
                 className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold ${
                   context.alertas.length
                     ? "border-amber-500/30 bg-amber-500/[0.07] text-amber-300"
-                    : "border-white/[0.08] bg-white/[0.03] text-slate-400"
+                    : "border-line/15 bg-surface-2/70 text-muted"
                 }`}
               >
                 {context.alertas.length
@@ -1246,8 +1246,8 @@ export default function ExperianDetalleResultados({ consultaId }) {
           >
             <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
               <FactGrid items={riskFacts} columns="md:grid-cols-2" />
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.025] p-4">
-                <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">Alertas</div>
+              <div className="rounded-xl border border-line/15 bg-surface-2/70 p-4">
+                <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-muted">Alertas</div>
                 <div className="mt-3">
                   <CompactList
                     items={context.alertas.map((alerta) =>
@@ -1293,17 +1293,17 @@ export default function ExperianDetalleResultados({ consultaId }) {
                 <div className="space-y-6">
                   <div>
                     <div className="mb-3 flex items-center gap-2">
-                      <div className="h-px flex-1 bg-white/[0.05]" />
-                      <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">Socios</div>
-                      <div className="h-px flex-1 bg-white/[0.05]" />
+                      <div className="h-px flex-1 bg-surface-2" />
+                      <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-muted">Socios</div>
+                      <div className="h-px flex-1 bg-surface-2" />
                     </div>
                     <PersonList items={context.socios} emptyLabel="Sin socios estructurados." />
                   </div>
                   <div>
                     <div className="mb-3 flex items-center gap-2">
-                      <div className="h-px flex-1 bg-white/[0.05]" />
-                      <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">Representación legal</div>
-                      <div className="h-px flex-1 bg-white/[0.05]" />
+                      <div className="h-px flex-1 bg-surface-2" />
+                      <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-muted">Representación legal</div>
+                      <div className="h-px flex-1 bg-surface-2" />
                     </div>
                     <PersonList items={context.representantes} emptyLabel="Sin representantes estructurados." />
                   </div>
@@ -1312,17 +1312,17 @@ export default function ExperianDetalleResultados({ consultaId }) {
                 <div className="space-y-6">
                   <div>
                     <div className="mb-3 flex items-center gap-2">
-                      <div className="h-px flex-1 bg-white/[0.05]" />
-                      <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">Junta directiva</div>
-                      <div className="h-px flex-1 bg-white/[0.05]" />
+                      <div className="h-px flex-1 bg-surface-2" />
+                      <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-muted">Junta directiva</div>
+                      <div className="h-px flex-1 bg-surface-2" />
                     </div>
                     <PersonList items={context.juntaDirectiva} emptyLabel="Sin junta estructurada." />
                   </div>
                   <div>
                     <div className="mb-3 flex items-center gap-2">
-                      <div className="h-px flex-1 bg-white/[0.05]" />
-                      <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">Revisoría fiscal y vínculos</div>
-                      <div className="h-px flex-1 bg-white/[0.05]" />
+                      <div className="h-px flex-1 bg-surface-2" />
+                      <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-muted">Revisoría fiscal y vínculos</div>
+                      <div className="h-px flex-1 bg-surface-2" />
                     </div>
                     <PersonList
                       items={[

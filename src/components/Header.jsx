@@ -2,8 +2,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import logoIcon from "../assets/logo-econfia-icon.png";
 import { Link, NavLink} from "react-router-dom";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
 import { FaEnvelope } from "react-icons/fa";
+import { useTheme } from "../context/ThemeContext";
 
 const linkBase = "flex items-center gap-2 hover:text-cyan-300 transition";
 const linkActive = "text-cyan-400";
@@ -11,6 +12,7 @@ const linkActive = "text-cyan-400";
 export default function Header() {
   const [isServiciosOpen, setIsServiciosOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const serviciosRef = useRef(null);
 
   // Cerrar el menú de servicios si se hace clic fuera
@@ -34,7 +36,7 @@ export default function Header() {
   }, [isServiciosOpen]);
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-[1rem] bg-white/5 border-b border-white/10 h-16 md:h-20">
+    <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-[1rem] bg-surface/70 border-b border-line/15 h-16 md:h-20">
       <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
         
         {/* Logo */}
@@ -50,10 +52,10 @@ export default function Header() {
               className="h-9 md:h-11 w-auto object-contain"
             />
             <div className="flex flex-col justify-center leading-none">
-              <span className="text-white font-bold tracking-[0.35em] text-lg md:text-2xl">
+              <span className="text-content font-bold tracking-[0.35em] text-lg md:text-2xl">
                 ECONFIA
               </span>
-              <span className="text-white/60 tracking-[0.18em] text-[7px] md:text-[9px] mt-1 whitespace-nowrap">
+              <span className="text-muted tracking-[0.18em] text-[7px] md:text-[9px] mt-1 whitespace-nowrap">
                 UNA MARCA DE GRUPO SOLUCIONES
               </span>
             </div>
@@ -61,7 +63,7 @@ export default function Header() {
         </div>
 
         {/* Navegación Desktop */}
-        <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-white text-sm font-medium">
+        <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-content text-sm font-medium">
           {/* Dropdown Servicios */}
           <div
             className="relative"
@@ -75,44 +77,44 @@ export default function Header() {
               Servicios <ChevronDown size={16} />
             </button>
             {isServiciosOpen && (
-              <div className="absolute left-0 bg-white text-black mt-2 rounded-lg shadow-xl w-72 z-[100] border border-gray-200">
+              <div className="absolute left-0 bg-surface text-content mt-2 rounded-lg shadow-xl w-72 z-[100] border border-line/15">
                 <Link
                   to="/servicio-econfia"
-                  className="block px-4 py-3 hover:bg-gray-100 rounded-t-lg transition"
+                  className="block px-4 py-3 hover:bg-brand/10 rounded-t-lg transition"
                   onClick={() => setIsServiciosOpen(false)}
                 >
                   <span className="font-semibold">Econfia</span>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     Consulta de lista dinámica de adversos
                   </p>
                 </Link>
                 <Link
                   to="/contacto"
-                  className="block px-4 py-3 hover:bg-gray-100 transition border-t border-gray-100"
+                  className="block px-4 py-3 hover:bg-brand/10 transition border-t border-line/10"
                   onClick={() => setIsServiciosOpen(false)}
                 >
                   <span className="font-semibold">Econfia Contratista</span>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     Documentos para contratistas
                   </p>
                 </Link>
                 <Link
                   to="/servicio-seguridad"
-                  className="block px-4 py-3 hover:bg-gray-100 transition border-t border-gray-100"
+                  className="block px-4 py-3 hover:bg-brand/10 transition border-t border-line/10"
                   onClick={() => setIsServiciosOpen(false)}
                 >
                   <span className="font-semibold">Econfia Estudios de seguridad</span>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     Selección de personal especializada
                   </p>
                 </Link>
                 <Link
                   to="/contacto"
-                  className="block px-4 py-3 hover:bg-gray-100 rounded-b-lg transition border-t border-gray-100"
+                  className="block px-4 py-3 hover:bg-brand/10 rounded-b-lg transition border-t border-line/10"
                   onClick={() => setIsServiciosOpen(false)}
                 >
                   <span className="font-semibold">Econfia Títulos</span>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     Validación documental y soportes académicos
                   </p>
                 </Link>
@@ -157,9 +159,18 @@ export default function Header() {
 
         {/* Botones Desktop */}
         <div className="hidden lg:flex items-center gap-4">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line/20 bg-surface-2/70 text-content transition hover:border-brand/40 hover:text-brand"
+            aria-label="Cambiar tema"
+            title={theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Link
             to="/login"
-            className="px-4 py-2 rounded-full text-white hover:text-cyan-300 transition text-sm font-medium"
+            className="px-4 py-2 rounded-full text-content hover:text-brand transition text-sm font-medium"
           >
             Iniciar sesión
           </Link>
@@ -174,7 +185,7 @@ export default function Header() {
         {/* Botón menú móvil */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="lg:hidden text-white p-2 hover:bg-white/10 rounded-lg transition"
+          className="lg:hidden text-content p-2 hover:bg-content/10 rounded-lg transition"
           aria-label="Toggle menu"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -183,13 +194,13 @@ export default function Header() {
 
       {/* Menú móvil */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 w-full bg-gray-900/95 backdrop-blur-xl border-b border-white/10 shadow-2xl max-h-[calc(100vh-4rem)] md:max-h-[calc(100vh-5rem)] overflow-y-auto">
+        <div className="lg:hidden absolute top-full left-0 w-full bg-surface/95 backdrop-blur-xl border-b border-line/15 shadow-2xl max-h-[calc(100vh-4rem)] md:max-h-[calc(100vh-5rem)] overflow-y-auto">
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col space-y-3">
             {/* Servicios móvil */}
             <div ref={serviciosRef}>
               <button
                 onClick={() => setIsServiciosOpen((open) => !open)}
-                className="w-full flex items-center justify-between text-white font-medium py-2"
+                className="w-full flex items-center justify-between text-content font-medium py-2"
               >
                 Servicios
                 <ChevronDown 
@@ -201,47 +212,47 @@ export default function Header() {
                 <div className="mt-2 ml-4 space-y-2 border-l-2 border-cyan-500/30 pl-4">
                   <Link
                     to="/servicio-econfia"
-                    className="block text-white/80 hover:text-cyan-300 transition py-2"
+                    className="block text-muted hover:text-brand transition py-2"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setIsServiciosOpen(false);
                     }}
                   >
                     <span className="font-semibold">Econfia</span>
-                    <p className="text-xs text-white/60 mt-1">Consulta de adversos</p>
+                    <p className="text-xs text-muted/80 mt-1">Consulta de adversos</p>
                   </Link>
                   <Link
                     to="/contacto"
-                    className="block text-white/80 hover:text-cyan-300 transition py-2"
+                    className="block text-muted hover:text-brand transition py-2"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setIsServiciosOpen(false);
                     }}
                   >
                     <span className="font-semibold">Econfia Contratista</span>
-                    <p className="text-xs text-white/60 mt-1">Documentos</p>
+                    <p className="text-xs text-muted/80 mt-1">Documentos</p>
                   </Link>
                   <Link
                     to="/servicio-seguridad"
-                    className="block text-white/80 hover:text-cyan-300 transition py-2"
+                    className="block text-muted hover:text-brand transition py-2"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setIsServiciosOpen(false);
                     }}
                   >
                     <span className="font-semibold">Econfia Seguridad</span>
-                    <p className="text-xs text-white/60 mt-1">Estudios de personal</p>
+                    <p className="text-xs text-muted/80 mt-1">Estudios de personal</p>
                   </Link>
                   <Link
                     to="/contacto"
-                    className="block text-white/80 hover:text-cyan-300 transition py-2"
+                    className="block text-muted hover:text-brand transition py-2"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
                       setIsServiciosOpen(false);
                     }}
                   >
                     <span className="font-semibold">Econfia Títulos</span>
-                    <p className="text-xs text-white/60 mt-1">Validación documental</p>
+                    <p className="text-xs text-muted/80 mt-1">Validación documental</p>
                   </Link>
                 </div>
               )}
@@ -250,7 +261,7 @@ export default function Header() {
             <NavLink
               to="/beneficios"
               className={({ isActive }) =>
-                `text-white font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition`
+                `text-content font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition`
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -260,7 +271,7 @@ export default function Header() {
             <NavLink
               to="/blog"
               className={({ isActive }) =>
-                `text-white font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition`
+                `text-content font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition`
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -269,7 +280,7 @@ export default function Header() {
 
             <Link
               to="/nosotros"
-              className="text-white font-medium py-2 hover:text-cyan-300 transition"
+              className="text-content font-medium py-2 hover:text-cyan-300 transition"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Nosotros
@@ -278,7 +289,7 @@ export default function Header() {
             <NavLink
               to="/contacto"
               className={({ isActive }) =>
-                `text-white font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition flex items-center gap-2`
+                `text-content font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition flex items-center gap-2`
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -286,7 +297,15 @@ export default function Header() {
             </NavLink>
 
             {/* Botones móvil */}
-            <div className="pt-4 border-t border-white/10 space-y-3">
+            <div className="pt-4 border-t border-line/15 space-y-3">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-line/20 bg-surface-2/70 px-4 py-3 text-content transition hover:border-brand/40 hover:text-brand font-medium"
+              >
+                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+                {theme === "dark" ? "Tema claro" : "Tema oscuro"}
+              </button>
               <Link
                 to="/login"
                 className="block w-full text-center px-4 py-3 rounded-full border border-cyan-500 text-cyan-400 hover:bg-cyan-500/10 transition font-medium"

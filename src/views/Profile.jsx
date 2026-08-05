@@ -9,12 +9,13 @@ import { FiLogOut } from "react-icons/fi";
 import jsPDF from "jspdf";
 import { generarInformeUsuarioPDF } from "../pdf/InformeUsuarioPDFV2";
 import { clearSession } from "../utils/session";
+import { useTheme } from "../context/ThemeContext";
 
 /** Paleta y helpers de estilo elegante */
 const THEME = {
-  bgPanel: "bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 backdrop-blur-xl border border-white/10",
-  text: "text-white",
-  subtext: "text-white/70",
+  bgPanel: "th-panel backdrop-blur-xl",
+  text: "text-content",
+  subtext: "text-muted",
   cyan: "#06b6d4",
   blue: "#3b82f6",
   purple: "#8b5cf6",
@@ -28,16 +29,16 @@ const PIE_COLORS = [THEME.cyan, THEME.blue, THEME.purple, THEME.pink, THEME.emer
 function GlassTooltip({ active, payload, label }) {
   if (!active || !payload || !payload.length) return null;
   return (
-    <div className="px-3 py-2 rounded-lg border border-white/20 bg-gradient-to-br from-slate-900/95 via-blue-900/40 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/20">
-      {label && <div className="text-xs text-cyan-300 mb-1 font-semibold">{label}</div>}
+    <div className="px-3 py-2 rounded-lg border border-line/20 bg-surface backdrop-blur-xl shadow-2xl shadow-cyan-500/20">
+      {label && <div className="text-xs text-brand mb-1 font-semibold">{label}</div>}
       {payload.map((p, i) => (
-        <div key={i} className="text-sm text-white flex items-center gap-2">
+        <div key={i} className="text-sm text-content flex items-center gap-2">
           <span
             className="inline-block w-2.5 h-2.5 rounded-full shadow-lg"
             style={{ background: p.color, boxShadow: `0 0 8px ${p.color}` }}
           />
           <span className="opacity-90">{p.name}:</span>
-          <span className="font-bold bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">{p.value}</span>
+          <span className="font-bold text-brand">{p.value}</span>
         </div>
       ))}
     </div>
@@ -56,7 +57,7 @@ function ElegantCard({ title, children, className = "" }) {
       <div className="relative p-3 md:p-4">
         {title && (
           <div className="mb-2 md:mb-3">
-            <h2 className="text-lg md:text-xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+            <h2 className="text-lg md:text-xl font-black text-content">
               {title}
             </h2>
           </div>
@@ -76,6 +77,12 @@ const AVATAR_LIST = [
 ];
 
 export default function Profile() {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+  // Colores de la gráfica según el tema (recharts usa hex/strings, no clases).
+  const chartAxis = isLight ? "#0f766e" : "#06b6d4";     // teal-700 / cyan
+  const chartTick = isLight ? "#334155" : "#67e8f9";     // slate-700 / cyan claro
+  const chartGrid = isLight ? "rgba(15,23,42,0.08)" : "rgba(6,182,212,0.08)";
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -189,7 +196,7 @@ export default function Profile() {
           <span className="absolute inset-0 m-auto h-3 w-3 rounded-full bg-cyan-300 shadow-[0_0_16px_4px_rgba(34,211,238,0.7)] animate-pulse" />
         </div>
         <div className="flex flex-col items-center gap-2">
-          <p className="text-lg font-bold bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+          <p className="text-lg font-bold text-content">
             Cargando perfil
           </p>
           <div className="flex items-center gap-1.5">
@@ -197,7 +204,7 @@ export default function Profile() {
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.15s]" />
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce" />
           </div>
-          <p className="text-xs text-white/40">Preparando tu información, un momento…</p>
+          <p className="text-xs text-muted">Preparando tu información, un momento…</p>
         </div>
       </div>
     );
@@ -364,12 +371,12 @@ export default function Profile() {
             <button
               onClick={handleLogout}
               title="Cerrar sesión"
-              className="absolute top-0 right-0 p-1.5 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all z-10"
+              className="absolute top-0 right-0 p-1.5 rounded-lg text-muted hover:text-danger hover:bg-red-500/10 transition-all z-10"
             >
               <FiLogOut className="w-4 h-4" />
             </button>
-            <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
-              <span className="text-cyan-300 text-xs font-medium">Mi Perfil</span>
+            <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-2">
+              <span className="text-brand text-xs font-medium">Mi Perfil</span>
             </div>
 
             <div
@@ -411,18 +418,18 @@ export default function Profile() {
               </div>
             </Modal>
 
-            <h3 className="text-base sm:text-lg font-semibold text-white text-center">{profile?.full_name || profile?.username}</h3>
-            <p className="text-white/60 text-xs sm:text-sm mb-2 text-center break-all">{profile?.email || "Sin correo"}</p>
+            <h3 className="text-base sm:text-lg font-semibold text-content text-center">{profile?.full_name || profile?.username}</h3>
+            <p className="text-muted text-xs sm:text-sm mb-2 text-center break-all">{profile?.email || "Sin correo"}</p>
 
-            <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold shadow-lg shadow-cyan-500/30">
+            <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-brand to-brand-2 text-white font-semibold shadow-lg shadow-cyan-500/30">
               {profile?.groups?.length > 0 ? profile.groups[0] : "Usuario"}
             </span>
 
             <div className="w-full grid grid-cols-2 gap-2.5 sm:gap-3 mt-4">
               {/* Consultas */}
               <div className="rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 hover:from-cyan-500/20 hover:to-blue-500/10 transition-all flex flex-col">
-                <div className="text-[10px] sm:text-xs text-cyan-300 font-semibold uppercase tracking-wide">Consultas</div>
-                <div className="text-white text-xl sm:text-2xl font-black mt-0.5 flex items-center">
+                <div className="text-[10px] sm:text-xs text-brand font-semibold uppercase tracking-wide">Consultas</div>
+                <div className="text-content text-xl sm:text-2xl font-black mt-0.5 flex items-center">
                   {profile?.perfil?.consultas_infinitas
                     ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'26px'}} />
                     : (profile?.perfil?.consultas_disponibles ?? 0)}
@@ -430,26 +437,26 @@ export default function Profile() {
               </div>
               {/* Planes activos */}
               <div className="rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 hover:from-blue-500/20 hover:to-purple-500/10 transition-all flex flex-col">
-                <div className="text-[10px] sm:text-xs text-blue-300 font-semibold uppercase tracking-wide mb-1.5">Planes activos</div>
+                <div className="text-[10px] sm:text-xs text-brand-2 font-semibold uppercase tracking-wide mb-1.5">Planes activos</div>
                 <div className="flex flex-wrap gap-1.5">
                   {(profile?.perfil?.planes && profile.perfil.planes.length > 0)
                     ? profile.perfil.planes.map((plan) => (
                         <span
                           key={plan.id}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/25 to-blue-500/25 border border-cyan-400/30 text-cyan-100 text-[10px] sm:text-[11px] font-bold shadow-sm shadow-cyan-500/20"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/25 to-blue-500/25 border border-cyan-400/30 text-brand text-[10px] sm:text-[11px] font-bold shadow-sm shadow-cyan-500/20"
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
                           {plan.nombre.charAt(0).toUpperCase() + plan.nombre.slice(1)}
                         </span>
                       ))
-                    : <span className="text-slate-400 text-xs">Sin plan</span>}
+                    : <span className="text-muted text-xs">Sin plan</span>}
                 </div>
               </div>
             </div>
             {/* Botón PDF */}
             <div className="w-full flex justify-center mt-5">
               <button
-                className="w-full px-6 py-2 text-sm sm:text-base rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold shadow-lg shadow-cyan-500/30 hover:from-cyan-600 hover:to-blue-600 transition-all"
+                className="w-full px-6 py-2 text-sm sm:text-base rounded-xl bg-gradient-to-r from-brand to-brand-2 text-white font-bold shadow-lg shadow-cyan-500/30 hover:opacity-90 transition-all"
                 onClick={() => generarInformeUsuarioPDF(profile, stats)}
               >
                 Generar informe PDF
@@ -463,33 +470,33 @@ export default function Profile() {
           {/* Control de consultas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4 mb-4 md:mb-6">
             <div className="rounded-xl px-3 py-3 sm:px-4 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/10">
-              <div className="text-[10px] sm:text-xs text-cyan-300 font-semibold uppercase tracking-wide">Consultas cargadas</div>
-              <div className="text-white text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">
+              <div className="text-[10px] sm:text-xs text-brand font-semibold uppercase tracking-wide">Consultas cargadas</div>
+              <div className="text-content text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">
                 {profile?.perfil?.consultas_infinitas
                   ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'26px'}} />
                   : (profile?.perfil?.consultas_cargadas_total ?? 0)}
               </div>
             </div>
             <div className="rounded-xl px-3 py-3 sm:px-4 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/10">
-              <div className="text-[10px] sm:text-xs text-blue-300 font-semibold uppercase tracking-wide">Consultas consumidas</div>
-              <div className="text-white text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">{profile?.perfil?.consultas_consumidas ?? 0}</div>
+              <div className="text-[10px] sm:text-xs text-brand-2 font-semibold uppercase tracking-wide">Consultas consumidas</div>
+              <div className="text-content text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">{profile?.perfil?.consultas_consumidas ?? 0}</div>
             </div>
             <div className="rounded-xl px-3 py-3 sm:px-4 border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/10">
-              <div className="text-[10px] sm:text-xs text-emerald-300 font-semibold uppercase tracking-wide">Saldo de consultas</div>
-              <div className="text-white text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">
+              <div className="text-[10px] sm:text-xs text-ok font-semibold uppercase tracking-wide">Saldo de consultas</div>
+              <div className="text-content text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">
                 {profile?.perfil?.consultas_infinitas
                   ? <img src={require('../assets/icons8-infinito-24.png')} alt="Consultas infinitas" style={{height:'30px'}} />
                   : (profile?.perfil?.consultas_disponibles ?? 0)}
               </div>
             </div>
             <div className="rounded-xl px-3 py-3 sm:px-4 border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-pink-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/10">
-              <div className="text-[10px] sm:text-xs text-amber-300 font-semibold uppercase tracking-wide">Estado de renovación</div>
+              <div className="text-[10px] sm:text-xs text-warn font-semibold uppercase tracking-wide">Estado de renovación</div>
               <div className="text-base sm:text-xl font-black mt-1 flex items-center justify-center min-h-[34px] leading-tight">
                 {profile?.perfil?.consultas_infinitas
-                  ? <span className="text-cyan-300">Plan ilimitado</span>
+                  ? <span className="text-brand">Plan ilimitado</span>
                   : profile?.perfil?.consultas_disponibles === 0
-                    ? <span className="text-red-400">¡Renueva tu plan!</span>
-                    : <span className="text-white">Vigente</span>}
+                    ? <span className="text-danger">¡Renueva tu plan!</span>
+                    : <span className="text-content">Vigente</span>}
               </div>
             </div>
           </div>
@@ -515,17 +522,17 @@ export default function Profile() {
                     </feMerge>
                   </filter>
                 </defs>
-                <CartesianGrid strokeDasharray="4 4" stroke="rgba(6,182,212,0.08)" vertical={false} />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#06b6d4" 
-                  tick={{ fill: "#67e8f9", fontSize: 11, fontWeight: 600 }} 
-                  axisLine={{ stroke: "#06b6d4", strokeWidth: 2 }}
+                <CartesianGrid strokeDasharray="4 4" stroke={chartGrid} vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  stroke={chartAxis}
+                  tick={{ fill: chartTick, fontSize: 11, fontWeight: 600 }}
+                  axisLine={{ stroke: chartAxis, strokeWidth: 2 }}
                 />
-                <YAxis 
-                  stroke="#06b6d4" 
-                  tick={{ fill: "#67e8f9", fontSize: 11, fontWeight: 600 }} 
-                  axisLine={{ stroke: "#06b6d4", strokeWidth: 2 }}
+                <YAxis
+                  stroke={chartAxis}
+                  tick={{ fill: chartTick, fontSize: 11, fontWeight: 600 }}
+                  axisLine={{ stroke: chartAxis, strokeWidth: 2 }}
                 />
                 <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(6,182,212,0.1)" }} />
                 <Bar

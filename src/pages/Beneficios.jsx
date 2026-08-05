@@ -38,39 +38,42 @@ const premiumStyles = `
     50%      { box-shadow: 0 0 40px rgba(34,211,238,0.18); }
   }
   .glass-panel {
-    background: rgba(15,23,42,0.55);
+    background: linear-gradient(160deg, rgb(var(--th-surface) / 0.88), rgb(var(--th-surface-2) / 0.78));
     backdrop-filter: blur(18px);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 20px 80px rgba(2,8,23,0.45);
+    border: 1px solid rgb(var(--th-line) / 0.14);
+    box-shadow: 0 20px 80px rgba(15,23,42,0.14);
   }
   .premium-card {
     position: relative;
     overflow: hidden;
     border-radius: 1.5rem;
-    background: linear-gradient(180deg, rgba(15,23,42,0.82) 0%, rgba(2,6,23,0.88) 100%);
-    border: 1px solid rgba(148,163,184,0.12);
+    background: linear-gradient(180deg, rgb(var(--th-surface) / 0.92) 0%, rgb(var(--th-surface-2) / 0.88) 100%);
+    border: 1px solid rgb(var(--th-line) / 0.12);
     transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease;
   }
   .premium-card:hover {
     transform: translateY(-8px);
     border-color: rgba(34,211,238,0.34);
-    box-shadow: 0 24px 80px rgba(8,145,178,0.18);
+    box-shadow: 0 24px 80px rgb(var(--th-brand) / 0.16);
   }
   .premium-card::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at top right, rgba(34,211,238,0.14), transparent 35%);
+    background: radial-gradient(circle at top right, rgb(var(--th-brand) / 0.13), transparent 35%);
     pointer-events: none;
   }
   .glow-soft { animation: pulseGlow 4s ease-in-out infinite; }
 `;
 
-if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
-  const tag = document.createElement("style");
-  tag.id = STYLE_ID;
+if (typeof document !== "undefined") {
+  let tag = document.getElementById(STYLE_ID);
+  if (!tag) {
+    tag = document.createElement("style");
+    tag.id = STYLE_ID;
+    document.head.appendChild(tag);
+  }
   tag.innerHTML = premiumStyles;
-  document.head.appendChild(tag);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -149,26 +152,26 @@ const reportes = [
 ];
 
 const colorMap = {
-  cyan:    { ring: "ring-cyan-400/20",    bg: "bg-cyan-400/10",    text: "text-cyan-300",    border: "border-cyan-400/20",    badgeText: "text-cyan-300"    },
-  emerald: { ring: "ring-emerald-400/20", bg: "bg-emerald-400/10", text: "text-emerald-300", border: "border-emerald-400/20", badgeText: "text-emerald-300" },
-  purple:  { ring: "ring-purple-400/20",  bg: "bg-purple-400/10",  text: "text-purple-300",  border: "border-purple-400/20",  badgeText: "text-purple-300"  },
-  blue:    { ring: "ring-blue-400/20",    bg: "bg-blue-400/10",    text: "text-blue-300",    border: "border-blue-400/20",    badgeText: "text-blue-300"    },
-  amber:   { ring: "ring-amber-400/20",   bg: "bg-amber-400/10",   text: "text-amber-300",   border: "border-amber-400/20",   badgeText: "text-amber-300"   },
-  pink:    { ring: "ring-pink-400/20",    bg: "bg-pink-400/10",    text: "text-pink-300",    border: "border-pink-400/20",    badgeText: "text-pink-300"    },
-  yellow:  { ring: "ring-yellow-400/20",  bg: "bg-yellow-400/10",  text: "text-yellow-300",  border: "border-yellow-400/20",  badgeText: "text-yellow-300"  },
-  orange:  { ring: "ring-orange-400/20",  bg: "bg-orange-400/10",  text: "text-orange-300",  border: "border-orange-400/20",  badgeText: "text-orange-300"  },
-  teal:    { ring: "ring-teal-400/20",    bg: "bg-teal-400/10",    text: "text-teal-300",    border: "border-teal-400/20",    badgeText: "text-teal-300"    },
+  cyan:    { ring: "ring-cyan-500/20",    bg: "bg-cyan-500/10",    text: "text-cyan-500",    border: "border-cyan-500/20",    badgeText: "text-cyan-500"    },
+  emerald: { ring: "ring-emerald-500/20", bg: "bg-emerald-500/10", text: "text-emerald-500", border: "border-emerald-500/20", badgeText: "text-emerald-500" },
+  purple:  { ring: "ring-purple-500/20",  bg: "bg-purple-500/10",  text: "text-purple-500",  border: "border-purple-500/20",  badgeText: "text-purple-500"  },
+  blue:    { ring: "ring-blue-500/20",    bg: "bg-blue-500/10",    text: "text-blue-500",    border: "border-blue-500/20",    badgeText: "text-blue-500"    },
+  amber:   { ring: "ring-amber-500/20",   bg: "bg-amber-500/10",   text: "text-amber-600",   border: "border-amber-500/20",   badgeText: "text-amber-600"   },
+  pink:    { ring: "ring-pink-500/20",    bg: "bg-pink-500/10",    text: "text-pink-500",    border: "border-pink-500/20",    badgeText: "text-pink-500"    },
+  yellow:  { ring: "ring-yellow-500/20",  bg: "bg-yellow-500/10",  text: "text-yellow-600",  border: "border-yellow-500/20",  badgeText: "text-yellow-600"  },
+  orange:  { ring: "ring-orange-500/20",  bg: "bg-orange-500/10",  text: "text-orange-500",  border: "border-orange-500/20",  badgeText: "text-orange-500"  },
+  teal:    { ring: "ring-teal-500/20",    bg: "bg-teal-500/10",    text: "text-teal-500",    border: "border-teal-500/20",    badgeText: "text-teal-500"    },
 };
 
 const formatColorText = {
-  cyan:    "text-cyan-300",
-  emerald: "text-emerald-300",
-  purple:  "text-purple-300",
+  cyan:    "text-cyan-500",
+  emerald: "text-emerald-500",
+  purple:  "text-purple-500",
 };
 const formatColorBg = {
-  cyan:    "bg-cyan-400/15 border-cyan-400/20",
-  emerald: "bg-emerald-400/15 border-emerald-400/20",
-  purple:  "bg-purple-400/15 border-purple-400/20",
+  cyan:    "bg-cyan-500/10 border-cyan-500/20",
+  emerald: "bg-emerald-500/10 border-emerald-500/20",
+  purple:  "bg-purple-500/10 border-purple-500/20",
 };
 
 const beneficios = [
@@ -198,25 +201,25 @@ const benColorGlow = {
 ───────────────────────────────────────────────────────────── */
 export default function Beneficios() {
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-screen text-content">
       <Header />
 
       <main className="relative overflow-hidden pt-24">
         {/* Fondos decorativos */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,0.10),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.10),transparent_40%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgb(var(--th-brand)/0.12),transparent_35%),radial-gradient(circle_at_bottom_left,rgb(var(--th-brand-2)/0.10),transparent_40%)]" />
 
         {/* ── BENEFICIOS DIFERENCIALES ── */}
         <section className="relative py-20">
           <div className="mx-auto max-w-7xl px-4 md:px-6">
             {/* Encabezado */}
             <div className="mx-auto max-w-3xl text-center mb-14">
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+              <p className="text-sm font-black uppercase tracking-[0.25em] text-brand">
                 Ventajas competitivas
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
+              <h2 className="mt-3 text-3xl font-black text-content md:text-4xl">
                 ¿Por qué elegir ECONFIA?
               </h2>
-              <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
+              <p className="mt-5 text-base leading-7 text-muted md:text-lg">
                 Una plataforma diseñada para la excelencia operativa, el cumplimiento normativo
                 y una experiencia de usuario que genera confianza desde el primer clic.
               </p>
@@ -235,8 +238,8 @@ export default function Beneficios() {
                       <Icon className="h-6 w-6" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-white">{title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-400">{text}</p>
+                      <h3 className="text-base font-black text-content">{title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-muted">{text}</p>
                     </div>
                   </div>
                 );
@@ -247,13 +250,13 @@ export default function Beneficios() {
             <div className="mt-10 glass-panel rounded-[2rem] p-8 md:p-10">
               <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+                  <p className="text-sm font-black uppercase tracking-[0.25em] text-brand">
                     Experiencia e integridad
                   </p>
-                  <h3 className="mt-3 text-2xl font-bold text-white md:text-3xl">
+                  <h3 className="mt-3 text-2xl font-black text-content md:text-3xl">
                     Una plataforma que se siente tan sólida como los resultados que entrega
                   </h3>
-                  <p className="mt-4 text-base leading-7 text-slate-300">
+                  <p className="mt-4 text-base leading-7 text-muted">
                     ECONFIA no solo verifica — también comunica. Cada pantalla, cada reporte
                     y cada resultado está diseñado para transmitir profesionalismo, claridad
                     y confianza a tus clientes, equipos y aliados corporativos.
@@ -268,13 +271,13 @@ export default function Beneficios() {
                   ].map(({ icon: Icon, label, desc }) => (
                     <div
                       key={label}
-                      className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 hover:border-cyan-400/25 hover:bg-cyan-400/[0.06] transition-all duration-300"
+                      className="rounded-2xl border border-line/10 bg-surface/70 p-5 transition-all duration-300 hover:border-brand/25 hover:bg-brand/10"
                     >
-                      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300 ring-1 ring-cyan-400/20">
+                      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand ring-1 ring-brand/20">
                         <Icon className="h-5 w-5" />
                       </div>
-                      <p className="text-sm font-semibold text-white">{label}</p>
-                      <p className="mt-1 text-xs leading-5 text-slate-400">{desc}</p>
+                      <p className="text-sm font-black text-content">{label}</p>
+                      <p className="mt-1 text-xs leading-5 text-muted">{desc}</p>
                     </div>
                   ))}
                 </div>
@@ -289,13 +292,13 @@ export default function Beneficios() {
           <div className="mx-auto max-w-7xl px-4 md:px-6">
             {/* Encabezado */}
             <div className="mx-auto max-w-3xl text-center mb-14">
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300/90">
+              <p className="text-sm font-black uppercase tracking-[0.25em] text-brand">
                 Reportería profesional
               </p>
-              <h2 className="mt-3 text-3xl font-bold text-white md:text-4xl">
+              <h2 className="mt-3 text-3xl font-black text-content md:text-4xl">
                 Todos los reportes que maneja Econfia 
               </h2>
-              <p className="mt-5 text-base leading-7 text-slate-300 md:text-lg">
+              <p className="mt-5 text-base leading-7 text-muted md:text-lg">
                 ECONFIA genera documentos ejecutivos, auditables y verificables para cada caso de uso —
                 desde una consulta individual hasta informes masivos para cumplimiento corporativo.
               </p>
@@ -322,8 +325,8 @@ export default function Beneficios() {
                         </span>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-white">{title}</h3>
-                        <p className="mt-2 text-sm leading-6 text-slate-400">{desc}</p>
+                        <h3 className="text-lg font-black text-content">{title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-muted">{desc}</p>
                       </div>
                       <div className="grid gap-4 sm:grid-cols-3 mt-1">
                         {formats.map((f) => (
@@ -332,12 +335,12 @@ export default function Beneficios() {
                             className={`rounded-2xl border p-4 flex flex-col gap-2 ${formatColorBg[f.color]}`}
                           >
                             <div className="flex items-center gap-2">
-                              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-white/10 ${formatColorText[f.color]}`}>
+                              <span className={`flex h-6 w-6 items-center justify-center rounded-full bg-surface/70 text-xs font-black ${formatColorText[f.color]}`}>
                                 {f.icon}
                               </span>
-                              <p className={`text-sm font-semibold ${formatColorText[f.color]}`}>{f.label}</p>
+                              <p className={`text-sm font-black ${formatColorText[f.color]}`}>{f.label}</p>
                             </div>
-                            <p className="text-xs leading-5 text-slate-400">{f.sub}</p>
+                            <p className="text-xs leading-5 text-muted">{f.sub}</p>
                           </div>
                         ))}
                       </div>
@@ -345,7 +348,7 @@ export default function Beneficios() {
                         {tags.map((t) => (
                           <span
                             key={t}
-                            className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-slate-300"
+                            className="rounded-lg border border-line/10 bg-surface/70 px-2 py-1 text-[11px] font-semibold text-muted"
                           >
                             {t}
                           </span>
@@ -370,14 +373,14 @@ export default function Beneficios() {
                       </span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white">{title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-400">{desc}</p>
+                      <h3 className="text-lg font-black text-content">{title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-muted">{desc}</p>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-auto">
                       {tags.map((t) => (
                         <span
                           key={t}
-                          className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-slate-300"
+                          className="rounded-lg border border-line/10 bg-surface/70 px-2 py-1 text-[11px] font-semibold text-muted"
                         >
                           {t}
                         </span>
@@ -398,10 +401,10 @@ export default function Beneficios() {
               ].map(({ label, sub, color, ring }) => (
                 <div
                   key={label}
-                  className={`rounded-2xl border border-white/10 bg-white/[0.04] p-5 ring-1 ${ring} text-center hover:border-cyan-400/25 transition-all duration-300`}
+                  className={`rounded-2xl border border-line/10 bg-surface/70 p-5 text-center ring-1 ${ring} transition-all duration-300 hover:border-brand/25`}
                 >
                   <p className={`text-base font-bold ${color}`}>{label}</p>
-                  <p className="mt-1 text-xs text-slate-400">{sub}</p>
+                  <p className="mt-1 text-xs text-muted">{sub}</p>
                 </div>
               ))}
             </div>
@@ -412,22 +415,22 @@ export default function Beneficios() {
         <section className="relative py-16">
           <div className="mx-auto max-w-7xl px-4 md:px-6">
             <div className="premium-card rounded-[2rem] p-8 md:p-12 text-center">
-              <h2 className="text-2xl font-bold text-white md:text-4xl">
+              <h2 className="text-2xl font-black text-content md:text-4xl">
                 Listo para verificar con confianza
               </h2>
-              <p className="mt-4 text-base leading-7 text-slate-300 md:text-lg max-w-xl mx-auto">
+              <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-muted md:text-lg">
                 Empieza a consultar, analizar y generar reportes ejecutivos hoy mismo.
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row justify-center">
                 <a
                   href="/consulta"
-                  className="rounded-full bg-cyan-500 px-8 py-4 text-base font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:bg-cyan-400 hover:shadow-[0_12px_40px_rgba(34,211,238,0.25)]"
+                  className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 px-8 py-4 text-base font-black text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(34,211,238,0.25)]"
                 >
                   Iniciar consulta
                 </a>
                 <a
                   href="/precios"
-                  className="rounded-full border border-white/15 bg-white/5 px-8 py-4 text-base font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-400/40 hover:bg-white/10"
+                  className="rounded-full border border-line/15 bg-surface/70 px-8 py-4 text-base font-black text-content transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:bg-brand/10"
                 >
                   Ver planes
                 </a>

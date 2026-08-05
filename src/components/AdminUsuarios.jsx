@@ -49,11 +49,11 @@ const ModalInput = ({ label, ...props }) => (
 // ─── Badge de estado ───────────────────────────────────────────────
 const Badge = ({ children, color }) => {
   const colors = {
-    green:  "bg-green-900/50 text-green-300 border-green-700/40",
-    red:    "bg-red-900/50 text-red-300 border-red-700/40",
-    cyan:   "bg-cyan-900/50 text-cyan-300 border-cyan-700/40",
-    violet: "bg-violet-900/50 text-violet-300 border-violet-700/40",
-    slate:  "bg-slate-700/50 text-slate-400 border-slate-600/40",
+    green:  "bg-green-500/12 text-green-700 border-green-500/30 dark:text-green-300",
+    red:    "bg-red-500/12 text-red-700 border-red-500/30 dark:text-red-300",
+    cyan:   "bg-cyan-500/12 text-cyan-700 border-cyan-500/30 dark:text-cyan-300",
+    violet: "bg-violet-500/12 text-violet-700 border-violet-500/30 dark:text-violet-300",
+    slate:  "bg-surface-2/70 text-muted border-line/20",
   };
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${colors[color] || colors.slate}`}>
@@ -511,16 +511,16 @@ const AdminUsuarios = () => {
       )}
 
       <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4">
-        <div className="overflow-hidden rounded-[24px] border border-cyan-500/10 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_34%),linear-gradient(135deg,rgba(8,15,30,0.98),rgba(10,18,36,0.92)_55%,rgba(8,12,24,0.98))] px-4 py-4 shadow-[0_30px_80px_rgba(8,145,178,0.08)] sm:px-5 sm:py-5 lg:px-7">
+        <div className="overflow-hidden rounded-[24px] border border-line/15 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.16),_transparent_34%)] bg-surface/90 px-4 py-4 shadow-2xl shadow-black/5 backdrop-blur-xl sm:px-5 sm:py-5 lg:px-7">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
               <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-200/90">
                 Centro administrativo
               </span>
-              <h2 className="mt-3 bg-gradient-to-r from-white via-cyan-100 to-sky-300 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl xl:text-4xl">
+              <h2 className="mt-3 text-2xl font-black tracking-tight text-content sm:text-3xl xl:text-4xl">
                 Administracion de usuarios
               </h2>
-              <p className="mt-2 max-w-2xl text-xs leading-5 text-slate-300 sm:text-sm sm:leading-6">
+              <p className="mt-2 max-w-2xl text-xs leading-5 text-muted sm:text-sm sm:leading-6">
                 Supervisa cuentas, planes, credito operativo y exportes desde una vista mucho mas comoda para escritorio, tablet y movil.
               </p>
             </div>
@@ -534,10 +534,10 @@ const AdminUsuarios = () => {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className={`group relative overflow-hidden rounded-2xl border ${item.ring} bg-gradient-to-br ${item.bg} to-transparent px-3 py-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:px-4 ${item.glow}`}
+                  className={`group relative overflow-hidden rounded-2xl border ${item.ring} bg-gradient-to-br ${item.bg} to-surface/70 px-3 py-3 shadow-lg shadow-black/5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:px-4 ${item.glow}`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50">{item.label}</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">{item.label}</div>
                     <span className="text-base leading-none opacity-80">{item.icon}</span>
                   </div>
                   <div className={`mt-2 bg-gradient-to-r ${item.grad} bg-clip-text text-2xl font-black text-transparent sm:text-3xl`}>{item.value}</div>
@@ -548,8 +548,8 @@ const AdminUsuarios = () => {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-slate-950/95 via-slate-900/95 to-slate-950/95 shadow-2xl shadow-cyan-500/5">
-          <div className="border-b border-white/8 bg-[linear-gradient(180deg,rgba(18,33,59,0.82),rgba(10,18,34,0.88))] px-4 py-4 sm:px-5 lg:px-6">
+        <div className="overflow-hidden rounded-[28px] border border-line/15 bg-surface/90 shadow-2xl shadow-black/5 backdrop-blur-xl">
+          <div className="border-b border-line/15 bg-surface-2/60 px-4 py-4 sm:px-5 lg:px-6">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                 <div className="relative w-full xl:max-w-xl">
@@ -561,7 +561,7 @@ const AdminUsuarios = () => {
                     value={filter}
                     onChange={(e) => { setFilter(e.target.value); setCurrentPage(1); }}
                     placeholder="Buscar por usuario, email, empresa, NIT o rol..."
-                    className="w-full rounded-2xl border border-white/10 bg-slate-900/70 py-3 pl-10 pr-4 text-sm text-white/90 shadow-inner shadow-black/20 transition placeholder:text-white/30 focus:border-cyan-400/60 focus:bg-slate-900 focus:outline-none"
+                    className="w-full rounded-2xl border border-line/15 bg-surface py-3 pl-10 pr-4 text-sm text-content shadow-inner shadow-black/5 transition placeholder:text-muted/70 focus:border-brand/50 focus:bg-surface focus:outline-none"
                     autoComplete="off"
                   />
                 </div>
@@ -569,7 +569,7 @@ const AdminUsuarios = () => {
                 <div className="flex flex-col gap-3 sm:flex-row xl:justify-end">
                   <button
                     onClick={handleOpenSoporteModal}
-                    className="relative inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-400/35 bg-amber-500/12 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100 transition-all hover:bg-amber-500/20"
+                    className="relative inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-400/35 bg-amber-500/12 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-amber-600 shadow-lg shadow-black/5 transition-all hover:bg-amber-500/20 dark:text-amber-100"
                     title="Ver tickets de soporte técnico"
                   >
                     <span>Tickets</span>
@@ -588,8 +588,8 @@ const AdminUsuarios = () => {
                     onClick={() => setOrderAsc((v) => !v)}
                     className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition-all ${
                       orderAsc
-                        ? "border-cyan-500/30 bg-cyan-500/12 text-cyan-200 hover:bg-cyan-500/20"
-                        : "border-blue-500/30 bg-blue-500/12 text-blue-200 hover:bg-blue-500/20"
+                        ? "border-cyan-500/30 bg-cyan-500/12 text-brand hover:bg-cyan-500/20"
+                        : "border-blue-500/30 bg-blue-500/12 text-blue-500 hover:bg-blue-500/20"
                     }`}
                   >
                     {orderAsc ? "Orden ID asc" : "Orden ID desc"}
@@ -629,29 +629,29 @@ const AdminUsuarios = () => {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="group rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-all hover:border-cyan-400/30 hover:bg-white/[0.06]">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
+                <div className="group rounded-2xl border border-line/15 bg-surface/80 px-4 py-3 transition-all hover:border-cyan-400/30 hover:bg-surface">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
                     <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" /> Resultados visibles
                   </div>
-                  <div className="mt-2 text-xl font-bold text-white">{filteredUsers.length}</div>
+                  <div className="mt-2 text-xl font-bold text-content">{filteredUsers.length}</div>
                 </div>
-                <div className="group rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-all hover:border-sky-400/30 hover:bg-white/[0.06]">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
+                <div className="group rounded-2xl border border-line/15 bg-surface/80 px-4 py-3 transition-all hover:border-sky-400/30 hover:bg-surface">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
                     <span className="h-1.5 w-1.5 rounded-full bg-sky-400" /> Rango mostrado
                   </div>
-                  <div className="mt-2 text-xl font-bold text-white">{visibleFrom} - {visibleTo}</div>
+                  <div className="mt-2 text-xl font-bold text-content">{visibleFrom} - {visibleTo}</div>
                 </div>
-                <div className="group rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-all hover:border-violet-400/30 hover:bg-white/[0.06]">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
+                <div className="group rounded-2xl border border-line/15 bg-surface/80 px-4 py-3 transition-all hover:border-violet-400/30 hover:bg-surface">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
                     <span className="h-1.5 w-1.5 rounded-full bg-violet-400" /> Pagina actual
                   </div>
-                  <div className="mt-2 text-xl font-bold text-white">{currentPage} / {totalPages}</div>
+                  <div className="mt-2 text-xl font-bold text-content">{currentPage} / {totalPages}</div>
                 </div>
-                <div className="group rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 transition-all hover:border-emerald-400/30 hover:bg-white/[0.06]">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35">
+                <div className="group rounded-2xl border border-line/15 bg-surface/80 px-4 py-3 transition-all hover:border-emerald-400/30 hover:bg-surface">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Cobertura
                   </div>
-                  <div className="mt-2 text-sm font-semibold text-cyan-200">
+                  <div className="mt-2 text-sm font-semibold text-brand">
                     {filter.trim() ? "Listado filtrado por busqueda activa" : "Vista completa del padron de usuarios"}
                   </div>
                 </div>
@@ -661,7 +661,7 @@ const AdminUsuarios = () => {
 
           <div className="block xl:hidden px-3 py-3 sm:px-4 sm:py-4">
             {pagedUsers.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-14 text-center text-sm text-white/35">
+              <div className="rounded-3xl border border-dashed border-line/20 bg-surface-2/50 px-4 py-14 text-center text-sm text-muted">
                 No se encontraron usuarios con ese filtro.
               </div>
             ) : (
@@ -669,40 +669,40 @@ const AdminUsuarios = () => {
                 {pagedUsers.map((u) => (
                   <article
                     key={u.id}
-                    className="overflow-hidden rounded-[26px] border border-white/8 bg-[linear-gradient(180deg,rgba(17,27,47,0.95),rgba(7,14,26,0.98))] shadow-[0_20px_45px_rgba(2,8,23,0.35)]"
+                    className="overflow-hidden rounded-[26px] border border-line/15 bg-surface/90 shadow-xl shadow-black/5"
                   >
-                    <div className="border-b border-white/6 bg-[linear-gradient(120deg,rgba(14,165,233,0.12),transparent_40%,rgba(59,130,246,0.08))] px-4 py-4 sm:px-5">
+                    <div className="border-b border-line/10 bg-cyan-500/5 px-4 py-4 sm:px-5">
                       <div className="flex items-start gap-3">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/12 text-lg font-black uppercase text-cyan-200">
                           {(u.username || "U").slice(0, 1)}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="truncate text-base font-bold text-white sm:text-lg">{u.username}</h3>
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] font-mono text-white/45">#{u.id}</span>
+                            <h3 className="truncate text-base font-bold text-content sm:text-lg">{u.username}</h3>
+                            <span className="rounded-full border border-line/15 bg-surface-2/70 px-2 py-0.5 text-[11px] font-mono text-muted">#{u.id}</span>
                             {u.is_active ? <Badge color="green">Activo</Badge> : <Badge color="red">Inactivo</Badge>}
                           </div>
-                          <p className="mt-1 break-all text-xs text-slate-300">{u.email || "Sin email registrado"}</p>
-                          <p className="mt-1 text-sm text-white/70">{u.full_name || "Sin nombre completo"}</p>
+                          <p className="mt-1 break-all text-xs text-muted">{u.email || "Sin email registrado"}</p>
+                          <p className="mt-1 text-sm text-content/75">{u.full_name || "Sin nombre completo"}</p>
                         </div>
                       </div>
 
                       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                        <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
-                          <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">Tipo</div>
-                          <div className="mt-1 text-sm font-semibold text-white">{u.perfil?.tipo_registro === "empresa" ? "Empresa" : "Natural"}</div>
+                        <div className="rounded-2xl border border-line/15 bg-surface-2/70 px-3 py-2.5">
+                          <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Tipo</div>
+                          <div className="mt-1 text-sm font-semibold text-content">{u.perfil?.tipo_registro === "empresa" ? "Empresa" : "Natural"}</div>
                         </div>
-                        <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
-                          <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">Rol</div>
-                          <div className="mt-1 text-sm font-semibold text-white">{getRoleSummary(u)}</div>
+                        <div className="rounded-2xl border border-line/15 bg-surface-2/70 px-3 py-2.5">
+                          <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Rol</div>
+                          <div className="mt-1 text-sm font-semibold text-content">{getRoleSummary(u)}</div>
                         </div>
-                        <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
-                          <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">Planes</div>
-                          <div className="mt-1 text-sm font-semibold text-white">{(u.perfil?.planes || []).length}</div>
+                        <div className="rounded-2xl border border-line/15 bg-surface-2/70 px-3 py-2.5">
+                          <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Planes</div>
+                          <div className="mt-1 text-sm font-semibold text-content">{(u.perfil?.planes || []).length}</div>
                         </div>
-                        <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2.5">
-                          <div className="text-[10px] uppercase tracking-[0.18em] text-white/35">Creditos</div>
-                          <div className="mt-1 text-sm font-semibold text-white">{u.perfil?.consultas_infinitas ? "Ilimitados" : (u.perfil?.consultas_disponibles ?? 0)}</div>
+                        <div className="rounded-2xl border border-line/15 bg-surface-2/70 px-3 py-2.5">
+                          <div className="text-[10px] uppercase tracking-[0.18em] text-muted">Creditos</div>
+                          <div className="mt-1 text-sm font-semibold text-content">{u.perfil?.consultas_infinitas ? "Ilimitados" : (u.perfil?.consultas_disponibles ?? 0)}</div>
                         </div>
                       </div>
                     </div>
@@ -711,7 +711,7 @@ const AdminUsuarios = () => {
                       {u.perfil?.tipo_registro === "empresa" && (
                         <div className="mb-4 rounded-2xl border border-violet-500/15 bg-violet-500/8 px-4 py-3">
                           <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-200/60">Entidad asociada</div>
-                          <div className="mt-1 text-sm font-semibold text-white">{u.perfil.nombre_empresa || "Sin nombre de empresa"}</div>
+                          <div className="mt-1 text-sm font-semibold text-content">{u.perfil.nombre_empresa || "Sin nombre de empresa"}</div>
                           <div className="mt-1 text-xs font-mono text-violet-200/70">{u.perfil.nit ? `NIT ${u.perfil.nit}` : "Sin NIT registrado"}</div>
                         </div>
                       )}
@@ -728,7 +728,7 @@ const AdminUsuarios = () => {
                           ))}
                         </div>
                       ) : (
-                        <div className="mb-4 rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 text-xs text-white/40">
+                        <div className="mb-4 rounded-2xl border border-line/15 bg-surface-2/50 px-4 py-3 text-xs text-muted">
                           Este usuario no tiene planes asignados.
                         </div>
                       )}
@@ -753,11 +753,11 @@ const AdminUsuarios = () => {
           </div>
 
           <div className="hidden xl:block px-4 py-4">
-            <div className="overflow-hidden rounded-[24px] border border-white/8 bg-slate-950/40">
+            <div className="overflow-hidden rounded-[24px] border border-line/15 bg-surface/80">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1320px] text-left text-sm">
-                  <thead className="bg-[linear-gradient(180deg,rgba(20,35,64,0.98),rgba(16,28,50,0.95))] text-[11px] uppercase tracking-[0.18em] text-cyan-100/80">
-                    <tr className="border-b border-cyan-500/15">
+                  <thead className="bg-surface-2/80 text-[11px] uppercase tracking-[0.18em] text-muted">
+                    <tr className="border-b border-line/15">
                       <th className="px-4 py-4 font-semibold">ID</th>
                       <th className="px-4 py-4 font-semibold">Usuario</th>
                       <th className="px-4 py-4 font-semibold">Email</th>
@@ -770,18 +770,18 @@ const AdminUsuarios = () => {
                       <th className="px-4 py-4 font-semibold">Acciones</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-line/10">
                     {pagedUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={10} className="px-4 py-16 text-center text-sm text-white/30">
+                        <td colSpan={10} className="px-4 py-16 text-center text-sm text-muted">
                           No se encontraron usuarios con ese filtro.
                         </td>
                       </tr>
                     ) : (
                       pagedUsers.map((u) => (
-                        <tr key={u.id} className="group align-top transition-colors hover:bg-cyan-500/[0.07]">
+                        <tr key={u.id} className="group align-top transition-colors hover:bg-cyan-500/[0.06]">
                           <td className="px-4 py-4">
-                            <span className="rounded-full border border-white/8 bg-white/[0.04] px-2.5 py-1 text-xs font-mono text-white/55 transition-colors group-hover:border-cyan-400/30 group-hover:text-cyan-200">
+                            <span className="rounded-full border border-line/15 bg-surface-2/70 px-2.5 py-1 text-xs font-mono text-muted transition-colors group-hover:border-cyan-400/30 group-hover:text-brand">
                               #{u.id}
                             </span>
                           </td>
@@ -792,18 +792,18 @@ const AdminUsuarios = () => {
                                 {(u.username || "U").slice(0, 1)}
                               </div>
                               <div className="min-w-0">
-                                <div className="truncate text-sm font-bold text-white">{u.username}</div>
-                                <div className="mt-1 text-xs text-white/45">{getRoleSummary(u)}</div>
+                                <div className="truncate text-sm font-bold text-content">{u.username}</div>
+                                <div className="mt-1 text-xs text-muted">{getRoleSummary(u)}</div>
                               </div>
                             </div>
                           </td>
 
                           <td className="px-4 py-4">
-                            <span className="break-all text-xs leading-5 text-slate-300">{u.email || "Sin email"}</span>
+                            <span className="break-all text-xs leading-5 text-muted">{u.email || "Sin email"}</span>
                           </td>
 
                           <td className="px-4 py-4">
-                            <span className="text-xs font-medium text-white/80">{u.full_name || "Sin nombre completo"}</span>
+                            <span className="text-xs font-medium text-content/80">{u.full_name || "Sin nombre completo"}</span>
                           </td>
 
                           <td className="px-4 py-4">
@@ -815,11 +815,11 @@ const AdminUsuarios = () => {
                           <td className="px-4 py-4">
                             {u.perfil?.tipo_registro === "empresa" ? (
                               <div className="max-w-[220px] rounded-2xl border border-violet-400/10 bg-violet-500/[0.06] px-3 py-2">
-                                <div className="truncate text-xs font-semibold text-white">{u.perfil.nombre_empresa || "Sin nombre"}</div>
+                                <div className="truncate text-xs font-semibold text-content">{u.perfil.nombre_empresa || "Sin nombre"}</div>
                                 <div className="mt-1 text-xs font-mono text-violet-200/70">{u.perfil.nit ? `NIT ${u.perfil.nit}` : "Sin NIT"}</div>
                               </div>
                             ) : (
-                              <span className="text-xs text-white/25">No aplica</span>
+                              <span className="text-xs text-muted">No aplica</span>
                             )}
                           </td>
 
@@ -833,7 +833,7 @@ const AdminUsuarios = () => {
                               {u.is_staff && !u.is_superuser && <Badge color="cyan">Staff</Badge>}
                               {u.perfil?.consultas_masivas && <Badge color="violet">Masivas</Badge>}
                               {!u.is_superuser && !u.is_staff && !u.perfil?.consultas_masivas && (
-                                <span className="text-xs text-white/25">Sin distintivos</span>
+                                <span className="text-xs text-muted">Sin distintivos</span>
                               )}
                             </div>
                           </td>
@@ -851,14 +851,14 @@ const AdminUsuarios = () => {
                                 ))}
                               </div>
                             ) : (
-                              <span className="text-xs italic text-white/25">Sin plan</span>
+                              <span className="text-xs italic text-muted">Sin plan</span>
                             )}
                           </td>
 
                           <td className="px-4 py-4">
                             <button
                               onClick={() => setGestionUser(u)}
-                              className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/15 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-cyan-100 transition-all hover:from-cyan-500/30 hover:to-blue-500/30 hover:shadow-lg hover:shadow-cyan-500/20"
+                              className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/15 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-brand transition-all hover:from-cyan-500/30 hover:to-blue-500/30 hover:shadow-lg hover:shadow-cyan-500/20"
                             >
                               ⚙ Gestionar
                             </button>
@@ -872,26 +872,26 @@ const AdminUsuarios = () => {
             </div>
           </div>
 
-          <div className="border-t border-white/8 bg-slate-950/60 px-4 py-4 sm:px-5 lg:px-6">
+          <div className="border-t border-line/15 bg-surface-2/60 px-4 py-4 sm:px-5 lg:px-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-xs text-white/35">
-                Mostrando <span className="font-semibold text-white/70">{visibleFrom} - {visibleTo}</span> de <span className="font-semibold text-cyan-200">{filteredUsers.length}</span> usuarios.
+              <div className="text-xs text-muted">
+                Mostrando <span className="font-semibold text-content/80">{visibleFrom} - {visibleTo}</span> de <span className="font-semibold text-brand">{filteredUsers.length}</span> usuarios.
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="rounded-xl border border-white/10 bg-slate-800/60 px-3.5 py-2 text-xs font-semibold text-white/70 transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="rounded-xl border border-line/15 bg-surface px-3.5 py-2 text-xs font-semibold text-content/70 transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-brand disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   Anterior
                 </button>
-                <span className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3.5 py-2 text-xs font-bold text-cyan-200">
+                <span className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3.5 py-2 text-xs font-bold text-brand">
                   Pagina {currentPage} de {totalPages}
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage >= totalPages}
-                  className="rounded-xl border border-white/10 bg-slate-800/60 px-3.5 py-2 text-xs font-semibold text-white/70 transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="rounded-xl border border-line/15 bg-surface px-3.5 py-2 text-xs font-semibold text-content/70 transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-brand disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   Siguiente
                 </button>
@@ -1382,5 +1382,3 @@ const AdminUsuarios = () => {
 };
 
 export default AdminUsuarios;
-
-

@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   FaCalendar, FaClock, FaUser, FaArrowLeft, FaArrowRight,
-  FaShare, FaFire, FaStar, FaPlay, FaImage,
+  FaShare, FaFire, FaStar, FaPlay,
 } from "react-icons/fa";
 import Header from "../components/Header";
 import fallbackImg from "../assets/logo-econfia (1).png";
@@ -24,9 +24,9 @@ if (!API_URL.endsWith("/")) API_URL += "/";
 // ─────────────────────────────────────────────────────────────────────────────
 function inlineFormat(text) {
   return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em class="text-cyan-200 not-italic font-medium">$1</em>')
-    .replace(/`(.+?)`/g, '<code class="bg-white/10 text-cyan-300 px-1.5 py-0.5 rounded font-mono text-sm">$1</code>');
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-content font-bold">$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em class="text-brand not-italic font-medium">$1</em>')
+    .replace(/`(.+?)`/g, '<code class="bg-brand/10 text-brand px-1.5 py-0.5 rounded font-mono text-sm">$1</code>');
 }
 
 function parseSections(text) {
@@ -45,10 +45,10 @@ function parseSections(text) {
     proseBuf.push(
       <div key={k()} className="mb-5 space-y-2">
         {listBuf.map((item, idx) => (
-          <div key={idx} className="flex items-start gap-3 text-on-surface/80 text-base leading-relaxed">
+          <div key={idx} className="flex items-start gap-3 text-base leading-relaxed text-muted">
             {isOl
-              ? <span className="flex-shrink-0 w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-bold flex items-center justify-center mt-0.5">{idx + 1}</span>
-              : <span className="flex-shrink-0 w-2 h-2 rounded-full bg-cyan-400 mt-2" />
+              ? <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-brand/40 bg-brand/15 text-xs font-bold text-brand">{idx + 1}</span>
+              : <span className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-brand" />
             }
             <span dangerouslySetInnerHTML={{ __html: inlineFormat(item) }} />
           </div>
@@ -162,7 +162,7 @@ function parseSections(text) {
         sections.push({ type: "gridtitle", title: h1[1] });
         i++; continue;
       }
-      proseBuf.push(<h2 key={k()} className="text-2xl md:text-3xl font-extrabold text-white mt-8 mb-4" dangerouslySetInnerHTML={{ __html: inlineFormat(h1[1]) }} />);
+      proseBuf.push(<h2 key={k()} className="mb-4 mt-8 text-2xl font-extrabold text-content md:text-3xl" dangerouslySetInnerHTML={{ __html: inlineFormat(h1[1]) }} />);
       i++; continue;
     }
     if (h2) {
@@ -173,12 +173,12 @@ function parseSections(text) {
         sections.push({ type: "gridtitle", title: h2[1] });
         i++; continue;
       }
-      proseBuf.push(<h3 key={k()} className="text-xl font-bold text-cyan-300 mt-7 mb-3" dangerouslySetInnerHTML={{ __html: inlineFormat(h2[1]) }} />);
+      proseBuf.push(<h3 key={k()} className="mb-3 mt-7 text-xl font-bold text-brand" dangerouslySetInnerHTML={{ __html: inlineFormat(h2[1]) }} />);
       i++; continue;
     }
     if (h3) {
       flushList();
-      proseBuf.push(<h4 key={k()} className="text-lg font-semibold text-cyan-200 mt-5 mb-2" dangerouslySetInnerHTML={{ __html: inlineFormat(h3[1]) }} />);
+      proseBuf.push(<h4 key={k()} className="mb-2 mt-5 text-lg font-semibold text-brand" dangerouslySetInnerHTML={{ __html: inlineFormat(h3[1]) }} />);
       i++; continue;
     }
 
@@ -188,9 +188,8 @@ function parseSections(text) {
       flushList();
       proseBuf.push(
         <blockquote key={k()}
-          className="relative border-l-4 border-cyan-400 pl-6 py-4 my-6 rounded-r-xl italic text-white/65 text-base leading-relaxed"
-          style={{ background: "rgba(10,20,50,0.5)" }}>
-          <span className="absolute top-2 left-3 text-cyan-400/25 text-4xl font-serif leading-none select-none">"</span>
+          className="relative my-6 rounded-r-xl border-l-4 border-brand bg-brand/10 py-4 pl-6 text-base italic leading-relaxed text-muted">
+          <span className="absolute left-3 top-2 select-none font-serif text-4xl leading-none text-brand/25">"</span>
           <span className="relative" dangerouslySetInnerHTML={{ __html: inlineFormat(quote[1]) }} />
         </blockquote>
       );
@@ -208,10 +207,9 @@ function parseSections(text) {
     if (emojiLine) {
       flushList();
       proseBuf.push(
-        <div key={k()} className="flex items-start gap-4 rounded-xl px-5 py-4 my-4 border border-cyan-900/30"
-          style={{ background: "rgba(0,30,60,0.45)" }}>
+        <div key={k()} className="my-4 flex items-start gap-4 rounded-xl border border-brand/20 bg-brand/10 px-5 py-4">
           <span className="text-2xl flex-shrink-0">{emojiLine[1]}</span>
-          <p className="text-white/80 text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: inlineFormat(emojiLine[2]) }} />
+          <p className="text-base leading-relaxed text-muted" dangerouslySetInnerHTML={{ __html: inlineFormat(emojiLine[2]) }} />
         </div>
       );
       i++; continue;
@@ -220,7 +218,7 @@ function parseSections(text) {
     // ── Párrafo
     flushList();
     proseBuf.push(
-      <p key={k()} className="text-white/75 text-base md:text-lg leading-[1.85] mb-5"
+      <p key={k()} className="mb-5 text-base leading-[1.85] text-muted md:text-lg"
         dangerouslySetInnerHTML={{ __html: inlineFormat(line) }} />
     );
     i++;
@@ -246,28 +244,28 @@ function mergeSections(sections) {
 // ── CSS: glow + flip cards ────────────────────────────────────────────────────
 const glassHoverStyle = `
   .glass-prose {
-    background: rgba(12, 25, 55, 0.35);
+    background: rgb(var(--th-surface) / 0.86);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border: 1px solid rgba(0, 218, 248, 0.08);
+    border: 1px solid rgb(var(--th-line) / 0.12);
     transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
   }
   .glass-prose:hover {
-    background: rgba(17, 38, 75, 0.55);
-    border-color: rgba(0, 218, 248, 0.22);
-    box-shadow: 0 0 32px rgba(0, 218, 248, 0.1), inset 0 0 24px rgba(0, 218, 248, 0.03);
+    background: rgb(var(--th-surface) / 0.94);
+    border-color: rgb(var(--th-brand) / 0.25);
+    box-shadow: 0 16px 42px rgb(var(--th-brand) / 0.10), inset 0 0 24px rgb(var(--th-brand) / 0.03);
   }
   .benefit-card {
-    background: rgba(12, 25, 55, 0.45);
+    background: rgb(var(--th-surface) / 0.86);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgb(var(--th-line) / 0.12);
     transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   }
   .benefit-card:hover {
-    background: rgba(17, 38, 75, 0.65);
-    border-color: rgba(0, 218, 248, 0.35);
-    box-shadow: 0 0 28px rgba(0, 218, 248, 0.14);
+    background: rgb(var(--th-surface) / 0.94);
+    border-color: rgb(var(--th-brand) / 0.35);
+    box-shadow: 0 16px 36px rgb(var(--th-brand) / 0.14);
     transform: translateY(-2px);
   }
   .benefit-card:hover .benefit-icon {
@@ -303,14 +301,14 @@ const glassHoverStyle = `
   }
   .flip-back {
     transform: rotateY(180deg);
-    background: rgba(8, 20, 50, 0.92);
+    background: rgb(var(--th-surface) / 0.96);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    border: 1px solid rgba(0,218,248,0.25);
-    box-shadow: inset 0 0 30px rgba(0,218,248,0.07);
+    border: 1px solid rgb(var(--th-brand) / 0.25);
+    box-shadow: inset 0 0 30px rgb(var(--th-brand) / 0.07);
   }
 `;
 
@@ -335,14 +333,14 @@ function ArticleContent({ contenido }) {
           if (sec.type === "grid") return (
             <section key={idx} className="pt-1">
               {sec.title && (
-                <h3 className="text-xl md:text-2xl font-bold text-cyan-400 mb-5 pl-1">{sec.title}</h3>
+                <h3 className="mb-5 pl-1 text-xl font-black text-brand md:text-2xl">{sec.title}</h3>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {sec.cards.map((c, ci) => (
                   <div key={ci} className="benefit-card rounded-xl p-6 cursor-default">
-                    <span className="benefit-icon text-4xl block mb-4">{c.emoji}</span>
-                    <h4 className="text-white font-bold text-lg mb-2">{c.title}</h4>
-                    <p className="text-white/50 text-sm leading-relaxed">{c.desc}</p>
+                    <span className="benefit-icon mb-4 block text-4xl">{c.emoji}</span>
+                    <h4 className="mb-2 text-lg font-black text-content">{c.title}</h4>
+                    <p className="text-sm leading-relaxed text-muted">{c.desc}</p>
                   </div>
                 ))}
               </div>
@@ -353,8 +351,8 @@ function ArticleContent({ contenido }) {
           if (sec.type === "summary") return (
             <div key={idx}
               className="glass-prose rounded-xl p-6"
-              style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-              <p className="text-white/60 text-base leading-relaxed"
+              style={{ borderColor: "rgb(var(--th-line) / 0.12)" }}>
+              <p className="text-base leading-relaxed text-muted"
                 dangerouslySetInnerHTML={{ __html: inlineFormat(sec.text) }} />
             </div>
           );
@@ -387,17 +385,17 @@ function ArticleContent({ contenido }) {
                       </div>
                       {/* Reverso — descripción */}
                       <div className="flip-back">
-                        <div className="w-8 h-px bg-cyan-400/50 mb-4" />
-                        <p className="text-white/90 text-sm text-center leading-relaxed font-medium">
+                        <div className="mb-4 h-px w-8 bg-brand/50" />
+                        <p className="text-center text-sm font-medium leading-relaxed text-content">
                           {img.desc || ""}
                         </p>
-                        <div className="w-8 h-px bg-cyan-400/50 mt-4" />
+                        <div className="mt-4 h-px w-8 bg-brand/50" />
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-              <p className="text-white/30 text-xs text-center mt-3 tracking-wide">Pasa el cursor sobre las imágenes</p>
+              <p className="mt-3 text-center text-xs tracking-wide text-muted">Pasa el cursor sobre las imágenes</p>
             </section>
           );
 
@@ -409,8 +407,7 @@ function ArticleContent({ contenido }) {
             const embedSrc = yt ? `https://www.youtube.com/embed/${yt[1]}?rel=0&modestbranding=1`
                            : vm ? `https://player.vimeo.com/video/${vm[1]}` : null;
             return (
-              <div key={idx} className="rounded-2xl overflow-hidden border border-cyan-500/15 shadow-xl"
-                style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(10px)" }}>
+              <div key={idx} className="overflow-hidden rounded-2xl border border-brand/15 bg-surface shadow-xl backdrop-blur">
                 {embedSrc
                   ? <div className="aspect-video"><iframe src={embedSrc} title="Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" /></div>
                   : <video controls className="w-full" src={url}>Tu navegador no soporta video.</video>
@@ -440,13 +437,13 @@ function VideoPlayer({ video_url, video_archivo_url, compact = false }) {
     <div className={compact ? "" : "my-8"}>
       {!compact && (
         <div className="flex items-center gap-2 mb-3">
-          <span className="w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full border border-brand/40 bg-brand/15">
             <FaPlay className="text-cyan-400 text-[10px] ml-px" />
           </span>
-          <span className="text-xs font-bold text-cyan-300 uppercase tracking-widest">Video</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-brand">Video</span>
         </div>
       )}
-      <div className="rounded-2xl overflow-hidden border border-white/10 shadow-xl bg-black">
+      <div className="overflow-hidden rounded-2xl border border-line/10 bg-surface shadow-xl">
         {embedSrc
           ? <div className="aspect-video"><iframe src={embedSrc} title="Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" /></div>
           : <video controls className="w-full" src={video_archivo_url}>Tu navegador no soporta video.</video>
@@ -467,14 +464,7 @@ function MediaPanel({ post }) {
       {/* Imagen de portada — completa, con glow */}
       {post.cover && (
         <div
-          className="rounded-2xl overflow-hidden border border-cyan-500/15 transition-all duration-300 group"
-          style={{
-            background: "rgba(12,25,55,0.4)",
-            backdropFilter: "blur(14px)",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.4)",
-          }}
-          onMouseEnter={e => e.currentTarget.style.boxShadow = "0 0 30px rgba(0,218,248,0.14), 0 4px 24px rgba(0,0,0,0.4)"}
-          onMouseLeave={e => e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.4)"}
+          className="group overflow-hidden rounded-2xl border border-brand/15 bg-surface/90 shadow-[0_16px_42px_rgba(15,23,42,0.14)] transition-all duration-300 hover:border-brand/30 hover:shadow-cyan-500/15"
         >
           <img
             src={post.cover}
@@ -489,21 +479,14 @@ function MediaPanel({ post }) {
       {/* Video */}
       {hasVideo && (
         <div
-          className="rounded-2xl overflow-hidden border border-cyan-500/15 transition-all duration-300"
-          style={{
-            background: "rgba(12,25,55,0.4)",
-            backdropFilter: "blur(14px)",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.4)",
-          }}
-          onMouseEnter={e => e.currentTarget.style.boxShadow = "0 0 30px rgba(0,218,248,0.14), 0 4px 24px rgba(0,0,0,0.4)"}
-          onMouseLeave={e => e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.4)"}
+          className="overflow-hidden rounded-2xl border border-brand/15 bg-surface/90 shadow-[0_16px_42px_rgba(15,23,42,0.14)] transition-all duration-300 hover:border-brand/30 hover:shadow-cyan-500/15"
         >
           {/* Label */}
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/8">
-            <span className="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center gap-2 border-b border-line/10 px-4 py-3">
+            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-brand/30 bg-brand/15">
               <FaPlay className="text-cyan-400 text-[8px] ml-px" />
             </span>
-            <span className="text-xs font-bold text-cyan-400/80 uppercase tracking-widest">Video</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-brand">Video</span>
           </div>
           <VideoPlayer video_url={post.video_url} video_archivo_url={post.video_archivo_url} compact />
         </div>
@@ -558,19 +541,19 @@ export default function BlogPost() {
   };
 
   if (loading) return (
-    <main className="min-h-screen pt-24 pb-20 text-white bg-gradient-to-b from-gray-900 via-blue-900/20 to-gray-900">
+    <main className="min-h-screen bg-transparent pb-20 pt-24 text-content">
       <Header />
       <div className="flex justify-center py-24"><div className="w-10 h-10 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" /></div>
     </main>
   );
 
   if (notFound || !post) return (
-    <main className="min-h-screen pt-24 pb-20 text-white bg-gradient-to-b from-gray-900 via-blue-900/20 to-gray-900">
+    <main className="min-h-screen bg-transparent pb-20 pt-24 text-content">
       <Header />
       <section className="max-w-4xl mx-auto px-6 text-center py-20">
-        <h1 className="text-4xl font-bold mb-4">Artículo no encontrado</h1>
-        <p className="text-white/70 mb-8">No pudimos encontrar el artículo que buscas.</p>
-        <Link to="/blog" className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-semibold"><FaArrowLeft /> Volver al blog</Link>
+        <h1 className="mb-4 text-4xl font-black text-content">Artículo no encontrado</h1>
+        <p className="mb-8 text-muted">No pudimos encontrar el artículo que buscas.</p>
+        <Link to="/blog" className="inline-flex items-center gap-2 font-semibold text-brand hover:opacity-80"><FaArrowLeft /> Volver al blog</Link>
       </section>
     </main>
   );
@@ -578,7 +561,7 @@ export default function BlogPost() {
   const hasMedia = post.cover || post.video_url || post.video_archivo_url;
 
   return (
-    <main className="min-h-screen text-white bg-gradient-to-b from-gray-900 via-blue-900/20 to-gray-900">
+    <main className="min-h-screen bg-transparent text-content">
       <Header />
 
       {/* ══════════════════════════════════════════════
@@ -595,11 +578,11 @@ export default function BlogPost() {
             onError={(e) => { e.currentTarget.src = fallbackImg; }}
           />
           {/* Degradé lateral izquierdo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/85 via-gray-900/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/40 to-transparent" />
           {/* Degradé inferior para fundir con el fondo */}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
           {/* Degradé superior (para el header) */}
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent to-transparent" />
 
           {/* Título superpuesto en el hero */}
           <div className="absolute inset-0 flex flex-col justify-end pb-10 pt-20">
@@ -618,7 +601,7 @@ export default function BlogPost() {
                     </span>
                   )}
                   {post.tags?.map((tag) => (
-                    <span key={tag} className="text-xs px-3 py-1 rounded-full border border-cyan-400/50 bg-cyan-400/15 text-cyan-300 backdrop-blur-sm">
+                    <span key={tag} className="rounded-full border border-cyan-400/50 bg-cyan-400/15 px-3 py-1 text-xs font-semibold text-cyan-100 backdrop-blur-sm">
                       {tag}
                     </span>
                   ))}
@@ -643,7 +626,7 @@ export default function BlogPost() {
 
         {/* Volver */}
         <div className="pt-5 pb-4">
-          <Link to="/blog" className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-medium transition-colors text-sm">
+          <Link to="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-brand transition-colors hover:opacity-80">
             <FaArrowLeft /> Volver al blog
           </Link>
         </div>
@@ -654,20 +637,26 @@ export default function BlogPost() {
             <div className="flex flex-wrap gap-2 mb-4">
               {post.featured && <span className="flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-red-500 text-white font-bold"><FaFire /> Destacado</span>}
               {post.importante && <span className="flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-yellow-400 text-black font-bold"><FaStar /> Importante</span>}
-              {post.tags?.map((tag) => <span key={tag} className="text-xs px-3 py-1 rounded-full border border-cyan-400/40 bg-cyan-400/10 text-cyan-300">{tag}</span>)}
+              {post.tags?.map((tag) => <span key={tag} className="rounded-full border border-brand/40 bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">{tag}</span>)}
             </div>
-            <h1 className="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight mb-2 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
+            <h1
+              className="mb-2 bg-clip-text text-3xl font-extrabold leading-tight tracking-tight text-transparent md:text-5xl"
+              style={{
+                backgroundImage:
+                  "linear-gradient(90deg, rgb(var(--th-content)), rgb(var(--th-brand)), rgb(var(--th-brand-2)))",
+              }}
+            >
               {post.title}
             </h1>
           </div>
         )}
 
         {/* Meta bar */}
-        <div className="flex flex-wrap items-center gap-4 text-sm text-white/50 border-b border-white/8 pb-4 mb-8">
-          <span className="flex items-center gap-1.5"><FaUser className="text-cyan-400/70" /> {post.autor}</span>
-          <span className="flex items-center gap-1.5"><FaCalendar className="text-cyan-400/70" /> {post.date}</span>
-          <span className="flex items-center gap-1.5"><FaClock className="text-cyan-400/70" /> {post.readTime} de lectura</span>
-          <button onClick={handleShare} className="ml-auto flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 transition-colors font-medium">
+        <div className="mb-8 flex flex-wrap items-center gap-4 border-b border-line/10 pb-4 text-sm font-semibold text-muted">
+          <span className="flex items-center gap-1.5"><FaUser className="text-brand/80" /> {post.autor}</span>
+          <span className="flex items-center gap-1.5"><FaCalendar className="text-brand/80" /> {post.date}</span>
+          <span className="flex items-center gap-1.5"><FaClock className="text-brand/80" /> {post.readTime} de lectura</span>
+          <button onClick={handleShare} className="ml-auto flex items-center gap-1.5 font-semibold text-brand transition-colors hover:opacity-80">
             <FaShare /> Compartir
           </button>
         </div>
@@ -680,14 +669,14 @@ export default function BlogPost() {
             <ArticleContent contenido={post.contenido} />
 
             {/* CTA */}
-            <div className="mt-14 bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/20 rounded-3xl p-8 md:p-10 text-center">
-              <div className="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3">Econfia</div>
-              <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">¿Listo para optimizar tus procesos?</h3>
-              <p className="text-white/55 mb-7 max-w-md mx-auto text-sm leading-relaxed">
+            <div className="mt-14 rounded-3xl border border-brand/20 bg-surface/90 p-8 text-center shadow-[0_16px_42px_rgba(15,23,42,0.12)] md:p-10">
+              <div className="mb-3 text-xs font-black uppercase tracking-widest text-brand">Econfia</div>
+              <h3 className="mb-3 text-2xl font-black text-content md:text-3xl">¿Listo para optimizar tus procesos?</h3>
+              <p className="mx-auto mb-7 max-w-md text-sm leading-relaxed text-muted">
                 Automatiza tu debida diligencia con Econfia y toma decisiones más seguras y eficientes.
               </p>
               <Link to="/servicio-econfia"
-                className="inline-flex items-center gap-2 px-7 py-3 bg-cyan-500 text-black font-bold rounded-full hover:bg-cyan-400 transition-all transform hover:scale-105 shadow-lg shadow-cyan-500/25">
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 px-7 py-3 font-black text-white shadow-lg shadow-cyan-500/25 transition-all hover:scale-105">
                 Conocer más <FaArrowRight />
               </Link>
             </div>
@@ -695,23 +684,23 @@ export default function BlogPost() {
             {/* Relacionados */}
             {related.length > 0 && (
               <div className="mt-16">
-                <h3 className="text-lg font-bold text-white mb-5 flex items-center gap-3">
-                  <span className="h-px flex-1 bg-white/10" /> Artículos relacionados <span className="h-px flex-1 bg-white/10" />
+                <h3 className="mb-5 flex items-center gap-3 text-lg font-black text-content">
+                  <span className="h-px flex-1 bg-line/10" /> Artículos relacionados <span className="h-px flex-1 bg-line/10" />
                 </h3>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {related.map((r) => (
                     <div key={r.slug} onClick={() => navigate(`/blog/${r.slug}`)}
-                      className="cursor-pointer rounded-2xl overflow-hidden border border-white/8 bg-white/[0.03] hover:border-cyan-400/30 hover:bg-white/[0.06] transition-all group">
-                      <div className="aspect-video overflow-hidden bg-black/40">
+                      className="group cursor-pointer overflow-hidden rounded-2xl border border-line/10 bg-surface/90 shadow-[0_12px_32px_rgba(15,23,42,0.10)] transition-all hover:border-brand/30 hover:bg-surface">
+                      <div className="aspect-video overflow-hidden bg-surface-2">
                         <img src={r.cover || fallbackImg} alt={r.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           loading="lazy" onError={(e) => { e.currentTarget.src = fallbackImg; }} />
                       </div>
                       <div className="p-4">
-                        <h4 className="font-bold text-white text-sm mb-1.5 group-hover:text-cyan-300 transition-colors line-clamp-2">{r.title}</h4>
-                        <div className="flex items-center gap-3 text-xs text-white/40">
-                          <span className="flex items-center gap-1"><FaCalendar className="text-cyan-400/60" /> {r.date}</span>
-                          <span className="flex items-center gap-1"><FaClock className="text-cyan-400/60" /> {r.readTime}</span>
+                        <h4 className="mb-1.5 line-clamp-2 text-sm font-black text-content transition-colors group-hover:text-brand">{r.title}</h4>
+                        <div className="flex items-center gap-3 text-xs font-semibold text-muted">
+                          <span className="flex items-center gap-1"><FaCalendar className="text-brand/70" /> {r.date}</span>
+                          <span className="flex items-center gap-1"><FaClock className="text-brand/70" /> {r.readTime}</span>
                         </div>
                       </div>
                     </div>

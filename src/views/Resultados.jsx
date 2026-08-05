@@ -188,7 +188,7 @@ function FloatingActionsPortal({
     <div className="fixed top-3 left-3 right-3 z-[10000]">
       {/* Título centrado en la barra */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <span className="hidden sm:block text-white font-bold text-sm md:text-base drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)]">
+        <span className="hidden sm:block text-content font-bold text-sm md:text-base">
           Detalles de Resultados
         </span>
       </div>
@@ -196,11 +196,11 @@ function FloatingActionsPortal({
         {/* Regresar */}
         <button
           onClick={goBack}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-slate-900/90 to-slate-800/90 hover:from-slate-800/90 hover:to-slate-700/90
-                     text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-black/20 transition-all hover:shadow-cyan-500/20 hover:border-cyan-500/30 group"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface/90 hover:bg-surface-2/90
+                     text-content border border-line/20 backdrop-blur-xl shadow-lg shadow-black/10 transition-all hover:border-brand/30 group"
           title="Regresar"
         >
-          <ArrowLeft size={16} className="group-hover:text-cyan-400 transition-colors" />
+          <ArrowLeft size={16} className="group-hover:text-brand transition-colors" />
           <span className="text-xs sm:text-sm font-semibold">Regresar</span>
         </button>
 
@@ -644,25 +644,31 @@ export default function Resultados() {
     return (
       <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4">
         {/* Spinner doble anillo con glow */}
-        <div className="relative h-20 w-20">
-          <span className="absolute inset-0 rounded-full border-2 border-cyan-500/15" />
-          <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-cyan-400 border-r-cyan-400 [animation-duration:0.9s]" />
-          <span className="absolute inset-2 animate-spin rounded-full border-2 border-transparent border-b-blue-400 border-l-blue-400 [animation-duration:1.4s] [animation-direction:reverse]" />
+        <div className="relative h-20 w-20 rounded-full bg-surface/75 shadow-[0_18px_45px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+          <span className="absolute inset-0 rounded-full border-2 border-brand/20" />
+          <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-r-brand border-t-brand [animation-duration:0.9s]" />
+          <span className="absolute inset-2 animate-spin rounded-full border-2 border-transparent border-b-brand-2 border-l-brand-2 [animation-duration:1.4s] [animation-direction:reverse]" />
           {/* Núcleo pulsante */}
-          <span className="absolute inset-0 m-auto h-3 w-3 rounded-full bg-cyan-300 shadow-[0_0_16px_4px_rgba(34,211,238,0.7)] animate-pulse" />
+          <span className="absolute inset-0 m-auto h-3 w-3 animate-pulse rounded-full bg-brand shadow-[0_0_16px_4px_rgb(var(--th-brand)/0.55)]" />
         </div>
 
         {/* Texto + puntos animados */}
         <div className="flex flex-col items-center gap-2">
-          <p className="text-lg font-bold bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+          <p
+            className="bg-clip-text text-lg font-black text-transparent"
+            style={{
+              backgroundImage:
+                "linear-gradient(90deg, rgb(var(--th-content)), rgb(var(--th-brand)), rgb(var(--th-brand-2)))",
+            }}
+          >
             Cargando resultados
           </p>
           <div className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.3s]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.15s]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand [animation-delay:-0.3s]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand [animation-delay:-0.15s]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand" />
           </div>
-          <p className="text-xs text-white/40">Preparando tu información, un momento…</p>
+          <p className="text-xs font-semibold text-muted">Preparando tu información, un momento…</p>
         </div>
       </div>
     );
@@ -973,10 +979,10 @@ export default function Resultados() {
           <div className="w-full max-w-7xl mx-auto">
             {/* Título */}
             <div className="mb-3 md:mb-4">
-              <div className="inline-block px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
-                <span className="text-cyan-300 text-[10px] md:text-xs font-medium">Panel de resultados</span>
+              <div className="inline-block px-2 py-0.5 rounded-full bg-brand/15 border border-brand/30 mb-2">
+                <span className="text-brand text-[10px] md:text-xs font-medium">Panel de resultados</span>
               </div>
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-content">
                 Resultados de Consultas
               </h1>
             </div>
@@ -988,7 +994,7 @@ export default function Resultados() {
                 placeholder="Buscar por ID, Cédula, Nombre o Estado..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full md:w-1/2 px-3 py-1.5 md:py-2 rounded-lg bg-white/5 border border-white/15 text-sm text-white placeholder-white/40 focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/20 transition-all backdrop-blur-sm"
+                className="w-full md:w-1/2 px-3 py-1.5 md:py-2 rounded-lg bg-surface/60 border border-line/15 text-sm text-content placeholder-muted focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
               />
 
               <div className="flex flex-col sm:flex-row gap-2">
@@ -997,12 +1003,12 @@ export default function Resultados() {
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, estado: e.target.value }))
                   }
-                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-white/5 border border-white/15 text-sm text-white focus:outline-none focus:border-blue-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-blue-500/20 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-surface/60 border border-line/15 text-sm text-content focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm appearance-none cursor-pointer"
                 >
-                  <option className="bg-slate-900 text-white" value="">Todos los estados</option>
-                  <option className="bg-slate-900 text-white" value="en_proceso">En proceso</option>
-                  <option className="bg-slate-900 text-white" value="finalizado">Finalizado</option>
-                  <option className="bg-slate-900 text-white" value="error">Error</option>
+                  <option className="bg-surface text-content" value="">Todos los estados</option>
+                  <option className="bg-surface text-content" value="en_proceso">En proceso</option>
+                  <option className="bg-surface text-content" value="finalizado">Finalizado</option>
+                  <option className="bg-surface text-content" value="error">Error</option>
                 </select>
 
                 <input
@@ -1011,7 +1017,7 @@ export default function Resultados() {
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, fecha: e.target.value }))
                   }
-                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-white/5 border border-white/15 text-sm text-white focus:outline-none focus:border-purple-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-purple-500/20 transition-all backdrop-blur-sm"
+                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-surface/60 border border-line/15 text-sm text-content focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
                 />
               </div>
             </div>
@@ -1062,7 +1068,7 @@ export default function Resultados() {
                 <button
                   type="button"
                   onClick={() => setConsultaSeleccionada(null)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/30 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-lg border border-line/20 bg-surface/90 px-4 py-2 text-sm font-semibold text-content shadow-lg shadow-black/5 backdrop-blur-xl transition hover:border-brand/30 hover:bg-surface-2/90 hover:text-brand"
                 >
                   <ArrowLeft className="h-4 w-4" /> Regresar
                 </button>
@@ -1082,7 +1088,7 @@ export default function Resultados() {
                 <button
                   type="button"
                   onClick={() => setConsultaSeleccionada(null)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/30 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-lg border border-line/20 bg-surface/90 px-4 py-2 text-sm font-semibold text-content shadow-lg shadow-black/5 backdrop-blur-xl transition hover:border-brand/30 hover:bg-surface-2/90 hover:text-brand"
                 >
                   <ArrowLeft className="h-4 w-4" /> Regresar
                 </button>
@@ -1102,7 +1108,7 @@ export default function Resultados() {
                 <button
                   type="button"
                   onClick={() => setConsultaSeleccionada(null)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/30 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-lg border border-line/20 bg-surface/90 px-4 py-2 text-sm font-semibold text-content shadow-lg shadow-black/5 backdrop-blur-xl transition hover:border-brand/30 hover:bg-surface-2/90 hover:text-brand"
                 >
                   <ArrowLeft className="h-4 w-4" /> Regresar
                 </button>
@@ -1137,11 +1143,11 @@ export default function Resultados() {
                 <button
                   type="button"
                   onClick={() => setConsultaSeleccionada(null)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/30 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-lg border border-line/20 bg-surface/90 px-4 py-2 text-sm font-semibold text-content shadow-lg shadow-black/5 backdrop-blur-xl transition hover:border-brand/30 hover:bg-surface-2/90 hover:text-brand"
                 >
                   <ArrowLeft className="h-4 w-4" /> Regresar
                 </button>
-                <div className="flex items-center rounded-lg border border-white/15 bg-slate-900/70 p-1 backdrop-blur-xl">
+                <div className="flex items-center rounded-lg border border-line/20 bg-surface/90 p-1 shadow-lg shadow-black/5 backdrop-blur-xl">
                   {EXPERIAN_PDF_THEME_OPTIONS.map((theme) => {
                     const isActive = experianPdfTheme === theme;
                     return (
@@ -1152,8 +1158,8 @@ export default function Resultados() {
                         disabled={savingExperianPdfTheme}
                         className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
                           isActive
-                            ? "bg-cyan-500/20 text-cyan-100"
-                            : "text-slate-300 hover:text-white"
+                            ? "bg-cyan-500/20 text-brand"
+                            : "text-muted hover:text-content"
                         } disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         {theme}

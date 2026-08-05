@@ -78,7 +78,7 @@ function percentFrom(startTs, nowTs, tipo_consulta) {
 }
 
 /* Devuelve colores según el % de tiempo transcurrido:
-   0–33 % → azul  |  33–66 % → amarillo  |  66–100 % → verde */
+   0–33 % → rojo  |  33–66 % → morado  |  66–100 % → verde */
 function barColors(percent) {
   if (percent < 33) return {
     bar:  "linear-gradient(90deg, #7f1d1d 0%, #dc2626 50%, #f87171 100%)",
@@ -110,7 +110,7 @@ function ProgressBar({ percent = 0, compact = false }) {
       width: "100%",
       height,
       borderRadius: 999,
-      background: "rgba(15,23,42,0.6)",
+      background: "rgb(var(--th-line) / 0.15)",
       border: `1px solid ${border}`,
       overflow: "hidden",
       position: "relative",
@@ -152,9 +152,9 @@ function ElegantCard({ children, className = "" }) {
   return (
     <div
       className={[
-        "px-4 py-3 rounded-xl border text-gray-100",
-        "bg-gradient-to-br from-slate-800/40 via-slate-900/30 to-slate-800/40",
-        "border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300",
+        "px-4 py-3 rounded-xl border text-content",
+        "bg-surface-2/50",
+        "border-brand/30 hover:border-brand/50 transition-all duration-300",
         "shadow-[0_4px_20px_rgba(6,182,212,0.15)] hover:shadow-[0_6px_25px_rgba(6,182,212,0.25)]",
         "backdrop-blur-xl hover:scale-[1.02] transform",
         className,
@@ -187,11 +187,11 @@ function ProcessDockPortal({ items }) {
   const now = Date.now();
   return createPortal(
     <div className="fixed top-4 right-4 z-[9999]">
-      <div className="backdrop-blur-xl bg-gradient-to-br from-slate-900/90 via-blue-950/80 to-slate-900/90 border border-cyan-500/30 rounded-2xl shadow-[0_8px_32px_rgba(6,182,212,0.3)] w-[320px]">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-cyan-500/20">
-          <div className="flex items-center gap-3 text-gray-100">
+      <div className="backdrop-blur-xl bg-surface/90 border border-brand/30 shadow-[0_8px_32px_rgba(6,182,212,0.3)] rounded-2xl w-[320px]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-line/15">
+          <div className="flex items-center gap-3 text-content">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
-            <span className="text-sm font-bold tracking-wide bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+            <span className="text-sm font-bold tracking-wide bg-gradient-to-r from-brand to-brand-2 bg-clip-text text-transparent">
               {items.length > 0
                 ? `Procesando ${items.length} ${items.length === 1 ? "caso" : "casos"}`
                 : "Sin procesos en curso"}
@@ -199,7 +199,7 @@ function ProcessDockPortal({ items }) {
           </div>
           <button
             onClick={() => setOpen(v => !v)}
-            className="text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-cyan-300 border border-cyan-500/30 transition-all duration-300"
+            className="text-xs px-3 py-1.5 rounded-lg bg-brand/15 hover:bg-brand/25 text-brand border border-brand/30 transition-all duration-300"
           >
             {open ? "Minimizar" : "Expandir"}
           </button>
@@ -215,12 +215,12 @@ function ProcessDockPortal({ items }) {
                   <ElegantCard key={`${card.id}-${card.persona}`} className="gap-2">
                     <div className="flex items-center gap-3 mb-2">
                       <span
-                        className="inline-block w-5 h-5 rounded-full border-2 border-slate-700/50 animate-spin"
+                        className="inline-block w-5 h-5 rounded-full border-2 border-line/30 animate-spin"
                         style={{ borderTopColor: barColors(percent).text, boxShadow: `0 0 10px ${barColors(percent).glow}` }}
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-bold text-cyan-100 line-clamp-1">{card.persona}</div>
-                        <div className="text-xs text-slate-400 mt-0.5">
+                        <div className="text-sm font-bold text-content line-clamp-1">{card.persona}</div>
+                        <div className="text-xs text-muted mt-0.5">
                           {card.cedula ? `CC ${card.cedula}` : ""}
                           {card.fecha ? ` · ${new Date(card.fecha).toLocaleTimeString()}` : ""}
                         </div>
@@ -298,12 +298,12 @@ export default function TablaResultados({
     <>
       <ProcessDockPortal items={enProcesoCards} />
 
-      <div className="backdrop-blur-xl bg-gradient-to-br from-slate-900/50 via-blue-950/30 to-slate-900/50 border border-cyan-500/20 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-xl md:rounded-2xl overflow-hidden">
+      <div className="backdrop-blur-xl bg-surface/70 border border-line/15 shadow-[0_8px_32px_rgba(6,182,212,0.12)] rounded-xl md:rounded-2xl overflow-hidden">
         {/* Header elegante */}
-        <div className="px-3 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-b border-cyan-500/20">
+        <div className="px-3 md:px-4 py-1.5 md:py-2 bg-surface-2/60 border-b border-line/15">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <h3 className="text-sm md:text-base font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent flex items-center gap-1.5 md:gap-2">
-              <svg className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h3 className="text-sm md:text-base font-bold bg-gradient-to-r from-brand to-brand-2 bg-clip-text text-transparent flex items-center gap-1.5 md:gap-2">
+              <svg className="w-4 h-4 md:w-5 md:h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               Historial de Consultas
@@ -314,7 +314,7 @@ export default function TablaResultados({
                 type="button"
                 onClick={onExportExcel}
                 disabled={exportDisabled || exportingExcel || exportingPdf}
-                className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-emerald-400/30 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 px-3 py-2 text-[11px] md:text-xs font-semibold text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:from-emerald-500/30 hover:to-cyan-500/30 hover:border-emerald-300/50 hover:shadow-[0_0_24px_rgba(16,185,129,0.28)] disabled:cursor-not-allowed disabled:opacity-45"
+                className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-ok/40 bg-ok/12 px-3 py-2 text-[11px] md:text-xs font-semibold text-ok shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all duration-300 hover:bg-ok/20 hover:border-ok/60 disabled:cursor-not-allowed disabled:opacity-45"
                 title={
                   exportDisabled
                     ? "No hay consultas completadas en el filtro actual para exportar."
@@ -322,7 +322,7 @@ export default function TablaResultados({
                 }
               >
                 {exportingExcel ? (
-                  <span className="inline-block h-4 w-4 rounded-full border-2 border-emerald-100/30 border-t-emerald-300 animate-spin" />
+                  <span className="inline-block h-4 w-4 rounded-full border-2 border-ok/30 border-t-ok animate-spin" />
                 ) : (
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v12m0 0l4-4m-4 4l-4-4m-4 7h16" />
@@ -330,7 +330,7 @@ export default function TablaResultados({
                 )}
                 <span>{exportingExcel ? "Generando Excel..." : "Descargar informe Excel"}</span>
                 {!exportDisabled && !exportingExcel && (
-                  <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-bold text-emerald-100">
+                  <span className="rounded-full bg-ok/15 px-2 py-0.5 text-[10px] font-bold text-ok">
                     {exportCount}
                   </span>
                 )}
@@ -340,7 +340,7 @@ export default function TablaResultados({
                 type="button"
                 onClick={onExportPdf}
                 disabled={exportDisabled || exportingPdf || exportingExcel}
-                className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-cyan-400/30 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-3 py-2 text-[11px] md:text-xs font-semibold text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.18)] transition-all duration-300 hover:from-cyan-500/30 hover:to-blue-500/30 hover:border-cyan-300/50 hover:shadow-[0_0_24px_rgba(34,211,238,0.26)] disabled:cursor-not-allowed disabled:opacity-45"
+                className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-brand/40 bg-brand/12 px-3 py-2 text-[11px] md:text-xs font-semibold text-brand shadow-[0_0_20px_rgba(34,211,238,0.15)] transition-all duration-300 hover:bg-brand/20 hover:border-brand/60 disabled:cursor-not-allowed disabled:opacity-45"
                 title={
                   exportDisabled
                     ? "No hay consultas completadas en el filtro actual para exportar."
@@ -348,7 +348,7 @@ export default function TablaResultados({
                 }
               >
                 {exportingPdf ? (
-                  <span className="inline-block h-4 w-4 rounded-full border-2 border-cyan-100/30 border-t-cyan-300 animate-spin" />
+                  <span className="inline-block h-4 w-4 rounded-full border-2 border-brand/30 border-t-brand animate-spin" />
                 ) : (
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 3h6l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
@@ -357,7 +357,7 @@ export default function TablaResultados({
                 )}
                 <span>{exportingPdf ? "Generando PDF..." : "Descargar informe PDF"}</span>
                 {!exportDisabled && !exportingPdf && (
-                  <span className="rounded-full bg-cyan-400/15 px-2 py-0.5 text-[10px] font-bold text-cyan-50">
+                  <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-bold text-brand">
                     {exportCount}
                   </span>
                 )}
@@ -370,17 +370,17 @@ export default function TablaResultados({
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
-            <tr className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 border-b border-cyan-500/20">
-                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider" title="Consecutivo de tus consultas">N°</th>
-                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">NIT/Documento</th>
-                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Tipo de Consulta</th>
-                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Nombre</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Estado</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Fecha</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider">Acción</th>
+            <tr className="bg-surface-2/70 border-b border-line/15">
+                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider" title="Consecutivo de tus consultas">N°</th>
+                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">NIT/Documento</th>
+                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Tipo de Consulta</th>
+                <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Nombre</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Estado</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Fecha</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-cyan-500/10">
+            <tbody className="divide-y divide-line/10">
               {datosPagina.map((item, idx) => {
                 const estado = (item.estado || "").toLowerCase();
                 const isProcessing = estado === "en_proceso";
@@ -389,26 +389,26 @@ export default function TablaResultados({
                 const percent = percentFrom(start, now, item.tipo_consulta);
 
                 return (
-                  <tr 
-                    key={item.row_id || item.id} 
-                    className="group hover:bg-gradient-to-r hover:from-cyan-500/5 hover:to-blue-500/5 transition-all duration-300 align-top"
+                  <tr
+                    key={item.row_id || item.id}
+                    className="group hover:bg-brand/5 transition-all duration-300 align-top"
                   >
-                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 font-mono text-[10px] md:text-xs">
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-muted font-mono text-[10px] md:text-xs">
                       {/* Consecutivo por usuario (el id real de BD queda en el title, para soporte) */}
                       <span
                         title={`ID interno: ${item.id}`}
-                        className="inline-flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-cyan-500/20 group-hover:border-cyan-500/40 transition-colors text-[10px] md:text-xs"
+                        className="inline-flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-lg bg-surface-2/60 border border-line/15 group-hover:border-brand/40 transition-colors text-[10px] md:text-xs"
                       >
                         {item.numero_usuario ?? item.id}
                       </span>
                     </td>
-                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-200 font-semibold text-xs md:text-sm">
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-content font-semibold text-xs md:text-sm">
                       {item.tipo === "EMPRESA" ? item.nit : item.cedula}
                     </td>
-                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-cyan-200 font-semibold text-xs md:text-sm">
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-brand font-semibold text-xs md:text-sm">
                       {getPlanLabel(item.tipo_consulta)}
                     </td>
-                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-100 font-medium text-xs md:text-sm">
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-content font-medium text-xs md:text-sm">
                       {item.tipo === "EMPRESA" ? item.nombre : (item.nombre || "—")}
                     </td>
 
@@ -419,26 +419,26 @@ export default function TablaResultados({
                           <ProgressBar percent={percent} compact />
                         </div>
                       ) : isDone ? (
-                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-semibold text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-ok/15 border border-ok/40 text-ok font-semibold text-xs shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
                           Completado
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-slate-400 text-xs">
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-surface-2/60 border border-line/15 text-muted text-xs">
                           {item.estado || "—"}
                         </span>
                       )}
                     </td>
 
-                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-slate-300 text-[10px] md:text-xs">
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-muted text-[10px] md:text-xs">
                       {item.fecha ? (
                         <div className="flex flex-col gap-1">
-                          <span className="text-cyan-300 font-semibold">
+                          <span className="text-brand font-semibold">
                             {new Date(item.fecha).toLocaleDateString()}
                           </span>
-                          <span className="text-slate-500">
+                          <span className="text-muted">
                             {new Date(item.fecha).toLocaleTimeString()}
                           </span>
                         </div>
@@ -449,7 +449,7 @@ export default function TablaResultados({
                       {isDone ? (
                         <button
                           onClick={() => onVerResultados?.(item)}
-                          className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105 transform text-[10px] md:text-xs"
+                          className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-brand to-brand-2 hover:opacity-90 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:scale-105 transform text-[10px] md:text-xs"
                         >
                           Ver resultados
                         </button>
@@ -457,12 +457,12 @@ export default function TablaResultados({
                         <button
                           title="Ver fuentes en vivo"
                           onClick={() => onOpenLive?.(item.id)}
-                          className="inline-flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-cyan-900/60 to-blue-900/60 border border-cyan-500/30 rounded-lg text-cyan-300 hover:text-cyan-100 hover:border-cyan-400/60 shadow-[0_0_8px_rgba(6,182,212,0.2)] transition-all duration-200 text-[10px] md:text-xs"
+                          className="inline-flex items-center gap-1.5 px-2 py-1 bg-brand/10 border border-brand/30 rounded-lg text-brand hover:bg-brand/20 hover:border-brand/60 transition-all duration-200 text-[10px] md:text-xs"
                           style={{ minWidth: 0 }}
                         >
                           <svg className="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" strokeWidth="2" className="text-cyan-400" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l2.5 2.5" className="text-cyan-400" />
+                            <circle cx="12" cy="12" r="10" strokeWidth="2" className="text-brand" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l2.5 2.5" className="text-brand" />
                           </svg>
                           Fuentes
                         </button>
@@ -476,26 +476,26 @@ export default function TablaResultados({
         </div>
 
         {/* Paginación elegante */}
-        <div className="flex justify-between items-center px-2 md:px-3 py-1.5 md:py-2 mb-0.5 md:mb-1 bg-gradient-to-r from-slate-800/30 to-slate-900/30 border-t border-cyan-500/20">
+        <div className="flex justify-between items-center px-2 md:px-3 py-1.5 md:py-2 mb-0.5 md:mb-1 bg-surface-2/50 border-t border-line/15">
           <button
             onClick={() => setPagina(prev => Math.max(prev - 1, 1))}
             disabled={pagina === 1}
-            className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1 text-[10px] md:text-xs"
+            className="px-2 md:px-3 py-1 md:py-1.5 bg-brand/15 hover:bg-brand/25 border border-brand/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-brand font-semibold transition-all duration-300 flex items-center gap-1 text-[10px] md:text-xs"
           >
             <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Anterior
           </button>
-          
-          <span className="text-slate-300 font-semibold text-[10px] md:text-xs">
-            Página <span className="text-cyan-400">{pagina}</span> de <span className="text-cyan-400">{totalPaginas || 1}</span>
+
+          <span className="text-muted font-semibold text-[10px] md:text-xs">
+            Página <span className="text-brand">{pagina}</span> de <span className="text-brand">{totalPaginas || 1}</span>
           </span>
-          
+
           <button
             onClick={() => setPagina(prev => Math.min(prev + 1, totalPaginas || 1))}
             disabled={pagina === totalPaginas || totalPaginas === 0}
-            className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 font-semibold transition-all duration-300 flex items-center gap-1 text-[10px] md:text-xs"
+            className="px-2 md:px-3 py-1 md:py-1.5 bg-brand/15 hover:bg-brand/25 border border-brand/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed text-brand font-semibold transition-all duration-300 flex items-center gap-1 text-[10px] md:text-xs"
           >
             Siguiente
             <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

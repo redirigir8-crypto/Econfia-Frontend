@@ -99,38 +99,38 @@ if (typeof document !== 'undefined') {
 
 /* ------- UI helpers ------- */
 const Chip = ({ children }) => (
-  <span className="text-xs px-3 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400/50 transition-all cursor-default hover:scale-105">
+  <span className="cursor-default rounded-full border border-brand/30 bg-brand/10 px-3 py-1.5 text-xs font-semibold text-brand transition-all hover:scale-105 hover:border-brand/50 hover:bg-brand/15">
     {children}
   </span>
 );
 
 const Stat = ({ n, l }) => (
-  <div className="group rounded-2xl p-6 border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] hover:from-white/10 hover:to-white/5 hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(34,211,238,0.2)] transition-all duration-500 cursor-pointer transform hover:scale-105">
-    <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent group-hover:from-cyan-300 group-hover:to-blue-400 transition-all">{n}</div>
-    <div className="text-white/70 mt-2 group-hover:text-white/90 transition-colors">{l}</div>
+  <div className="group cursor-pointer rounded-2xl border border-line/15 bg-surface/85 p-6 shadow-[0_16px_42px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-all duration-500 hover:scale-105 hover:border-brand/45 hover:bg-surface hover:shadow-cyan-500/15">
+    <div className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-4xl font-black text-transparent transition-all group-hover:from-cyan-300 group-hover:to-blue-400">{n}</div>
+    <div className="mt-2 font-medium text-muted transition-colors group-hover:text-content">{l}</div>
   </div>
 );
 
 function Valor({ titulo, resumen, detalle, icon }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="group rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-6 hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(34,211,238,0.15)] hover:from-white/10 hover:to-white/5 transition-all duration-500 transform hover:scale-105">
+    <div className="group rounded-2xl border border-line/15 bg-surface/85 p-6 shadow-[0_16px_42px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-all duration-500 hover:scale-105 hover:border-brand/45 hover:bg-surface hover:shadow-cyan-500/15">
       <div className="flex items-start gap-4 mb-3">
-        <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl group-hover:bg-cyan-500/30 group-hover:scale-110 transition-all flex-shrink-0">
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-brand/15 text-xl text-brand transition-all group-hover:scale-110 group-hover:bg-brand/25">
           {icon}
         </div>
         <div className="flex-1">
-          <h4 className="text-lg font-semibold text-white group-hover:text-cyan-300 transition-colors">{titulo}</h4>
+          <h4 className="text-lg font-black text-content transition-colors group-hover:text-brand">{titulo}</h4>
         </div>
       </div>
       
-      <p className="text-white/75 group-hover:text-white/90 transition-colors leading-relaxed">
+      <p className="leading-relaxed text-muted transition-colors group-hover:text-content">
         {open ? detalle : resumen}
       </p>
       
       <button
         onClick={() => setOpen(!open)}
-        className="mt-4 text-xs px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400/50 transition-all"
+        className="mt-4 rounded-full border border-brand/30 bg-brand/10 px-4 py-2 text-xs font-bold text-brand transition-all hover:border-brand/50 hover:bg-brand/15"
       >
         {open ? "Ver menos ↑" : "Ver más ↓"}
       </button>
@@ -182,7 +182,7 @@ export default function Nosotros() {
   const prev = () => go(Math.max(page - 1, 0));
 
   return (
-    <main className="min-h-[calc(100vh-64px)] pt-16 text-white overflow-hidden">
+    <main className="min-h-[calc(100vh-64px)] overflow-hidden pt-16 text-content">
       <Header />
       {/* Contenedor horizontal a pantalla (menos header): sin overflow-y */}
       <section
@@ -199,40 +199,52 @@ export default function Nosotros() {
         <div className="snap-start shrink-0 w-full h-full overflow-y-auto">
           <div className="mx-auto max-w-[1200px] px-6 py-6 md:py-8">
             <header className="grid place-items-start gap-4 animate-fade-in-down">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30">
+              <div className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-4 py-2 shadow-[0_10px_28px_rgba(15,23,42,0.08)] backdrop-blur">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
                 </span>
-                <span className="text-cyan-300 text-sm font-medium">Conoce más sobre nosotros</span>
+                <span className="text-sm font-bold text-brand">Conoce más sobre nosotros</span>
               </div>
               
               <h1
-                className="text-[clamp(2.5rem,4vw,4rem)] font-extrabold leading-tight tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent"
-                style={{ fontFamily: "poppins, sans-serif" }}
+                className="bg-clip-text text-[clamp(2.5rem,4vw,4rem)] font-extrabold leading-tight tracking-tight text-transparent"
+                style={{
+                  fontFamily: "poppins, sans-serif",
+                  backgroundImage:
+                    "linear-gradient(90deg, rgb(var(--th-content)), rgb(var(--th-brand)), rgb(var(--th-brand-2)))",
+                }}
               >
                 Sobre eConfia
               </h1>
               
-              <p className="text-white/90 max-w-3xl text-[1.05rem] leading-relaxed">
-                eConfia es una <span className="text-cyan-300 font-semibold">plataforma líder de verificación</span> y listas restrictivas que
+              <p className="max-w-3xl text-[1.05rem] font-medium leading-relaxed text-muted">
+                eConfia es una <span className="font-black text-brand">plataforma líder de verificación</span> y listas restrictivas que
                 automatiza consultas en fuentes nacionales e internacionales para
                 reducir riesgo operativo y de cumplimiento. Cumple normativa, guarda
-                evidencia y genera reportes claros para <span className="text-cyan-300 font-semibold">decisiones ágiles y seguras</span>.
+                evidencia y genera reportes claros para <span className="font-black text-brand">decisiones ágiles y seguras</span>.
               </p>
             </header>
 
             <section className="mt-8 animate-fade-in-up animation-delay-200">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/20">
                   <FaRocket className="text-white text-xl" />
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-cyan-300 bg-clip-text text-transparent">Nuestros Servicios</h2>
+                <h2
+                  className="bg-clip-text text-3xl font-black text-transparent md:text-4xl"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(90deg, rgb(var(--th-content)), rgb(var(--th-brand)))",
+                  }}
+                >
+                  Nuestros Servicios
+                </h2>
               </div>
               
-              <p className="text-white/90 max-w-3xl mt-4 leading-relaxed">
+              <p className="mt-4 max-w-3xl font-medium leading-relaxed text-muted">
                 Ofrecemos servicios de calidad para complementar tus procesos y{" "}
-                <span className="text-cyan-300 font-semibold">prevenir proactivamente irregularidades</span>{" "}
+                <span className="font-black text-brand">prevenir proactivamente irregularidades</span>{" "}
                 que afecten la imagen de tu empresa. Contamos con un equipo
                 multidisciplinario y metodologías de cumplimiento para que tomes
                 decisiones con confianza.
@@ -269,16 +281,16 @@ export default function Nosotros() {
           <div className="mx-auto max-w-[1200px] px-6 py-6 md:py-8">
             {/* Misión / Visión */}
             <section className="mt-2 animate-fade-in-up">
-              <div className="rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-white/5 to-white/[0.02] p-6 md:p-7 shadow-[0_0_30px_rgba(34,211,238,0.1)]">
+              <div className="rounded-3xl border border-line/15 bg-surface/80 p-6 shadow-[0_22px_65px_rgba(15,23,42,0.12)] backdrop-blur-xl md:p-7">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-                  <article className="group h-full min-h-[240px] rounded-2xl p-6 border border-white/10 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_25px_rgba(34,211,238,0.2)] transition-all duration-500 flex flex-col transform hover:scale-105">
+                  <article className="group flex h-full min-h-[240px] flex-col rounded-2xl border border-brand/20 bg-brand/10 p-6 transition-all duration-500 hover:scale-105 hover:border-brand/45 hover:bg-brand/15 hover:shadow-cyan-500/15">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-cyan-500/30 flex items-center justify-center group-hover:bg-cyan-500/40 transition-all">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/20 transition-all group-hover:bg-brand/30">
                         <FaRocket className="text-cyan-300 text-2xl group-hover:scale-110 transition-transform" />
                       </div>
-                      <h3 className="text-2xl font-bold text-white group-hover:text-cyan-300 transition-colors">Misión</h3>
+                      <h3 className="text-2xl font-black text-content transition-colors group-hover:text-brand">Misión</h3>
                     </div>
-                    <p className="text-white/85 leading-relaxed group-hover:text-white transition-colors">
+                    <p className="leading-relaxed text-muted transition-colors group-hover:text-content">
                       Proveer soluciones óptimas mediante información, verificación e
                       investigación para garantizar personal apto, idóneo y honesto. Con
                       altos estándares de confidencialidad y tecnología de última
@@ -286,14 +298,14 @@ export default function Nosotros() {
                     </p>
                   </article>
 
-                  <article className="group h-full min-h-[240px] rounded-2xl p-6 border border-white/10 bg-gradient-to-br from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 hover:border-purple-400/50 hover:shadow-[0_0_25px_rgba(168,85,247,0.2)] transition-all duration-500 flex flex-col transform hover:scale-105">
+                  <article className="group flex h-full min-h-[240px] flex-col rounded-2xl border border-violet-400/25 bg-violet-500/10 p-6 transition-all duration-500 hover:scale-105 hover:border-violet-400/45 hover:bg-violet-500/15 hover:shadow-violet-500/15">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-purple-500/30 flex items-center justify-center group-hover:bg-purple-500/40 transition-all">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/20 transition-all group-hover:bg-violet-500/30">
                         <FaEye className="text-purple-300 text-2xl group-hover:scale-110 transition-transform" />
                       </div>
-                      <h3 className="text-2xl font-bold text-white group-hover:text-purple-300 transition-colors">Visión</h3>
+                      <h3 className="text-2xl font-black text-content transition-colors group-hover:text-violet-300">Visión</h3>
                     </div>
-                    <p className="text-white/85 leading-relaxed group-hover:text-white transition-colors">
+                    <p className="leading-relaxed text-muted transition-colors group-hover:text-content">
                       Para 2030, eConfia será referente en asesoría de
                       confiabilidad y selección, con infraestructura sólida, gestión
                       moderna orientada a valor y tecnología de punta.
@@ -318,10 +330,18 @@ export default function Nosotros() {
           <div className="mx-auto max-w-[1200px] px-6 py-6 md:py-8">
             <section className="mt-2 pb-6">
               <div className="flex items-center gap-3 mb-6 animate-fade-in-down">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/20">
                   <FaHeart className="text-white text-2xl" />
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-cyan-300 bg-clip-text text-transparent">Valores Corporativos</h2>
+                <h2
+                  className="bg-clip-text text-3xl font-black text-transparent md:text-4xl"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(90deg, rgb(var(--th-content)), rgb(var(--th-brand)))",
+                  }}
+                >
+                  Valores Corporativos
+                </h2>
               </div>
               
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
@@ -397,10 +417,10 @@ export default function Nosotros() {
 
       {/* Controles (flechas + dots) */}
       <div className="pointer-events-none fixed bottom-8 left-0 right-0 flex items-center justify-center gap-3 z-50">
-        <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-black/40 border border-cyan-500/30 backdrop-blur-xl px-4 py-2 shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+        <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-line/20 bg-surface/90 px-4 py-2 shadow-[0_16px_42px_rgba(15,23,42,0.16)] backdrop-blur-xl">
           <button
             onClick={prev}
-            className="px-4 py-2 text-sm rounded-full hover:bg-cyan-500/20 text-white hover:text-cyan-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed font-medium"
+            className="rounded-full px-4 py-2 text-sm font-bold text-muted transition-all hover:bg-brand/10 hover:text-brand disabled:cursor-not-allowed disabled:opacity-30"
             disabled={page === 0}
           >
             ← Anterior
@@ -413,14 +433,14 @@ export default function Nosotros() {
                 className={`transition-all duration-300 rounded-full ${
                   page === i 
                     ? "w-8 h-3 bg-gradient-to-r from-cyan-400 to-blue-500" 
-                    : "w-3 h-3 bg-white/40 hover:bg-white/60"
+                    : "w-3 h-3 bg-muted/35 hover:bg-brand/45"
                 }`}
               />
             ))}
           </div>
           <button
             onClick={next}
-            className="px-4 py-2 text-sm rounded-full hover:bg-cyan-500/20 text-white hover:text-cyan-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed font-medium"
+            className="rounded-full px-4 py-2 text-sm font-bold text-content transition-all hover:bg-brand/10 hover:text-brand disabled:cursor-not-allowed disabled:opacity-30"
             disabled={page === 2}
           >
             Siguiente →
