@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search, FileText, LogOut, User, HelpCircle, HardHat, BookOpen, ShieldCheck, Volume2,
-  ChevronLeft, ChevronRight, Sun, Moon,
+  ChevronLeft, ChevronRight, Sun, Moon, Activity,
 } from "lucide-react";
 import { Fuel } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
@@ -104,6 +104,7 @@ if (isAdmin) {
     { path: "/4d9b2f6e", icon: <Search size={16} strokeWidth={1.75} />, label: "Admin Fuentes", color: "cyan" },
     { path: "/2c8e5f1a", icon: <BookOpen size={16} strokeWidth={1.75} />, label: "Admin Blog", color: "violet" },
     { path: "/8f4a1d7c", icon: <Volume2 size={16} strokeWidth={1.75} />, label: "Admin Sonidos", color: "emerald" },
+    { path: "/9a3f2c7e", icon: <Activity size={16} strokeWidth={1.75} />, label: "Admin Monitoreo", color: "sky" },
   ];
 }
 

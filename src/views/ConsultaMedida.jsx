@@ -174,7 +174,7 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
           </button>
 
           <div className="relative z-10 flex flex-col min-h-0 flex-1">
-            <div className="text-center mb-4">
+            <div className="text-center mb-4 flex-shrink-0">
               <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
                 <span className="text-cyan-300 text-xs font-medium">Personaliza tu consulta</span>
               </div>
@@ -182,6 +182,9 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
                 Consulta a la Medida
               </h2>
             </div>
+
+            {/* Zona central: todo scrollea junto (filtro + lotes + seleccionadas + lista) */}
+            <div className="flex-1 min-h-0 overflow-y-auto pr-1 custom-scrollbar">
 
             {/* Filtro */}
             <div className="mb-3 flex flex-col md:flex-row md:items-center md:gap-2">
@@ -283,8 +286,8 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
               )}
             </div>
 
-            {/* Lista de fuentes */}
-            <div className="flex-1 min-h-0 overflow-y-auto space-y-2 mb-4 pr-2 custom-scrollbar">
+            {/* Lista de fuentes (altura natural; el scroll lo maneja la zona central) */}
+            <div className="space-y-2 mb-2">
               {filteredFuentes.length > 0 ? (
                 filteredFuentes.map((fuente) => {
                   const isDisabled = false;
@@ -318,6 +321,8 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
                 </p>
               )}
             </div>
+
+            </div>{/* fin zona central scrolleable */}
 
             {/* Footer fijo: botón consultar siempre visible */}
             <div className="flex-shrink-0 pt-3 border-t border-line/15">

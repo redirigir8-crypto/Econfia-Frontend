@@ -51,6 +51,7 @@ import ChatbotFlotante from "./components/ChatbotFlotante";
 import AdminSoporte from "./views/AdminSoporte";
 import AdminBlog from "./components/AdminBlog";
 import AdminSonidos from "./components/AdminSonidos";
+import AdminMonitoreo from "./components/AdminMonitoreo";
 import SoundManager from "./components/SoundManager";
 import {
   ShieldCheck,
@@ -805,6 +806,7 @@ export default function App() {
               <Route path="/5d2a9c8e"          element={<AdminSoporte />}             />
               <Route path="/2c8e5f1a"          element={<AdminBlog />}                />
               <Route path="/8f4a1d7c"          element={<AdminSonidos />}             />
+              <Route path="/9a3f2c7e"          element={<AdminMonitoreo />}           />
             </Route>
 
             <Route path="/a8e3c7b2" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />

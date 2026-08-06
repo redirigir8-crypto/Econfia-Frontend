@@ -242,6 +242,11 @@ export default function LotesFuentes({
         </div>
       </div>
 
+      {/* Pista del flujo de edición */}
+      <p className="text-[11px] text-purple-200/70 mb-2 leading-snug">
+        ✏️ Para editar un lote: pulsa <b>Aplicar</b>, marca o desmarca fuentes en la lista de abajo y luego <b>Actualizar</b>.
+      </p>
+
       {/* Guardar la selección actual como lote nuevo */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-white/10">
         <input

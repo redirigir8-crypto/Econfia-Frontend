@@ -4,6 +4,7 @@ const ITEMS = [
   { key: "users",    icon: "👤", label: "Usuarios" },
   { key: "planes",   icon: "📦", label: "Planes" },
   { key: "fuentes",  icon: "🗂️",  label: "Fuentes" },
+  { key: "monitoreo", icon: "📡", label: "Monitoreo de fuentes" },
   { key: "soporte",  icon: "💬", label: "Soporte técnico" },
 ];
 
