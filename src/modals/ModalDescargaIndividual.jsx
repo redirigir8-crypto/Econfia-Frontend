@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import CargandoResultados from "../components/CargandoResultados";
 
 export default function ModalDescargaIndividual({ isOpen, onClose, data }) {
   const [resultados, setResultados] = useState([]);
@@ -140,10 +141,7 @@ export default function ModalDescargaIndividual({ isOpen, onClose, data }) {
         {/* Tabla */}
         <div className="relative z-10 flex-1 overflow-y-auto mx-6 mb-2 rounded-xl border border-white/10 overflow-hidden">
           {loading ? (
-            <div className="flex items-center justify-center py-12 gap-3">
-              <div className="w-4 h-4 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
-              <span className="text-white/50 text-sm">Cargando resultados...</span>
-            </div>
+            <CargandoResultados className="py-10" subtitle="" />
           ) : (
             <table className="w-full text-left text-xs">
               <thead className="bg-white/5 border-b border-white/10 sticky top-0 z-10 backdrop-blur-sm">

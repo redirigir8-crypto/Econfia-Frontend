@@ -106,7 +106,8 @@ const AdminMonitoreo = () => {
         if (!e.corriendo) {
           clearInterval(pollRef.current);
           setSondeando(false);
-          notificar("Sondeo completado ✔");
+          if (e.error) notificar(`El sondeo falló: ${e.error}`, "err");
+          else notificar(`Sondeo completado ✔ (${e.hechos}/${e.total})`);
           cargarReporte();
         }
       }, 1500);

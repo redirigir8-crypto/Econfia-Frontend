@@ -35,58 +35,36 @@ html[data-theme="light"] {
   --th-warn: 180 83 9;       /* amber-700 */
 }
 
-/* IMPORTANTE: el tema OSCURO NO debe tocar el fondo original (lo da el canvas
-   de partículas #tsparticles con su degradado). Por eso el fondo del tema solo
-   se aplica en CLARO; en oscuro no ponemos ningún background y todo queda igual
-   que antes (partículas + degradado + mesh). */
-html[data-theme="light"],
-html[data-theme="light"] body {
+/* Tema NARANJA (cálido): superficies claras, texto café oscuro legible y
+   acentos naranja/ámbar. Misma estructura que el claro, en tono cálido. */
+html[data-theme="orange"] {
+  --th-app: 255 237 213;     /* orange-100 base del gradiente */
+  --th-surface: 255 255 255; /* tarjetas blancas */
+  --th-surface-2: 255 237 213;/* orange-100 (da sheen blanco→durazno) */
+  --th-content: 67 20 7;     /* orange-950 texto café oscuro */
+  --th-muted: 154 52 18;     /* orange-800 texto secundario */
+  --th-line: 67 20 7;        /* divisores cálidos (con baja opacidad) */
+  --th-brand: 234 88 12;     /* orange-600 acento */
+  --th-brand-2: 245 158 11;  /* amber-500 acento gradiente */
+  --th-ok: 22 163 74;        /* green-600 éxito (legible sobre cálido) */
+  --th-danger: 190 18 60;    /* rose-700 */
+  --th-warn: 180 83 9;       /* amber-700 */
+}
+
+/* ── Tema CLARO/VERDE: usa las CONSTELACIONES (#tsparticles) tintadas de verde
+   (ver ParticlesBackground.jsx), igual que oscuro y naranja. El canvas provee
+   el fondo verde + los puntos/líneas; aquí solo un color de respaldo por si el
+   canvas aún no cargó. NO se ocultan las partículas. ── */
+html[data-theme="light"] {
   background-color: rgb(var(--th-app));
-  /* Fondo verde con profundidad (mesh) en lugar de un plano insípido. */
-  background-image:
-    radial-gradient(at 12% 8%,  rgba(16, 185, 129, 0.16) 0%, transparent 42%),
-    radial-gradient(at 88% 12%, rgba(20, 184, 166, 0.14) 0%, transparent 45%),
-    radial-gradient(at 70% 85%, rgba(52, 211, 153, 0.14) 0%, transparent 48%),
-    radial-gradient(at 25% 95%, rgba(5, 150, 105, 0.10) 0%, transparent 45%),
-    linear-gradient(160deg, #e2f4ea 0%, #d3ecdd 55%, #cfeada 100%);
-  background-attachment: fixed;
 }
 
-/* En tema claro ocultamos el starfield oscuro (canvas a pantalla completa)
-   para que se vea el fondo claro. En oscuro se muestra igual que siempre. */
-html[data-theme="light"] #tsparticles {
-  display: none !important;
-}
-
-/* Fondo VIVO para el tema claro: blobs verdes/teal que flotan lentamente,
-   para que no se sienta plano (equivale al starfield del tema oscuro).
-   Es un pseudo-elemento fijo a pantalla completa, detrás del contenido,
-   animado con transform (GPU) => liviano. */
-html[data-theme="light"] body::after {
-  content: "";
-  position: fixed;
-  inset: -20%;
-  z-index: -1;
-  pointer-events: none;
-  background-repeat: no-repeat;
-  background-image:
-    radial-gradient(38rem 38rem at 16% 22%, rgba(16, 185, 129, 0.40), transparent 60%),
-    radial-gradient(34rem 34rem at 84% 16%, rgba(20, 184, 166, 0.38), transparent 60%),
-    radial-gradient(42rem 42rem at 74% 84%, rgba(45, 212, 191, 0.34), transparent 60%),
-    radial-gradient(30rem 30rem at 26% 88%, rgba(5, 150, 105, 0.30), transparent 60%);
-  animation: th-light-drift 20s ease-in-out infinite alternate;
-  will-change: transform;
-}
-
-@keyframes th-light-drift {
-  0%   { transform: translate3d(0, 0, 0) scale(1)    rotate(0deg); }
-  50%  { transform: translate3d(4.5%, -4%, 0) scale(1.12) rotate(1.2deg); }
-  100% { transform: translate3d(-4%, 3.5%, 0) scale(1.06) rotate(-1.2deg); }
-}
-
-/* Respeta a quien prefiere menos movimiento. */
-@media (prefers-reduced-motion: reduce) {
-  html[data-theme="light"] body::after { animation: none; }
+/* ── Tema NARANJA: usa las CONSTELACIONES (#tsparticles) tintadas de naranja.
+   El canvas de partículas (ParticlesBackground.jsx) provee el fondo cálido +
+   los puntos/líneas naranjas, igual que el oscuro. Aquí solo dejamos un color
+   de respaldo por si el canvas aún no cargó. NO se ocultan las partículas. ── */
+html[data-theme="orange"] {
+  background-color: rgb(var(--th-app));
 }
 
 /* ==========================================================================

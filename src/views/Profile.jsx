@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import CargandoResultados from "../components/CargandoResultados";
 import {
   ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -186,28 +187,7 @@ export default function Profile() {
   }, [API_URL]);
 
   if (!profile || !stats) {
-    return (
-      <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4">
-        {/* Spinner doble anillo con glow */}
-        <div className="relative h-20 w-20">
-          <span className="absolute inset-0 rounded-full border-2 border-cyan-500/15" />
-          <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-cyan-400 border-r-cyan-400 [animation-duration:0.9s]" />
-          <span className="absolute inset-2 animate-spin rounded-full border-2 border-transparent border-b-blue-400 border-l-blue-400 [animation-duration:1.4s] [animation-direction:reverse]" />
-          <span className="absolute inset-0 m-auto h-3 w-3 rounded-full bg-cyan-300 shadow-[0_0_16px_4px_rgba(34,211,238,0.7)] animate-pulse" />
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-lg font-bold text-content">
-            Cargando perfil
-          </p>
-          <div className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.3s]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.15s]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce" />
-          </div>
-          <p className="text-xs text-muted">Preparando tu información, un momento…</p>
-        </div>
-      </div>
-    );
+    return <CargandoResultados title="Cargando perfil" />;
   }
 
   // ---- Preparar datos para el nuevo gráfico ----

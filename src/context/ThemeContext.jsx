@@ -14,6 +14,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef } f
 export const THEMES = [
   { id: "dark", label: "Oscuro" },
   { id: "light", label: "Claro" },
+  { id: "orange", label: "Naranja" },
 ];
 
 const STORAGE_KEY = "econfia_theme"; // caché local
@@ -103,9 +104,11 @@ export function ThemeProvider({ children }) {
     [persistToBackend]
   );
 
+  // Cicla por todos los temas disponibles en orden (Oscuro → Claro → Naranja → …).
   const toggleTheme = useCallback(() => {
     setThemeState((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
+      const idx = THEMES.findIndex((t) => t.id === prev);
+      const next = THEMES[(idx + 1) % THEMES.length].id;
       persistToBackend(next);
       return next;
     });
