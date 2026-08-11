@@ -13,6 +13,7 @@ const TIPO_DOC_OPCIONES = [
 
 const TIPO_DOCUMENTO_SUBIDA = [
   { value: "cedula", label: "Cédula de ciudadanía" },
+  { value: "hoja_vida", label: "Hoja de vida" },
   { value: "referencia_laboral", label: "Referencia laboral" },
   { value: "certificacion", label: "Certificación laboral" },
   { value: "otro", label: "Otro documento" },
@@ -414,7 +415,7 @@ export default function EconfiaWallet() {
             <StepDot n={3} done={documentos.length > 0} />
             <div>
               <h2 className="text-content font-bold">Mis documentos</h2>
-              <p className="text-muted text-xs">Sube tu cédula, referencias o certificaciones. La cédula se verifica automáticamente.</p>
+              <p className="text-muted text-xs">Sube tu cédula, hoja de vida, referencias o certificaciones. La cédula se verifica automáticamente.</p>
             </div>
           </div>
 
