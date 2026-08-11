@@ -76,6 +76,9 @@ celery -A backend worker -l info -Q fask_medio_heavy --pool=solo --concurrency=1
 celery -A backend worker -l info -Q fask_mega --pool=solo --concurrency=1 -n fask_mega@%h
 celery -A backend worker -l info -Q fask_ultra --pool=solo --concurrency=1 -n fask_ultra@%h
 celery -A backend worker -l info -Q fask_ultra_heavy --pool=solo --concurrency=1 -n fask_ultra_heavy@%h
+
+# econfiaWallet (B2C) — consulta única de antecedentes (4 bots)
+celery -A backend worker -l info -Q wallet --pool=solo --concurrency=1 -n wallet@%h
 ```
 
 ---

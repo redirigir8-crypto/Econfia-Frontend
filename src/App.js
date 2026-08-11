@@ -17,6 +17,8 @@ import ConsultaContratista from "./views/ConsultaContratista";
 import ConsultaMedida from "./views/ConsultaMedida";
 import ConsultaBasicElemnt from "./views/ConsultaBasicElemnt";
 import ConsultaEIdentidad from "./views/ConsultaEIdentidad";
+import EconfiaWallet from "./views/EconfiaWallet";
+import WalletPublico from "./views/WalletPublico";
 import Resultados from "./views/Resultados";
 import LogOut from "./views/LogOut";
 import Ayuda from "./views/Ayuda";
@@ -773,6 +775,7 @@ export default function App() {
             {/* Verificación pública QR */}
             <Route path="/econfia/resumen-consulta/:consultaId" element={<VerificarReporte />} />
             <Route path="/beneficios" element={<Beneficios />} />
+            <Route path="/w/:token" element={<WalletPublico />} />
 
             {/* Protegidas */}
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
@@ -791,6 +794,7 @@ export default function App() {
               <Route path="/9e3a6c1f"          element={<ConsultaMedida />}           />
               <Route path="/b4f8d2e7"          element={<ConsultaBasicElemnt />}      />
               <Route path="/1d5f8e3a"          element={<ConsultaEIdentidad />}       />
+              <Route path="/e7c1a9d4"          element={<EconfiaWallet />}            />
               <Route path="/6c1b9f3d"          element={<ConsultaContratista />}      />
               <Route path="/4a7e2b8f"          element={<ConsultaEmpresa />}          />
               <Route path="/8f5c3a1b/:nit"     element={<EmpresaRuesResult />}        />

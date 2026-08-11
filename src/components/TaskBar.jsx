@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search, FileText, LogOut, User, HelpCircle, HardHat, BookOpen, ShieldCheck, Volume2,
-  ChevronLeft, ChevronRight, Sun, Moon, Activity,
+  ChevronLeft, ChevronRight, Sun, Moon, Activity, Wallet,
 } from "lucide-react";
 import { Fuel } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
@@ -74,6 +74,9 @@ if (hasPlanes) {
   }
   if (planes.includes("e-identidad")) {
     consultaItems.push({ path: "/1d5f8e3a", icon: <User size={16} strokeWidth={1.75} />, label: "E-Identidad", color: "teal" });
+  }
+  if (planes.includes("wallet")) {
+    consultaItems.push({ path: "/e7c1a9d4", icon: <Wallet size={16} strokeWidth={1.75} />, label: "econfiaWallet", color: "emerald" });
   }
   if (planes.includes("experian")) {
     consultaItems.push({ path: "/5c2e8f4a", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Econfia Adjudicator", color: "sky" });
