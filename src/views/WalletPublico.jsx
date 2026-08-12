@@ -39,7 +39,7 @@ export default function WalletPublico() {
     <div className="min-h-screen bg-gradient-to-br from-[#020115] via-[#011a31] to-[#05021f] text-slate-100 px-4 py-10">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-2 mb-6">
-          <span className="text-emerald-400 font-black text-xl">econfia<span className="text-white">Wallet</span></span>
+          <span className="text-emerald-400 font-black text-xl">Econfia<span className="text-white">Wallet</span></span>
           <span className="text-xs text-slate-400 ml-auto">Pase temporal</span>
         </div>
 

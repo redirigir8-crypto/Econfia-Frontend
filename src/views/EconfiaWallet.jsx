@@ -19,6 +19,16 @@ const TIPO_DOCUMENTO_SUBIDA = [
   { value: "otro", label: "Otro documento" },
 ];
 
+const NIVEL_OPCIONES = [
+  { value: "tecnico", label: "Técnico" },
+  { value: "tecnologo", label: "Tecnólogo" },
+  { value: "pregrado", label: "Pregrado" },
+  { value: "especializacion", label: "Especialización" },
+  { value: "maestria", label: "Maestría" },
+  { value: "doctorado", label: "Doctorado" },
+  { value: "otro", label: "Otro" },
+];
+
 // Colores por estado de verificación / resultado.
 function badgeClasses(estado) {
   const e = String(estado || "").toLowerCase();
@@ -61,6 +71,18 @@ export default function EconfiaWallet() {
   const [tipoSubida, setTipoSubida] = useState("cedula");
   const [archivo, setArchivo] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
+
+  // Títulos académicos (formulario)
+  const [titulos, setTitulos] = useState([]);
+  const [tituloForm, setTituloForm] = useState({ institucion: "", programa: "", nivel: "pregrado", anio: "" });
+  const [tituloArchivo, setTituloArchivo] = useState(null);
+  const [guardandoTitulo, setGuardandoTitulo] = useState(false);
+
+  // Referencias personales (formulario, máx. 2)
+  const [referencias, setReferencias] = useState([]);
+  const [refMax, setRefMax] = useState(2);
+  const [refForm, setRefForm] = useState({ nombre: "", telefono: "", relacion: "", email: "" });
+  const [guardandoRef, setGuardandoRef] = useState(false);
 
   // QR / pase temporal
   const [qr, setQr] = useState(null); // { url, qr_base64, expires_at }
@@ -107,10 +129,35 @@ export default function EconfiaWallet() {
     }
   }, []);
 
+  const cargarTitulos = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/titulos/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setTitulos(data.titulos || []);
+    } catch {
+      /* silencioso */
+    }
+  }, []);
+
+  const cargarReferencias = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/referencias/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) {
+        setReferencias(data.referencias || []);
+        if (data.max) setRefMax(data.max);
+      }
+    } catch {
+      /* silencioso */
+    }
+  }, []);
+
   useEffect(() => {
     cargarEstado();
     cargarDocumentos();
-  }, [cargarEstado, cargarDocumentos]);
+    cargarTitulos();
+    cargarReferencias();
+  }, [cargarEstado, cargarDocumentos, cargarTitulos, cargarReferencias]);
 
   // Al saber que ya hay consulta, cargar su resultado y hacer polling si sigue en curso.
   useEffect(() => {
@@ -236,6 +283,74 @@ export default function EconfiaWallet() {
       setToast({ type: "error", message: "Error al subir el documento." });
     } finally {
       setSubiendo(false);
+    }
+  };
+
+  const agregarTitulo = async (e) => {
+    e.preventDefault();
+    if (!tituloForm.institucion.trim() || !tituloForm.programa.trim())
+      return setToast({ type: "error", message: "Institución y programa/título son obligatorios." });
+    const fd = new FormData();
+    fd.append("institucion", tituloForm.institucion);
+    fd.append("programa", tituloForm.programa);
+    fd.append("nivel", tituloForm.nivel);
+    if (tituloForm.anio) fd.append("anio", tituloForm.anio);
+    if (tituloArchivo) fd.append("archivo", tituloArchivo);
+    setGuardandoTitulo(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/titulos/`, { method: "POST", headers: authHeaders(), body: fd });
+      const data = await res.json();
+      if (!res.ok) return setToast({ type: "error", message: data.error || "No se pudo registrar el título." });
+      setTituloForm({ institucion: "", programa: "", nivel: "pregrado", anio: "" });
+      setTituloArchivo(null);
+      e.target.reset();
+      setToast({ type: "success", message: "Título registrado." });
+      cargarTitulos();
+    } catch {
+      setToast({ type: "error", message: "Error al registrar el título." });
+    } finally {
+      setGuardandoTitulo(false);
+    }
+  };
+
+  const eliminarTitulo = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/titulos/${id}/`, { method: "DELETE", headers: authHeaders() });
+      if (res.ok || res.status === 204) cargarTitulos();
+    } catch {
+      /* silencioso */
+    }
+  };
+
+  const agregarReferencia = async (e) => {
+    e.preventDefault();
+    if (!refForm.nombre.trim() || !refForm.telefono.trim())
+      return setToast({ type: "error", message: "Nombre y teléfono son obligatorios." });
+    setGuardandoRef(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/referencias/`, {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify(refForm),
+      });
+      const data = await res.json();
+      if (!res.ok) return setToast({ type: "error", message: data.error || "No se pudo registrar la referencia." });
+      setRefForm({ nombre: "", telefono: "", relacion: "", email: "" });
+      setToast({ type: "success", message: "Referencia registrada." });
+      cargarReferencias();
+    } catch {
+      setToast({ type: "error", message: "Error al registrar la referencia." });
+    } finally {
+      setGuardandoRef(false);
+    }
+  };
+
+  const eliminarReferencia = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/referencias/${id}/`, { method: "DELETE", headers: authHeaders() });
+      if (res.ok || res.status === 204) cargarReferencias();
+    } catch {
+      /* silencioso */
     }
   };
 
@@ -463,6 +578,113 @@ export default function EconfiaWallet() {
             </ul>
           )}
         </div>
+
+        {/* ================= ZONA D: títulos académicos ================= */}
+        <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <StepDot n={4} done={titulos.length > 0} />
+            <div>
+              <h2 className="text-content font-bold">Títulos académicos</h2>
+              <p className="text-muted text-xs">Registra tus estudios (institución, programa, nivel y año). El diploma es opcional.</p>
+            </div>
+          </div>
+
+          <form onSubmit={agregarTitulo} className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+            <WField label="Institución *" value={tituloForm.institucion}
+              onChange={(v) => setTituloForm({ ...tituloForm, institucion: v })} placeholder="Universidad Nacional…" />
+            <WField label="Programa / Título *" value={tituloForm.programa}
+              onChange={(v) => setTituloForm({ ...tituloForm, programa: v })} placeholder="Ingeniería de Sistemas" />
+            <Select label="Nivel" value={tituloForm.nivel}
+              onChange={(v) => setTituloForm({ ...tituloForm, nivel: v })} options={NIVEL_OPCIONES} />
+            <WField label="Año" type="number" value={tituloForm.anio}
+              onChange={(v) => setTituloForm({ ...tituloForm, anio: v })} placeholder="2020" />
+            <div className="flex flex-col gap-1 sm:col-span-2">
+              <label className="text-xs font-semibold text-content/80">Diploma (PDF o imagen, opcional)</label>
+              <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp"
+                onChange={(e) => setTituloArchivo(e.target.files?.[0] || null)}
+                className="text-xs text-content file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-white file:text-xs file:font-semibold hover:file:bg-emerald-400 file:cursor-pointer" />
+            </div>
+            <div className="sm:col-span-2">
+              <button type="submit" disabled={guardandoTitulo}
+                className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
+                {guardandoTitulo ? "Guardando…" : "Agregar título"}
+              </button>
+            </div>
+          </form>
+
+          {titulos.length === 0 ? (
+            <p className="text-muted text-xs">Aún no has registrado títulos.</p>
+          ) : (
+            <ul className="space-y-2">
+              {titulos.map((t) => (
+                <li key={t.id} className="flex items-center justify-between gap-3 rounded-xl bg-surface-2/50 border border-line/10 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-content text-sm font-semibold truncate">{t.programa}</p>
+                    <p className="text-muted text-[11px] truncate">
+                      {t.institucion} · {t.nivel_label}{t.anio ? ` · ${t.anio}` : ""}
+                      {t.archivo_url ? (
+                        <> · <a href={t.archivo_url} target="_blank" rel="noreferrer" className="text-emerald-300 hover:text-emerald-200 underline underline-offset-2">diploma</a></>
+                      ) : null}
+                    </p>
+                  </div>
+                  <button onClick={() => eliminarTitulo(t.id)} className="text-muted hover:text-red-400 transition-colors shrink-0" title="Eliminar">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* ================= ZONA E: referencias personales ================= */}
+        <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <StepDot n={5} done={referencias.length > 0} />
+            <div>
+              <h2 className="text-content font-bold">Referencias personales</h2>
+              <p className="text-muted text-xs">Agrega hasta {refMax} referencias ({referencias.length}/{refMax}).</p>
+            </div>
+          </div>
+
+          {referencias.length < refMax && (
+            <form onSubmit={agregarReferencia} className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+              <WField label="Nombre *" value={refForm.nombre} onChange={(v) => setRefForm({ ...refForm, nombre: v })} placeholder="Nombre completo" />
+              <WField label="Teléfono *" value={refForm.telefono} onChange={(v) => setRefForm({ ...refForm, telefono: v })} placeholder="300 000 0000" />
+              <WField label="Relación" value={refForm.relacion} onChange={(v) => setRefForm({ ...refForm, relacion: v })} placeholder="Jefe, colega, familiar…" />
+              <WField label="Correo (opcional)" type="email" value={refForm.email} onChange={(v) => setRefForm({ ...refForm, email: v })} placeholder="correo@ejemplo.com" />
+              <div className="sm:col-span-2">
+                <button type="submit" disabled={guardandoRef}
+                  className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
+                  {guardandoRef ? "Guardando…" : "Agregar referencia"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {referencias.length === 0 ? (
+            <p className="text-muted text-xs">Aún no has registrado referencias.</p>
+          ) : (
+            <ul className="space-y-2">
+              {referencias.map((r) => (
+                <li key={r.id} className="flex items-center justify-between gap-3 rounded-xl bg-surface-2/50 border border-line/10 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-content text-sm font-semibold truncate">{r.nombre}</p>
+                    <p className="text-muted text-[11px] truncate">
+                      {r.telefono}{r.relacion ? ` · ${r.relacion}` : ""}{r.email ? ` · ${r.email}` : ""}
+                    </p>
+                  </div>
+                  <button onClick={() => eliminarReferencia(r.id)} className="text-muted hover:text-red-400 transition-colors shrink-0" title="Eliminar">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
       {qr && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
@@ -518,6 +740,17 @@ export default function EconfiaWallet() {
 }
 
 /* ------------------------------------------------------------------ átomos UI */
+function WField({ label, value, onChange, placeholder, type = "text" }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs font-semibold text-content/80">{label}</label>
+      <input type={type} value={value} placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-sm placeholder:text-muted/60 focus:outline-none focus:border-emerald-500/50" />
+    </div>
+  );
+}
+
 function StepDot({ n, done }) {
   return (
     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border ${
