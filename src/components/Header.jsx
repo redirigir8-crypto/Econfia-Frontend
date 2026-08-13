@@ -52,10 +52,10 @@ export default function Header() {
               className="h-9 md:h-11 w-auto object-contain"
             />
             <div className="flex flex-col justify-center leading-none">
-              <span className="text-content font-bold tracking-[0.35em] text-lg md:text-2xl">
+              <span className="text-content font-bold tracking-[-0.045em] text-lg md:text-2xl">
                 ECONFIA
               </span>
-              <span className="text-muted tracking-[0.18em] text-[7px] md:text-[9px] mt-1 whitespace-nowrap">
+              <span className="text-muted tracking-[0.18em] text-[7px] md:text-[9px] -mt-0.5 whitespace-nowrap">
                 UNA MARCA DE GRUPO SOLUCIONES
               </span>
             </div>

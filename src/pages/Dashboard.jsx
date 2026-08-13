@@ -132,9 +132,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex flex-col bg-transparent">
       {!hideLayout && (
-        <>
+        <div className="relative w-full h-28">
           {/* Logo — esquina superior izquierda */}
-          <div className="hidden md:flex fixed md:top-4 md:left-4 z-40 items-center gap-3 group">
+          <div className="hidden md:flex md:absolute md:top-4 md:left-4 z-[60] items-center gap-3 group">
             <style>{`
               @keyframes econfiaLetterSweep {
                 0% { background-position: 130% 50%; }
@@ -234,11 +234,11 @@ export default function Dashboard() {
 
               <div className="flex flex-col justify-center gap-0 leading-none">
                 <div className="econfia-title-shell">
-                  <p className="econfia-title font-black text-3xl tracking-[0.22em] uppercase leading-[0.78]">
+                  <p className="econfia-title font-black text-3xl tracking-[-0.045em] uppercase leading-[0.78]">
                     Econfia
                   </p>
                 </div>
-                <p className="econfia-logo-tagline -mt-0.5 whitespace-nowrap text-[10px] font-semibold uppercase leading-none tracking-[0.18em] text-muted">
+                <p className="econfia-logo-tagline -mt-3 whitespace-nowrap text-[10px] font-semibold uppercase leading-none tracking-[0.18em] text-muted">
                   Una marca de Grupo Soluciones
                 </p>
               </div>
@@ -246,7 +246,7 @@ export default function Dashboard() {
           </div>
 
           <Taskbar />
-        </>
+        </div>
       )}
 
       <AnimatePresence mode="wait">
@@ -256,7 +256,7 @@ export default function Dashboard() {
           animate={{ opacity: 1, filter: "blur(0px)" }}
           exit={{ opacity: 0, filter: "blur(10px)" }}
           transition={{ duration: 0.35 }}
-          className={`flex-1 w-full ${hideLayout ? "" : "pt-28"}`}
+          className="flex-1 w-full"
         >
           {/* Aquí se renderizan las rutas hijas definidas en App.jsx */}
           <Outlet />

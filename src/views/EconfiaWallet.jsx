@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Toast from "../components/Toast";
+import { MUNICIPIOS_COLOMBIA } from "../utils/municipiosColombia";
+import { PROFESIONES_MUNDO } from "../utils/profesionesMundo";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -14,9 +16,22 @@ const TIPO_DOC_OPCIONES = [
 const TIPO_DOCUMENTO_SUBIDA = [
   { value: "cedula", label: "Cédula de ciudadanía" },
   { value: "hoja_vida", label: "Hoja de vida" },
-  { value: "referencia_laboral", label: "Referencia laboral" },
+  { value: "referencia_laboral", label: "Referencias personales" },
   { value: "certificacion", label: "Certificación laboral" },
-  { value: "otro", label: "Otro documento" },
+  { value: "eps", label: "Certificado de afiliación EPS" },
+  { value: "pension", label: "Certificado de afiliación a pensión" },
+  { value: "libreta_militar", label: "Libreta militar" },
+  { value: "rut", label: "RUT" },
+  { value: "antecedentes_propios", label: "Certificado de antecedentes (propio)" },
+  { value: "curso_diplomado", label: "Curso / diplomado" },
+  { value: "otro", label: "Otro documento que consideres relevante" },
+];
+
+const SEXO_OPCIONES = [
+  { value: "", label: "Seleccione…" },
+  { value: "M", label: "Masculino" },
+  { value: "F", label: "Femenino" },
+  { value: "NB", label: "Prefiero no decirlo" },
 ];
 
 const NIVEL_OPCIONES = [
@@ -57,7 +72,13 @@ export default function EconfiaWallet() {
     fecha_expedicion: "",
     nombre_completo: "",
     fecha_nacimiento: "",
-    lugar_nacimiento: "",
+    lugar_expedicion: "",
+    email: "",
+    profesion: "",
+    profesion_otro: "",
+    sexo: "",
+    telefono: "",
+    ciudad_residencia: "",
   });
   const [guardandoBase, setGuardandoBase] = useState(false);
 
@@ -98,9 +119,9 @@ export default function EconfiaWallet() {
       const res = await fetch(`${API_URL}/api/wallet/estado/`, { headers: authHeaders() });
       const data = await res.json();
       if (res.ok) setEstado(data);
-      else setToast({ type: "error", message: data.error || "No se pudo cargar tu Wallet." });
+      else setToast({ type: "error", message: data.error || "No se pudo cargar su Wallet." });
     } catch {
-      setToast({ type: "error", message: "Error de conexión al cargar tu Wallet." });
+      setToast({ type: "error", message: "Error de conexión al cargar su Wallet." });
     }
   }, []);
 
@@ -183,28 +204,36 @@ export default function EconfiaWallet() {
   const guardarBase = async (e) => {
     e.preventDefault();
     if (!form.documento.trim())
-      return setToast({ type: "error", message: "Ingresa tu número de documento." });
+      return setToast({ type: "error", message: "Ingrese su número de documento." });
     if (!form.fecha_expedicion)
-      return setToast({ type: "error", message: "Ingresa la fecha de expedición." });
+      return setToast({ type: "error", message: "Ingrese la fecha de expedición." });
     if (!form.nombre_completo.trim())
-      return setToast({ type: "error", message: "Ingresa tus nombres completos." });
+      return setToast({ type: "error", message: "Ingrese sus nombres completos." });
+    if (form.profesion === "Otro" && !form.profesion_otro.trim())
+      return setToast({ type: "error", message: "Especifique su profesión." });
+
+    const { profesion_otro, ...formBase } = form;
+    const payload = {
+      ...formBase,
+      profesion: form.profesion === "Otro" ? form.profesion_otro.trim() : form.profesion,
+    };
 
     setGuardandoBase(true);
     try {
       const res = await fetch(`${API_URL}/api/wallet/base/`, {
         method: "POST",
         headers: authHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) {
-        setToast({ type: "error", message: data.error || "No se pudieron guardar tus datos." });
+        setToast({ type: "error", message: data.error || "No se pudieron guardar sus datos." });
         return;
       }
       setEstado(data);
-      setToast({ type: "success", message: "Datos guardados. Ya puedes consultar." });
+      setToast({ type: "success", message: "Datos guardados. Ya puede consultar." });
     } catch {
-      setToast({ type: "error", message: "Error al guardar tus datos." });
+      setToast({ type: "error", message: "Error al guardar sus datos." });
     } finally {
       setGuardandoBase(false);
     }
@@ -419,8 +448,8 @@ export default function EconfiaWallet() {
             econfia<span className="text-emerald-400">Wallet</span>
           </h1>
           <p className="text-sm text-muted mt-2 max-w-2xl">
-            Guarda tus documentos y consulta tus antecedentes en listas restrictivas. Completa tus
-            datos una sola vez y obtén tu reporte consolidado en PDF.
+            Guarde sus documentos y consulte sus antecedentes en listas restrictivas. Complete sus
+            datos una sola vez y obtenga su reporte consolidado en PDF.
           </p>
           {baseCompleta && (
             <button onClick={compartir}
@@ -439,7 +468,7 @@ export default function EconfiaWallet() {
           <div className="flex items-center gap-3 mb-4">
             <StepDot n={1} done={baseCompleta} />
             <div>
-              <h2 className="text-content font-bold">Tus datos</h2>
+              <h2 className="text-content font-bold">Sus datos</h2>
               <p className="text-muted text-xs">Documento, fecha de expedición y nombres completos.</p>
             </div>
           </div>
@@ -449,6 +478,12 @@ export default function EconfiaWallet() {
               <Campo label="Nombre" value={`${estado?.candidato?.nombre || ""} ${estado?.candidato?.apellido || ""}`} />
               <Campo label="Documento" value={`${estado?.candidato?.tipo_doc || ""} ${estado?.candidato?.cedula || ""}`} />
               <Campo label="Fecha de expedición" value={estado?.candidato?.fecha_expedicion} />
+              <Campo label="Correo electrónico" value={estado?.candidato?.email} />
+              <Campo label="Teléfono" value={estado?.candidato?.telefono} />
+              <Campo label="Ciudad de residencia" value={estado?.candidato?.ciudad_residencia} />
+              <Campo label="Profesión" value={estado?.candidato?.profesion} />
+              <Campo label="Sexo" value={estado?.candidato?.sexo} />
+              <Campo label="Lugar de expedición" value={estado?.candidato?.lugar_expedicion} />
             </div>
           ) : (
             <form onSubmit={guardarBase} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -462,8 +497,28 @@ export default function EconfiaWallet() {
                 onChange={(v) => setForm({ ...form, fecha_expedicion: v })} />
               <Input label="Fecha de nacimiento" type="date" value={form.fecha_nacimiento}
                 onChange={(v) => setForm({ ...form, fecha_nacimiento: v })} />
-              <Input label="Lugar de nacimiento" value={form.lugar_nacimiento}
-                onChange={(v) => setForm({ ...form, lugar_nacimiento: v })} placeholder="Bogotá D.C." />
+              <Input label="Lugar de expedición" value={form.lugar_expedicion}
+                onChange={(v) => setForm({ ...form, lugar_expedicion: v })} placeholder="Bogotá D.C." />
+              <Select label="Sexo" value={form.sexo}
+                onChange={(v) => setForm({ ...form, sexo: v })} options={SEXO_OPCIONES} />
+              <Input label="Correo electrónico" type="email" value={form.email}
+                onChange={(v) => setForm({ ...form, email: v })} placeholder="correo@ejemplo.com" />
+              <Input label="Teléfono / celular" value={form.telefono}
+                onChange={(v) => setForm({ ...form, telefono: v })} placeholder="3001234567" />
+              <Input label="Ciudad de residencia" value={form.ciudad_residencia} listId="ciudades-colombia"
+                onChange={(v) => setForm({ ...form, ciudad_residencia: v })} placeholder="Bogotá D.C." />
+              <datalist id="ciudades-colombia">
+                {MUNICIPIOS_COLOMBIA.map((c) => <option key={c} value={c} />)}
+              </datalist>
+              <Input label="Profesión" value={form.profesion} listId="profesiones-mundo"
+                onChange={(v) => setForm({ ...form, profesion: v, profesion_otro: "" })} placeholder="Ingeniero de sistemas" />
+              <datalist id="profesiones-mundo">
+                {PROFESIONES_MUNDO.map((p) => <option key={p} value={p} />)}
+              </datalist>
+              {form.profesion === "Otro" && (
+                <Input label="Especifique cuál *" value={form.profesion_otro}
+                  onChange={(v) => setForm({ ...form, profesion_otro: v })} placeholder="Ej. Apicultor" />
+              )}
               <div className="sm:col-span-2">
                 <button type="submit" disabled={guardandoBase}
                   className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
@@ -480,7 +535,7 @@ export default function EconfiaWallet() {
             <StepDot n={2} done={consultaUsada} />
             <div>
               <h2 className="text-content font-bold">Consulta de antecedentes</h2>
-              <p className="text-muted text-xs">Policía, Procuraduría, Contraloría y Personería · una sola vez.</p>
+              <p className="text-muted text-xs">Policía, Procuraduría, Contraloría, Personería, Inhabilidades, Rama Judicial, Tyba y SIMIT · una sola vez.</p>
             </div>
           </div>
 
@@ -491,7 +546,7 @@ export default function EconfiaWallet() {
             </button>
           )}
           {!consultaHabilitada && !consultaUsada && (
-            <p className="text-muted text-xs mt-2">Primero completa tus datos para habilitar la consulta.</p>
+            <p className="text-muted text-xs mt-2">Primero complete sus datos para habilitar la consulta.</p>
           )}
 
           {resultado && (
@@ -530,7 +585,7 @@ export default function EconfiaWallet() {
             <StepDot n={3} done={documentos.length > 0} />
             <div>
               <h2 className="text-content font-bold">Mis documentos</h2>
-              <p className="text-muted text-xs">Sube tu cédula, hoja de vida, referencias o certificaciones. La cédula se verifica automáticamente.</p>
+              <p className="text-muted text-xs">Entre más documentos tenga cargados, más información podrán verificar las empresas sobre usted. Suba su cédula, hoja de vida, certificaciones y cualquier otro documento que considere relevante para respaldar su perfil. La cédula se verifica automáticamente.</p>
             </div>
           </div>
 
@@ -585,7 +640,7 @@ export default function EconfiaWallet() {
             <StepDot n={4} done={titulos.length > 0} />
             <div>
               <h2 className="text-content font-bold">Títulos académicos</h2>
-              <p className="text-muted text-xs">Registra tus estudios (institución, programa, nivel y año). El diploma es opcional.</p>
+              <p className="text-muted text-xs">Registre sus estudios (institución, programa, nivel y año). El diploma es opcional.</p>
             </div>
           </div>
 
@@ -770,11 +825,11 @@ function Campo({ label, value }) {
   );
 }
 
-function Input({ label, value, onChange, placeholder, type = "text", full }) {
+function Input({ label, value, onChange, placeholder, type = "text", full, listId }) {
   return (
     <div className={`flex flex-col gap-1 ${full ? "sm:col-span-2" : ""}`}>
       <label className="text-xs font-semibold text-content/80">{label}</label>
-      <input type={type} value={value} placeholder={placeholder}
+      <input type={type} value={value} placeholder={placeholder} list={listId}
         onChange={(e) => onChange(e.target.value)}
         className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-sm focus:outline-none focus:border-emerald-500/50 focus:bg-surface transition-all" />
     </div>

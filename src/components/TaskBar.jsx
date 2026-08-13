@@ -155,7 +155,7 @@ if (isAdmin) {
   const midIndex = (count - 1) / 2;
 
   return (
-    <div className="fixed top-5 left-0 right-0 z-50 flex justify-center pointer-events-none">
+    <div className="absolute top-5 left-0 right-0 z-[60] flex justify-center pointer-events-none">
       <style>{`
         .glass-pill {
           background: linear-gradient(180deg, rgb(var(--th-surface) / 0.72) 0%, rgb(var(--th-surface-2) / 0.58) 100%);
