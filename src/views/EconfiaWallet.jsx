@@ -16,13 +16,10 @@ const TIPO_DOC_OPCIONES = [
 const TIPO_DOCUMENTO_SUBIDA = [
   { value: "cedula", label: "Cédula de ciudadanía" },
   { value: "hoja_vida", label: "Hoja de vida" },
-  { value: "referencia_laboral", label: "Referencias personales" },
-  { value: "certificacion", label: "Certificación laboral" },
   { value: "eps", label: "Certificado de afiliación EPS" },
   { value: "pension", label: "Certificado de afiliación a pensión" },
   { value: "libreta_militar", label: "Libreta militar" },
   { value: "rut", label: "RUT" },
-  { value: "antecedentes_propios", label: "Certificado de antecedentes (propio)" },
   { value: "curso_diplomado", label: "Curso / diplomado" },
   { value: "otro", label: "Otro documento que consideres relevante" },
 ];
@@ -93,6 +90,12 @@ export default function EconfiaWallet() {
   const [archivo, setArchivo] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
 
+  // Certificaciones laborales (formulario + archivo opcional)
+  const [certificaciones, setCertificaciones] = useState([]);
+  const [certForm, setCertForm] = useState({ empresa: "", cargo: "", fecha_inicio: "", fecha_fin: "", actual: false });
+  const [certArchivo, setCertArchivo] = useState(null);
+  const [guardandoCert, setGuardandoCert] = useState(false);
+
   // Títulos académicos (formulario)
   const [titulos, setTitulos] = useState([]);
   const [tituloForm, setTituloForm] = useState({ institucion: "", programa: "", nivel: "pregrado", anio: "" });
@@ -112,6 +115,10 @@ export default function EconfiaWallet() {
   const baseCompleta = estado?.base_completa;
   const consultaHabilitada = estado?.consulta_habilitada;
   const consultaUsada = estado?.consulta_usada;
+
+  // Las certificaciones viven en su propia sección (modelo aparte); "Mis
+  // documentos" excluye cualquier documento legado de tipo certificación.
+  const otrosDocumentos = documentos.filter((d) => d.tipo !== "certificacion");
 
   // --------------------------------------------------------------- carga inicial
   const cargarEstado = useCallback(async () => {
@@ -160,6 +167,16 @@ export default function EconfiaWallet() {
     }
   }, []);
 
+  const cargarCertificaciones = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/certificaciones/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setCertificaciones(data.certificaciones || []);
+    } catch {
+      /* silencioso */
+    }
+  }, []);
+
   const cargarReferencias = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/api/wallet/referencias/`, { headers: authHeaders() });
@@ -178,7 +195,8 @@ export default function EconfiaWallet() {
     cargarDocumentos();
     cargarTitulos();
     cargarReferencias();
-  }, [cargarEstado, cargarDocumentos, cargarTitulos, cargarReferencias]);
+    cargarCertificaciones();
+  }, [cargarEstado, cargarDocumentos, cargarTitulos, cargarReferencias, cargarCertificaciones]);
 
   // Al saber que ya hay consulta, cargar su resultado y hacer polling si sigue en curso.
   useEffect(() => {
@@ -315,6 +333,52 @@ export default function EconfiaWallet() {
     }
   };
 
+  const agregarCertificacion = async (e) => {
+    e.preventDefault();
+    if (!certForm.empresa.trim() || !certForm.cargo.trim())
+      return setToast({ type: "error", message: "Empresa y cargo son obligatorios." });
+
+    const fd = new FormData();
+    fd.append("empresa", certForm.empresa);
+    fd.append("cargo", certForm.cargo);
+    if (certForm.fecha_inicio) fd.append("fecha_inicio", certForm.fecha_inicio);
+    fd.append("actual", certForm.actual ? "true" : "false");
+    if (!certForm.actual && certForm.fecha_fin) fd.append("fecha_fin", certForm.fecha_fin);
+    if (certArchivo) fd.append("archivo", certArchivo);
+
+    setGuardandoCert(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/certificaciones/`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ type: "error", message: data.error || "No se pudo registrar la certificación." });
+        return;
+      }
+      setCertForm({ empresa: "", cargo: "", fecha_inicio: "", fecha_fin: "", actual: false });
+      setCertArchivo(null);
+      e.target.reset();
+      setToast({ type: "success", message: "Certificación registrada." });
+      cargarCertificaciones();
+    } catch {
+      setToast({ type: "error", message: "Error al registrar la certificación." });
+    } finally {
+      setGuardandoCert(false);
+    }
+  };
+
+  const eliminarCertificacion = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/certificaciones/${id}/`, { method: "DELETE", headers: authHeaders() });
+      if (res.ok || res.status === 204) cargarCertificaciones();
+    } catch {
+      /* silencioso */
+    }
+  };
+
   const agregarTitulo = async (e) => {
     e.preventDefault();
     if (!tituloForm.institucion.trim() || !tituloForm.programa.trim())
@@ -435,32 +499,58 @@ export default function EconfiaWallet() {
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 
       <div className="max-w-5xl mx-auto space-y-8">
-        {/* Encabezado */}
-        <header className="text-center md:text-left">
-          <div className="inline-flex px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 mb-3 items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="text-emerald-300 text-xs font-medium">Tu billetera documental</span>
+        {/* Encabezado — hero */}
+        <header className="relative overflow-hidden rounded-2xl border border-line/15 bg-gradient-to-br from-surface/95 via-surface-2/70 to-surface/95 px-6 py-6 md:px-8 md:py-7 shadow-xl">
+          {/* Glow decorativo */}
+          <div className="pointer-events-none absolute -top-24 -right-20 w-72 h-72 rounded-full bg-emerald-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-16 w-64 h-64 rounded-full bg-emerald-400/[0.06] blur-3xl" />
+
+          <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            {/* Izquierda: identidad del módulo */}
+            <div className="max-w-2xl">
+              <div className="inline-flex px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 mb-3 items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <span className="text-emerald-300 text-xs font-medium">Tu billetera documental</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="hidden sm:flex w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 items-center justify-center shrink-0 shadow-inner">
+                  <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+                      d="M21 12V7H5a2 2 0 010-4h14v4M3 5v14a2 2 0 002 2h16v-5M18 12a2 2 0 000 4h4v-4h-4z" />
+                  </svg>
+                </span>
+                <h1 className="text-3xl md:text-4xl font-black text-content leading-none tracking-tight">
+                  econfia<span className="text-emerald-400">Wallet</span>
+                </h1>
+              </div>
+              <p className="text-sm text-muted mt-3 leading-relaxed">
+                Guarde sus documentos y consulte sus antecedentes en listas restrictivas. Complete
+                sus datos una sola vez y obtenga su reporte consolidado en PDF.
+              </p>
+            </div>
+
+            {/* Derecha: acción principal (QR) */}
+            {baseCompleta && (
+              <div className="shrink-0">
+                <button onClick={compartir}
+                  className="group inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:-translate-y-0.5">
+                  <span className="flex w-9 h-9 rounded-lg bg-white/15 items-center justify-center shrink-0">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 3h3m-3 3h6m0-6v.01M17 14h3" />
+                    </svg>
+                  </span>
+                  <span className="flex flex-col items-start leading-tight">
+                    <span className="text-sm font-semibold">Compartir con QR</span>
+                    <span className="text-[10px] font-normal text-white/80">Pase temporal seguro</span>
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
-            econfia<span className="text-emerald-400">Wallet</span>
-          </h1>
-          <p className="text-sm text-muted mt-2 max-w-2xl">
-            Guarde sus documentos y consulte sus antecedentes en listas restrictivas. Complete sus
-            datos una sola vez y obtenga su reporte consolidado en PDF.
-          </p>
-          {baseCompleta && (
-            <button onClick={compartir}
-              className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 3h3m-3 3h6m0-6v.01M17 14h3" />
-              </svg>
-              Compartir con QR temporal
-            </button>
-          )}
         </header>
 
         {/* ================= ZONA A: datos base ================= */}
@@ -582,7 +672,7 @@ export default function EconfiaWallet() {
         {/* ================= ZONA C: documentos ================= */}
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
-            <StepDot n={3} done={documentos.length > 0} />
+            <StepDot n={3} done={otrosDocumentos.length > 0} />
             <div>
               <h2 className="text-content font-bold">Mis documentos</h2>
               <p className="text-muted text-xs">Entre más documentos tenga cargados, más información podrán verificar las empresas sobre usted. Suba su cédula, hoja de vida, certificaciones y cualquier otro documento que considere relevante para respaldar su perfil. La cédula se verifica automáticamente.</p>
@@ -603,11 +693,11 @@ export default function EconfiaWallet() {
             </button>
           </form>
 
-          {documentos.length === 0 ? (
+          {otrosDocumentos.length === 0 ? (
             <p className="text-muted text-xs">Aún no has subido documentos.</p>
           ) : (
             <ul className="space-y-2">
-              {documentos.map((d) => (
+              {otrosDocumentos.map((d) => (
                 <li key={d.id} className="flex items-center justify-between gap-3 rounded-xl bg-surface-2/50 border border-line/10 px-4 py-3">
                   <div className="min-w-0">
                     <p className="text-content text-sm font-semibold truncate">{d.tipo_label}</p>
@@ -634,10 +724,77 @@ export default function EconfiaWallet() {
           )}
         </div>
 
+        {/* ================= ZONA C2: certificaciones laborales ================= */}
+        <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <StepDot n={4} done={certificaciones.length > 0} />
+            <div>
+              <h2 className="text-content font-bold">Certificaciones laborales</h2>
+              <p className="text-muted text-xs">Registre su experiencia laboral (empresa, cargo y fechas). Adjuntar la constancia es opcional.</p>
+            </div>
+          </div>
+
+          <form onSubmit={agregarCertificacion} className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+            <WField label="Empresa *" value={certForm.empresa}
+              onChange={(v) => setCertForm({ ...certForm, empresa: v })} placeholder="Nombre de la empresa" />
+            <WField label="Cargo *" value={certForm.cargo}
+              onChange={(v) => setCertForm({ ...certForm, cargo: v })} placeholder="Ej. Analista de sistemas" />
+            <WField label="Fecha de inicio" type="date" value={certForm.fecha_inicio}
+              onChange={(v) => setCertForm({ ...certForm, fecha_inicio: v })} />
+            <WField label="Fecha de fin" type="date" value={certForm.fecha_fin}
+              onChange={(v) => setCertForm({ ...certForm, fecha_fin: v })} disabled={certForm.actual} />
+            <label className="flex items-center gap-2 text-xs text-content/85 cursor-pointer sm:col-span-2">
+              <input type="checkbox" checked={certForm.actual}
+                onChange={(e) => setCertForm({ ...certForm, actual: e.target.checked, fecha_fin: e.target.checked ? "" : certForm.fecha_fin })}
+                className="accent-emerald-500 w-4 h-4 cursor-pointer" />
+              Trabajo aquí actualmente
+            </label>
+            <div className="flex flex-col gap-1 sm:col-span-2">
+              <label className="text-xs font-semibold text-content/80">Constancia laboral (PDF o imagen, opcional)</label>
+              <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp"
+                onChange={(e) => setCertArchivo(e.target.files?.[0] || null)}
+                className="text-xs text-content file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-white file:text-xs file:font-semibold hover:file:bg-emerald-400 file:cursor-pointer" />
+            </div>
+            <div className="sm:col-span-2">
+              <button type="submit" disabled={guardandoCert}
+                className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
+                {guardandoCert ? "Guardando…" : "Agregar certificación"}
+              </button>
+            </div>
+          </form>
+
+          {certificaciones.length === 0 ? (
+            <p className="text-muted text-xs">Aún no has registrado certificaciones.</p>
+          ) : (
+            <ul className="space-y-2">
+              {certificaciones.map((c) => (
+                <li key={c.id} className="flex items-center justify-between gap-3 rounded-xl bg-surface-2/50 border border-line/10 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-content text-sm font-semibold truncate">{c.cargo} · {c.empresa}</p>
+                    <p className="text-muted text-[11px] truncate">
+                      {c.fecha_inicio || "—"} → {c.actual ? "Actual" : (c.fecha_fin || "—")}
+                      {c.archivo_url ? (
+                        <> · <a href={c.archivo_url} target="_blank" rel="noreferrer" className="text-emerald-300 hover:text-emerald-200 underline underline-offset-2">constancia</a></>
+                      ) : null}
+                    </p>
+                  </div>
+                  <button onClick={() => eliminarCertificacion(c.id)}
+                    className="text-muted hover:text-red-400 transition-colors shrink-0" title="Eliminar">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         {/* ================= ZONA D: títulos académicos ================= */}
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
-            <StepDot n={4} done={titulos.length > 0} />
+            <StepDot n={5} done={titulos.length > 0} />
             <div>
               <h2 className="text-content font-bold">Títulos académicos</h2>
               <p className="text-muted text-xs">Registre sus estudios (institución, programa, nivel y año). El diploma es opcional.</p>
@@ -696,7 +853,7 @@ export default function EconfiaWallet() {
         {/* ================= ZONA E: referencias personales ================= */}
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
-            <StepDot n={5} done={referencias.length > 0} />
+            <StepDot n={6} done={referencias.length > 0} />
             <div>
               <h2 className="text-content font-bold">Referencias personales</h2>
               <p className="text-muted text-xs">Agrega hasta {refMax} referencias ({referencias.length}/{refMax}).</p>
@@ -795,13 +952,13 @@ export default function EconfiaWallet() {
 }
 
 /* ------------------------------------------------------------------ átomos UI */
-function WField({ label, value, onChange, placeholder, type = "text" }) {
+function WField({ label, value, onChange, placeholder, type = "text", disabled = false }) {
   return (
     <div className="flex flex-col gap-1">
       <label className="text-xs font-semibold text-content/80">{label}</label>
-      <input type={type} value={value} placeholder={placeholder}
+      <input type={type} value={value} placeholder={placeholder} disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className="px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-sm placeholder:text-muted/60 focus:outline-none focus:border-emerald-500/50" />
+        className="px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-sm placeholder:text-muted/60 focus:outline-none focus:border-emerald-500/50 disabled:opacity-50" />
     </div>
   );
 }

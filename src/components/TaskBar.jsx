@@ -191,7 +191,7 @@ if (isAdmin) {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 7px;
+          gap: 3px;
           width: 100px;
           pointer-events: auto;
           z-index: 1;
@@ -214,22 +214,18 @@ if (isAdmin) {
           z-index: 10;
         }
         .curve-item.active .curve-icon {
-          width: 72px;
-          height: 72px;
+          width: 62px;
+          height: 62px;
           background: linear-gradient(180deg,
             color-mix(in srgb, var(--item-color, #38bdf8) 85%, white 5%),
             color-mix(in srgb, var(--item-color, #38bdf8) 65%, black 25%));
           border-color: color-mix(in srgb, var(--item-color, #38bdf8) 70%, white 20%);
-          animation: taskbarPulseGlow 2.2s ease-in-out infinite;
+          box-shadow:
+            0 0 16px 3px color-mix(in srgb, var(--item-color, #38bdf8) 58%, transparent),
+            inset 0 0 0 1px rgb(var(--th-content) / 0.20);
         }
         .curve-item.active .curve-shine {
-          position: absolute;
-          top: -40%;
-          left: 0;
-          width: 45%;
-          height: 180%;
-          background: linear-gradient(120deg, transparent, rgb(var(--th-content) / 0.45), transparent);
-          animation: taskbarShineSweep 2.4s ease-in-out infinite;
+          display: none;
         }
         .curve-item:not(.active) {
           opacity: 0.9;
