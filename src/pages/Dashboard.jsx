@@ -134,7 +134,7 @@ export default function Dashboard() {
       {!hideLayout && (
         <div className="relative w-full h-28">
           {/* Logo — esquina superior izquierda */}
-          <div className="hidden md:flex md:absolute md:top-4 md:left-4 z-[60] items-center gap-3 group">
+          <div className="hidden md:flex md:absolute md:top-4 md:left-4 z-40 items-center gap-3 group">
             <style>{`
               @keyframes econfiaLetterSweep {
                 0% { background-position: 130% 50%; }
@@ -234,11 +234,11 @@ export default function Dashboard() {
 
               <div className="flex flex-col justify-center gap-0 leading-none">
                 <div className="econfia-title-shell">
-                  <p className="econfia-title font-black text-3xl tracking-[-0.045em] uppercase leading-[0.78]">
+                  <p className="econfia-title font-black text-3xl tracking-[-0.045em] uppercase leading-none">
                     Econfia
                   </p>
                 </div>
-                <p className="econfia-logo-tagline -mt-3 whitespace-nowrap text-[10px] font-semibold uppercase leading-none tracking-[0.18em] text-muted">
+                <p className="econfia-logo-tagline mt-2 whitespace-nowrap text-[10px] font-semibold uppercase leading-none tracking-[0.18em] text-muted">
                   Una marca de Grupo Soluciones
                 </p>
               </div>
