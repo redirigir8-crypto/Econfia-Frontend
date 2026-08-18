@@ -54,6 +54,7 @@ import AdminSoporte from "./views/AdminSoporte";
 import AdminBlog from "./components/AdminBlog";
 import AdminSonidos from "./components/AdminSonidos";
 import AdminMonitoreo from "./components/AdminMonitoreo";
+import MonitoreoFuentes from "./components/MonitoreoFuentes";
 import SoundManager from "./components/SoundManager";
 import {
   ShieldCheck,
@@ -804,6 +805,7 @@ export default function App() {
               <Route path="/e9c4b2f7"          element={<Profile />}                  />
               <Route path="/f1d8a5c3"          element={<LogOut />}                   />
               <Route path="/c2e6b9a4"          element={<Ayuda />}                    />
+              <Route path="/7f2b9e4d"          element={<MonitoreoFuentes />}         />
               <Route path="/7b3f9d1e"          element={<AdminUsuarios />}            />
               <Route path="/1e5c8a4b"          element={<AdminPlanes />}              />
               <Route path="/4d9b2f6e"          element={<AdminFuentes />}             />

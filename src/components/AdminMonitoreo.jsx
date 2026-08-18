@@ -65,6 +65,7 @@ const AdminMonitoreo = () => {
   const [progreso, setProgreso] = useState({ hechos: 0, total: 0 });
   const [toast, setToast] = useState(null);
   const [ayuda, setAyuda] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
   const pollRef = useRef(null);
 
   const notificar = (msg, tipo = "ok") => setToast({ msg, tipo });
@@ -138,6 +139,13 @@ const AdminMonitoreo = () => {
   const kpi = reporte?.kpi;
   const pct = progreso.total ? Math.round((progreso.hechos / progreso.total) * 100) : 0;
 
+  // Buscador: si hay texto filtra TODAS las fuentes; si no, muestra las 60 primeras.
+  const todasFuentes = reporte?.disponibilidad || [];
+  const qBusqueda = busqueda.trim().toLowerCase();
+  const filasVisibles = qBusqueda
+    ? todasFuentes.filter((r) => r.clave.toLowerCase().includes(qBusqueda))
+    : todasFuentes.slice(0, 60);
+
   return (
     <div style={{
       fontFamily: "Segoe UI, system-ui, sans-serif", color: T.text,
@@ -196,11 +204,10 @@ const AdminMonitoreo = () => {
 
       {/* KPIs */}
       {kpi && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 16, marginTop: 24 }}>
-          <KpiCard label="FUENTES MONITOREADAS" val={kpi.fuentes_monitoreadas} />
-          <KpiCard label="SONDEOS TOTALES" val={kpi.sondeos_totales} />
-          <KpiCard label="DISPONIBILIDAD PROMEDIO" val={`${kpi.disponibilidad_promedio_pct}%`}
-            color={dispColor(kpi.disponibilidad_promedio_pct)} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 16, marginTop: 24 }}>
+          <KpiCard icon="📡" label="FUENTES MONITOREADAS" val={kpi.fuentes_monitoreadas} />
+          <KpiCard icon="🔍" label="SONDEOS TOTALES" val={kpi.sondeos_totales} />
+          <GaugeCard label="DISPONIBILIDAD PROMEDIO" pct={kpi.disponibilidad_promedio_pct} />
           <div className="th-card" style={cardStyle}>
             <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 10, letterSpacing: .5 }}>POR ESTADO</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -213,8 +220,33 @@ const AdminMonitoreo = () => {
         </div>
       )}
 
+      {/* Gráfico de fuentes caídas por día */}
+      {reporte && (
+        <Seccion titulo="Fuentes caídas por día">
+          <GraficoFallos datos={reporte.fallos_por_dia} />
+        </Seccion>
+      )}
+
       {/* Tabla disponibilidad */}
       <Seccion titulo="Disponibilidad y latencia (peores primero)">
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
+          <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="🔎 Buscar fuente por nombre…"
+            style={{
+              flex: "1 1 280px", maxWidth: 400, padding: "10px 14px", borderRadius: 12, fontSize: 13,
+              color: T.text, background: T.surface2, border: `1px solid ${T.line}`, outline: "none",
+            }} />
+          {busqueda && (
+            <button onClick={() => setBusqueda("")}
+              style={{ cursor: "pointer", padding: "9px 14px", borderRadius: 12, fontWeight: 700, color: T.muted, background: "transparent", border: `1px solid ${T.line}` }}>
+              ✕ Limpiar
+            </button>
+          )}
+          <span style={{ fontSize: 12.5, color: T.muted, fontWeight: 700 }}>
+            Mostrando {filasVisibles.length} de {todasFuentes.length}
+            {!busqueda && todasFuentes.length > 60 ? " · escribe para ver todas" : ""}
+          </span>
+        </div>
         {cargando ? <p style={{ color: T.muted }}>Cargando…</p> : (
           <div className="th-panel" style={{ overflowX: "auto", borderRadius: 16 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, color: T.text }}>
@@ -229,13 +261,18 @@ const AdminMonitoreo = () => {
                 </tr>
               </thead>
               <tbody>
-                {(reporte?.disponibilidad || []).slice(0, 60).map((r, i) => {
+                {filasVisibles.map((r, i) => {
                   const [bg, fg] = ESTADO_COLOR[r.ultimo_estado] || ["rgb(var(--th-line) / 0.15)", T.text];
                   return (
                     <tr key={r.clave} style={{ background: i % 2 ? T.lineSoft : "transparent" }}>
                       <td style={{ padding: "9px 12px", fontWeight: 600 }}>{r.clave}</td>
                       <td style={tdC}>{r.sondeos}</td>
-                      <td style={{ ...tdC, fontWeight: 800, color: dispColor(r.disponibilidad_pct) }}>{r.disponibilidad_pct}%</td>
+                      <td style={{ ...tdC, minWidth: 92 }}>
+                        <div style={{ fontWeight: 800, fontSize: 12, color: dispColor(r.disponibilidad_pct) }}>{r.disponibilidad_pct}%</div>
+                        <div style={{ height: 5, borderRadius: 999, background: "rgb(var(--th-line) / 0.16)", marginTop: 4, overflow: "hidden" }}>
+                          <div style={{ width: `${r.disponibilidad_pct}%`, height: "100%", background: dispColor(r.disponibilidad_pct), borderRadius: 999, transition: "width .4s" }} />
+                        </div>
+                      </td>
                       <td style={tdC}>{r.latencia_med_ms ?? "—"}</td>
                       <td style={tdC}>{r.latencia_p95_ms ?? "—"}</td>
                       <td style={tdC}>{r.bloqueos || ""}</td>
@@ -245,9 +282,9 @@ const AdminMonitoreo = () => {
                     </tr>
                   );
                 })}
-                {reporte && !reporte.disponibilidad.length && (
+                {reporte && !filasVisibles.length && (
                   <tr><td colSpan={9} style={{ padding: 24, textAlign: "center", color: T.muted }}>
-                    Aún no hay sondeos. Pulsa “Ejecutar sondeo ahora”.
+                    {busqueda ? `Sin coincidencias para “${busqueda}”.` : "Aún no hay sondeos. Pulsa “Ejecutar sondeo ahora”."}
                   </td></tr>
                 )}
               </tbody>
@@ -393,12 +430,77 @@ const Def = ({ chip, children }) => (
   </div>
 );
 
-const KpiCard = ({ label, val, color }) => (
-  <div className="th-card" style={cardStyle}>
-    <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 6, letterSpacing: .5 }}>{label}</div>
-    <div style={{ fontSize: 32, fontWeight: 800, color: color || T.text }}>{val}</div>
+const KpiCard = ({ icon, label, val, color }) => (
+  <div className="th-card" style={{ ...cardStyle, display: "flex", alignItems: "center", gap: 14 }}>
+    {icon && (
+      <div style={{
+        width: 48, height: 48, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 23, flexShrink: 0,
+        background: `linear-gradient(140deg, rgb(var(--th-brand) / 0.20), rgb(var(--th-brand-2) / 0.08))`,
+        border: `1px solid rgb(var(--th-brand) / 0.22)`,
+      }}>{icon}</div>
+    )}
+    <div style={{ minWidth: 0 }}>
+      <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 4, letterSpacing: .5 }}>{label}</div>
+      <div style={{ fontSize: 30, fontWeight: 800, color: color || T.text, lineHeight: 1.05 }}>{val}</div>
+    </div>
   </div>
 );
+
+// Anillo/gauge de disponibilidad
+const GaugeCard = ({ label, pct }) => {
+  const p = Math.max(0, Math.min(100, Math.round(pct || 0)));
+  const R = 33, C = 2 * Math.PI * R;
+  const color = dispColor(p);
+  return (
+    <div className="th-card" style={{ ...cardStyle, display: "flex", alignItems: "center", gap: 16 }}>
+      <div style={{ position: "relative", width: 82, height: 82, flexShrink: 0 }}>
+        <svg width="82" height="82" viewBox="0 0 82 82">
+          <circle cx="41" cy="41" r={R} fill="none" stroke="rgb(var(--th-line) / 0.16)" strokeWidth="9" />
+          <circle cx="41" cy="41" r={R} fill="none" stroke={color} strokeWidth="9" strokeLinecap="round"
+            strokeDasharray={C} strokeDashoffset={C * (1 - p / 100)} transform="rotate(-90 41 41)"
+            style={{ transition: "stroke-dashoffset .7s ease" }} />
+        </svg>
+        <div style={{
+          position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 19, fontWeight: 800, color,
+        }}>{p}%</div>
+      </div>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, letterSpacing: .5 }}>{label}</div>
+        <div style={{ fontSize: 12.5, color: T.muted, marginTop: 5 }}>de sondeos exitosos (OK o lento)</div>
+      </div>
+    </div>
+  );
+};
+
+// Gráfico de barras: fuentes caídas por día
+const GraficoFallos = ({ datos }) => {
+  if (!datos || !datos.length) {
+    return <p style={{ color: T.muted }}>Aún no hay historial de sondeos para graficar.</p>;
+  }
+  const max = Math.max(...datos.map((d) => d.fallos), 1);
+  return (
+    <div className="th-panel" style={{ borderRadius: 16, padding: "22px 20px 14px" }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 190, overflowX: "auto", paddingBottom: 6 }}>
+        {datos.map((d) => {
+          const h = Math.max(4, Math.round((d.fallos / max) * 150));
+          return (
+            <div key={d.fecha} title={`${d.fecha}: ${d.fallos} caídas de ${d.total} sondeadas`}
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, minWidth: 40 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: ROJO }}>{d.fallos}</span>
+              <div style={{
+                width: 28, height: h, borderRadius: "7px 7px 0 0",
+                background: `linear-gradient(180deg, ${ROJO}, rgba(239,68,68,.42))`,
+              }} />
+              <span style={{ fontSize: 10, color: T.muted, whiteSpace: "nowrap" }}>{d.fecha.slice(5)}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const Seccion = ({ titulo, children }) => (
   <div style={{ marginTop: 30 }}>

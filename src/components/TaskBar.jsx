@@ -98,6 +98,12 @@ let menuItems = [
   { path: "/c2e6b9a4", icon: <HelpCircle size={16} strokeWidth={1.75} />, label: "Ayuda", color: "lime" },
 ];
 
+// Monitoreo de fuentes (solo lectura) para el usuario NO admin:
+// puede ver el estado de las fuentes pero no lanzar escaneo ni ver el porcentaje.
+if (!isAdmin) {
+  menuItems.push({ path: "/7f2b9e4d", icon: <Activity size={16} strokeWidth={1.75} />, label: "Monitoreo de fuentes", color: "sky" });
+}
+
 // Accesos CRUD solo para admin
 if (isAdmin) {
   menuItems = [
