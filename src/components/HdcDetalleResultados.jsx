@@ -90,8 +90,8 @@ const DEBT_COMPOSITION_COLORS = ["#38bdf8", "#34d399", "#f59e0b", "#a78bfa", "#f
 
 function buildDebtCompositionData({ liabilities, creditCard, global }) {
   const direct = [
-    { name: "Obligaciones", value: sumField(liabilities, "debtBalance"), color: DEBT_COMPOSITION_COLORS[0] },
-    { name: "Tarjetas", value: sumField(creditCard, "debtBalance"), color: DEBT_COMPOSITION_COLORS[1] },
+    { name: "Obligaciones", value: sumBalance(liabilities), color: DEBT_COMPOSITION_COLORS[0] },
+    { name: "Tarjetas", value: sumBalance(creditCard), color: DEBT_COMPOSITION_COLORS[1] },
   ].filter((item) => item.value > 0);
 
   if (direct.length) return direct;
@@ -139,17 +139,29 @@ function firstValues(item) {
   return values.find((value) => value && typeof value === "object") || {};
 }
 
+// El saldo ACTUAL vive en values[].debtBalance (NO en account). Los productos
+// saldados/cancelados quedan en 0, así solo se suma la deuda vigente real y no
+// se infla con valores iniciales o históricos.
+function accountBalance(item) {
+  const v = numValue(firstValues(item).debtBalance);
+  return v > 0 ? v : numValue(acc(item).debtBalance);
+}
+
+function sumBalance(list) {
+  return list.reduce((total, item) => total + accountBalance(item), 0);
+}
+
+// SOLO señales realmente negativas. OJO: "cancelada voluntariamente",
+// "saldada", "pago total" y "al día" NO son negativas → no van aquí.
+// "cancelada por MAL MANEJO" sí, y se detecta por "mal manejo".
 const NEGATIVE_TERMS = [
   "mora",
   "vencid",
   "castig",
-  "cobro",
-  "jurid",
+  "cobro jurid",
   "prejurid",
-  "dudos",
-  "cancelad",
-  "recuper",
-  "reestructur",
+  "mal manejo",
+  "dudoso recaudo",
 ];
 
 function isNegativeCredit(item) {
@@ -548,7 +560,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
   const genero = basic.genderDesc || natural.genderDesc || "";
   const edad = age.min && age.max ? `${age.min} - ${age.max} años` : "—";
 
-  const totalDeuda = sumField(liabilities, "debtBalance") + sumField(creditCard, "debtBalance");
+  const totalDeuda = sumBalance(liabilities) + sumBalance(creditCard);
   const totalCuota = sumField(liabilities, "valueMonthlyPayment") + sumField(creditCard, "valueMonthlyPayment");
   const debtCompositionData = buildDebtCompositionData({ liabilities, creditCard, global });
   const debtTrendData = buildDebtTrendData(pr);

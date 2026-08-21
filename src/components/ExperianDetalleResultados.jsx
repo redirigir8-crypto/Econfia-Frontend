@@ -1082,6 +1082,18 @@ export default function ExperianDetalleResultados({ consultaId }) {
     ),
   ], [context.comportamiento, context.informacionRiesgo]);
 
+  const sectoresConCredito = useMemo(
+    () =>
+      safeArray(context.comportamiento?.sectores).filter(
+        (s) =>
+          Number(s?.creditosVigentes || 0) +
+            Number(s?.creditosCerrados || 0) +
+            Number(s?.totalPrincipal || 0) >
+          0
+      ),
+    [context.comportamiento]
+  );
+
   const financeFacts = useMemo(() => {
     if (isPj) {
       return compactFactsFromObject(context.estadosFinancieros, [
@@ -1209,6 +1221,47 @@ export default function ExperianDetalleResultados({ consultaId }) {
           </section>
 
           <SectionCard
+            icon={AlertTriangle}
+            title="Alertas"
+            description="Novedades y validaciones reportadas por la fuente para esta consulta."
+            action={
+              <div className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold ${
+                context.alertas.length
+                  ? "border-amber-500/30 bg-amber-500/[0.07] text-amber-600 dark:text-amber-300"
+                  : "border-emerald-500/30 bg-emerald-500/[0.07] text-emerald-600 dark:text-emerald-300"
+              }`}>
+                {context.alertas.length
+                  ? `${context.alertas.length} alerta${context.alertas.length !== 1 ? "s" : ""}`
+                  : "Sin alertas"}
+              </div>
+            }
+          >
+            {context.alertas.length ? (
+              <div className="grid gap-2.5">
+                {context.alertas.map((alerta, index) => (
+                  <div key={`alerta-${index}`} className="rounded-xl border border-amber-400/20 bg-amber-400/[0.05] px-4 py-3">
+                    <div className="flex items-start gap-2.5">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-amber-800 dark:text-amber-100">
+                          {displayValue(alerta?.alerta || alerta)}
+                        </div>
+                        {alerta?.colocacion || alerta?.modificacion ? (
+                          <div className="mt-1 text-[11px] text-muted">
+                            {[alerta?.colocacion, alerta?.modificacion].filter(Boolean).join(" · ")}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm italic text-muted">No se reportaron alertas para esta consulta.</p>
+            )}
+          </SectionCard>
+
+          <SectionCard
             icon={Briefcase}
             title="Resumen ejecutivo"
             description="Variables de negocio destacadas para una lectura inicial rápida."
@@ -1261,6 +1314,42 @@ export default function ExperianDetalleResultados({ consultaId }) {
               </div>
             </div>
           </SectionCard>
+
+          {sectoresConCredito.length ? (
+            <SectionCard
+              icon={Landmark}
+              title="Detalle de créditos por sector"
+              description="Distribución de los créditos vigentes y cerrados según el sector reportado por la fuente."
+            >
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[520px] border-collapse text-sm">
+                  <thead>
+                    <tr className="text-left text-[10px] uppercase tracking-[0.2em] text-muted">
+                      <th className="pb-2 pr-4 font-semibold">Sector</th>
+                      <th className="pb-2 px-3 text-center font-semibold">Vigentes</th>
+                      <th className="pb-2 px-3 text-center font-semibold">Cerrados</th>
+                      <th className="pb-2 px-3 text-right font-semibold">Valor inicial</th>
+                      <th className="pb-2 pl-3 text-right font-semibold">Saldo actual</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sectoresConCredito.map((s, i) => (
+                      <tr key={`sector-${i}`} className="border-t border-line/10">
+                        <td className="py-2.5 pr-4 font-semibold text-content">{displayValue(s?.sector)}</td>
+                        <td className="py-2.5 px-3 text-center text-content">{s?.creditosVigentes ?? "0"}</td>
+                        <td className="py-2.5 px-3 text-center text-content">{s?.creditosCerrados ?? "0"}</td>
+                        <td className="py-2.5 px-3 text-right text-muted">{formatMoney(s?.valorInicial)}</td>
+                        <td className="py-2.5 pl-3 text-right text-muted">{formatMoney(s?.saldoActual)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-3 text-[11px] italic text-muted">
+                MiDecisor reporta los créditos agrupados por sector. El nombre de cada entidad se obtiene en el producto Historia de Crédito (HDC+).
+              </p>
+            </SectionCard>
+          ) : null}
 
           <SectionCard
             icon={Wallet}

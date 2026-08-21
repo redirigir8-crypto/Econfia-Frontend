@@ -31,7 +31,6 @@ export default function ConsultaExperian() {
   const [tipoIdentificacion, setTipoIdentificacion] = useState("");
   const [numeroIdentificacion, setNumeroIdentificacion] = useState("");
   const [apellidoRazonSocial, setApellidoRazonSocial] = useState("");
-  const [forzarConsulta, setForzarConsulta] = useState(false);
   const [acepta, setAcepta] = useState(false);
   const [consentimiento, setConsentimiento] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -76,7 +75,7 @@ export default function ConsultaExperian() {
         tipoIdentificacion,
         numeroIdentificacion: numeroIdentificacion.trim(),
         apellidoRazonSocial: apellidoRazonSocial.trim(),
-        forzarConsulta,
+        forzarConsulta: false,
         autorizacion: {
           nombre_autorizado: buildAuthorizedName(),
           tipo_identificacion: tipoIdentificacion,
@@ -243,17 +242,6 @@ export default function ConsultaExperian() {
                   </div>
 
                   <div className="space-y-1 pt-1">
-                    <label className="group flex cursor-pointer items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={forzarConsulta}
-                        onChange={(event) => setForzarConsulta(event.target.checked)}
-                        className="h-4 w-4 cursor-pointer accent-cyan-500"
-                      />
-                      <span className="text-xs text-content/85 transition-colors group-hover:text-content">
-                        Forzar consulta nueva
-                      </span>
-                    </label>
                     <label className="group flex cursor-pointer items-center gap-2">
                       <input
                         type="checkbox"
