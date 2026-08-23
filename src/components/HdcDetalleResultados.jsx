@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
+  BookOpen,
   CreditCard,
   Landmark,
   PiggyBank,
@@ -73,6 +74,48 @@ function fmtText(value) {
   if (value === null || value === undefined || value === "" || value === "null") return "—";
   return String(value);
 }
+
+// Estado de la cédula: la fuente a veces solo trae el código (statusId "00").
+// Preferimos la descripción; si no viene, traducimos el código a texto legible.
+const ESTADO_CEDULA = { "00": "Vigente", "0": "Vigente" };
+function estadoDocumento(id) {
+  const desc = fmtText(id?.statusDesc);
+  if (desc !== "—") return desc;
+  const code = String(id?.statusId ?? "").trim();
+  return ESTADO_CEDULA[code] || (code && code !== "—" ? `Código ${code}` : "—");
+}
+
+// Glosario de siglas/códigos del reporte (fuente: Manual de Implementación HDC+ DataCrédito).
+const HDC_GLOSARIO = [
+  ["AHO", "Cuenta de ahorros"],
+  ["AHD", "Cuenta de ahorros — banca digital"],
+  ["CCB", "Cuenta corriente bancaria"],
+  ["TDC", "Tarjeta de crédito"],
+  ["CAB", "Cartera bancaria (consumo / libre inversión)"],
+  ["CBR", "Cartera bancaria rotativa (cupo rotativo)"],
+  ["CAV", "Cartera de ahorro y vivienda (crédito hipotecario)"],
+  ["CAU", "Cartera automotriz (crédito de vehículo)"],
+  ["CCF", "Cartera de compañías de financiamiento comercial"],
+  ["CDC", "Cartera de comunicaciones (planes / servicios)"],
+  ["CTC", "Cartera de telefonía celular"],
+  ["EDU", "Cartera de educación (crédito educativo)"],
+  ["NORMAL / NOR", "Cuenta sin novedades"],
+  ["GMF", "Cuenta exenta del 4x1.000 (Gravamen a los Movimientos Financieros)"],
+  ["ELE", "Producto electrónico / de bajo monto"],
+  ["SIN GAR", "Crédito sin garantía"],
+  ["ADMIS", "Garantía admisible (respaldo idóneo)"],
+  ["OTR GAR", "Otras garantías idóneas"],
+  ["NO IDÓNEA", "Garantía no idónea (respaldo débil)"],
+  ["Al día / Vigente", "Obligación al día en el corte reportado"],
+  ["Saldada", "Obligación pagada por completo y cerrada"],
+  ["Cancelada vol.", "El cliente canceló el producto por voluntad propia"],
+  ["Inactiva", "Cuenta sin movimientos"],
+  ["Calificación A", "Riesgo normal — al día (la mejor)"],
+  ["Calif. B / C / D / E", "Riesgo creciente (E = incobrable)"],
+  ["Vector: N", "Mes al día (comportamiento normal)"],
+  ["Vector: 1, 2, 3…", "Meses de mora (a mayor número, mayor atraso)"],
+  ["Vector: —", "Mes sin información reportada"],
+];
 
 // Cada cuenta viene como { account: {...} } — devuelve el objeto real.
 function acc(item) {
@@ -249,8 +292,10 @@ function Section({ icon: Icon, title, count, children }) {
 
 function estadoTone(desc) {
   const d = String(desc || "").toLowerCase();
-  if (d.includes("mora") || d.includes("vencid")) return "rose";
-  if (d.includes("al d") || d.includes("activ") || d.includes("vigente")) return "emerald";
+  if (d.includes("mora") || d.includes("vencid") || d.includes("mal manejo")) return "rose";
+  // "inactiva" contiene "activ": evaluar los estados de cierre ANTES que los activos.
+  if (d.includes("saldad") || d.includes("cancel") || d.includes("pago total") || d.includes("inactiv") || d.includes("devuelt")) return "amber";
+  if (d.includes("al d") || d.includes("activ") || d.includes("vigente") || d.includes("entregad")) return "emerald";
   return "slate";
 }
 
@@ -258,6 +303,7 @@ function Badge({ children, tone = "slate" }) {
   const tones = {
     emerald: "border-emerald-500/25 bg-emerald-500/10 text-emerald-300",
     rose: "border-rose-500/25 bg-rose-500/10 text-rose-300",
+    amber: "border-amber-500/25 bg-amber-500/10 text-amber-300",
     slate: "border-line/15 bg-surface-2/70 text-muted",
   };
   return (
@@ -267,17 +313,40 @@ function Badge({ children, tone = "slate" }) {
   );
 }
 
-function AccountCard({ titulo, subtitulo, estado, filas }) {
+function UsageBar({ saldo = 0, cupo = 0 }) {
+  if (cupo <= 0 && saldo <= 0) return null;
+  const pct = cupo > 0 ? Math.min(100, Math.round((saldo / cupo) * 100)) : (saldo > 0 ? 100 : 0);
+  // Tono según utilización: bajo = verde, medio = ámbar, alto = rojo.
+  const fill =
+    pct >= 80 ? "from-rose-500 to-rose-400"
+    : pct >= 40 ? "from-amber-400 to-amber-300"
+    : "from-cyan-400 to-emerald-400";
   return (
-    <div className="rounded-2xl border border-line/15 bg-surface-2/70 p-4 transition hover:border-brand/25 hover:bg-surface">
+    <div className="mb-3 rounded-xl border border-line/10 bg-surface/60 p-2.5">
+      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide">
+        <span className="text-emerald-300/90">Saldo {fmtMoney(saldo)}</span>
+        <span className="text-muted">Cupo {fmtMoney(cupo)}</span>
+      </div>
+      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-2">
+        <div className={`h-full rounded-full bg-gradient-to-r ${fill}`} style={{ width: `${pct}%` }} />
+      </div>
+      <div className="mt-1 text-right text-[10px] font-bold text-brand">{pct}% utilizado</div>
+    </div>
+  );
+}
+
+function AccountCard({ titulo, subtitulo, estado, barra, filas }) {
+  return (
+    <div className="flex h-full flex-col rounded-2xl border border-line/15 bg-surface-2/70 p-4 transition hover:border-brand/25 hover:bg-surface">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="truncate text-sm font-bold text-content">{titulo}</div>
           {subtitulo && <div className="mt-0.5 text-xs text-muted">{subtitulo}</div>}
         </div>
-        {estado && <Badge tone={estadoTone(estado)}>{estado}</Badge>}
+        {estado && estado !== "—" && <Badge tone={estadoTone(estado)}>{estado}</Badge>}
       </div>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+      {barra && <UsageBar saldo={barra.saldo} cupo={barra.cupo} />}
+      <div className="mt-auto grid grid-cols-2 gap-x-3 gap-y-2">
         {filas.filter((f) => f && f.value !== "—" && f.value !== "$0").map((f) => (
           <div key={f.label}>
             <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-muted">{f.label}</div>
@@ -541,7 +610,9 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
 
   const basic = deepFind(pr, "basicInformation") || {};
   const natural = deepFind(pr, "nationalNatural") || {};
-  const identificacion = basic.identification || natural.identification || {};
+  // Fusionamos ambas fuentes: basicInformation trae statusId pero no statusDesc;
+  // nationalNatural trae statusDesc ("VIGENTE"). Así el estado se muestra legible.
+  const identificacion = { ...(natural.identification || {}), ...(basic.identification || {}) };
   const age = basic.age || natural.age || {};
 
   const savings = toArray(deepFind(pr, "savings"));
@@ -667,7 +738,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
       <Section icon={UserRound} title="Identificación">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatTile label="Documento" value={fmtText(basic.personId?.personIdNumber)} tone="slate" />
-          <StatTile label="Estado documento" value={fmtText(identificacion.statusDesc || identificacion.statusId)} tone="slate" />
+          <StatTile label="Estado documento" value={estadoDocumento(identificacion)} tone="slate" />
           <StatTile label="Expedición" value={fmtText(identificacion.issueDate)} tone="slate" />
           <StatTile label="Ciudad expedición" value={fmtText(identificacion.issuingCityName)} tone="slate" />
         </div>
@@ -676,24 +747,26 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
       {/* Obligaciones */}
       {liabilities.length > 0 && (
         <Section icon={Landmark} title="Obligaciones / Créditos" count={liabilities.length}>
-          <div className="grid gap-2.5">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {liabilities.map((item, i) => {
               const a = acc(item);
+              const v = firstValues(item);
+              const st = item.status || {};
+              const la = item.liabilitiesAccount || {};
+              const feat = item.featuresLiabilities || {};
               return (
                 <AccountCard
                   key={a.primaryKey || i}
                   titulo={fmtText(a.businessLineName)}
-                  subtitulo={fmtText(a.featuresLiabilities?.typeOfCreditDesc || a.accountTypeDesc)}
-                  estado={a.status?.account?.businessAccountStatusDesc || a.paymentTypeDesc}
+                  subtitulo={fmtText(feat.typeOfCreditDesc || a.accountTypeDesc)}
+                  estado={fmtText(st.account?.businessAccountStatusDesc || st.payment?.businessBureauEventDesc)}
+                  barra={{ saldo: numValue(v.debtBalance), cupo: numValue(v.initialValue) }}
                   filas={[
-                    { label: "Saldo deuda", value: fmtMoney(a.debtBalance) },
-                    { label: "Cuota mensual", value: fmtMoney(a.valueMonthlyPayment) },
-                    { label: "Valor inicial", value: fmtMoney(a.initialValue) },
+                    { label: "Cuota mensual", value: fmtMoney(v.valueMonthlyPayment) },
                     { label: "Apertura", value: fmtText(a.accountOpeningDate) },
-                    { label: "Vencimiento", value: fmtText(a.liabilitiesAccount?.expiryDate) },
+                    { label: "Vencimiento", value: fmtText(la.expiryDate) },
                     { label: "Calificación", value: fmtText(a.ratingDesc) },
-                    { label: "Cuotas mora", value: fmtText(a.installmentsOverdue) },
-                    { label: "Saldo en mora", value: fmtMoney(a.businessValueBalanceOverdue) },
+                    { label: "Saldo en mora", value: fmtMoney(v.businessValueBalanceOverdue) },
                   ]}
                 />
               );
@@ -705,21 +778,23 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
       {/* Tarjetas de crédito */}
       {creditCard.length > 0 && (
         <Section icon={CreditCard} title="Tarjetas de crédito" count={creditCard.length}>
-          <div className="grid gap-2.5">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {creditCard.map((item, i) => {
               const a = acc(item);
+              const v = firstValues(item);
+              const st = item.status || {};
+              const feat = item.FeaturesCreditCard || {};
               return (
                 <AccountCard
                   key={a.primaryKey || i}
                   titulo={fmtText(a.businessLineCode || a.businessLineName)}
-                  subtitulo={fmtText(a.FeaturesCreditCard?.franchiseName)}
-                  estado={a.status?.account?.businessAccountStatusDesc}
+                  subtitulo={fmtText(feat.franchiseName)}
+                  estado={fmtText(st.account?.businessAccountStatusDesc || st.card?.cardStatusName)}
+                  barra={{ saldo: numValue(v.debtBalance), cupo: numValue(v.initialValue) }}
                   filas={[
-                    { label: "Cupo disponible", value: fmtMoney(a.availableBalance) },
-                    { label: "Saldo deuda", value: fmtMoney(a.debtBalance) },
-                    { label: "Cupo total", value: fmtMoney(a.initialValue) },
-                    { label: "Cuota mensual", value: fmtMoney(a.valueMonthlyPayment) },
-                    { label: "Estado tarjeta", value: fmtText(a.card?.cardStatusName) },
+                    { label: "Cupo disponible", value: fmtMoney(v.availableBalance) },
+                    { label: "Cuota mensual", value: fmtMoney(v.valueMonthlyPayment) },
+                    { label: "Estado tarjeta", value: fmtText(st.card?.cardStatusName) },
                     { label: "Apertura", value: fmtText(a.accountOpeningDate) },
                   ]}
                 />
@@ -732,15 +807,16 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
       {/* Cuentas / productos de ahorro */}
       {savings.length > 0 && (
         <Section icon={PiggyBank} title="Cuentas y productos" count={savings.length}>
-          <div className="grid gap-2.5 md:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {savings.map((item, i) => {
               const a = acc(item);
+              const st = item.status || {};
               return (
                 <AccountCard
                   key={a.primaryKey || i}
                   titulo={fmtText(a.businessLineName)}
                   subtitulo={fmtText(a.subAccountTypeName)}
-                  estado={a.status?.businessBureauEventDesc}
+                  estado={fmtText(st.businessBureauEventDesc)}
                   filas={[
                     { label: "Número", value: fmtText(a.accountNumber) },
                     { label: "Apertura", value: fmtText(a.accountOpeningDate) },
@@ -791,6 +867,21 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
           </div>
         </Section>
       )}
+
+      {/* Glosario de siglas */}
+      <Section icon={BookOpen} title="Glosario — ¿qué significan las siglas?" count={HDC_GLOSARIO.length}>
+        <p className="mb-3 text-xs text-muted">
+          Referencia rápida de los códigos que usa la central de riesgo en este informe.
+        </p>
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+          {HDC_GLOSARIO.map(([sigla, significado]) => (
+            <div key={sigla} className="rounded-2xl border border-line/15 bg-surface-2/70 p-3">
+              <div className="text-xs font-bold text-cyan-300">{sigla}</div>
+              <div className="mt-0.5 text-xs text-content">{significado}</div>
+            </div>
+          ))}
+        </div>
+      </Section>
 
       {/* JSON crudo (respaldo) */}
       <div>

@@ -4,7 +4,9 @@ import {
   BadgeCheck,
   Briefcase,
   Building2,
+  CheckCircle2,
   FileSearch,
+  Info,
   Landmark,
   ShieldCheck,
   UserRound,
@@ -72,6 +74,14 @@ function numericValue(value) {
   if (!raw || raw === "-" || raw === "." || raw === "-.") return null;
   const numeric = Number(raw);
   return Number.isFinite(numeric) ? numeric : null;
+}
+
+// Los saldos del bloque "comportamientoCrediticio" (MiDecisor) vienen en MILES
+// de pesos (p.ej. valorInicial "900" = $900.000). El ingreso y el monto sugerido
+// vienen en pesos completos y NO se escalan.
+function milesAPesos(value) {
+  const n = numericValue(value);
+  return n === null ? 0 : n * 1000;
 }
 
 function formatPercent(value) {
@@ -265,8 +275,17 @@ const METRIC_COLORS = {
   Alertas:          { top: "border-t-rose-500/60",    text: "text-rose-500"    },
 };
 
-function MetricCard({ label, value }) {
-  const palette = METRIC_COLORS[label] ?? { top: "border-t-cyan-500/50", text: "text-brand" };
+const TONE_PALETTE = {
+  emerald: { top: "border-t-emerald-500/60", text: "text-emerald-500" },
+  amber:   { top: "border-t-amber-500/60",   text: "text-amber-500"   },
+  rose:    { top: "border-t-rose-500/60",    text: "text-rose-500"    },
+  cyan:    { top: "border-t-cyan-500/50",    text: "text-brand"       },
+};
+
+function MetricCard({ label, value, hint, tone }) {
+  // `tone` (si viene) manda sobre el color por etiqueta: así "Alertas" no se
+  // pinta de rojo cuando las alertas no son realmente negativas.
+  const palette = tone ? TONE_PALETTE[tone] : (METRIC_COLORS[label] ?? TONE_PALETTE.cyan);
   const Icon =
     label === "Monto sugerido" ? Wallet :
     label === "Alertas" ? AlertTriangle :
@@ -285,6 +304,7 @@ function MetricCard({ label, value }) {
         <div className="min-w-0">
           <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">{label}</div>
           <div className={`mt-2 text-2xl font-extrabold tracking-tight ${palette.text}`}>{displayValue(value)}</div>
+          {hint ? <div className="mt-1.5 text-[11px] leading-4 text-muted">{hint}</div> : null}
         </div>
       </div>
     </div>
@@ -666,6 +686,36 @@ const PAYMENT_STATUS = {
   "90": { label: "Mora 90 o mas", color: "bg-rose-500", text: "text-rose-200", border: "border-rose-400/25" },
 };
 
+// Texto plano de una alerta (viene como string o como objeto con .alerta).
+function alertaTexto(alerta) {
+  if (typeof alerta === "string") return alerta;
+  return String(alerta?.alerta || Object.values(alerta || {}).filter(Boolean).join(" "));
+}
+
+// Clasifica una alerta según su significado real para la persona:
+//  - "ok": buena noticia (p.ej. NO aparece en listas restrictivas).
+//  - "risk": señal negativa real (mora, castigo, embargo, coincidencia en listas...).
+//  - "info": novedad informativa, ni buena ni mala (p.ej. nuevas direcciones).
+function classifyAlerta(alerta) {
+  const text = alertaTexto(alerta).toLowerCase();
+  const positivo = /(no se encuentra|sin coincidencia|no coincid|ninguna coincidencia|no presenta|no registra|no reporta|no aparece|no tiene)/.test(text);
+  if (positivo) return { kind: "ok", label: "Sin novedad", explica: "Es una validación positiva: la fuente NO encontró nada negativo en este punto." };
+  const riesgo = /(mora|vencid|castig|cobro jur|prejur|embargo|demanda|fallec|mal manejo|dudoso|coincid\w* con.*lista|reportad\w* negativ)/.test(text);
+  if (riesgo) return { kind: "risk", label: "Requiere revisión", explica: "Es una señal negativa: conviene revisarla antes de decidir." };
+  return { kind: "info", label: "Informativa", explica: "Es un dato informativo, ni bueno ni malo por sí solo." };
+}
+
+const ALERT_STYLES = {
+  ok:   { wrap: "border-emerald-400/25 bg-emerald-400/[0.06]", icon: "text-emerald-400", title: "text-emerald-700 dark:text-emerald-100", Icon: CheckCircle2 },
+  info: { wrap: "border-cyan-400/20 bg-cyan-400/[0.05]",       icon: "text-cyan-300",    title: "text-content",                          Icon: Info },
+  risk: { wrap: "border-rose-400/25 bg-rose-400/[0.06]",       icon: "text-rose-400",    title: "text-rose-700 dark:text-rose-100",      Icon: AlertTriangle },
+};
+
+// Cuántas de las alertas son realmente de riesgo (para no pintar todo en rojo).
+function contarAlertasRiesgo(alertas) {
+  return safeArray(alertas).filter((a) => classifyAlerta(a).kind === "risk").length;
+}
+
 function paymentStatusFor(value) {
   const key = String(value || "").trim().toUpperCase();
   return PAYMENT_STATUS[key] || PAYMENT_STATUS.D;
@@ -675,7 +725,7 @@ function buildAdjudicatorDebtData(crediticio) {
   const trimestres = safeArray(crediticio?.evolucionRoPN?.trimestres);
   const cuotas = safeArray(crediticio?.evolucionSaldoCuotaPN?.trimestres);
   const cuotaByTrimester = new Map(
-    cuotas.map((item) => [String(item?.trimestre || ""), numericValue(item?.cuotaTotal) || 0])
+    cuotas.map((item) => [String(item?.trimestre || ""), milesAPesos(item?.cuotaTotal)])
   );
 
   return trimestres
@@ -684,8 +734,8 @@ function buildAdjudicatorDebtData(crediticio) {
       return {
         periodo: formatPeriodLabel(periodo),
         rawPeriodo: String(periodo || ""),
-        cupo: numericValue(item?.cupoTotal) || 0,
-        saldo: numericValue(item?.saldoTotal) || 0,
+        cupo: milesAPesos(item?.cupoTotal),
+        saldo: milesAPesos(item?.saldoTotal),
         deuda: numericValue(item?.porcentajeDeuda) || 0,
         cuota: cuotaByTrimester.get(String(periodo || "")) || 0,
       };
@@ -740,7 +790,10 @@ function IncomeGauge({ ingreso, cuotaVsIngreso }) {
         Analisis de ingresos
       </div>
       <div className="mt-2 text-2xl font-extrabold tracking-tight text-content">{formatMoney(ingreso)}</div>
-      <p className="mt-1 text-xs leading-5 text-muted">Ingreso estimado reportado frente a cuota mensual.</p>
+      <p className="mt-1 text-xs leading-5 text-muted">
+        Ingreso <strong>estimado por la fuente</strong> a partir de su comportamiento financiero
+        (no es el salario que declara la persona). Se compara contra la cuota mensual de sus créditos.
+      </p>
 
       <div className="mt-5 flex items-end gap-5">
         <div className="relative h-36 w-16 overflow-hidden rounded-2xl border border-line/15 bg-surface p-1.5">
@@ -765,6 +818,11 @@ function IncomeGauge({ ingreso, cuotaVsIngreso }) {
               style={{ width: `${clamped}%` }}
             />
           </div>
+          <p className="mt-3 text-[11px] leading-4 text-muted">
+            {percent <= 0
+              ? "0% significa que hoy NO tiene cuotas de crédito activas: sus deudas actuales no comprometen su ingreso. Es una señal buena."
+              : `Sus cuotas mensuales equivalen al ${formatPercent(percent)} de su ingreso. Entre más bajo, mayor capacidad para asumir un nuevo crédito.`}
+          </p>
         </div>
       </div>
     </div>
@@ -785,7 +843,7 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
     <SectionCard
       icon={AlertTriangle}
       title="Endeudamiento y comportamiento de pago"
-      description="Lectura visual de alertas, ingreso estimado y evolución trimestral del cupo, saldo y porcentaje de deuda."
+      description="Cómo ha evolucionado su deuda trimestre a trimestre. Cupo = cuánto crédito le han aprobado; Saldo = cuánto debe; % deuda = qué parte del cupo está usando. Si cupo y saldo están en $0, quiere decir que en ese período no tenía créditos con saldo reportado."
       action={
         <div className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-3.5 py-1.5 text-xs font-semibold text-emerald-200">
           Econfia Adjudicator
@@ -800,7 +858,8 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
                 Evolucion de cupo, saldo y deuda
               </div>
               <p className="mt-1 text-xs leading-5 text-muted">
-                Comparativo trimestral con doble escala para valores reportados y porcentaje de deuda.
+                Eje izquierdo = pesos ($ cupo y saldo). Eje derecho = % de deuda. Cada punto es un trimestre.
+                La línea azul es el cupo, las barras verdes el saldo y la línea naranja punteada el % usado.
               </p>
             </div>
             <div className="flex flex-wrap gap-3 text-[10px] font-semibold text-muted">
@@ -931,18 +990,28 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
   );
 }
 
-function buildExecutiveMetrics(detalle, isPj) {
+function buildExecutiveMetrics(detalle, isPj, alertas = []) {
+  const totalAlertas = safeArray(alertas).length || Number(detalle?.cantidad_alertas || 0);
+  const alertasRiesgo = contarAlertasRiesgo(alertas);
+  // Rojo solo si hay alertas realmente negativas; si no, ámbar (hay novedades
+  // informativas) o verde (ninguna alerta).
+  const alertaTone = alertasRiesgo > 0 ? "rose" : (totalAlertas > 0 ? "amber" : "emerald");
+  const alertaHint = alertasRiesgo > 0
+    ? `${alertasRiesgo} de ${totalAlertas} requieren revisión.`
+    : (totalAlertas > 0 ? "Novedades informativas, ninguna negativa." : "Sin novedades reportadas.");
+  const montoHint = "Valor de crédito que el modelo sugiere según su capacidad de pago.";
+
   if (isPj) {
     return [
-      { label: "Riesgo",           value: detalle?.nivel_riesgo || detalle?.resumen_json?.nivel },
-      { label: "Monto sugerido",   value: formatMoney(detalle?.monto_sugerido || detalle?.resumen_json?.monto_sugerido) },
-      { label: "Alertas",          value: detalle?.cantidad_alertas ?? "0" },
+      { label: "Riesgo",         value: detalle?.nivel_riesgo || detalle?.resumen_json?.nivel, hint: "Nivel de riesgo estimado de la empresa." },
+      { label: "Monto sugerido", value: formatMoney(detalle?.monto_sugerido || detalle?.resumen_json?.monto_sugerido), hint: montoHint },
+      { label: "Alertas",        value: totalAlertas, hint: alertaHint, tone: alertaTone },
     ];
   }
   return [
-    { label: "Viabilidad",       value: detalle?.viabilidad || detalle?.resumen_json?.viabilidad },
-    { label: "Monto sugerido",   value: formatMoney(detalle?.monto_sugerido || detalle?.resumen_json?.monto_sugerido) },
-    { label: "Alertas",          value: detalle?.cantidad_alertas ?? "0" },
+    { label: "Viabilidad",     value: detalle?.viabilidad || detalle?.resumen_json?.viabilidad, hint: "Qué tan viable es otorgarle crédito (ALTA = buen perfil)." },
+    { label: "Monto sugerido", value: formatMoney(detalle?.monto_sugerido || detalle?.resumen_json?.monto_sugerido), hint: montoHint },
+    { label: "Alertas",        value: totalAlertas, hint: alertaHint, tone: alertaTone },
   ];
 }
 
@@ -1024,7 +1093,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
     context.datosBasicos?.razonSocial ||
     detalle?.apellido_razon_social ||
     detalle?.numero_identificacion;
-  const metrics    = useMemo(() => buildExecutiveMetrics(detalle, isPj), [detalle, isPj]);
+  const metrics    = useMemo(() => buildExecutiveMetrics(detalle, isPj, context.alertas), [detalle, isPj, context.alertas]);
   const gaugeProps = useMemo(() => buildGaugeProps(detalle, isPj),       [detalle, isPj]);
 
   const summaryFacts = useMemo(() => {
@@ -1077,7 +1146,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
     ...compactFactsFromObject(context.comportamiento, ["creditosVigentes", "creditosCerrados", "saldoActual", "valorCuota", "porcentajeDeuda"]).map(
       (item) =>
         item.label.toLowerCase().includes("saldo") || item.label.toLowerCase().includes("cuota")
-          ? { ...item, value: formatMoney(item.value) }
+          ? { ...item, value: formatMoney(milesAPesos(item.value)) }
           : item
     ),
   ], [context.comportamiento, context.informacionRiesgo]);
@@ -1102,7 +1171,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
     }
     return compactFactsFromObject(context.endeudamiento, Object.keys(context.endeudamiento || {})).map((item) => ({
       ...item,
-      value: item.label.toLowerCase().includes("porcentaje") ? item.value : formatMoney(item.value),
+      value: item.label.toLowerCase().includes("porcentaje") ? formatPercent(item.value) : formatMoney(item.value),
     }));
   }, [context.endeudamiento, context.estadosFinancieros, isPj]);
 
@@ -1119,10 +1188,12 @@ export default function ExperianDetalleResultados({ consultaId }) {
     }
 
     return buildTrendBars([
-      ["Saldo actual", context.comportamiento?.saldoActual || context.endeudamiento?.saldoActual],
-      ["Valor cuota", context.comportamiento?.valorCuota || context.endeudamiento?.valorCuota],
+      // Los saldos del comportamiento vienen en miles → a pesos. El monto
+      // sugerido ya viene en pesos completos.
+      ["Saldo actual", milesAPesos(context.comportamiento?.saldoActual || context.endeudamiento?.saldoActual)],
+      ["Valor cuota", milesAPesos(context.comportamiento?.valorCuota || context.endeudamiento?.valorCuota)],
       ["Monto sugerido", detalle?.monto_sugerido || detalle?.resumen_json?.monto_sugerido],
-      ["Saldo en mora", context.comportamiento?.saldoMora || context.endeudamiento?.saldoMora],
+      ["Saldo en mora", milesAPesos(context.comportamiento?.saldoMora || context.endeudamiento?.saldoMora)],
     ]);
   }, [context.comportamiento, context.endeudamiento, context.estadosFinancieros, detalle?.monto_sugerido, detalle?.resumen_json, isPj]);
 
@@ -1195,8 +1266,13 @@ export default function ExperianDetalleResultados({ consultaId }) {
               </div>
 
               {/* ── Center: gauge ───────────────────────────────────────── */}
-              <div className="flex min-h-[260px] items-center justify-center rounded-[26px] border border-line/15 bg-surface-2/70 p-5 shadow-lg shadow-black/5 backdrop-blur-xl">
+              <div className="flex min-h-[260px] flex-col items-center justify-center rounded-[26px] border border-line/15 bg-surface-2/70 p-5 shadow-lg shadow-black/5 backdrop-blur-xl">
                 <SpeedoGauge {...gaugeProps} />
+                <p className="mt-3 max-w-[280px] text-center text-[11px] leading-4 text-muted">
+                  {isPj
+                    ? "Rating de riesgo de la empresa. Mientras mejor la letra (AA es lo más alto), menor es el riesgo."
+                    : "Puntaje de 0 a 1000. Entre más alto, mejor es el perfil y menor el riesgo. La aguja hacia “BAJO” (derecha) significa riesgo bajo."}
+                </p>
               </div>
 
               {/* ── Right: metric cards ─────────────────────────────────── */}
@@ -1210,7 +1286,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
                   Ver evidencia tecnica
                 </button>
                 {metrics.map((metric) => (
-                  <MetricCard key={metric.label} label={metric.label} value={metric.value} />
+                  <MetricCard key={metric.label} label={metric.label} value={metric.value} hint={metric.hint} tone={metric.tone} />
                 ))}
                 <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] px-5 py-4 text-sm leading-6 text-muted shadow-lg shadow-black/5">
                   <span className="font-semibold text-brand">Nivel de lectura:</span>{" "}
@@ -1223,38 +1299,48 @@ export default function ExperianDetalleResultados({ consultaId }) {
           <SectionCard
             icon={AlertTriangle}
             title="Alertas"
-            description="Novedades y validaciones reportadas por la fuente para esta consulta."
+            description="Novedades y validaciones que la fuente reportó. Ojo: no todas son malas — una validación en verde significa que NO se encontró nada negativo."
             action={
-              <div className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold ${
-                context.alertas.length
-                  ? "border-amber-500/30 bg-amber-500/[0.07] text-amber-600 dark:text-amber-300"
-                  : "border-emerald-500/30 bg-emerald-500/[0.07] text-emerald-600 dark:text-emerald-300"
-              }`}>
-                {context.alertas.length
-                  ? `${context.alertas.length} alerta${context.alertas.length !== 1 ? "s" : ""}`
-                  : "Sin alertas"}
-              </div>
+              (() => {
+                const riesgo = contarAlertasRiesgo(context.alertas);
+                const total = context.alertas.length;
+                const cls = riesgo > 0
+                  ? "border-rose-500/30 bg-rose-500/[0.07] text-rose-600 dark:text-rose-300"
+                  : total > 0
+                    ? "border-cyan-500/30 bg-cyan-500/[0.07] text-cyan-600 dark:text-cyan-300"
+                    : "border-emerald-500/30 bg-emerald-500/[0.07] text-emerald-600 dark:text-emerald-300";
+                const txt = riesgo > 0
+                  ? `${riesgo} por revisar`
+                  : total > 0 ? `${total} informativa${total !== 1 ? "s" : ""}` : "Sin alertas";
+                return <div className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold ${cls}`}>{txt}</div>;
+              })()
             }
           >
             {context.alertas.length ? (
               <div className="grid gap-2.5">
-                {context.alertas.map((alerta, index) => (
-                  <div key={`alerta-${index}`} className="rounded-xl border border-amber-400/20 bg-amber-400/[0.05] px-4 py-3">
-                    <div className="flex items-start gap-2.5">
-                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-amber-800 dark:text-amber-100">
-                          {displayValue(alerta?.alerta || alerta)}
-                        </div>
-                        {alerta?.colocacion || alerta?.modificacion ? (
-                          <div className="mt-1 text-[11px] text-muted">
-                            {[alerta?.colocacion, alerta?.modificacion].filter(Boolean).join(" · ")}
+                {context.alertas.map((alerta, index) => {
+                  const cls = classifyAlerta(alerta);
+                  const style = ALERT_STYLES[cls.kind];
+                  const AIcon = style.Icon;
+                  return (
+                    <div key={`alerta-${index}`} className={`rounded-xl border ${style.wrap} px-4 py-3`}>
+                      <div className="flex items-start gap-2.5">
+                        <AIcon className={`mt-0.5 h-4 w-4 shrink-0 ${style.icon}`} />
+                        <div className="min-w-0">
+                          <div className={`text-sm font-semibold ${style.title}`}>
+                            {displayValue(alerta?.alerta || alerta)}
                           </div>
-                        ) : null}
+                          <div className="mt-1 text-[11px] leading-4 text-muted">{cls.explica}</div>
+                          {alerta?.colocacion || alerta?.modificacion ? (
+                            <div className="mt-1 text-[11px] text-muted">
+                              {[alerta?.colocacion, alerta?.modificacion].filter(Boolean).join(" · ")}
+                            </div>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-sm italic text-muted">No se reportaron alertas para esta consulta.</p>
@@ -1338,8 +1424,8 @@ export default function ExperianDetalleResultados({ consultaId }) {
                         <td className="py-2.5 pr-4 font-semibold text-content">{displayValue(s?.sector)}</td>
                         <td className="py-2.5 px-3 text-center text-content">{s?.creditosVigentes ?? "0"}</td>
                         <td className="py-2.5 px-3 text-center text-content">{s?.creditosCerrados ?? "0"}</td>
-                        <td className="py-2.5 px-3 text-right text-muted">{formatMoney(s?.valorInicial)}</td>
-                        <td className="py-2.5 pl-3 text-right text-muted">{formatMoney(s?.saldoActual)}</td>
+                        <td className="py-2.5 px-3 text-right text-muted">{formatMoney(milesAPesos(s?.valorInicial))}</td>
+                        <td className="py-2.5 pl-3 text-right text-muted">{formatMoney(milesAPesos(s?.saldoActual))}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1357,7 +1443,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
             description={
               isPj
                 ? "Resumen financiero consolidado para lectura comercial."
-                : "Indicadores financieros y de endeudamiento usados por el análisis."
+                : "Indicadores usados por el análisis. Ingreso = ingreso mensual estimado por la fuente (no el salario declarado). Porcentaje cuota vs ingreso = qué parte de ese ingreso se va en pagar cuotas (0 = sin cuotas activas). Monto sugerido = crédito recomendado según su capacidad."
             }
           >
             <FactGrid items={financeFacts} />
