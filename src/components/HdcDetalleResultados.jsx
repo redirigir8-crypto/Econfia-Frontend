@@ -335,6 +335,69 @@ function UsageBar({ saldo = 0, cupo = 0 }) {
   );
 }
 
+// Estado de cada producto según la fuente (para el desglose por sección).
+function estadoDeItem(item, section) {
+  const st = item?.status || {};
+  if (section === "savings") return fmtText(st.businessBureauEventDesc);
+  return fmtText(st.account?.businessAccountStatusDesc || st.payment?.businessBureauEventDesc);
+}
+
+// ¿La obligación/tarjeta está vigente (al día / activa)? "Inactiva" NO cuenta.
+function esActivaEstado(estado) {
+  const d = String(estado || "").toLowerCase();
+  if (d.includes("inactiv")) return false;
+  return d.includes("al d") || d.includes("vigente") || d.includes("activ");
+}
+
+// Normaliza el estado a una etiqueta corta y legible para las fichas de conteo.
+function normalizaEstado(estado) {
+  const d = String(estado || "").toUpperCase();
+  if (d.includes("AL D")) return "Al día";
+  if (d.includes("PAGO TOTAL")) return "Pago total";
+  if (d.includes("CANCELAD")) return "Cancelada";
+  if (d.includes("SALDAD")) return "Saldada";
+  if (d.includes("INACTIV")) return "Inactiva";
+  if (d.includes("CUENTA ACTIVA") || d.includes("ACTIVA")) return "Activa";
+  if (d.includes("DEVUELT")) return "Devuelta";
+  if (d.includes("NO REPORT")) return "No reportó";
+  return estado && estado !== "—" ? estado : "Sin estado";
+}
+
+// Cuenta activas vs cerradas y desglosa por estado. Base: el estado reportado
+// por la central (no la fecha), que es lo que define si está viva o cerrada.
+function resumenEstados(items, section) {
+  const counts = {};
+  let activas = 0;
+  for (const it of items || []) {
+    const est = estadoDeItem(it, section);
+    if (esActivaEstado(est)) activas += 1;
+    const norm = normalizaEstado(est);
+    counts[norm] = (counts[norm] || 0) + 1;
+  }
+  return { counts, activas, cerradas: (items?.length || 0) - activas };
+}
+
+function EstadoBreakdown({ items, section }) {
+  const { counts, activas, cerradas } = resumenEstados(items, section);
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2">
+      <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">
+        {activas} al día / activas
+      </span>
+      <span className="rounded-full border border-line/15 bg-surface-2/70 px-3 py-1 text-xs font-semibold text-muted">
+        {cerradas} cerradas
+      </span>
+      <span className="hidden text-line/30 sm:inline">|</span>
+      {entries.map(([est, n]) => (
+        <span key={est} className="rounded-full border border-line/12 bg-surface-2/50 px-2.5 py-1 text-[11px] font-medium text-muted">
+          {est}: <strong className="text-content">{n}</strong>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function AccountCard({ titulo, subtitulo, estado, barra, filas }) {
   return (
     <div className="flex h-full flex-col rounded-2xl border border-line/15 bg-surface-2/70 p-4 transition hover:border-brand/25 hover:bg-surface">
@@ -747,6 +810,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
       {/* Obligaciones */}
       {liabilities.length > 0 && (
         <Section icon={Landmark} title="Obligaciones / Créditos" count={liabilities.length}>
+          <EstadoBreakdown items={liabilities} section="liabilities" />
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {liabilities.map((item, i) => {
               const a = acc(item);
@@ -778,6 +842,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
       {/* Tarjetas de crédito */}
       {creditCard.length > 0 && (
         <Section icon={CreditCard} title="Tarjetas de crédito" count={creditCard.length}>
+          <EstadoBreakdown items={creditCard} section="creditCard" />
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {creditCard.map((item, i) => {
               const a = acc(item);
@@ -807,6 +872,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
       {/* Cuentas / productos de ahorro */}
       {savings.length > 0 && (
         <Section icon={PiggyBank} title="Cuentas y productos" count={savings.length}>
+          <EstadoBreakdown items={savings} section="savings" />
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {savings.map((item, i) => {
               const a = acc(item);
@@ -882,6 +948,13 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
           ))}
         </div>
       </Section>
+
+      {/* Fuente oficial */}
+      <div className="rounded-2xl border border-line/15 bg-surface-2/60 px-5 py-4 text-center text-[11px] leading-5 text-muted">
+        Fuente oficial de la información: <strong className="text-content">EXPERIAN COLOMBIA S.A.</strong> (NIT 900.422.614-8).
+        Consulta realizada bajo autorización del titular. Información de carácter informativo y de apoyo a la decisión;
+        no reemplaza el análisis crediticio completo.
+      </div>
 
       {/* JSON crudo (respaldo) */}
       <div>

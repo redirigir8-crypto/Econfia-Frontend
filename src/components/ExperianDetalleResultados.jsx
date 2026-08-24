@@ -58,10 +58,10 @@ function displayValue(value) {
 }
 
 function formatMoney(value) {
-  const raw = String(value ?? "").replace(/[^\d-]/g, "");
-  if (!raw) return displayValue(value);
-  const numeric = Number(raw);
-  if (Number.isNaN(numeric)) return displayValue(value);
+  // OJO: no usar replace(/[^\d-]/g,"") porque borra el punto decimal y convierte
+  // "1313000.0" en "13130000" (×10). numericValue conserva el decimal y redondea.
+  const numeric = numericValue(value);
+  if (numeric === null) return displayValue(value);
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
     currency: "COP",
@@ -679,8 +679,10 @@ function SugerenciasBlock({ sugerencias }) {
 }
 
 const PAYMENT_STATUS = {
-  N: { label: "Normal", color: "bg-emerald-300", text: "text-emerald-200", border: "border-emerald-400/25" },
-  D: { label: "No se recibio / no existe", color: "bg-slate-400", text: "text-muted", border: "border-line/15" },
+  N: { label: "Al día", color: "bg-emerald-300", text: "text-emerald-200", border: "border-emerald-400/25" },
+  D: { label: "Sin información", color: "bg-slate-400", text: "text-muted", border: "border-line/15" },
+  "1": { label: "En mora (nivel 1)", color: "bg-yellow-300", text: "text-yellow-200", border: "border-yellow-400/25" },
+  "2": { label: "En mora (nivel 2)", color: "bg-orange-400", text: "text-orange-200", border: "border-orange-400/25" },
   "30": { label: "Mora 30", color: "bg-yellow-300", text: "text-yellow-200", border: "border-yellow-400/25" },
   "60": { label: "Mora 60", color: "bg-orange-400", text: "text-orange-200", border: "border-orange-400/25" },
   "90": { label: "Mora 90 o mas", color: "bg-rose-500", text: "text-rose-200", border: "border-rose-400/25" },
@@ -779,6 +781,44 @@ function AdjudicatorTooltip({ active, payload, label }) {
   );
 }
 
+// Estimación de ingreso mensual + capacidad: cuánto del ingreso se va en cuotas
+// y cuánto queda disponible. Elegante y honesto (usa solo datos reales).
+function MonthlyCapacity({ ingreso, cuotaVsIngreso }) {
+  const ing = numericValue(ingreso) || 0;
+  if (ing <= 0) return null;
+  const semestral = ing * 6;
+  const pct = Math.max(0, Math.min(100, numericValue(cuotaVsIngreso) || 0));
+  const cuota = Math.round((ing * pct) / 100);
+  const disponible = Math.max(0, ing - cuota);
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-line/15 bg-surface-2/70 p-5 shadow-lg shadow-black/5">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-300/50 via-cyan-300/25 to-transparent" />
+      <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">Ingreso mensual estimado</div>
+      <div className="mt-2 flex items-baseline gap-1">
+        <span className="text-2xl font-extrabold tracking-tight text-content">{formatMoney(ing)}</span>
+        <span className="text-xs font-semibold text-muted">/ mes</span>
+      </div>
+      <p className="mt-1 text-[11px] leading-4 text-muted">Estimación de la fuente sobre los últimos ~6 meses.</p>
+
+      <div className="mt-3 flex items-center justify-between rounded-xl border border-cyan-400/20 bg-cyan-400/[0.05] px-3 py-2">
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Ingreso semestral estimado (×6)</span>
+        <span className="text-sm font-black text-cyan-200">{formatMoney(semestral)}</span>
+      </div>
+
+      <div className="mt-4 flex h-3.5 overflow-hidden rounded-full bg-surface-2 ring-1 ring-line/10">
+        {pct > 0 && (
+          <div className="h-full bg-gradient-to-r from-amber-400 to-amber-300" style={{ width: `${pct}%` }} />
+        )}
+        <div className="h-full flex-1 bg-gradient-to-r from-cyan-400 to-emerald-400" />
+      </div>
+      <div className="mt-2 flex items-center justify-between text-[11px] font-semibold">
+        <span className="text-amber-300">Cuotas {formatMoney(cuota)}</span>
+        <span className="text-emerald-300">Disponible {formatMoney(disponible)}</span>
+      </div>
+    </div>
+  );
+}
+
 function IncomeGauge({ ingreso, cuotaVsIngreso }) {
   const percent = numericValue(cuotaVsIngreso) || 0;
   const clamped = Math.max(0, Math.min(100, percent));
@@ -791,8 +831,9 @@ function IncomeGauge({ ingreso, cuotaVsIngreso }) {
       </div>
       <div className="mt-2 text-2xl font-extrabold tracking-tight text-content">{formatMoney(ingreso)}</div>
       <p className="mt-1 text-xs leading-5 text-muted">
-        Ingreso <strong>estimado por la fuente</strong> a partir de su comportamiento financiero
-        (no es el salario que declara la persona). Se compara contra la cuota mensual de sus créditos.
+        Ingreso mensual <strong>estimado por la fuente</strong> (promedio de los últimos ~6 meses),
+        a partir de su comportamiento financiero — no es el salario que declara la persona.
+        Se compara contra la cuota mensual de sus créditos.
       </p>
 
       <div className="mt-5 flex items-end gap-5">
@@ -933,8 +974,13 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
 
           {paymentData.length ? (
             <div className="mt-5 border-t border-line/10 pt-4">
-              <div className="mb-3 text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">
+              <div className="mb-1 text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">
                 Comportamiento de pago mensual
+              </div>
+              <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-muted">
+                <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-emerald-300" />Al día (N)</span>
+                <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-yellow-300" />En mora (1, 2, 3…)</span>
+                <span className="inline-flex items-center gap-1.5"><i className="h-2 w-2 rounded-full bg-slate-400" />Sin información (—)</span>
               </div>
               <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(64px,1fr))]">
                 {paymentData.map((item) => (
@@ -955,6 +1001,7 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
 
         <div className="grid gap-4">
           <IncomeGauge ingreso={ingreso} cuotaVsIngreso={cuotaVsIngreso} />
+          <MonthlyCapacity ingreso={ingreso} cuotaVsIngreso={cuotaVsIngreso} />
           <div className="rounded-2xl border border-line/15 bg-surface-2/70 p-5 shadow-lg shadow-black/5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -1023,6 +1070,26 @@ function buildGaugeProps(detalle, isPj) {
   const score = Number(detalle?.score_valor || detalle?.resumen_json?.score) || 0;
   return { value: score, max: 1000, label: "Score" };
 }
+
+// Glosario del Adjudicator (Tabla 12 ratingRecaudos + términos generales).
+const ADJ_GLOSARIO = [
+  ["Score", "Puntaje de riesgo de 0 a 1000 (entre más alto, mejor perfil y menor riesgo)."],
+  ["Viabilidad ALTA / MEDIA / BAJA", "Recomendación de otorgamiento según el perfil (ALTA = favorable)."],
+  ["Rating recaudo A", "Suele cumplir solo con el envío de la factura."],
+  ["Rating recaudo B", "Cumple con la factura + un recordatorio de pago amable."],
+  ["Rating recaudo C", "Cumple con la factura + cobranza contundente (intensidad alta)."],
+  ["Rating recaudo D", "Requiere reestructuración o acuerdo de pago."],
+  ["Rating recaudo N", "Sin información suficiente para calificar."],
+  ["Ingreso mensual estimado", "Lo calcula la fuente (Experian) según el comportamiento financiero, no el salario declarado."],
+  ["Ingreso semestral estimado", "Proyección del ingreso mensual a 6 meses (mensual ×6)."],
+  ["Cuota vs. ingreso", "Parte del ingreso que se va en cuotas (0% = sin cuotas activas)."],
+  ["% de deuda", "Porcentaje del cupo aprobado que está usando."],
+  ["Monto sugerido", "Crédito que el modelo sugiere según su capacidad de pago."],
+  ["Créditos vigentes / cerrados", "Obligaciones activas / ya pagadas o canceladas."],
+  ["Comportamiento: N", "Mes al día (normal)."],
+  ["Comportamiento: 1, 2, 3…", "Meses de mora (a mayor número, mayor atraso)."],
+  ["Comportamiento: —", "Mes sin información reportada."],
+];
 
 export default function ExperianDetalleResultados({ consultaId }) {
   const API_URL = process.env.REACT_APP_API_URL;
@@ -1432,7 +1499,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
                 </table>
               </div>
               <p className="mt-3 text-[11px] italic text-muted">
-                MiDecisor reporta los créditos agrupados por sector. El nombre de cada entidad se obtiene en el producto Historia de Crédito (HDC+).
+                Los créditos se presentan agrupados por sector, permitiendo una lectura clara de la información financiera sin detallar el nombre específico de cada entidad.
               </p>
             </SectionCard>
           ) : null}
@@ -1511,6 +1578,29 @@ export default function ExperianDetalleResultados({ consultaId }) {
               </div>
             </SectionCard>
           )}
+
+          {!isPj && (
+            <SectionCard
+              icon={Info}
+              title="Glosario — ¿qué significan estos términos?"
+              description="Referencia rápida de los códigos y calificaciones que usa la fuente en este análisis."
+            >
+              <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+                {ADJ_GLOSARIO.map(([sigla, significado]) => (
+                  <div key={sigla} className="rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3">
+                    <div className="text-xs font-bold text-cyan-300">{sigla}</div>
+                    <div className="mt-0.5 text-xs leading-snug text-content">{significado}</div>
+                  </div>
+                ))}
+              </div>
+            </SectionCard>
+          )}
+
+          <div className="rounded-2xl border border-line/15 bg-surface-2/60 px-5 py-4 text-center text-[11px] leading-5 text-muted">
+            Fuente oficial de la información: <strong className="text-content">EXPERIAN COLOMBIA S.A.</strong> (NIT 900.422.614-8).
+            Consulta realizada bajo autorización del titular. Información de carácter informativo y de apoyo a la decisión;
+            no reemplaza el análisis crediticio completo.
+          </div>
         </div>
       </div>
 
