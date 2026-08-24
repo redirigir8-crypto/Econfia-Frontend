@@ -142,7 +142,8 @@ function buildDebtCompositionData({ liabilities, creditCard, global }) {
   const grouped = new Map();
   global.forEach((item) => {
     const name = fmtText(item.typeOfCreditDesc || item.entity?.businessLineName || "Otros");
-    const value = numValue(item.capitalValue) * 1000;
+    // capitalValue del endeudamiento global YA viene en pesos (p.ej. 5579000 = $5.579.000).
+    const value = numValue(item.capitalValue);
     if (value > 0) grouped.set(name, (grouped.get(name) || 0) + value);
   });
 
@@ -906,7 +907,8 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
                 subtitulo={fmtText(item.typeOfCreditDesc)}
                 estado={item.quarterQualificationDesc || item.quarterQualification}
                 filas={[
-                  { label: "Capital", value: fmtMoney(Number(item.capitalValue) * 1000) },
+                  // capitalValue ya viene en pesos (5579000 = $5.579.000); NO multiplicar ×1000.
+                  { label: "Capital", value: fmtMoney(item.capitalValue) },
                   { label: "Fuente", value: fmtText(item.sourceGlobalIndebtednessDesc) },
                   { label: "Corte", value: fmtText(item.cutoffDate) },
                   { label: "Obligaciones", value: fmtText(item.quantityOfObligations) },
