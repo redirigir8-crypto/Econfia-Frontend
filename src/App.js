@@ -37,6 +37,7 @@ import ServicioSeguridad from "./pages/ServicioSeguridad";
 import ServicioTitulos from "./pages/ServicioTitulos";
 import TerminosLegales from "./pages/TerminosLegales";
 import PoliticaPrivacidad from "./pages/PoliticaPrivacidad";
+import EliminarCuenta from "./pages/EliminarCuenta";
 import TitulosValidationForm from "./views/TitulosValidationForm";
 import AdminPanel from "./pages/AdminPanel";
 import AdminUsuarios from "./components/AdminUsuarios";
@@ -782,6 +783,7 @@ export default function App() {
             {/* Legales públicas (requeridas por Google Play) */}
             <Route path="/terminos"            element={<TerminosLegales />}    />
             <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+            <Route path="/eliminar-cuenta"     element={<EliminarCuenta />}     />
 
             {/* Protegidas */}
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
