@@ -76,12 +76,14 @@ function numericValue(value) {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
-// Los saldos del bloque "comportamientoCrediticio" (MiDecisor) vienen en MILES
-// de pesos (p.ej. valorInicial "900" = $900.000). El ingreso y el monto sugerido
-// vienen en pesos completos y NO se escalan.
+// Devuelve el monto tal como viene de MiDecisor, YA en pesos.
+// Se comprobó contra el JSON real (saldoActual "697873" = $697.873;
+// cupoTotal "988690" = $988.690): vienen en pesos completos, NO en miles.
+// Antes se multiplicaba ×1000 y generaba valores inflados. Único punto a ajustar
+// si alguna consulta llegara en miles.
 function milesAPesos(value) {
   const n = numericValue(value);
-  return n === null ? 0 : n * 1000;
+  return n === null ? 0 : n;
 }
 
 function formatPercent(value) {
@@ -1255,8 +1257,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
     }
 
     return buildTrendBars([
-      // Los saldos del comportamiento vienen en miles → a pesos. El monto
-      // sugerido ya viene en pesos completos.
+      // Todos ya vienen en pesos (milesAPesos solo normaliza el número).
       ["Saldo actual", milesAPesos(context.comportamiento?.saldoActual || context.endeudamiento?.saldoActual)],
       ["Valor cuota", milesAPesos(context.comportamiento?.valorCuota || context.endeudamiento?.valorCuota)],
       ["Monto sugerido", detalle?.monto_sugerido || detalle?.resumen_json?.monto_sugerido],

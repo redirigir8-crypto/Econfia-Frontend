@@ -1092,7 +1092,10 @@ export default function Resultados() {
                     const res = await fetch(`${API_URL}/api/descargar-pdf-empresa/${nit}/`, {
                       headers: token ? { Authorization: `Token ${token}` } : {},
                     });
-                    if (!res.ok) throw new Error(`Error al descargar PDF: ${res.status}`);
+                    if (!res.ok) {
+                      const data = await res.json().catch(() => ({}));
+                      throw new Error(data.error || `Error al descargar PDF: ${res.status}`);
+                    }
                     const blob = await res.blob();
                     const link = document.createElement("a");
                     link.href = window.URL.createObjectURL(blob);

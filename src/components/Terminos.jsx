@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { FileCheck2, LockKeyhole, ShieldCheck, X } from "lucide-react";
 
-function DefaultTermsContent() {
+export function DefaultTermsContent() {
   const legalFramework = [
     "Constitucion Politica de Colombia, articulo 15.",
     "Ley 1581 de 2012 y sus decretos reglamentarios.",

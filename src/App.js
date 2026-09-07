@@ -35,6 +35,8 @@ import ServicioEconfia from "./pages/ServicioEconfia";
 import ServicioContratista from "./pages/ServicioContratista";
 import ServicioSeguridad from "./pages/ServicioSeguridad";
 import ServicioTitulos from "./pages/ServicioTitulos";
+import TerminosLegales from "./pages/TerminosLegales";
+import PoliticaPrivacidad from "./pages/PoliticaPrivacidad";
 import TitulosValidationForm from "./views/TitulosValidationForm";
 import AdminPanel from "./pages/AdminPanel";
 import AdminUsuarios from "./components/AdminUsuarios";
@@ -777,6 +779,9 @@ export default function App() {
             <Route path="/econfia/resumen-consulta/:consultaId" element={<VerificarReporte />} />
             <Route path="/beneficios" element={<Beneficios />} />
             <Route path="/w/:token" element={<WalletPublico />} />
+            {/* Legales públicas (requeridas por Google Play) */}
+            <Route path="/terminos"            element={<TerminosLegales />}    />
+            <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
 
             {/* Protegidas */}
             <Route element={<PrivateRoute><Dashboard /></PrivateRoute>}>
