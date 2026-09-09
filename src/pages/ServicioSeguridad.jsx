@@ -1,3 +1,4 @@
+import { urlEntrarSeguridad } from "../utils/seguridadNav";
 import React from "react";
 import { FaCheckCircle, FaArrowRight, FaUserShield, FaClipboardCheck, FaChartLine } from "react-icons/fa";
 import Header from "../components/Header";
@@ -142,8 +143,8 @@ export default function ServicioSeguridad() {
         {/* Call to Action */}
         <div className="text-center">
           <a
-            href="https://econfia.store/"
-            target="_blank"
+            href="/estudios-seguridad/"
+            onClick={(event) => { event.preventDefault(); window.location.href = urlEntrarSeguridad(); }}
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-8 py-4 bg-green-500 text-white font-semibold rounded-full hover:bg-green-400 transition transform hover:scale-105 shadow-lg shadow-green-500/50"
           >
@@ -151,7 +152,7 @@ export default function ServicioSeguridad() {
             <FaArrowRight />
           </a>
           <p className="text-gray-400 mt-4">
-            Plataforma externa especializada en estudios de seguridad
+            Estudios de seguridad integrados en Econfia
           </p>
         </div>
       </div>

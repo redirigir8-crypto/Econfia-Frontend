@@ -5,6 +5,7 @@ import { Link, NavLink} from "react-router-dom";
 import { ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
 import { FaEnvelope } from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
+import { urlEntrarTitulos } from "../utils/titulosNav";
 
 const linkBase = "flex items-center gap-2 hover:text-cyan-300 transition";
 const linkActive = "text-cyan-400";
@@ -108,16 +109,37 @@ export default function Header() {
                     Selección de personal especializada
                   </p>
                 </Link>
-                <Link
-                  to="/contacto"
-                  className="block px-4 py-3 hover:bg-brand/10 rounded-b-lg transition border-t border-line/10"
-                  onClick={() => setIsServiciosOpen(false)}
+                <a
+                  href="/servicio-titulos"
+                  className="block px-4 py-3 hover:bg-brand/10 rounded-b-lg transition border-t border-line/10 cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsServiciosOpen(false);
+                    const econfiaToken = localStorage.getItem("token") || "";
+                    let tienePlanTitulos = false;
+                    try {
+                      const u = JSON.parse(localStorage.getItem("user"));
+                      const planes = (u?.perfil?.planes || []).map(
+                        (p) => (p.nombre || "").toLowerCase()
+                      );
+                      tienePlanTitulos = planes.includes("econfia-titulos");
+                    } catch (err) {
+                      tienePlanTitulos = false;
+                    }
+                    if (econfiaToken && tienePlanTitulos) {
+                      // Logueado y con plan -> entra directo a Econfia Títulos (SSO)
+                      window.location.href = urlEntrarTitulos();
+                    } else {
+                      // Sin sesión o sin el plan -> ve el apartado del servicio
+                      window.location.href = "/servicio-titulos";
+                    }
+                  }}
                 >
                   <span className="font-semibold">Econfia Títulos</span>
                   <p className="text-xs text-muted mt-1">
                     Validación documental y soportes académicos
                   </p>
-                </Link>
+                </a>
               </div>
             )}
           </div>

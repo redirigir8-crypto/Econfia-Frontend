@@ -8,6 +8,7 @@ import {
   FaUniversity,
 } from "react-icons/fa";
 import Header from "../components/Header";
+import { urlEntrarTitulos } from "../utils/titulosNav";
 
 const puntosClave = [
   "Revisión de títulos, certificados y soportes académicos dentro de un flujo más claro.",
@@ -80,9 +81,11 @@ export default function ServicioTitulos() {
 
                 <div className="mt-8 flex flex-col sm:flex-row gap-4">
                   <a
-                    href="https://www.econfia.online"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="/titulos/"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.href = urlEntrarTitulos();
+                    }}
                     className="inline-flex items-center justify-center gap-3 rounded-full bg-amber-400 px-8 py-4 font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-[0_16px_40px_rgba(245,158,11,0.22)]"
                   >
                     Visitar Econfia Títulos
@@ -235,9 +238,11 @@ export default function ServicioTitulos() {
 
               <div className="flex flex-col gap-4">
                 <a
-                  href="https://www.econfia.online"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/titulos/"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.href = urlEntrarTitulos();
+                  }}
                   className="inline-flex items-center justify-center gap-3 rounded-full bg-amber-400 px-8 py-4 font-semibold text-slate-950 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-300"
                 >
                   Ir a Econfia Títulos
