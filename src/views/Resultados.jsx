@@ -907,9 +907,21 @@ export default function Resultados() {
       });
       if (!res.ok) throw new Error(`Error al descargar PDF: ${res.status}`);
       const blob = await res.blob();
+      // Usar el nombre que envía el backend (econfia-adjudicator / econfia-credit-report / reconocer);
+      // solo si no viene, caemos a un nombre legible por producto.
+      const disposition = res.headers.get("content-disposition") || "";
+      const match = disposition.match(/filename\*?=(?:UTF-8''|"?)([^";]+)/i);
+      const fallbackPorKind = {
+        experian: `econfia-adjudicator_${id}.pdf`,
+        hdc: `econfia-credit-report_${id}.pdf`,
+        reconocer: `reconocer_${id}.pdf`,
+      };
+      const filename = match?.[1]
+        ? decodeURIComponent(match[1])
+        : (fallbackPorKind[kind] || `${kind}_${id}.pdf`);
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download = `${kind}_${id}.pdf`;
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       link.remove();

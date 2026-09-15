@@ -1598,9 +1598,8 @@ export default function ExperianDetalleResultados({ consultaId }) {
           )}
 
           <div className="rounded-2xl border border-line/15 bg-surface-2/60 px-5 py-4 text-center text-[11px] leading-5 text-muted">
-            Fuente oficial de la información: <strong className="text-content">EXPERIAN COLOMBIA S.A.</strong> (NIT 900.422.614-8).
-            Consulta realizada bajo autorización del titular. Información de carácter informativo y de apoyo a la decisión;
-            no reemplaza el análisis crediticio completo.
+            Fuente oficial de la información: <strong className="text-content">Central de Riesgo</strong> (NIT 900.422.614-8).
+            Consulta realizada bajo autorización del titular.
           </div>
         </div>
       </div>
