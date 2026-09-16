@@ -914,7 +914,7 @@ export default function Resultados() {
       const fallbackPorKind = {
         experian: `econfia-adjudicator_${id}.pdf`,
         hdc: `econfia-credit-report_${id}.pdf`,
-        reconocer: `reconocer_${id}.pdf`,
+        reconocer: `econfia-contact-search_${id}.pdf`,
       };
       const filename = match?.[1]
         ? decodeURIComponent(match[1])

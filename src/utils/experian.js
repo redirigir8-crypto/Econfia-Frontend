@@ -74,12 +74,12 @@ export function normalizeHdcConsulta(item) {
   };
 }
 
-// ── Econfia Recognize ──────────────────────────────────────────────────────
+// ── Econfia Contact Search (Reconocer) ──────────────────────────────────────
 
 export function isReconocerConsulta(item) {
   const source = String(item?.source || "").trim().toLowerCase();
   const tipo = String(item?.tipo_consulta || item?.tipo || "").trim().toLowerCase();
-  return source === "reconocer" || tipo === "reconocer" || tipo === "econfia recognize";
+  return source === "reconocer" || tipo === "reconocer" || tipo === "econfia recognize" || tipo === "econfia contact search";
 }
 
 export function normalizeReconocerConsulta(item) {
@@ -89,7 +89,7 @@ export function normalizeReconocerConsulta(item) {
     row_id: `reconocer-${item.id}`,
     source: "reconocer",
     tipo: "PERSONA",
-    tipo_consulta: "Econfia Recognize",
+    tipo_consulta: "Econfia Contact Search",
     cedula: item.numero_identificacion || "",
     nombre: item.nombre_mostrado || item.apellido_razon_social || "",
     fecha: item.created_at || item.updated_at || null,

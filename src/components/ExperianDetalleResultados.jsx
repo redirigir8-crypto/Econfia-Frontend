@@ -1602,7 +1602,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
             Consulta realizada bajo autorización del titular.
           </div>
         </div>
-      </div>
+      </div>  
 
       <EvidenceDrawer
         open={showEvidence}

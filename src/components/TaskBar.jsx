@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search, FileText, LogOut, User, HelpCircle, HardHat, BookOpen, ShieldCheck, Volume2,
-  ChevronLeft, ChevronRight, Sun, Moon, Activity, Wallet,
+  ChevronLeft, ChevronRight, Sun, Moon, Activity, Wallet, MapPin, BadgeDollarSign
 } from "lucide-react";
 import { Fuel } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
@@ -82,10 +82,10 @@ if (hasPlanes) {
     consultaItems.push({ path: "/5c2e8f4a", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Econfia Adjudicator", color: "sky" });
   }
   if (planes.includes("historia_credito") || planes.includes("experian")) {
-    consultaItems.push({ path: "/3e9f7c1d", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Econfia Credit Report", color: "sky" });
+    consultaItems.push({ path: "/3e9f7c1d", icon: <BadgeDollarSign size={16} strokeWidth={1.75} />, label: "Econfia Credit Report", color: "sky" });
   }
   if (planes.includes("reconocer") || planes.includes("experian")) {
-    consultaItems.push({ path: "/6b2d8e4f", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Econfia Recognize", color: "sky" });
+    consultaItems.push({ path: "/6b2d8e4f", icon: <MapPin size={16} strokeWidth={1.75} />, label: "Econfia Contact Search", color: "sky" });
   }
 }
 
