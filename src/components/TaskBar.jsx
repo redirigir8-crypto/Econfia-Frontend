@@ -1,17 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Search, FileText, LogOut, User, HelpCircle, HardHat, BookOpen, ShieldCheck, Volume2,
-  ChevronLeft, ChevronRight, Sun, Moon, Activity, Wallet, MapPin, BadgeDollarSign
+  Search, FileText, LogOut, User,  BookOpen,  Volume2,
+  ChevronLeft, ChevronRight, Sun, Moon, Activity, 
 } from "lucide-react";
+
 import { Fuel } from "lucide-react";
+import { CircleDollarSignIcon } from "./icons/CircleDollarSignIcon";
+import {MapPinIcon} from "./icons/MapIcon"
 import { useTheme } from "../context/ThemeContext";
-import HardHatIcon from '../assets/icons8-contratista-64 (1).png';
+import {GaugeIcon} from "./icons/Range"
+import {UserIcon} from "./icons/Perons"
+import {BookTextIcon} from "./icons/Consultas"
+import {CircleHelpIcon} from "./icons/help"
+import {WalletIcon} from "./icons/wallet"
+import {FingerprintIcon} from "./icons/huella"
+import {CursorClickIcon} from "./icons/essencitialExpress"
+import {ZapIcon} from "./icons/fast"
+import { BriefcaseBusinessIcon } from "./icons/Empresa"
+import {FolderOpenIcon } from "./icons/basic"
+import {SendIcon} from "./icons/essencial"
+import {IdCardIcon } from "./icons/iconcontratista"
+import {EvChargerIcon} from "./icons/iconfull"
+import {LogoutIcon} from "./icons/loout"
 import UserCogIcon from '../assets/icons8-lista-de-verificación-64.png';
-import UserBaseIcon from '../assets/icons8-usuario-48 (1).png';
-import AjustesIcon from '../assets/icons8-orthogonal-view-24.png';
-import IconFask from '../assets/icons8-flash-activado-50.png';
-import express from '../assets/icons8-hand-drag-50.png';
 
 export default function Taskbar() {
   const [user, setUser] = useState(null);
@@ -49,53 +61,53 @@ let consultaItems = [];
 if (hasPlanes) {
   const planes = user.perfil.planes.map(p => (p.nombre || '').toLowerCase());
   if (planes.includes("ecorefull")) {
-    consultaItems.push({ path: "/3c8f1a2e", icon: <Fuel size={16} strokeWidth={1.75} />, label: "E-Core Full", color: "amber" });
+    consultaItems.push({ path: "/3c8f1a2e", icon: <EvChargerIcon size={36} strokeWidth={1.75} />, label: "E-Core Full", color: "amber" });
   }
   if (planes.includes("contratista")) {
-    consultaItems.push({ path: "/6c1b9f3d", icon: <img src={HardHatIcon} alt="Contratista" />, label: "E-Contratista", color: "orange" });
+    consultaItems.push({ path: "/6c1b9f3d", icon: <IdCardIcon size = {36} />, label: "E-Contratista", color: "orange" });
   }
   if (planes.includes("essential")) {
-    consultaItems.push({ path: "/9e3a6c1f", icon: <img src={UserCogIcon} alt="E-Essential" />, label: "E-Essential", color: "cyan" });
+    consultaItems.push({ path: "/9e3a6c1f", icon: <SendIcon size ={36} />, label: "E-Essential", color: "cyan" });
   }
   if (planes.includes("basic-element") || planes.includes("basic-elemnt")) {
-    consultaItems.push({ path: "/b4f8d2e7", icon: <img src={AjustesIcon} alt="E-Basic Element" />, label: "E-Basic Element", color: "violet" });
+    consultaItems.push({ path: "/b4f8d2e7", icon: <FolderOpenIcon  size ={36} />, label: "E-Basic Element", color: "violet" });
   }
   if(planes.includes("empresa")){
-    consultaItems.push({ path: "/4a7e2b8f", icon: <HardHat size={16} strokeWidth={1.75} />, label: "Empresa RUES", color: "emerald" });
+    consultaItems.push({ path: "/4a7e2b8f", icon: < BriefcaseBusinessIcon  size={36} strokeWidth={1.75} />, label: "Empresa RUES", color: "emerald" });
   }
   if (planes.includes("econfiafast")) {
-    consultaItems.push({ path: "/7f3a9e2b", icon: <img src={IconFask} alt="E-Fast" />, label: "E-Fast", color: "yellow" });
+    consultaItems.push({ path: "/7f3a9e2b", icon: <ZapIcon size={36} />, label: "E-Fast", color: "yellow" });
   }
   if (planes.includes("essencial-express")) {
-    consultaItems.push({ path: "/a1e6c4b8", icon: <img src={express} alt="E-Essencial Express" />, label: "E-Essencial Express", color: "pink" });
+    consultaItems.push({ path: "/a1e6c4b8", icon: <CursorClickIcon size ={36} />, label: "E-Essencial Express", color: "pink" });
   }
   if(planes.includes("validacion-titulos")){
   consultaItems.push({ path: "/2b7d5e9c", icon: <img src={UserCogIcon} alt="Validación de títulos" />, label: "Validación de títulos", color: "indigo" });
   }
   if (planes.includes("e-identidad")) {
-    consultaItems.push({ path: "/1d5f8e3a", icon: <User size={16} strokeWidth={1.75} />, label: "E-Identidad", color: "teal" });
+    consultaItems.push({ path: "/1d5f8e3a", icon: <FingerprintIcon size={36} strokeWidth={1.75} />, label: "E-Identidad", color: "teal" });
   }
   if (planes.includes("wallet")) {
-    consultaItems.push({ path: "/e7c1a9d4", icon: <Wallet size={16} strokeWidth={1.75} />, label: "econfiaWallet", color: "emerald" });
+    consultaItems.push({ path: "/e7c1a9d4", icon: <WalletIcon size={36} strokeWidth={1.75} />, label: "econfiaWallet", color: "emerald" });
   }
   if (planes.includes("experian")) {
-    consultaItems.push({ path: "/5c2e8f4a", icon: <ShieldCheck size={16} strokeWidth={1.75} />, label: "Econfia Adjudicator", color: "sky" });
+    consultaItems.push({ path: "/5c2e8f4a", icon: <GaugeIcon size={36} strokeWidth={1.75} />, label: "Econfia Adjudicator", color: "sky" });
   }
   if (planes.includes("historia_credito") || planes.includes("experian")) {
-    consultaItems.push({ path: "/3e9f7c1d", icon: <BadgeDollarSign size={16} strokeWidth={1.75} />, label: "Econfia Credit Report", color: "sky" });
+    consultaItems.push({ path: "/3e9f7c1d", icon: <CircleDollarSignIcon size={36} strokeWidth={1.75} />, label: "Econfia Credit Report", color: "sky" });
   }
   if (planes.includes("reconocer") || planes.includes("experian")) {
-    consultaItems.push({ path: "/6b2d8e4f", icon: <MapPin size={16} strokeWidth={1.75} />, label: "Econfia Contact Search", color: "sky" });
+    consultaItems.push({ path: "/6b2d8e4f", icon: <MapPinIcon size={36} strokeWidth={1.75} />, label: "Econfia Contact Search", color: "sky" });
   }
 }
 
 // Menú base — "Salir" siempre primero, de izquierda a derecha
 let menuItems = [
-  { path: "/f1d8a5c3", icon: <LogOut size={16} strokeWidth={1.75} />, label: "Salir", color: "rose" },
+  { path: "/f1d8a5c3", icon: <LogoutIcon size={36} strokeWidth={1.75} />, label: "Salir", color: "rose" },
   ...consultaItems,
-  { path: "/e9c4b2f7", icon: <img src={UserBaseIcon} alt="Perfil" />, label: "Perfil", color: "fuchsia" },
-  { path: "/d3b7f1e9", icon: <FileText size={16} strokeWidth={1.75} />, label: "Consultas", color: "blue" },
-  { path: "/c2e6b9a4", icon: <HelpCircle size={16} strokeWidth={1.75} />, label: "Ayuda", color: "lime" },
+  { path: "/e9c4b2f7", icon: <UserIcon size={36} />, label: "Perfil", color: "fuchsia" },
+  { path: "/d3b7f1e9", icon: <BookTextIcon size={36} strokeWidth={1.75} />, label: "Consultas", color: "blue" },
+  { path: "/c2e6b9a4", icon: <CircleHelpIcon size={36} strokeWidth={1.75} />, label: "Ayuda", color: "lime" },
 ];
 
 // Monitoreo de fuentes (solo lectura) para el usuario NO admin:
