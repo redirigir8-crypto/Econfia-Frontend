@@ -55,6 +55,7 @@ const AdminMonitoreo = () => {
   const [toast, setToast] = useState(null);
   const [ayuda, setAyuda] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("todas"); // todas | ok | lento | problema
   const pollRef = useRef(null);
 
   const notificar = (msg, tipo = "ok") => setToast({ msg, tipo });
@@ -133,12 +134,37 @@ const AdminMonitoreo = () => {
   const ultimoDia = diasArr.length ? diasArr[diasArr.length - 1] : null;
   const sondeosDia = ultimoDia ? ultimoDia.total : (kpi?.sondeos_totales ?? 0);
 
-  // Buscador: si hay texto filtra TODAS las fuentes; si no, muestra las 60 primeras.
+  // Grupos de estado para el filtro rápido.
+  const ESTADO_GRUPO = {
+    ok: ["ok"],
+    lento: ["lento"],
+    problema: ["bloqueo", "timeout", "error", "error_servidor", "no_encontrado"],
+  };
+  const nombreFuente = (r) => r.nombre_pila || r.clave;
+
+  // Buscador + filtro por estado.
+  // Sin búsqueda y con "todas": las 60 peores. Con búsqueda o filtro: TODAS las que calcen
+  // (así las fuentes OK siempre se pueden ver eligiendo el filtro "OK").
   const todasFuentes = reporte?.disponibilidad || [];
   const qBusqueda = busqueda.trim().toLowerCase();
-  const filasVisibles = qBusqueda
-    ? todasFuentes.filter((r) => r.clave.toLowerCase().includes(qBusqueda))
-    : todasFuentes.slice(0, 60);
+  let base = todasFuentes;
+  if (qBusqueda) {
+    base = base.filter(
+      (r) => nombreFuente(r).toLowerCase().includes(qBusqueda) || r.clave.toLowerCase().includes(qBusqueda)
+    );
+  }
+  if (filtroEstado !== "todas") {
+    const estados = ESTADO_GRUPO[filtroEstado] || [];
+    base = base.filter((r) => estados.includes(r.ultimo_estado));
+  }
+  // Orden: en "Con problema" las peores primero; en el resto, las verdes (OK) primero.
+  base = [...base].sort((a, b) =>
+    filtroEstado === "problema"
+      ? a.disponibilidad_pct - b.disponibilidad_pct
+      : b.disponibilidad_pct - a.disponibilidad_pct
+  );
+  const filtrando = qBusqueda || filtroEstado !== "todas";
+  const filasVisibles = filtrando ? base : base.slice(0, 60);
 
   return (
     <div style={{
@@ -204,9 +230,9 @@ const AdminMonitoreo = () => {
             sub={ultimoDia ? `revisiones del ${ultimoDia.fecha.slice(5)} · total acumulado en el Excel` : "el total acumulado va en el Excel"} />
           <GaugeCard label="DISPONIBILIDAD PROMEDIO" pct={kpi.disponibilidad_promedio_pct} />
           <div className="th-card" style={cardStyle}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 10, letterSpacing: .5 }}>POR ESTADO</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 10, letterSpacing: .5 }}>POR ESTADO · ÚLTIMO DÍA</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {Object.entries(kpi.por_estado || {}).map(([e, n]) => {
+              {Object.entries(kpi.por_estado_dia || kpi.por_estado || {}).map(([e, n]) => {
                 const [bg, fg] = ESTADO_COLOR[e] || ["rgb(var(--th-line) / 0.15)", T.text];
                 return <span key={e} style={{ background: bg, color: fg, fontWeight: 800, fontSize: 12, padding: "3px 9px", borderRadius: 7 }}>{e}: {n}</span>;
               })}
@@ -223,14 +249,25 @@ const AdminMonitoreo = () => {
       )}
 
       {/* Tabla disponibilidad */}
-      <Seccion titulo="Disponibilidad y latencia (peores primero)">
+      <Seccion titulo="Disponibilidad y latencia">
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
           <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
             placeholder="🔎 Buscar fuente por nombre…"
             style={{
-              flex: "1 1 280px", maxWidth: 400, padding: "10px 14px", borderRadius: 12, fontSize: 13,
+              flex: "1 1 260px", maxWidth: 380, padding: "10px 14px", borderRadius: 12, fontSize: 13,
               color: T.text, background: T.surface2, border: `1px solid ${T.line}`, outline: "none",
             }} />
+          {/* Filtro por estado — permite ver SIEMPRE las fuentes OK */}
+          <div style={{ display: "flex", background: T.surface2, borderRadius: 12, padding: 4, border: `1px solid ${T.line}` }}>
+            {[["todas", "Todas"], ["ok", "✅ OK"], ["lento", "⚠ Lentas"], ["problema", "⛔ Con problema"]].map(([k, lbl]) => (
+              <button key={k} onClick={() => setFiltroEstado(k)}
+                style={{
+                  border: "none", cursor: "pointer", padding: "7px 12px", borderRadius: 9, fontWeight: 700, fontSize: 12.5,
+                  background: filtroEstado === k ? T.brand : "transparent",
+                  color: filtroEstado === k ? T.surface : T.muted,
+                }}>{lbl}</button>
+            ))}
+          </div>
           {busqueda && (
             <button onClick={() => setBusqueda("")}
               style={{ cursor: "pointer", padding: "9px 14px", borderRadius: 12, fontWeight: 700, color: T.muted, background: "transparent", border: `1px solid ${T.line}` }}>
@@ -239,7 +276,7 @@ const AdminMonitoreo = () => {
           )}
           <span style={{ fontSize: 12.5, color: T.muted, fontWeight: 700 }}>
             Mostrando {filasVisibles.length} de {todasFuentes.length}
-            {!busqueda && todasFuentes.length > 60 ? " · escribe para ver todas" : ""}
+            {!filtrando && todasFuentes.length > 60 ? " · filtra o busca para ver todas" : ""}
           </span>
         </div>
         {cargando ? <p style={{ color: T.muted }}>Cargando…</p> : (
@@ -260,7 +297,12 @@ const AdminMonitoreo = () => {
                   const [bg, fg] = ESTADO_COLOR[r.ultimo_estado] || ["rgb(var(--th-line) / 0.15)", T.text];
                   return (
                     <tr key={r.clave} style={{ background: i % 2 ? T.lineSoft : "transparent" }}>
-                      <td style={{ padding: "9px 12px", fontWeight: 600 }}>{r.clave}</td>
+                      <td style={{ padding: "9px 12px", fontWeight: 600 }}>
+                        {r.nombre_pila || r.clave}
+                        {r.nombre_pila && (
+                          <div style={{ fontSize: 10.5, fontWeight: 500, color: T.muted, marginTop: 1 }}>{r.clave}</div>
+                        )}
+                      </td>
                       <td style={tdC}>{r.sondeos}</td>
                       <td style={{ ...tdC, minWidth: 92 }}>
                         <div style={{ fontWeight: 800, fontSize: 12, color: dispColor(r.disponibilidad_pct) }}>{r.disponibilidad_pct}%</div>
@@ -279,7 +321,7 @@ const AdminMonitoreo = () => {
                 })}
                 {reporte && !filasVisibles.length && (
                   <tr><td colSpan={9} style={{ padding: 24, textAlign: "center", color: T.muted }}>
-                    {busqueda ? `Sin coincidencias para “${busqueda}”.` : "Aún no hay sondeos. Pulsa “Ejecutar sondeo ahora”."}
+                    {filtrando ? "Sin fuentes que coincidan con el filtro o la búsqueda." : "Aún no hay sondeos. Pulsa “Ejecutar sondeo ahora”."}
                   </td></tr>
                 )}
               </tbody>

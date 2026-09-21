@@ -79,7 +79,7 @@ if (hasPlanes) {
     consultaItems.push({ path: "/7f3a9e2b", icon: <ZapIcon size={26} />, label: "E-Fast", color: "yellow" });
   }
   if (planes.includes("essencial-express")) {
-    consultaItems.push({ path: "/a1e6c4b8", icon: <CursorClickIcon size ={26} />, label: "E-Essencial Express", color: "pink" });
+    consultaItems.push({ path: "/a1e6c4b8", icon: <CursorClickIcon size ={26} />, label: "E-Essential Express", color: "pink" });
   }
   if(planes.includes("validacion-titulos")){
   consultaItems.push({ path: "/2b7d5e9c", icon: <img src={UserCogIcon} alt="Validación de títulos" />, label: "Validación de títulos", color: "indigo" });
@@ -88,7 +88,7 @@ if (hasPlanes) {
     consultaItems.push({ path: "/1d5f8e3a", icon: <FingerprintIcon size={36} strokeWidth={1.75} />, label: "E-Identidad", color: "teal" });
   }
   if (planes.includes("wallet")) {
-    consultaItems.push({ path: "/e7c1a9d4", icon: <WalletIcon size={36} strokeWidth={1.75} />, label: "econfiaWallet", color: "emerald" });
+    consultaItems.push({ path: "/e7c1a9d4", icon: <WalletIcon size={36} strokeWidth={1.75} />, label: "EconfiaWallet", color: "emerald" });
   }
   if (planes.includes("experian")) {
     consultaItems.push({ path: "/5c2e8f4a", icon: <GaugeIcon size={36} strokeWidth={1.75} />, label: "Econfia Adjudicator", color: "sky" });

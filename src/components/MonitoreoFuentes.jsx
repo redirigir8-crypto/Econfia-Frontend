@@ -122,9 +122,9 @@ const MonitoreoFuentes = () => {
           <KpiCard icon="🗓️" label="SONDEOS DEL DÍA" val={sondeosDia}
             sub={ultimoDia ? `revisiones del ${ultimoDia.fecha.slice(5)}` : "sin datos aún"} />
           <div className="th-card" style={cardStyle}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 10, letterSpacing: .5 }}>POR ESTADO</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 10, letterSpacing: .5 }}>POR ESTADO · ÚLTIMO DÍA</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {Object.entries(kpi.por_estado || {}).map(([e, n]) => {
+              {Object.entries(kpi.por_estado_dia || kpi.por_estado || {}).map(([e, n]) => {
                 const [bg, fg] = ESTADO_COLOR[e] || ["rgb(var(--th-line) / 0.15)", T.text];
                 return <span key={e} style={{ background: bg, color: fg, fontWeight: 800, fontSize: 12, padding: "3px 9px", borderRadius: 7 }}>{e}: {n}</span>;
               })}
@@ -160,7 +160,7 @@ const MonitoreoFuentes = () => {
                   const [bg, fg] = ESTADO_COLOR[r.ultimo_estado] || ["rgb(var(--th-line) / 0.15)", T.text];
                   return (
                     <tr key={r.clave} style={{ background: i % 2 ? T.lineSoft : "transparent" }}>
-                      <td style={{ padding: "9px 12px", fontWeight: 600 }}>{r.clave}</td>
+                      <td style={{ padding: "9px 12px", fontWeight: 600 }}>{r.nombre_pila || r.clave}</td>
                       <td style={tdC}>
                         <span style={{
                           fontSize: 11, fontWeight: 800, padding: "3px 8px", borderRadius: 7,

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import FormLogo from "../components/FormLogo";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -399,6 +400,7 @@ export default function Consulta() {
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
 
               <div className="relative z-10">
+                <FormLogo />
                 <div className="mb-4 text-center">
                   <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2 flex items-center gap-2">
                     <span className="relative flex h-2 w-2">
