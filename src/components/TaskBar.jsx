@@ -273,7 +273,7 @@ return (
           linear-gradient(
             180deg,
             rgb(var(--th-surface) / 0.58),
-            rgb(2 6 23 / 0.72)
+            rgb(var(--th-surface-2) / 0.72)
           );
 
         backdrop-filter: blur(12px) saturate(160%);
@@ -515,13 +515,13 @@ return (
         background:
           radial-gradient(
             circle at 50% 34%,
-            rgb(255 255 255 / 0.05),
+            rgb(var(--th-content) / 0.06),
             transparent 52%
           ),
           linear-gradient(
             180deg,
-            rgb(15 23 42 / 0.82),
-            rgb(2 6 23 / 0.84)
+            rgb(var(--th-surface) / 0.92),
+            rgb(var(--th-surface-2) / 0.90)
           );
 
         border:
@@ -539,7 +539,7 @@ return (
             var(--item-color, #38bdf8) 24%,
             transparent
           ),
-          inset 0 0 22px rgb(2 6 23 / 0.52);
+          inset 0 0 20px rgb(var(--th-surface-2) / 0.55);
 
         transition:
           width 0.78s cubic-bezier(.20,.90,.25,1),
@@ -585,7 +585,7 @@ return (
         width: 60px;
         height: 60px;
 
-        color: white;
+        color: rgb(var(--th-content));
 
         border-width: 3px;
 
@@ -601,10 +601,10 @@ return (
             circle at 50% 38%,
             color-mix(
               in srgb,
-              var(--item-color, #38bdf8) 24%,
+              var(--item-color, #38bdf8) 26%,
               transparent
             ),
-            rgb(2 6 23 / 0.88) 68%
+            rgb(var(--th-surface) / 0.94) 72%
           );
 
         box-shadow:
@@ -779,7 +779,7 @@ return (
       .disc-page-btn:hover {
         transform: scale(1.08);
 
-        color: white;
+        color: rgb(var(--th-content));
 
         border-color:
           rgba(56, 189, 248, 0.60);
@@ -814,39 +814,6 @@ return (
 
         color:
           rgb(var(--th-content) / 0.42);
-      }
-
-
-      /* =========================================================
-         TEMA CLARO
-      ========================================================= */
-
-      html[data-theme="light"] .disc-icon {
-        background:
-          radial-gradient(
-            circle at 50% 35%,
-            rgb(255 255 255 / 0.96),
-            transparent 60%
-          ),
-          linear-gradient(
-            180deg,
-            rgb(var(--th-surface) / 0.96),
-            rgb(var(--th-surface-2) / 0.90)
-          );
-
-        color: #334155;
-      }
-
-      html[data-theme="light"] .disc-label {
-        color: #475569;
-      }
-
-      html[data-theme="light"] .disc-item.is-center .disc-label {
-        color: #07111f;
-      }
-
-      html[data-theme="light"] .disc-desc {
-        color: #64748b;
       }
 
 

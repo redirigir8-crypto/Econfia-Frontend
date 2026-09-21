@@ -827,7 +827,7 @@ export default function ConsultaEmpresa() {
 
   return (
     <>
-    <div className="relative z-0 mx-auto max-w-7xl px-4 pb-8 pt-24 md:px-6 md:pb-10 md:pt-28">
+    <div className="relative z-0 mx-auto max-w-7xl px-4 pb-8 pt-3 md:px-6 md:pb-10 md:pt-4">
       <div className="space-y-8">
         <div className="relative overflow-hidden rounded-[2rem] border border-line/15 bg-[linear-gradient(135deg,rgb(var(--th-surface)/0.96),rgb(var(--th-surface-2)/0.9)_48%,rgb(var(--th-surface)/0.96))] p-5 shadow-[0_30px_80px_rgba(2,6,23,0.16)]">
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-sky-400/15 blur-3xl" />

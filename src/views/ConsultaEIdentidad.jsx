@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FormLogo from "../components/FormLogo";
 import { createPortal } from "react-dom";
 import Toast from "../components/Toast";
 import Terminos from "../components/Terminos";
@@ -169,9 +170,7 @@ export default function ConsultaEIdentidad() {
           <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
             <div className="relative z-10">
-              <div className="flex items-center justify-center mb-4">
-                <img src="/img/logo-econfia-1.png" alt="Econfía" className="h-16 w-16 object-contain" />
-              </div>
+              <FormLogo />
               <form onSubmit={handleSubmit} className="space-y-3">
                 {/* Tipo de documento */}
                 <div className="flex flex-col gap-1">

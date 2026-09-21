@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import MonitoreoAyuda from "./MonitoreoAyuda";
 
 // Versión NO-ADMIN del monitoreo de fuentes.
 // Diferencias vs AdminMonitoreo:
@@ -53,6 +54,7 @@ const MonitoreoFuentes = () => {
   const [reporte, setReporte] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
+  const [ayuda, setAyuda] = useState(false);
 
   const cargarReporte = useCallback(async (d = dias) => {
     if (!token) return;
@@ -73,10 +75,15 @@ const MonitoreoFuentes = () => {
   const cambiarDias = (d) => { setDias(d); cargarReporte(d); };
   const kpi = reporte?.kpi;
 
+  // "Sondeos del día": revisiones del último día registrado (no el acumulado, que asusta).
+  const diasArr = reporte?.fallos_por_dia || [];
+  const ultimoDia = diasArr.length ? diasArr[diasArr.length - 1] : null;
+  const sondeosDia = ultimoDia ? ultimoDia.total : (kpi?.sondeos_totales ?? 0);
+
   return (
     <div style={{
       fontFamily: "Segoe UI, system-ui, sans-serif", color: T.text,
-      minHeight: "100vh", padding: "120px 32px 48px", boxSizing: "border-box",
+      minHeight: "100vh", padding: "12px 32px 48px", boxSizing: "border-box",
       maxWidth: 1360, margin: "0 auto",
     }}>
       {/* Cabecera (SIN botón de sondeo ni Excel) */}
@@ -89,23 +96,31 @@ const MonitoreoFuentes = () => {
             Estado de disponibilidad y latencia de las fuentes externas. Se actualiza automáticamente.
           </p>
         </div>
-        <div style={{ display: "flex", background: T.surface2, borderRadius: 12, padding: 4, border: `1px solid ${T.line}` }}>
-          {[7, 30, 90].map((d) => (
-            <button key={d} onClick={() => cambiarDias(d)}
-              style={{
-                border: "none", cursor: "pointer", padding: "7px 15px", borderRadius: 9, fontWeight: 700,
-                background: dias === d ? T.brand : "transparent",
-                color: dias === d ? T.surface : T.muted,
-              }}>{d}d</button>
-          ))}
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <button onClick={() => setAyuda(true)} title="¿Qué es esto y cómo se lee?"
+            style={{
+              cursor: "pointer", padding: "9px 14px", borderRadius: 12, fontWeight: 800,
+              color: T.text, background: T.surface2, border: `1px solid ${T.line}`,
+            }}>ℹ️ ¿Cómo funciona?</button>
+          <div style={{ display: "flex", background: T.surface2, borderRadius: 12, padding: 4, border: `1px solid ${T.line}` }}>
+            {[7, 30, 90].map((d) => (
+              <button key={d} onClick={() => cambiarDias(d)}
+                style={{
+                  border: "none", cursor: "pointer", padding: "7px 15px", borderRadius: 9, fontWeight: 700,
+                  background: dias === d ? T.brand : "transparent",
+                  color: dias === d ? T.surface : T.muted,
+                }}>{d}d</button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* KPIs (SIN "Disponibilidad promedio") */}
       {kpi && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 16, marginTop: 24 }}>
-          <KpiCard label="FUENTES MONITOREADAS" val={kpi.fuentes_monitoreadas} />
-          <KpiCard label="SONDEOS TOTALES" val={kpi.sondeos_totales} />
+          <KpiCard icon="📡" label="FUENTES MONITOREADAS" val={kpi.fuentes_monitoreadas} />
+          <KpiCard icon="🗓️" label="SONDEOS DEL DÍA" val={sondeosDia}
+            sub={ultimoDia ? `revisiones del ${ultimoDia.fecha.slice(5)}` : "sin datos aún"} />
           <div className="th-card" style={cardStyle}>
             <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 10, letterSpacing: .5 }}>POR ESTADO</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -173,6 +188,8 @@ const MonitoreoFuentes = () => {
           </div>
         )}
       </Seccion>
+
+      {ayuda && <MonitoreoAyuda onClose={() => setAyuda(false)} />}
     </div>
   );
 };
@@ -211,10 +228,21 @@ const GraficoFallos = ({ datos }) => {
   );
 };
 
-const KpiCard = ({ label, val }) => (
-  <div className="th-card" style={cardStyle}>
-    <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 6, letterSpacing: .5 }}>{label}</div>
-    <div style={{ fontSize: 32, fontWeight: 800, color: T.text }}>{val}</div>
+const KpiCard = ({ icon, label, val, sub }) => (
+  <div className="th-card" style={{ ...cardStyle, display: "flex", alignItems: "center", gap: 14 }}>
+    {icon && (
+      <div style={{
+        width: 48, height: 48, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 23, flexShrink: 0,
+        background: `linear-gradient(140deg, rgb(var(--th-brand) / 0.20), rgb(var(--th-brand-2) / 0.08))`,
+        border: `1px solid rgb(var(--th-brand) / 0.22)`,
+      }}>{icon}</div>
+    )}
+    <div style={{ minWidth: 0 }}>
+      <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 4, letterSpacing: .5 }}>{label}</div>
+      <div style={{ fontSize: 30, fontWeight: 800, color: T.text, lineHeight: 1.05 }}>{val}</div>
+      {sub && <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3 }}>{sub}</div>}
+    </div>
   </div>
 );
 

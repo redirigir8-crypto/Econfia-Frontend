@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import FormLogo from "../components/FormLogo";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
@@ -195,9 +196,7 @@ export default function ConsultaExperian() {
             <div className="group relative w-full rounded-[20px] border border-line/15 bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 p-6 shadow-2xl shadow-cyan-500/10 backdrop-blur-xl">
               <div className="pointer-events-none absolute inset-0 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
               <div className="relative z-10">
-                <div className="mb-4 flex items-center justify-center">
-                  <img src="/img/logo-econfia-1.png" alt="Econfia" className="h-16 w-16 object-contain" />
-                </div>
+              <FormLogo />
 
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <div className="flex flex-col gap-1">
