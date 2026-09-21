@@ -128,7 +128,7 @@ export default function ConsultaHistoriaCredito() {
 
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 
-      <section className="relative min-h-screen overflow-hidden bg-transparent pb-32 pt-24">
+      <section className="relative min-h-screen overflow-hidden bg-transparent pb-32 pt-3">
         <div className="absolute right-20 top-20 h-72 w-72 animate-pulse rounded-full bg-cyan-500/10 blur-3xl" />
         <div className="absolute bottom-20 left-20 h-96 w-96 animate-pulse rounded-full bg-blue-500/10 blur-3xl" style={{ animationDelay: "1s" }} />
 

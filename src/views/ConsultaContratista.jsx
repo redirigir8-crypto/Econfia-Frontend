@@ -331,7 +331,7 @@ export default function ConsultaContratista() {
       )}
 
       {/* Home - Tema oscuro con hero + formulario elegante */}
-      <section className="relative min-h-screen flex items-center justify-center pt-24 pb-32 md:pb-36 overflow-hidden bg-transparent">
+      <section className="relative min-h-screen flex items-start justify-center pt-3 pb-32 md:pb-36 overflow-hidden bg-transparent">
         {/* Elementos decorativos de fondo */}
         <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
         <div

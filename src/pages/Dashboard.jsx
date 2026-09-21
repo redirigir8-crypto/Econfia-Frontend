@@ -132,9 +132,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex flex-col bg-transparent">
       {!hideLayout && (
-        <div className="relative w-full h-28">
+        <div className="relative w-full h-[340px]">
           {/* Logo — esquina superior izquierda */}
-          <div className="hidden md:flex md:absolute md:top-4 md:left-4 z-40 items-center gap-3 group">
+          <div className="hidden md:flex md:absolute md:top-5 md:left-1/2 md:-translate-x-1/2 z-40 items-center gap-3 group">
             <style>{`
               @keyframes econfiaLetterSweep {
                 0% { background-position: 130% 50%; }
@@ -252,10 +252,10 @@ export default function Dashboard() {
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
-          initial={{ opacity: 0, filter: "blur(10px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          exit={{ opacity: 0, filter: "blur(10px)" }}
-          transition={{ duration: 0.35 }}
+          initial={{ opacity: 0, filter: "blur(12px)", scale: 0.985, y: 14 }}
+          animate={{ opacity: 1, filter: "blur(0px)", scale: 1, y: 0 }}
+          exit={{ opacity: 0, filter: "blur(12px)", scale: 0.985, y: -10 }}
+          transition={{ duration: 0.6, ease: [0.2, 0.9, 0.25, 1] }}
           className="flex-1 w-full"
         >
           {/* Aquí se renderizan las rutas hijas definidas en App.jsx */}
