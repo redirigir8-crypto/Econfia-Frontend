@@ -17,8 +17,9 @@ import ConsultaContratista from "./views/ConsultaContratista";
 import ConsultaMedida from "./views/ConsultaMedida";
 import ConsultaBasicElemnt from "./views/ConsultaBasicElemnt";
 import ConsultaEIdentidad from "./views/ConsultaEIdentidad";
-import EconfiaWallet from "./views/EconfiaWallet";
+import EconfiaWalletHome from "./views/EconfiaWalletHome";
 import WalletPublico from "./views/WalletPublico";
+import AceptarInvitacion from "./pages/AceptarInvitacion";
 import Resultados from "./views/Resultados";
 import LogOut from "./views/LogOut";
 import Ayuda from "./views/Ayuda";
@@ -57,6 +58,7 @@ import AdminSoporte from "./views/AdminSoporte";
 import AdminBlog from "./components/AdminBlog";
 import AdminSonidos from "./components/AdminSonidos";
 import AdminMonitoreo from "./components/AdminMonitoreo";
+import AdminWallet from "./components/AdminWallet";
 import MonitoreoFuentes from "./components/MonitoreoFuentes";
 import SoundManager from "./components/SoundManager";
 import {
@@ -780,6 +782,7 @@ export default function App() {
             <Route path="/econfia/resumen-consulta/:consultaId" element={<VerificarReporte />} />
             <Route path="/beneficios" element={<Beneficios />} />
             <Route path="/w/:token" element={<WalletPublico />} />
+            <Route path="/wallet-invitacion" element={<AceptarInvitacion />} />
             {/* Legales públicas (requeridas por Google Play) */}
             <Route path="/terminos"            element={<TerminosLegales />}    />
             <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
@@ -802,7 +805,7 @@ export default function App() {
               <Route path="/9e3a6c1f"          element={<ConsultaMedida />}           />
               <Route path="/b4f8d2e7"          element={<ConsultaBasicElemnt />}      />
               <Route path="/1d5f8e3a"          element={<ConsultaEIdentidad />}       />
-              <Route path="/e7c1a9d4"          element={<EconfiaWallet />}            />
+              <Route path="/e7c1a9d4"          element={<EconfiaWalletHome />}        />
               <Route path="/6c1b9f3d"          element={<ConsultaContratista />}      />
               <Route path="/4a7e2b8f"          element={<ConsultaEmpresa />}          />
               <Route path="/8f5c3a1b/:nit"     element={<EmpresaRuesResult />}        />
@@ -820,6 +823,7 @@ export default function App() {
               <Route path="/2c8e5f1a"          element={<AdminBlog />}                />
               <Route path="/8f4a1d7c"          element={<AdminSonidos />}             />
               <Route path="/9a3f2c7e"          element={<AdminMonitoreo />}           />
+              <Route path="/3f8a1e6d"          element={<AdminWallet />}              />
             </Route>
 
             <Route path="/a8e3c7b2" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />

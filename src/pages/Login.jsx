@@ -24,6 +24,14 @@ export default function Login() {
   console.log("API URL cargada desde .env:", process.env.REACT_APP_API_URL);
 }, []);
 
+  // Aviso al volver del enlace de activación por correo (?activado=1|ya|error).
+  useEffect(() => {
+    const act = new URLSearchParams(window.location.search).get("activado");
+    if (act === "1") setToast({ type: "success", message: "¡Cuenta activada! Ya puedes iniciar sesión." });
+    else if (act === "ya") setToast({ type: "success", message: "Tu cuenta ya estaba activa. Inicia sesión." });
+    else if (act === "error") setToast({ type: "error", message: "El enlace de activación no es válido o ya expiró." });
+  }, []);
+
     console.log("username:", user);
     console.log("password:", password);
     console.log("API_URL:", API_URL);
@@ -56,7 +64,8 @@ export default function Login() {
         },
         body: JSON.stringify({
           username: user,
-          password: password
+          password: password,
+          nombre_dispositivo: "Navegador web",
 
         }),
       });
