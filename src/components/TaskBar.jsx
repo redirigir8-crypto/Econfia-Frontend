@@ -126,6 +126,7 @@ if (isAdmin) {
     { path: "/2c8e5f1a", icon: <BookOpen size={16} strokeWidth={1.75} />, label: "Admin Blog", color: "violet" },
     { path: "/8f4a1d7c", icon: <Volume2 size={16} strokeWidth={1.75} />, label: "Admin Sonidos", color: "emerald" },
     { path: "/9a3f2c7e", icon: <Activity size={16} strokeWidth={1.75} />, label: "Admin Monitoreo", color: "sky" },
+    { path: "/3f8a1e6d", icon: <WalletIcon size={16} strokeWidth={1.75} />, label: "Admin Wallet", color: "emerald" },
   ];
 }
 

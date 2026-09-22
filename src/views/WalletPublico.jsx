@@ -98,6 +98,7 @@ export default function WalletPublico() {
             )}
 
             {/* Documentos */}
+            {data.atributos?.includes("documentos") && (
             <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
               <h2 className="font-bold mb-3">Documentos</h2>
               {(!data.documentos || data.documentos.length === 0) ? (
@@ -125,6 +126,7 @@ export default function WalletPublico() {
                 </ul>
               )}
             </div>
+            )}
 
             <p className="text-center text-[11px] text-slate-500">
               Este pase es temporal y dejará de funcionar automáticamente.

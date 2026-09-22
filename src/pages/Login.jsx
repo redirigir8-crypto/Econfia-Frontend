@@ -56,7 +56,8 @@ export default function Login() {
         },
         body: JSON.stringify({
           username: user,
-          password: password
+          password: password,
+          nombre_dispositivo: "Navegador web",
 
         }),
       });

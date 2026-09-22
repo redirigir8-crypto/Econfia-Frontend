@@ -57,6 +57,7 @@ import AdminSoporte from "./views/AdminSoporte";
 import AdminBlog from "./components/AdminBlog";
 import AdminSonidos from "./components/AdminSonidos";
 import AdminMonitoreo from "./components/AdminMonitoreo";
+import AdminWallet from "./components/AdminWallet";
 import MonitoreoFuentes from "./components/MonitoreoFuentes";
 import SoundManager from "./components/SoundManager";
 import {
@@ -820,6 +821,7 @@ export default function App() {
               <Route path="/2c8e5f1a"          element={<AdminBlog />}                />
               <Route path="/8f4a1d7c"          element={<AdminSonidos />}             />
               <Route path="/9a3f2c7e"          element={<AdminMonitoreo />}           />
+              <Route path="/3f8a1e6d"          element={<AdminWallet />}              />
             </Route>
 
             <Route path="/a8e3c7b2" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
