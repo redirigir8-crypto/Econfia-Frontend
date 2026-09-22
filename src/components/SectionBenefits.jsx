@@ -22,7 +22,7 @@ export default function SectionBenefits() {
               className="text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-tight"
               style={{ fontFamily: "poppins, sans-serif" }}
             >
-              Precisión y <span className="text-cyan-400">Confiabilidad</span>
+              Precisión y <span className="text-brand">Confiabilidad</span>
             </h2>
 
             <div
@@ -68,7 +68,7 @@ export default function SectionBenefits() {
                   rounded-xl bg-white/5 border border-white/10 p-4
                   transition-all duration-300 cursor-default
                   hover:shadow-[0_0_28px_rgba(34,211,238,0.22)]
-                  hover:border-cyan-300/40 hover:ring-2 hover:ring-cyan-300/35
+                  hover:border-brand/40 hover:ring-2 hover:ring-brand/35
                 "
               >
                 <div className="text-[1rem] font-semibold text-white leading-tight">

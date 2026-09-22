@@ -224,7 +224,7 @@ export default function LotesFuentes({
         </select>
         <div className="flex flex-wrap gap-1.5">
           <button type="button" onClick={handleAplicar} disabled={!loteActual || busy}
-            className={`${btnBase} bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400`}>
+            className={`${btnBase} bg-gradient-to-r from-brand to-brand-2 text-white hover:brightness-110`}>
             Aplicar
           </button>
           <button type="button" onClick={handleActualizar} disabled={!loteActual || busy}

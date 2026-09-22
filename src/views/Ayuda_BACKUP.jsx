@@ -26,7 +26,7 @@ function FaqItem({ q, a, idx }) {
 			className={[
 				"w-full",
 				"relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur[25px]",
-				open ? "ring-1 ring-cyan-400/30 shadow-[0_0_20px_rgba(34,211,238,0.18)]" : "shadow-3xl",
+				open ? "ring-1 ring-brand/30 shadow-[0_0_20px_rgba(34,211,238,0.18)]" : "shadow-3xl",
 				"overflow-hidden",
 			].join(" ")}
 		>
@@ -38,7 +38,7 @@ function FaqItem({ q, a, idx }) {
 				className="relative w-full h-16 md:h-[72px] pl-5 pr-14 flex items-center justify-start text-left select-none"
 			>
 				<div className="flex items-center gap-4">
-					<span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-cyan-300">
+					<span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand">
 						{idx + 1}
 					</span>
 					<span className="font-semibold leading-snug text-white">{q}</span>
@@ -46,7 +46,7 @@ function FaqItem({ q, a, idx }) {
 
 				<ChevronDown
 					className={`absolute right-6 top-1/2 -translate-y-1/2 size-5 transition-transform ${
-						open ? "rotate-180 text-cyan-300" : "text-gray-300"
+						open ? "rotate-180 text-brand" : "text-gray-300"
 					}`}
 				/>
 			</button>
@@ -102,8 +102,8 @@ export default function Ayuda() {
 				<div className="grid grid-cols-1 md:grid-cols-2 items-center text-center md:text-left gap-4">
 					<p className="text-cyan-200/80 text-lg font-medium drop-shadow-lg animate-fade-in">Resuelve dudas frecuentes. Toca una pregunta para ver la respuesta.</p>
 					<div className="flex items-center justify-center md:justify-end gap-3">
-						<HelpCircle className="text-cyan-400 animate-pulse" size={32} />
-						<h1 className="text-[clamp(2.2rem,3vw,2.8rem)] font-black leading-tight bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(6,182,212,0.5)] animate-gradient-x" style={{ fontFamily: "poppins, sans-serif" }}>
+						<HelpCircle className="text-brand animate-pulse" size={32} />
+						<h1 className="text-[clamp(2.2rem,3vw,2.8rem)] font-black leading-tight bg-gradient-to-r from-brand via-brand-2 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(6,182,212,0.5)] animate-gradient-x" style={{ fontFamily: "poppins, sans-serif" }}>
 							Centro de ayuda
 						</h1>
 					</div>
@@ -114,21 +114,21 @@ export default function Ayuda() {
 					<button
 						onClick={prev}
 						disabled={page === 0}
-						className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/30 text-cyan-300 font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-cyan-500/30 ${page === 0? "opacity-40 cursor-not-allowed":"hover:bg-cyan-500/20"}`}
+						className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-brand/10 to-brand-2/10 border border-brand/30 text-brand font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-brand/30 ${page === 0? "opacity-40 cursor-not-allowed":"hover:bg-brand/20"}`}
 					>
 						<ChevronLeft className="size-5" /> Anterior
 					</button>
 
 					<div className="flex items-center gap-2">
 						{Array.from({ length: totalPages }).map((_, i) => (
-							<span key={i} className={["h-3 w-3 rounded-full transition-all duration-300", i === page ? "bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "bg-white/20"].join(" ")} />
+							<span key={i} className={["h-3 w-3 rounded-full transition-all duration-300", i === page ? "bg-brand shadow-[0_0_10px_rgba(6,182,212,0.5)]" : "bg-white/20"].join(" ")} />
 						))}
 					</div>
 
 					<button
 						onClick={next}
 						disabled={page === totalPages - 1}
-						className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/30 text-cyan-300 font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-cyan-500/30 ${page === totalPages - 1? "opacity-40 cursor-not-allowed":"hover:bg-cyan-500/20"}`}
+						className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-brand/10 to-brand-2/10 border border-brand/30 text-brand font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-brand/30 ${page === totalPages - 1? "opacity-40 cursor-not-allowed":"hover:bg-brand/20"}`}
 					>
 						Siguiente <ChevronRight className="size-5" />
 					</button>

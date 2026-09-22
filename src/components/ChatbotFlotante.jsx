@@ -307,7 +307,7 @@ export default function ChatbotFlotante() {
 						exit={{ scale: 0 }}
 						whileHover={{ scale: 1.1 }}
 						onClick={() => setIsOpen(true)}
-						className="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 shadow-2xl flex items-center justify-center text-white hover:shadow-cyan-500/50 transition-all"
+						className="w-14 h-14 rounded-full bg-gradient-to-br from-brand to-brand-2 shadow-2xl flex items-center justify-center text-white hover:shadow-brand/50 transition-all"
 					>
 						<div className="relative w-10 h-10 flex items-center justify-center">
 							<img
@@ -319,7 +319,7 @@ export default function ChatbotFlotante() {
 								}}
 							/>
 							<span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-950/80 border border-white/15 flex items-center justify-center">
-								<MessageCircle size={14} className="text-cyan-200" />
+								<MessageCircle size={14} className="text-brand" />
 							</span>
 						</div>
 					</motion.button>
@@ -333,10 +333,10 @@ export default function ChatbotFlotante() {
 						initial={{ opacity: 0, scale: 0.8, y: 20 }}
 						animate={{ opacity: 1, scale: 1, y: 0 }}
 						exit={{ opacity: 0, scale: 0.8, y: 20 }}
-						className="absolute bottom-20 right-0 w-[92vw] max-w-sm h-[70vh] max-h-[560px] bg-gradient-to-b from-slate-900 to-slate-950 rounded-2xl shadow-2xl border border-cyan-500/20 flex flex-col overflow-hidden"
+						className="absolute bottom-20 right-0 w-[92vw] max-w-sm h-[70vh] max-h-[560px] bg-gradient-to-b from-slate-900 to-slate-950 rounded-2xl shadow-2xl border border-brand/20 flex flex-col overflow-hidden"
 					>
 						{/* Header */}
-						<div className="bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-4 flex items-center justify-between">
+						<div className="bg-gradient-to-r from-brand to-brand-2 px-4 py-4 flex items-center justify-between">
 							<div className="flex items-center gap-3 min-w-0">
 								<div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden">
 									<img
@@ -350,7 +350,7 @@ export default function ChatbotFlotante() {
 								</div>
 								<div className="min-w-0">
 									<h3 className="font-bold text-white leading-tight">Soporte ECONFIA</h3>
-									<p className="text-xs text-cyan-100">
+									<p className="text-xs text-white/85">
 										{isEscalated ? `Ticket: ${ticketCode}` : "Respuestas automáticas"}
 									</p>
 								</div>
@@ -375,8 +375,8 @@ export default function ChatbotFlotante() {
 									<div
 										className={`max-w-xs px-4 py-2 rounded-lg text-sm whitespace-pre-line ${
 											msg.sender === "user"
-												? "bg-cyan-600 text-white rounded-br-none"
-												: "bg-slate-700 text-cyan-100 rounded-bl-none border border-cyan-500/30"
+												? "bg-brand text-white rounded-br-none"
+												: "bg-slate-700 text-brand rounded-bl-none border border-brand/30"
 										}`}
 									>
 										{msg.texto}
@@ -395,7 +395,7 @@ export default function ChatbotFlotante() {
 						{/* Sugerencias */}
 						{!isEscalated && messages.length <= 2 && (
 							<div className="px-4 pb-3">
-								<p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300/70">
+								<p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand/70">
 									Puedes preguntar
 								</p>
 								<div className="flex flex-wrap gap-2">
@@ -404,7 +404,7 @@ export default function ChatbotFlotante() {
 											key={pregunta}
 											type="button"
 											onClick={() => setInputValue(pregunta)}
-											className="rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-100 transition hover:bg-cyan-500/20"
+											className="rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-xs text-brand transition hover:bg-brand/20"
 										>
 											{pregunta}
 										</button>
@@ -415,7 +415,7 @@ export default function ChatbotFlotante() {
 
 						{/* Botones de acción */}
 						{!isEscalated && (
-							<div className="px-4 py-3 border-t border-cyan-500/20 space-y-2">
+							<div className="px-4 py-3 border-t border-brand/20 space-y-2">
 								{/* WhatsApp — siempre visible */}
 								<button
 									onClick={handleWhatsApp}
@@ -443,7 +443,7 @@ export default function ChatbotFlotante() {
 						)}
 
 						{/* Input */}
-						<div className="px-4 py-3 border-t border-cyan-500/20 bg-slate-950">
+						<div className="px-4 py-3 border-t border-brand/20 bg-slate-950">
 							<div className="flex gap-2">
 								<input
 									type="text"
@@ -451,12 +451,12 @@ export default function ChatbotFlotante() {
 									onChange={(e) => setInputValue(e.target.value)}
 									onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
 									placeholder="Escribe tu pregunta..."
-									className="flex-1 bg-slate-800 text-white rounded-lg px-3 py-2 text-sm outline-none border border-cyan-500/30 focus:border-cyan-500/80 transition placeholder-gray-500"
+									className="flex-1 bg-slate-800 text-white rounded-lg px-3 py-2 text-sm outline-none border border-brand/30 focus:border-brand/80 transition placeholder-gray-500"
 								/>
 								<button
 									onClick={handleSendMessage}
 									disabled={isSending || !inputValue.trim()}
-									className="bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg px-3 py-2 transition"
+									className="bg-brand hover:opacity-90 text-white rounded-lg px-3 py-2 transition"
 								>
 									{isSending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
 								</button>

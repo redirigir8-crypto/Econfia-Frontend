@@ -281,7 +281,7 @@ const TONE_PALETTE = {
   emerald: { top: "border-t-emerald-500/60", text: "text-emerald-500" },
   amber:   { top: "border-t-amber-500/60",   text: "text-amber-500"   },
   rose:    { top: "border-t-rose-500/60",    text: "text-rose-500"    },
-  cyan:    { top: "border-t-cyan-500/50",    text: "text-brand"       },
+  cyan:    { top: "border-t-brand/50",    text: "text-brand"       },
 };
 
 function MetricCard({ label, value, hint, tone }) {
@@ -298,9 +298,9 @@ function MetricCard({ label, value, hint, tone }) {
     <div
       className={`group relative overflow-hidden rounded-2xl border border-line/15 border-t-2 ${palette.top} bg-surface-2/70 px-5 py-4 shadow-lg shadow-black/5 backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-brand/25 hover:bg-surface`}
     >
-      <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-cyan-400/[0.06] blur-2xl transition group-hover:bg-cyan-400/[0.10]" />
+      <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-brand/[0.06] blur-2xl transition group-hover:bg-brand/[0.10]" />
       <div className="relative flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-line/15 bg-surface/80 text-cyan-300 shadow-inner">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-line/15 bg-surface/80 text-brand shadow-inner">
           <Icon className="h-4.5 w-4.5" />
         </div>
         <div className="min-w-0">
@@ -325,11 +325,11 @@ function StatBadge({ label, value }) {
 function SectionCard({ icon: Icon, title, description, children, action }) {
   return (
     <section className="relative overflow-hidden rounded-[26px] border border-line/15 bg-surface/90 p-6 shadow-xl shadow-black/5 backdrop-blur-xl transition duration-300 hover:border-brand/20">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/35 to-transparent" />
-      <div className="pointer-events-none absolute -left-24 -top-24 h-52 w-52 rounded-full bg-cyan-500/[0.035] blur-3xl" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/35 to-transparent" />
+      <div className="pointer-events-none absolute -left-24 -top-24 h-52 w-52 rounded-full bg-brand/[0.035] blur-3xl" />
       <div className="relative flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-4">
-          <div className="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/25 bg-cyan-400/[0.08] text-cyan-300 shadow-[0_0_28px_rgba(34,211,238,0.08)]">
+          <div className="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-brand/25 bg-brand/[0.08] text-brand shadow-[0_0_28px_rgba(34,211,238,0.08)]">
             <Icon className="h-5 w-5" />
           </div>
           <div>
@@ -372,7 +372,7 @@ function AnimatedTrendBars({ items }) {
   if (!items.length) return null;
 
   return (
-    <div className="mt-5 overflow-hidden rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] p-5 shadow-lg shadow-black/5">
+    <div className="mt-5 overflow-hidden rounded-2xl border border-brand/20 bg-brand/[0.05] p-5 shadow-lg shadow-black/5">
       <style>{`
         @keyframes experianBarGrow {
           from { opacity: .35; transform: scaleX(0); }
@@ -401,7 +401,7 @@ function AnimatedTrendBars({ items }) {
             </div>
             <div className="h-2.5 overflow-hidden rounded-full bg-surface-2 ring-1 ring-line/10">
               <div
-                className="h-full origin-left rounded-full bg-gradient-to-r from-sky-400 via-cyan-300 to-emerald-300 shadow-[0_0_24px_rgba(45,212,191,0.22)]"
+                className="h-full origin-left rounded-full bg-gradient-to-r from-sky-400 via-brand to-emerald-300 shadow-[0_0_24px_rgba(45,212,191,0.22)]"
                 style={{
                   width: `${item.width}%`,
                   transform: "scaleX(0)",
@@ -581,12 +581,12 @@ function EvidenceDrawer({ open, onClose, detalle }) {
         onClick={onClose}
       />
       <aside className="relative h-full w-full max-w-3xl border-l border-white/[0.08] bg-[#04060f]/98 px-6 py-6 shadow-[-32px_0_80px_rgba(2,6,23,0.6)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent" />
 
         <div className="flex items-start justify-between gap-4 border-b border-white/[0.07] pb-5">
           <div>
             <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.25em] text-slate-500">
-              <div className="h-px w-4 bg-cyan-500/50" />
+              <div className="h-px w-4 bg-brand/50" />
               Soporte y auditoría
             </div>
             <h3 className="mt-2 text-xl font-bold text-white">Evidencia tecnica</h3>
@@ -664,7 +664,7 @@ function SugerenciasBlock({ sugerencias }) {
               key={`${index}-${texto.slice(0, 24)}`}
               className="flex gap-3 rounded-2xl border border-line/15 bg-surface-2/70 px-5 py-4 shadow-lg shadow-black/5 backdrop-blur-xl transition hover:border-brand/25 hover:bg-surface"
             >
-              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] text-[11px] font-bold text-cyan-300">
+              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-brand/25 bg-brand/[0.08] text-[11px] font-bold text-brand">
                 {index + 1}
               </div>
               <p className="text-sm leading-6 text-content">{texto}</p>
@@ -794,7 +794,7 @@ function MonthlyCapacity({ ingreso, cuotaVsIngreso }) {
   const disponible = Math.max(0, ing - cuota);
   return (
     <div className="relative overflow-hidden rounded-2xl border border-line/15 bg-surface-2/70 p-5 shadow-lg shadow-black/5">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-300/50 via-cyan-300/25 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-300/50 via-brand/25 to-transparent" />
       <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">Ingreso mensual estimado</div>
       <div className="mt-2 flex items-baseline gap-1">
         <span className="text-2xl font-extrabold tracking-tight text-content">{formatMoney(ing)}</span>
@@ -802,16 +802,16 @@ function MonthlyCapacity({ ingreso, cuotaVsIngreso }) {
       </div>
       <p className="mt-1 text-[11px] leading-4 text-muted">Estimación de la fuente sobre los últimos ~6 meses.</p>
 
-      <div className="mt-3 flex items-center justify-between rounded-xl border border-cyan-400/20 bg-cyan-400/[0.05] px-3 py-2">
+      <div className="mt-3 flex items-center justify-between rounded-xl border border-brand/20 bg-brand/[0.05] px-3 py-2">
         <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Ingreso semestral estimado (×6)</span>
-        <span className="text-sm font-black text-cyan-200">{formatMoney(semestral)}</span>
+        <span className="text-sm font-black text-brand">{formatMoney(semestral)}</span>
       </div>
 
       <div className="mt-4 flex h-3.5 overflow-hidden rounded-full bg-surface-2 ring-1 ring-line/10">
         {pct > 0 && (
           <div className="h-full bg-gradient-to-r from-amber-400 to-amber-300" style={{ width: `${pct}%` }} />
         )}
-        <div className="h-full flex-1 bg-gradient-to-r from-cyan-400 to-emerald-400" />
+        <div className="h-full flex-1 bg-gradient-to-r from-brand to-emerald-400" />
       </div>
       <div className="mt-2 flex items-center justify-between text-[11px] font-semibold">
         <span className="text-amber-300">Cuotas {formatMoney(cuota)}</span>
@@ -827,7 +827,7 @@ function IncomeGauge({ ingreso, cuotaVsIngreso }) {
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-line/15 bg-surface-2/70 p-5 shadow-lg shadow-black/5">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-cyan-300/60 via-emerald-300/30 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-brand/60 via-emerald-300/30 to-transparent" />
       <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">
         Analisis de ingresos
       </div>
@@ -846,7 +846,7 @@ function IncomeGauge({ ingreso, cuotaVsIngreso }) {
             ))}
           </div>
           <div
-            className="absolute inset-x-1.5 bottom-1.5 rounded-xl bg-gradient-to-t from-cyan-400 to-emerald-300 shadow-[0_0_26px_rgba(45,212,191,0.28)] transition-all duration-700"
+            className="absolute inset-x-1.5 bottom-1.5 rounded-xl bg-gradient-to-t from-brand to-emerald-300 shadow-[0_0_26px_rgba(45,212,191,0.28)] transition-all duration-700"
             style={{ height: `${Math.max(5, clamped)}%` }}
           />
         </div>
@@ -857,7 +857,7 @@ function IncomeGauge({ ingreso, cuotaVsIngreso }) {
           </div>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-surface-2">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 transition-all duration-700"
+              className="h-full rounded-full bg-gradient-to-r from-brand to-emerald-300 transition-all duration-700"
               style={{ width: `${clamped}%` }}
             />
           </div>
@@ -894,7 +894,7 @@ function AdjudicatorCreditBehaviorPanel({ context, detalle }) {
       }
     >
       <div className="grid gap-4 xl:grid-cols-[1.45fr_0.85fr]">
-        <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] p-5 shadow-lg shadow-black/5">
+        <div className="rounded-2xl border border-brand/20 bg-brand/[0.05] p-5 shadow-lg shadow-black/5">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="text-[9px] font-semibold uppercase tracking-[0.24em] text-brand">
@@ -1270,8 +1270,8 @@ export default function ExperianDetalleResultados({ consultaId }) {
       <div className="flex h-full min-h-[60vh] items-center justify-center">
         <div className="text-center">
           <div className="relative mx-auto mb-6 h-16 w-16">
-            <div className="absolute inset-0 animate-ping rounded-full border border-cyan-500/25" />
-            <div className="absolute inset-2 animate-spin rounded-full border-2 border-t-cyan-400 border-slate-800" />
+            <div className="absolute inset-0 animate-ping rounded-full border border-brand/25" />
+            <div className="absolute inset-2 animate-spin rounded-full border-2 border-t-brand border-slate-800" />
           </div>
           <p className="text-sm font-semibold text-content">Cargando Econfia Adjudicator</p>
           <p className="mt-1 text-xs text-muted">Un momento por favor...</p>
@@ -1303,14 +1303,14 @@ export default function ExperianDetalleResultados({ consultaId }) {
 
           {/* ── Hero header ─────────────────────────────────────────────── */}
           <section className="relative overflow-hidden rounded-[30px] border border-line/15 bg-surface/90 px-6 py-7 shadow-2xl shadow-black/5 backdrop-blur-xl md:px-8 md:py-8">
-            <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-cyan-500/[0.055] blur-3xl" />
+            <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-brand/[0.055] blur-3xl" />
             <div className="pointer-events-none absolute -left-40 bottom-0 h-80 w-80 rounded-full bg-violet-500/[0.035] blur-3xl" />
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent" />
 
             <div className="relative grid gap-6 xl:grid-cols-[1.35fr_330px_300px] xl:items-stretch">
               {/* ── Left: identity ───────────────────────────────────────── */}
               <div className="flex min-w-0 flex-col justify-center">
-                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.08)]">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-brand/25 bg-brand/[0.08] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.28em] text-brand shadow-[0_0_30px_rgba(34,211,238,0.08)]">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   Econfia Adjudicator
                 </div>
@@ -1350,13 +1350,13 @@ export default function ExperianDetalleResultados({ consultaId }) {
                   onClick={() => setShowEvidence(true)}
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3 text-sm font-semibold text-content shadow-lg shadow-black/5 transition hover:border-brand/25 hover:bg-surface hover:text-brand"
                 >
-                  <FileSearch className="h-4 w-4 text-cyan-300" />
+                  <FileSearch className="h-4 w-4 text-brand" />
                   Ver evidencia tecnica
                 </button>
                 {metrics.map((metric) => (
                   <MetricCard key={metric.label} label={metric.label} value={metric.value} hint={metric.hint} tone={metric.tone} />
                 ))}
-                <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] px-5 py-4 text-sm leading-6 text-muted shadow-lg shadow-black/5">
+                <div className="rounded-2xl border border-brand/20 bg-brand/[0.06] px-5 py-4 text-sm leading-6 text-muted shadow-lg shadow-black/5">
                   <span className="font-semibold text-brand">Nivel de lectura:</span>{" "}
                   úselo como apoyo para la decisión; no reemplaza el análisis crediticio completo.
                 </div>
@@ -1375,7 +1375,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
                 const cls = riesgo > 0
                   ? "border-rose-500/30 bg-rose-500/[0.07] text-rose-600 dark:text-rose-300"
                   : total > 0
-                    ? "border-cyan-500/30 bg-cyan-500/[0.07] text-cyan-600 dark:text-cyan-300"
+                    ? "border-brand/30 bg-brand/[0.07] text-brand dark:text-brand"
                     : "border-emerald-500/30 bg-emerald-500/[0.07] text-emerald-600 dark:text-emerald-300";
                 const txt = riesgo > 0
                   ? `${riesgo} por revisar`
@@ -1589,7 +1589,7 @@ export default function ExperianDetalleResultados({ consultaId }) {
               <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
                 {ADJ_GLOSARIO.map(([sigla, significado]) => (
                   <div key={sigla} className="rounded-2xl border border-line/15 bg-surface-2/70 px-4 py-3">
-                    <div className="text-xs font-bold text-cyan-300">{sigla}</div>
+                    <div className="text-xs font-bold text-brand">{sigla}</div>
                     <div className="mt-0.5 text-xs leading-snug text-content">{significado}</div>
                   </div>
                 ))}

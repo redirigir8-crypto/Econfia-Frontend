@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Toast from "../components/Toast";
+import { useTheme } from "../context/ThemeContext";
 import { MUNICIPIOS_COLOMBIA } from "../utils/municipiosColombia";
 import { PROFESIONES_MUNDO } from "../utils/profesionesMundo";
 
@@ -9,9 +10,22 @@ const TIPO_DOC_OPCIONES = [
   { value: "CC", label: "Cédula de Ciudadanía (CC)" },
   { value: "TI", label: "Tarjeta de Identidad (TI)" },
   { value: "CE", label: "Cédula de Extranjería (CE)" },
+  { value: "PA", label: "Pasaporte (PA)" },
   { value: "PPT", label: "Permiso de Protección Temporal (PPT)" },
   { value: "PEP", label: "Permiso Especial de Permanencia (PEP)" },
 ];
+
+// Nombre del documento a verificar según lo que el candidato declaró en
+// "Sus datos" — el flujo de verificación es el mismo (OCR + captura), pero
+// referirse siempre a "cédula" confunde a quien tiene pasaporte o CE.
+const NOMBRE_DOCUMENTO_POR_TIPO = {
+  CE: "cédula de extranjería",
+  PA: "pasaporte",
+};
+
+function nombreDocumento(tipoDoc) {
+  return NOMBRE_DOCUMENTO_POR_TIPO[tipoDoc] || "cédula";
+}
 
 const TIPO_DOCUMENTO_SUBIDA = [
   { value: "hoja_vida", label: "Hoja de vida" },
@@ -85,6 +99,11 @@ function mensajeEnvioSms(data) {
 }
 
 export default function EconfiaWallet() {
+  const { organizacion } = useTheme();
+  // Certicámara (y cualquier otro cliente white-label) puede renombrar el
+  // producto Wallet para sus usuarios — el resto de Econfia conserva su
+  // nombre tal cual (decisión de alcance: solo Wallet cambia de nombre).
+  const nombreWallet = organizacion?.nombre_wallet_efectivo || "econfiaWallet";
   const [estado, setEstado] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -172,6 +191,89 @@ export default function EconfiaWallet() {
       setHistorial([]);
     } finally {
       setCargandoHistorial(false);
+    }
+  };
+
+  const [exportandoHistorial, setExportandoHistorial] = useState(false);
+
+  const exportarHistorialPdf = async () => {
+    setExportandoHistorial(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/identidad/historial/pdf/`, { headers: authHeaders() });
+      if (!res.ok) {
+        setToast({ type: "error", message: "No se pudo generar el PDF." });
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "econfia-wallet-historial.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setToast({ type: "error", message: "Error al generar el PDF." });
+    } finally {
+      setExportandoHistorial(false);
+    }
+  };
+
+  const [revocandoPropio, setRevocandoPropio] = useState("");
+
+  const revocarPropio = async (metodo) => {
+    const etiqueta = { rostro: "su rostro", cedula: "su cédula verificada", telefono: "su teléfono verificado" }[metodo];
+    if (!window.confirm(`¿Revocar ${etiqueta}? Deberá volver a verificarlo.`)) return;
+    setRevocandoPropio(metodo);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/identidad/autorrevocar/`, {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ metodo }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setToast({ type: "error", message: data?.error || "No se pudo revocar." });
+        return;
+      }
+      setToast({ type: "success", message: `Se revocó ${etiqueta} correctamente.` });
+      cargarEstado();
+      cargarDocumentos();
+      abrirHistorial();
+    } catch {
+      setToast({ type: "error", message: "Error de conexión al revocar." });
+    } finally {
+      setRevocandoPropio("");
+    }
+  };
+
+  const [mostrarEliminarDatos, setMostrarEliminarDatos] = useState(false);
+  const [eliminandoDatos, setEliminandoDatos] = useState(false);
+
+  const eliminarTodosMisDatos = async (password) => {
+    setEliminandoDatos(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/identidad/eliminar-datos/`, {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setToast({ type: "error", message: data?.error || "No se pudo eliminar sus datos." });
+        return false;
+      }
+      setToast({ type: "success", message: `Se eliminaron todos sus datos de ${nombreWallet}.` });
+      setMostrarEliminarDatos(false);
+      cargarEstado();
+      cargarDocumentos();
+      return true;
+    } catch {
+      setToast({ type: "error", message: "Error de conexión al eliminar sus datos." });
+      return false;
+    } finally {
+      setEliminandoDatos(false);
     }
   };
 
@@ -666,7 +768,11 @@ export default function EconfiaWallet() {
                   </svg>
                 </span>
                 <h1 className="text-3xl md:text-4xl font-black text-content leading-none tracking-tight">
-                  econfia<span className="text-emerald-400">Wallet</span>
+                  {organizacion?.nombre_wallet ? (
+                    nombreWallet
+                  ) : (
+                    <>econfia<span className="text-emerald-400">Wallet</span></>
+                  )}
                 </h1>
               </div>
               <p className="text-sm text-muted mt-3 leading-relaxed">
@@ -860,7 +966,9 @@ export default function EconfiaWallet() {
                 className="flex items-center gap-3 rounded-xl bg-surface-2/50 border border-line/10 hover:border-emerald-500/40 px-4 py-3 text-left transition-colors">
                 <span className="text-2xl">🪪</span>
                 <span>
-                  <span className="block text-content text-sm font-semibold">Verificar cédula</span>
+                  <span className="block text-content text-sm font-semibold capitalize">
+                    Verificar {nombreDocumento(estado?.candidato?.tipo_doc)}
+                  </span>
                   <span className="block text-muted text-[11px]">Frente y reverso</span>
                 </span>
               </button>
@@ -905,6 +1013,15 @@ export default function EconfiaWallet() {
               <span className="flex-1">
                 <span className="block text-content text-sm font-semibold">Ver historial de identidad</span>
                 <span className="block text-muted text-[11px]">Registros, verificaciones y revocaciones de su cuenta</span>
+              </span>
+            </button>
+
+            <button type="button" onClick={() => setMostrarEliminarDatos(true)}
+              className="mt-4 w-full flex items-center gap-3 rounded-xl border border-red-500/40 bg-red-500/10 hover:bg-red-500/15 px-4 py-3 text-left transition-colors">
+              <span className="text-xl">🗑️</span>
+              <span className="flex-1">
+                <span className="block text-red-300 text-sm font-semibold">Eliminar todos mis datos de Wallet</span>
+                <span className="block text-muted text-[11px]">Rostro, documentos, títulos, referencias y consentimientos. No se puede deshacer.</span>
               </span>
             </button>
           </div>
@@ -1231,7 +1348,7 @@ export default function EconfiaWallet() {
         />
       )}
       {modalVerificacion === "cedula" && (
-        <VerificarCedulaModal onClose={() => setModalVerificacion(null)} setToast={setToast} onVerificado={cargarDocumentos} />
+        <VerificarCedulaModal onClose={() => setModalVerificacion(null)} setToast={setToast} onVerificado={cargarDocumentos} tipoDoc={estado?.candidato?.tipo_doc} />
       )}
       {modalVerificacion === "sms" && (
         <VerificarSmsModal onClose={() => setModalVerificacion(null)} setToast={setToast} datosTelefono={form.telefono} onVerificado={cargarEstado} />
@@ -1241,6 +1358,12 @@ export default function EconfiaWallet() {
           onClose={() => setMostrarHistorial(false)}
           eventos={historial}
           cargando={cargandoHistorial}
+          onExportar={exportarHistorialPdf}
+          exportando={exportandoHistorial}
+          estado={estado}
+          cedulaVerificada={documentos.some((d) => d.tipo === "cedula" && d.estado_verificacion === "verificado")}
+          onRevocar={revocarPropio}
+          revocando={revocandoPropio}
         />
       )}
       {mostrarDispositivos && (
@@ -1262,6 +1385,13 @@ export default function EconfiaWallet() {
           onClose={() => setMostrarConsentimientos(false)}
           consentimientos={consentimientos}
           cargando={cargandoConsentimientos}
+        />
+      )}
+      {mostrarEliminarDatos && (
+        <EliminarDatosModal
+          onClose={() => setMostrarEliminarDatos(false)}
+          onConfirmar={eliminarTodosMisDatos}
+          eliminando={eliminandoDatos}
         />
       )}
     </section>
@@ -1305,18 +1435,33 @@ const ICONO_EVENTO = {
   revocacion: "🔒",
 };
 
-function HistorialIdentidadModal({ onClose, eventos, cargando }) {
+const METODO_LABEL_PROPIO = { rostro: "el rostro", cedula: "la cédula verificada", telefono: "el teléfono verificado" };
+
+function HistorialIdentidadModal({ onClose, eventos, cargando, onExportar, exportando, estado, cedulaVerificada, onRevocar, revocando }) {
+  const { organizacion } = useTheme();
+  const nombreWallet = organizacion?.nombre_wallet_efectivo || "econfiaWallet";
+  const metodosActivos = [
+    estado?.rostro_registrado && "rostro",
+    cedulaVerificada && "cedula",
+    estado?.telefono_verificado && "telefono",
+  ].filter(Boolean);
+
   return (
     <VerifModalShell
       title="Historial de identidad"
-      subtitle="Registro de sus verificaciones y revocaciones en econfiaWallet."
+      subtitle={`Registro de sus verificaciones y revocaciones en ${nombreWallet}.`}
       onClose={onClose}>
+      <button type="button" onClick={onExportar} disabled={exportando}
+        className="mb-3 w-full flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 px-4 py-2.5 text-emerald-300 text-xs font-semibold transition-colors disabled:opacity-50">
+        {exportando ? <Spinner /> : "⬇"} Exportar historial en PDF
+      </button>
+
       {cargando ? (
         <div className="flex justify-center py-6"><Spinner /></div>
       ) : eventos.length === 0 ? (
         <p className="text-muted text-xs text-center py-6">Aún no hay eventos registrados.</p>
       ) : (
-        <ul className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
+        <ul className="flex flex-col gap-3 max-h-[45vh] overflow-y-auto">
           {eventos.map((ev, i) => (
             <li key={i} className="flex items-start gap-3 rounded-xl bg-surface-2/50 border border-line/10 px-4 py-3">
               <span className="text-xl">{ICONO_EVENTO[ev.tipo] || "•"}</span>
@@ -1330,6 +1475,20 @@ function HistorialIdentidadModal({ onClose, eventos, cargando }) {
             </li>
           ))}
         </ul>
+      )}
+
+      {metodosActivos.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-line/10">
+          <p className="text-muted text-[11px] mb-2">Si desea eliminar alguna verificación de su cuenta:</p>
+          <div className="flex flex-wrap gap-2">
+            {metodosActivos.map((m) => (
+              <button key={m} type="button" onClick={() => onRevocar(m)} disabled={revocando === m}
+                className="px-3 py-1.5 rounded-lg border border-red-500/40 text-red-300 hover:bg-red-500/10 text-[11px] font-semibold disabled:opacity-50">
+                {revocando === m ? "Revocando…" : `Revocar ${METODO_LABEL_PROPIO[m]}`}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </VerifModalShell>
   );
@@ -1413,10 +1572,12 @@ function PoliticaBiometricaModal({ onClose, data, cargando }) {
 const CANAL_LABEL = { app: "App móvil", web: "Sitio web" };
 
 function ConsentimientosModal({ onClose, consentimientos, cargando }) {
+  const { organizacion } = useTheme();
+  const nombreWallet = organizacion?.nombre_wallet_efectivo || "econfiaWallet";
   return (
     <VerifModalShell
       title="Mis autorizaciones otorgadas"
-      subtitle="Registro de las autorizaciones que ha dado en econfiaWallet, por categoría de dato."
+      subtitle={`Registro de las autorizaciones que ha dado en ${nombreWallet}, por categoría de dato.`}
       onClose={onClose}>
       {cargando ? (
         <div className="flex justify-center py-6"><Spinner /></div>
@@ -1435,6 +1596,76 @@ function ConsentimientosModal({ onClose, consentimientos, cargando }) {
           ))}
         </ul>
       )}
+    </VerifModalShell>
+  );
+}
+
+function EliminarDatosModal({ onClose, onConfirmar, eliminando }) {
+  const { organizacion } = useTheme();
+  const nombreWallet = organizacion?.nombre_wallet_efectivo || "econfiaWallet";
+  const [paso, setPaso] = useState("advertencia"); // advertencia | password
+  const [textoConfirmacion, setTextoConfirmacion] = useState("");
+  const [password, setPassword] = useState("");
+
+  const confirmacionValida = textoConfirmacion.trim().toUpperCase() === "ELIMINAR";
+
+  const enviar = async (e) => {
+    e.preventDefault();
+    if (!password) return;
+    await onConfirmar(password);
+  };
+
+  if (paso === "advertencia") {
+    return (
+      <VerifModalShell title={`Eliminar todos mis datos de ${nombreWallet}`} onClose={onClose}>
+        <div className="flex flex-col gap-4">
+          <p className="text-content text-sm">
+            Esto eliminará de forma <strong>permanente e irreversible</strong>: su rostro registrado, la cédula
+            y demás documentos subidos, títulos académicos, referencias, certificaciones, pases QR compartidos,
+            dispositivos registrados y las autorizaciones otorgadas.
+          </p>
+          <p className="text-muted text-xs">
+            No se elimina su cuenta de Econfia ni sus consultas de antecedentes fuera de {nombreWallet}. El
+            historial de revocaciones se conserva como registro de auditoría.
+          </p>
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-semibold text-content/80">
+              Para continuar, escriba <span className="text-red-300">ELIMINAR</span>
+            </label>
+            <input type="text" value={textoConfirmacion} onChange={(e) => setTextoConfirmacion(e.target.value)}
+              className="px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-sm"
+              autoComplete="off" />
+          </div>
+          <button type="button" disabled={!confirmacionValida} onClick={() => setPaso("password")}
+            className="px-5 py-2.5 rounded-lg bg-red-500 hover:bg-red-400 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors">
+            Continuar
+          </button>
+        </div>
+      </VerifModalShell>
+    );
+  }
+
+  return (
+    <VerifModalShell title="Confirme su contraseña" onClose={onClose}>
+      <form onSubmit={enviar} className="flex flex-col gap-4">
+        <p className="text-muted text-xs">
+          Por seguridad, ingrese la contraseña de su cuenta para confirmar la eliminación definitiva.
+        </p>
+        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+          placeholder="Contraseña de su cuenta"
+          className="px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-sm"
+          autoComplete="current-password" autoFocus />
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => setPaso("advertencia")} className="text-xs text-muted hover:text-content">
+            ← Volver
+          </button>
+          <button type="submit" disabled={!password || eliminando}
+            className="ml-auto flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-500 hover:bg-red-400 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+            {eliminando && <Spinner tono="rojo" />}
+            {eliminando ? "Eliminando…" : "Eliminar definitivamente"}
+          </button>
+        </div>
+      </form>
     </VerifModalShell>
   );
 }
@@ -1714,7 +1945,7 @@ function dataUrlAArchivo(dataUrl, nombre) {
   return new File([arr], nombre, { type: mime });
 }
 
-function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
+function VerificarCedulaModal({ onClose, setToast, onVerificado, tipoDoc }) {
   const [modo, setModo] = useState(null); // null | "camara" | "archivo"
   const [paso, setPaso] = useState("frente"); // frente | reverso | listo
   const [capturas, setCapturas] = useState({ frente: null, reverso: null });
@@ -1734,8 +1965,12 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   const [verificando, setVerificando] = useState(false);
   const pollDocRef = useRef(null);
 
+  const documento = nombreDocumento(tipoDoc);
   const ORDEN = ["frente", "reverso"];
-  const ETIQUETAS = { frente: "Enfoque el frente de su cédula", reverso: "Ahora enfoque el reverso de su cédula" };
+  const ETIQUETAS = {
+    frente: `Enfoque el frente de su ${documento}`,
+    reverso: `Ahora enfoque el reverso de su ${documento}`,
+  };
 
   useEffect(() => {
     if (modo !== "camara" || paso === "listo") return undefined;
@@ -1795,19 +2030,43 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
 
   // Consulta periódica del documento mientras está "pendiente" (Celery
   // corriendo verificar_documento_wallet contra Registraduría).
+  // Tras ~2 minutos (30 intentos cada 4s) de seguir "pendiente" se deja de
+  // esperar en silencio: puede pasar si Registraduría no responde y el
+  // documento queda pendiente indefinidamente (sin reintento automático en
+  // el backend) — mejor avisar al usuario que dejarlo esperando para siempre.
+  const POLL_INTENTOS_MAX = 30;
+
   const pollearDocumento = (docId, onReintentar) => {
     setVerificando(true);
     let activo = true;
+    let intentos = 0;
     const tick = async () => {
+      intentos += 1;
       try {
         const res = await fetch(`${API_URL}/api/wallet/documentos/${docId}/`, { headers: authHeaders() });
         const doc = await res.json().catch(() => null);
         if (!activo) return;
         if (!res.ok || !doc) {
+          if (intentos >= POLL_INTENTOS_MAX) {
+            setVerificando(false);
+            setToast({ type: "error", message: "No se pudo confirmar el estado de su cédula. Intente de nuevo más tarde." });
+            onReintentar?.();
+            return;
+          }
           pollDocRef.current = setTimeout(tick, 4000);
           return;
         }
         if (doc.estado_verificacion === "pendiente") {
+          if (intentos >= POLL_INTENTOS_MAX) {
+            setVerificando(false);
+            setToast({
+              type: "error",
+              message: doc.detalle_verificacion?.mensaje
+                || "La verificación está tardando más de lo normal. Intente de nuevo más tarde.",
+            });
+            onReintentar?.();
+            return;
+          }
           pollDocRef.current = setTimeout(tick, 4000);
           return;
         }
@@ -1824,7 +2083,14 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
         onVerificado?.();
         onClose();
       } catch {
-        if (activo) pollDocRef.current = setTimeout(tick, 4000);
+        if (!activo) return;
+        if (intentos >= POLL_INTENTOS_MAX) {
+          setVerificando(false);
+          setToast({ type: "error", message: "No se pudo confirmar el estado de su cédula. Intente de nuevo más tarde." });
+          onReintentar?.();
+          return;
+        }
+        pollDocRef.current = setTimeout(tick, 4000);
       }
     };
     tick();
@@ -1903,7 +2169,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   if (verificando) {
     return (
       <VerifModalShell
-        title="Verificar cédula"
+        title={`Verificar ${documento}`}
         subtitle="Estamos confirmando sus datos con la Registraduría. Esto puede tardar hasta un minuto."
         onClose={onClose}>
         <div className="flex flex-col items-center gap-4 py-4">
@@ -1916,7 +2182,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
 
   if (modo === null) {
     return (
-      <VerifModalShell title="Verificar cédula" subtitle="Elija cómo quiere entregar su documento." onClose={onClose}>
+      <VerifModalShell title={`Verificar ${documento}`} subtitle="Elija cómo quiere entregar su documento." onClose={onClose}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button type="button" onClick={() => setModo("camara")}
             className="flex flex-col items-center gap-2 rounded-xl bg-surface-2/50 border border-line/10 hover:border-emerald-500/40 px-4 py-6 transition-colors">
@@ -1937,7 +2203,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
 
   if (modo === "archivo") {
     return (
-      <VerifModalShell title="Verificar cédula" subtitle="Suba el PDF o imagen de su cédula escaneada (frente y reverso, en una o dos páginas)." onClose={onClose}>
+      <VerifModalShell title={`Verificar ${documento}`} subtitle={`Suba el PDF o imagen de su ${documento} escaneado (frente y reverso, en una o dos páginas).`} onClose={onClose}>
         <form onSubmit={enviarArchivo} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-content/80">Archivo (PDF o imagen, máx 10 MB)</label>
@@ -1953,7 +2219,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
             <button type="submit" disabled={enviando}
               className="ml-auto flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
               {enviando && <Spinner />}
-              {enviando ? "Enviando…" : "Verificar cédula"}
+              {enviando ? "Enviando…" : `Verificar ${documento}`}
             </button>
           </div>
         </form>
@@ -1962,7 +2228,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   }
 
   return (
-    <VerifModalShell title="Verificar cédula" subtitle="Tome una foto del frente y luego del reverso de su cédula." onClose={onClose}>
+    <VerifModalShell title={`Verificar ${documento}`} subtitle={`Tome una foto del frente y luego del reverso de su ${documento}.`} onClose={onClose}>
       {paso !== "listo" ? (
         <div className="flex flex-col items-center gap-3">
           <p className="text-content text-sm font-semibold">{ETIQUETAS[paso]}</p>
@@ -2001,7 +2267,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
           <button type="button" onClick={enviarCapturas} disabled={enviando}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
             {enviando && <Spinner />}
-            {enviando ? "Enviando…" : "Verificar cédula"}
+            {enviando ? "Enviando…" : `Verificar ${documento}`}
           </button>
         </div>
       )}

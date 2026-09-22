@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import LogoOrganizacion from "../components/LogoOrganizacion";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
@@ -117,8 +118,8 @@ export default function ConsultaExperian() {
       {loading &&
         createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-            <div className="relative w-full max-w-md rounded-2xl border border-cyan-400/20 bg-slate-950/85 p-10 text-center shadow-2xl shadow-cyan-500/20 backdrop-blur-md">
-              <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-t-4 border-cyan-400" />
+            <div className="relative w-full max-w-md rounded-2xl border border-brand/20 bg-slate-950/85 p-10 text-center shadow-2xl shadow-brand/20 backdrop-blur-md">
+              <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-t-4 border-brand" />
               <p className="animate-pulse text-lg font-semibold text-white">
                 Consultando Econfia Adjudicator...
               </p>
@@ -131,7 +132,7 @@ export default function ConsultaExperian() {
         resultado &&
         createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-            <div className="w-full max-w-xl rounded-3xl border border-cyan-400/20 bg-slate-950/88 p-8 text-center shadow-[0_20px_80px_rgba(8,145,178,0.22)] backdrop-blur-xl">
+            <div className="w-full max-w-xl rounded-3xl border border-brand/20 bg-slate-950/88 p-8 text-center shadow-[0_20px_80px_rgba(8,145,178,0.22)] backdrop-blur-xl">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-emerald-300">
                 <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -158,18 +159,18 @@ export default function ConsultaExperian() {
       )}
 
       <section className="relative min-h-screen overflow-hidden bg-transparent pb-32 pt-24">
-        <div className="absolute right-20 top-20 h-72 w-72 animate-pulse rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute bottom-20 left-20 h-96 w-96 animate-pulse rounded-full bg-blue-500/10 blur-3xl" style={{ animationDelay: "1s" }} />
+        <div className="absolute right-20 top-20 h-72 w-72 animate-pulse rounded-full bg-brand/10 blur-3xl" />
+        <div className="absolute bottom-20 left-20 h-96 w-96 animate-pulse rounded-full bg-brand-2/10 blur-3xl" style={{ animationDelay: "1s" }} />
 
         <div className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 items-center gap-6 px-4 md:grid-cols-2">
           <div className="space-y-5 text-center md:text-left">
             <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-3 py-1">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-gradient-to-r from-brand/20 to-brand-2/20 px-3 py-1">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
                 </span>
-                <span className="text-xs font-medium text-cyan-300">Econfia Adjudicator</span>
+                <span className="text-xs font-medium text-brand">Econfia Adjudicator</span>
               </div>
               <h1 className="text-3xl font-black leading-tight tracking-tight text-content md:text-4xl">
                 Econfia Adjudicator
@@ -181,9 +182,9 @@ export default function ConsultaExperian() {
             </p>
 
             <ul className="space-y-2 text-xs text-content/80">
-              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />Score, viabilidad y alertas relevantes</li>
-              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />Detección automática de PN o PJ según el documento</li>
-              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />Detalle completo disponible luego en el panel de resultados</li>
+              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-brand" />Score, viabilidad y alertas relevantes</li>
+              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-brand" />Detección automática de PN o PJ según el documento</li>
+              <li className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-brand" />Detalle completo disponible luego en el panel de resultados</li>
             </ul>
 
             <p className="pt-4 text-xs leading-6 text-red-300/85">
@@ -192,11 +193,11 @@ export default function ConsultaExperian() {
           </div>
 
           <div className="relative mx-auto w-full max-w-sm">
-            <div className="group relative w-full rounded-[20px] border border-line/15 bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 p-6 shadow-2xl shadow-cyan-500/10 backdrop-blur-xl">
-              <div className="pointer-events-none absolute inset-0 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            <div className="group relative w-full rounded-[20px] border border-line/15 bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 p-6 shadow-2xl shadow-brand/10 backdrop-blur-xl">
+              <div className="pointer-events-none absolute inset-0 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
               <div className="relative z-10">
                 <div className="mb-4 flex items-center justify-center">
-                  <img src="/img/logo-econfia-1.png" alt="Econfia" className="h-16 w-16 object-contain" />
+                  <LogoOrganizacion className="h-16 w-16 object-contain" />
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-3">
@@ -247,13 +248,13 @@ export default function ConsultaExperian() {
                         type="checkbox"
                         checked={acepta}
                         onChange={(event) => setAcepta(event.target.checked)}
-                        className="h-4 w-4 cursor-pointer accent-cyan-500"
+                        className="h-4 w-4 cursor-pointer accent-brand"
                       />
                       <span className="text-xs text-content/85 transition-colors group-hover:text-content">
                         Acepto los{" "}
                         <Terminos
                           inline
-                          triggerClassName="font-medium text-cyan-400 underline underline-offset-4 transition-colors hover:text-cyan-300"
+                          triggerClassName="font-medium text-brand underline underline-offset-4 transition-colors hover:text-brand"
                         />
                       </span>
                     </label>
@@ -262,7 +263,7 @@ export default function ConsultaExperian() {
                         type="checkbox"
                         checked={consentimiento}
                         onChange={(event) => setConsentimiento(event.target.checked)}
-                        className="h-4 w-4 cursor-pointer accent-cyan-500"
+                        className="h-4 w-4 cursor-pointer accent-brand"
                       />
                       <span className="text-xs text-content/85 transition-colors group-hover:text-content">
                         Confirmo consentimiento del titular
@@ -288,7 +289,7 @@ export default function ConsultaExperian() {
                       !acepta ||
                       !consentimiento
                         ? "cursor-not-allowed bg-surface-2/70 text-muted"
-                        : "transform bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:scale-105 hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
+                        : "transform bg-gradient-to-r from-brand to-brand-2 text-white hover:scale-105 hover:opacity-90 hover:shadow-lg hover:shadow-brand/50"
                     }`}
                   >
                     Consultar Econfia Adjudicator

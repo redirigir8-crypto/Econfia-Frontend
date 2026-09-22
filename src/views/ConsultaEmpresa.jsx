@@ -357,7 +357,7 @@ function EmpresaGraficosEjecutivos({ resultadoEmpresa }) {
               <div className="text-sm font-black text-white">Cobertura de fuentes</div>
               <div className="text-xs text-slate-400">Disponibilidad de señales por fuente.</div>
             </div>
-            <FaChartPie className="text-cyan-300" />
+            <FaChartPie className="text-brand" />
           </div>
           <div className="grid gap-3 sm:grid-cols-[210px_1fr]">
             <div className="relative h-[210px]">
@@ -924,7 +924,7 @@ export default function ConsultaEmpresa() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex min-h-[92px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 to-blue-500 px-5 text-base font-black text-white shadow-[0_18px_38px_rgba(14,165,233,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:from-sky-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="flex min-h-[92px] w-full items-center justify-center rounded-2xl bg-gradient-to-r from-sky-500 to-brand-2 px-5 text-base font-black text-white shadow-[0_18px_38px_rgba(14,165,233,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:from-sky-400 hover:to-brand-2 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {loading ? (
                     <span className="inline-flex items-center gap-3">
@@ -1347,7 +1347,7 @@ export default function ConsultaEmpresa() {
         onClick={() => setCapturaAmpliada(false)}
       >
         <div
-          className="relative max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-cyan-400/20 bg-slate-950 shadow-2xl"
+          className="relative max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-brand/20 bg-slate-950 shadow-2xl"
           onClick={(event) => event.stopPropagation()}
         >
           <button

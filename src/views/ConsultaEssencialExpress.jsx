@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import LogoOrganizacion from "../components/LogoOrganizacion";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -141,10 +142,10 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess, puedeUsarLote
         />
       )}
       <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
-        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="relative bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl border border-line/15 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full mx-4 p-6 text-content max-h-[92vh] flex flex-col">
-          <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+        <div className="relative bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl border border-line/15 rounded-[20px] shadow-2xl shadow-brand/20 max-w-3xl w-full mx-4 p-6 text-content max-h-[92vh] flex flex-col">
+          <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
           <button
             onClick={onClose}
             className="absolute top-3 right-3 text-muted hover:text-danger text-xl font-bold transition-colors z-10"
@@ -154,8 +155,8 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess, puedeUsarLote
           </button>
           <div className="relative z-10 flex flex-col min-h-0 flex-1">
             <div className="text-center mb-4">
-              <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
-                <span className="text-cyan-300 text-xs font-medium">Personaliza tu consulta Express</span>
+              <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-2">
+                <span className="text-brand text-xs font-medium">Personaliza tu consulta Express</span>
               </div>
               <h2 className="text-2xl font-black text-content">
                 Econfia Essential Express
@@ -167,12 +168,12 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess, puedeUsarLote
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filtrar fuentes por nombre..."
-                className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-sm focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-sm focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={handleToggleAll}
-                className={`mt-2 md:mt-0 md:ml-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 border border-cyan-400/40 ${
+                className={`mt-2 md:mt-0 md:ml-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 border border-brand/40 ${
                   allSelected
                     ? "bg-brand text-white hover:opacity-90"
                     : "bg-brand/10 text-brand hover:bg-brand/20"
@@ -193,7 +194,7 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess, puedeUsarLote
 
             {/* Contador de fuentes seleccionadas */}
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-cyan-300 font-semibold text-sm">
+              <span className="text-brand font-semibold text-sm">
                 {`Fuentes seleccionadas: ${seleccionadas.length}`}
               </span>
             </div>
@@ -204,13 +205,13 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess, puedeUsarLote
                   return (
                   <label
                     key={fuente.id}
-                    className={`flex items-center gap-3 bg-surface-2/60 hover:bg-brand/10 p-3 rounded-lg border border-line/15 transition-all hover:shadow-md hover:shadow-cyan-500/10 group ${
+                    className={`flex items-center gap-3 bg-surface-2/60 hover:bg-brand/10 p-3 rounded-lg border border-line/15 transition-all hover:shadow-md hover:shadow-brand/10 group ${
                       isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                     }`}
                   >
                     <input
                       type="checkbox"
-                      className={`accent-cyan-500 w-4 h-4 ${
+                      className={`accent-brand w-4 h-4 ${
                         isDisabled ? "cursor-not-allowed" : "cursor-pointer"
                       }`}
                       checked={seleccionadas.includes(fuente.nombre)}
@@ -239,7 +240,7 @@ function ModalEssencialExpress({ isOpen, onClose, data, onSuccess, puedeUsarLote
                 className={`w-full px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 ${
                   loading || seleccionadas.length === 0
                     ? "bg-surface-2/70 text-muted cursor-not-allowed"
-                    : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
+                    : "bg-gradient-to-r from-brand to-brand-2 text-white hover:opacity-90 hover:shadow-lg hover:shadow-brand/50"
                 }`}
               >
                 {loading
@@ -335,7 +336,7 @@ export default function ConsultaEssencialExpress() {
               Tu navegador no soporta audio.
             </audio>
             <div className="relative bg-white/10 border border-white/30 rounded-2xl p-10 shadow-2xl text-center max-w-md w-full mx-4 backdrop-blur-md">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-cyan-400 mx-auto mb-6"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-brand mx-auto mb-6"></div>
               <p className="text-white text-lg font-semibold animate-pulse">
                 Cargando datos del candidato para la consulta...
               </p>
@@ -366,17 +367,17 @@ export default function ConsultaEssencialExpress() {
         />
       )}
       <section className="relative min-h-screen flex items-center justify-center pt-24 pb-32 md:pb-36 overflow-hidden bg-transparent">
-        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-5xl w-full px-4 relative z-10">
           <div className="text-center md:text-left space-y-5">
             <div>
-              <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 items-center gap-2">
+              <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-3 items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
                 </span>
-                <span className="text-cyan-300 text-xs font-medium">Consulta Express</span>
+                <span className="text-brand text-xs font-medium">Consulta Express</span>
               </div>
               <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
                 Econfia Essencial Express
@@ -387,11 +388,11 @@ export default function ConsultaEssencialExpress() {
             </p>
             <div className="space-y-2 pt-2">
               <div className="flex items-start gap-3">
-                <span className="mt-1 h-2 w-2 rounded-full bg-cyan-500 flex-shrink-0" />
+                <span className="mt-1 h-2 w-2 rounded-full bg-brand flex-shrink-0" />
                 <span className="text-xs text-content/85">Consulta rápida y eficiente.</span>
               </div>
               <div className="flex items-start gap-3">
-                <span className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <span className="mt-1 h-2 w-2 rounded-full bg-brand-2 flex-shrink-0" />
                 <span className="text-xs text-content/85">Solo bots sin captura.</span>
               </div>
               <div className="flex items-start gap-3">
@@ -404,11 +405,11 @@ export default function ConsultaEssencialExpress() {
             </p>
           </div>
           <div className="relative w-full max-w-sm mx-auto">
-            <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+            <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-brand/10 p-6 group">
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
               <div className="relative z-10">
                 <div className="flex items-center justify-center mb-4">
-                  <img src="/img/logo-econfia-1.png" alt="Econfía" className="h-16 w-16 object-contain" />
+                  <LogoOrganizacion className="h-16 w-16 object-contain" />
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-2">
                   <div className="space-y-2">
@@ -418,7 +419,7 @@ export default function ConsultaEssencialExpress() {
                         required
                         value={tipoDoc}
                         onChange={(e) => setTipoDoc(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                        className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
                       >
                         <option className="bg-surface text-content" value="">
                           Seleccione tipo de documento
@@ -439,7 +440,7 @@ export default function ConsultaEssencialExpress() {
                         value={cedula}
                         onChange={(e) => setCedula(e.target.value)}
                         placeholder="Ingrese número de documento"
-                        className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -448,7 +449,7 @@ export default function ConsultaEssencialExpress() {
                         type="date"
                         value={fechaExpedicion}
                         onChange={(e) => setFechaExpedicion(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
                       />
                     </div>
                   </div>
@@ -458,13 +459,13 @@ export default function ConsultaEssencialExpress() {
                         type="checkbox"
                         checked={acepta}
                         onChange={(e) => setAcepta(e.target.checked)}
-                        className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                        className="accent-brand w-4 h-4 cursor-pointer"
                       />
                       <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                         Acepto los {" "}
                         <Terminos
                           inline
-                          triggerClassName="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium transition-colors"
+                          triggerClassName="text-brand hover:text-brand underline underline-offset-4 font-medium transition-colors"
                         />
                       </span>
                     </label>
@@ -473,7 +474,7 @@ export default function ConsultaEssencialExpress() {
                         type="checkbox"
                         checked={consentimiento}
                         onChange={(e) => setConsentimiento(e.target.checked)}
-                        className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                        className="accent-brand w-4 h-4 cursor-pointer"
                       />
                       <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                         Confirmo consentimiento del titular
@@ -486,7 +487,7 @@ export default function ConsultaEssencialExpress() {
                     className={`mt-3 w-full px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-300 ${
                       !tipoDoc || !cedula || !acepta || !consentimiento
                         ? "bg-surface-2/70 text-muted cursor-not-allowed"
-                        : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+                        : "bg-gradient-to-r from-brand to-brand-2 text-white hover:opacity-90 hover:shadow-lg hover:shadow-brand/50 transform hover:scale-105"
                     }`}
                   >
                     Consulta Essencial Express

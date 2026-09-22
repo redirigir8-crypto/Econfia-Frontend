@@ -52,7 +52,7 @@ function Section({ icon: Icon, title, count, children }) {
   return (
     <section className="rounded-[22px] border border-line/15 bg-surface/90 p-5 shadow-xl shadow-black/5 backdrop-blur-xl">
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] text-brand">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-brand/25 bg-brand/[0.08] text-brand">
           <Icon className="h-5 w-5" />
         </div>
         <h3 className="text-base font-bold text-content">{title}</h3>
@@ -67,16 +67,16 @@ function Section({ icon: Icon, title, count, children }) {
   );
 }
 
-function StatTile({ label, value, tone = "cyan" }) {
+function StatTile({ label, value, tone = "brand" }) {
   const tones = {
-    cyan: "border-cyan-500/25 from-cyan-500/10 to-blue-500/5",
-    emerald: "border-emerald-500/25 from-emerald-500/10 to-cyan-500/5",
+    brand: "border-brand/25 from-brand/10 to-brand-2/5",
+    emerald: "border-emerald-500/25 from-emerald-500/10 to-brand/5",
     amber: "border-amber-500/25 from-amber-500/10 to-orange-500/5",
     rose: "border-rose-500/25 from-rose-500/10 to-pink-500/5",
     slate: "border-line/15 from-surface-2/80 to-surface/70",
   };
   return (
-    <div className={`rounded-2xl border bg-gradient-to-br p-4 shadow-lg shadow-black/5 ${tones[tone] || tones.cyan}`}>
+    <div className={`rounded-2xl border bg-gradient-to-br p-4 shadow-lg shadow-black/5 ${tones[tone] || tones.brand}`}>
       <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">{label}</div>
       <div className="mt-1.5 text-lg font-black leading-tight text-content">{value}</div>
     </div>
@@ -308,7 +308,7 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile label="Año matrícula" value={metricas.anio_fundacion || "—"} tone="cyan" />
+        <StatTile label="Año matrícula" value={metricas.anio_fundacion || "—"} tone="brand" />
         <StatTile label="Antigüedad" value={metricas.antiguedad_anos != null ? `${metricas.antiguedad_anos} años` : "—"} tone="emerald" />
         <StatTile label="Actividades" value={metricas.total_actividades ?? actividades.length} tone="amber" />
         <StatTile label="Estado DIAN" value={alertaDian ? "Alerta" : "Sin alerta"} tone={alertaDian ? "rose" : "emerald"} />
@@ -406,7 +406,7 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
             <img src={data.captura_principal} alt="Captura de la empresa" className="max-h-[360px] w-full object-cover opacity-90 transition group-hover:scale-[1.01] group-hover:opacity-100" />
             <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-slate-950/90 to-transparent px-4 py-4">
               <span className="text-sm font-bold text-white">Ver captura ampliada</span>
-              <ExternalLink className="h-4 w-4 text-cyan-200" />
+              <ExternalLink className="h-4 w-4 text-brand" />
             </div>
           </button>
         </Section>
@@ -414,7 +414,7 @@ export default function EmpresaDetalleResultados({ empresa, onDownloadPdf }) {
 
       {previewOpen && data.captura_principal && (
         <div className="fixed inset-0 z-[12000] flex items-center justify-center bg-slate-950/88 p-4 backdrop-blur-md" onClick={() => setPreviewOpen(false)}>
-          <div className="relative max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-cyan-400/20 bg-slate-950 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+          <div className="relative max-h-[92vh] w-full max-w-6xl overflow-hidden rounded-2xl border border-brand/20 bg-slate-950 shadow-2xl" onClick={(event) => event.stopPropagation()}>
             <button
               type="button"
               onClick={() => setPreviewOpen(false)}

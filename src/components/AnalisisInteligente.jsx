@@ -16,6 +16,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { describirFuente } from "../utils/fuentesCatalogo";
+import { useTheme } from "../context/ThemeContext";
 
 const getNum = (value) => {
   const parsed = Number(value);
@@ -60,6 +61,10 @@ export default function AnalisisInteligente({
   onIrAResultados,
   onGenerarIA, // reservado para la fase IA; si no se pasa, se oculta el botón
 }) {
+  const { organizacion } = useTheme();
+  // Si la Organizacion tiene marca propia, el anillo del estado "indeterminado"
+  // (sin significado semántico, es el cyan/brand por defecto) usa su color.
+  const marcaPrincipal = organizacion?.color_acento || null;
   const stats = useMemo(() => {
     const buckets = {
       alto: [],
@@ -155,16 +160,16 @@ export default function AnalisisInteligente({
       ring: "#10b981",
       text: "text-emerald-300",
       chip: "text-ok border-ok/30 bg-ok/10",
-      banner: "border-emerald-400/30 from-emerald-500/15 to-cyan-500/10",
+      banner: "border-emerald-400/30 from-emerald-500/15 to-brand/10",
       glow: "shadow-[0_0_30px_rgba(16,185,129,0.22)]",
     },
     indeterminado: {
       label: "Cobertura incompleta",
       Icon: Signal,
-      ring: "#38bdf8",
+      ring: marcaPrincipal || "#38bdf8",
       text: "text-brand",
       chip: "text-brand border-brand/30 bg-brand/10",
-      banner: "border-cyan-400/30 from-cyan-500/15 to-blue-500/10",
+      banner: "border-brand/30 from-brand/15 to-brand-2/10",
       glow: "shadow-[0_0_30px_rgba(56,189,248,0.22)]",
     },
   }[stats.nivel];
@@ -367,7 +372,7 @@ export default function AnalisisInteligente({
           {typeof onIrAResultados === "function" && (
             <button
               onClick={onIrAResultados}
-              className="inline-flex items-center gap-1 text-[11px] font-bold text-brand hover:text-cyan-200 transition-colors"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-brand hover:opacity-80 transition-colors"
             >
               Ver todos <ChevronRight size={13} />
             </button>

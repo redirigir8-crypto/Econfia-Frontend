@@ -96,7 +96,7 @@ export default function EIdentidadDetalleModal({ consultaId, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Barra superior decorativa */}
-        <div className="h-1 w-full bg-gradient-to-r from-sky-100 via-sky-400 to-blue-500" />
+        <div className="h-1 w-full bg-gradient-to-r from-sky-100 via-sky-400 to-brand-2" />
 
         {/* Encabezado */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02]">
@@ -123,7 +123,7 @@ export default function EIdentidadDetalleModal({ consultaId, onClose }) {
           <FingerprintWatermark />
           {loading && (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
-              <svg className="animate-spin w-8 h-8 text-cyan-400" viewBox="0 0 24 24" fill="none">
+              <svg className="animate-spin w-8 h-8 text-brand" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
               </svg>
@@ -179,7 +179,7 @@ export default function EIdentidadDetalleModal({ consultaId, onClose }) {
               <button
                 onClick={handleDescargarPDF}
                 disabled={descargando}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 disabled:opacity-50 transition-all"
+                className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-brand to-brand-2 text-white hover:from-brand hover:to-brand-2 disabled:opacity-50 transition-all"
               >
                 {descargando ? (
                   <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">

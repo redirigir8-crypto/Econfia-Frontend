@@ -1,4 +1,5 @@
 import { useState } from "react";
+import LogoOrganizacion from "../components/LogoOrganizacion";
 import { createPortal } from "react-dom";
 import Toast from "../components/Toast";
 import Terminos from "../components/Terminos";
@@ -37,11 +38,11 @@ function ResultadoCard({ datos, onClose }) {
   const campos = Object.entries(CAMPO_LABEL);
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4">
-      <div className="relative w-full max-w-lg bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl shadow-2xl shadow-cyan-500/10 p-6 text-content">
+      <div className="relative w-full max-w-lg bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl shadow-2xl shadow-brand/10 p-6 text-content">
         {/* Encabezado */}
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-            <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-10 h-10 rounded-full bg-brand/10 border border-brand/30 flex items-center justify-center">
+            <svg className="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
@@ -80,7 +81,7 @@ function ResultadoCard({ datos, onClose }) {
 
         <button
           onClick={onClose}
-          className="mt-6 w-full py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-semibold hover:from-cyan-400 hover:to-blue-400 transition-all"
+          className="mt-6 w-full py-2 rounded-lg bg-gradient-to-r from-brand to-brand-2 text-white text-xs font-semibold hover:opacity-90 transition-all"
         >
           Cerrar
         </button>
@@ -141,12 +142,12 @@ export default function ConsultaEIdentidad() {
         {/* Descripción */}
         <div className="text-center md:text-left space-y-5">
           <div>
-            <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 items-center gap-2">
+            <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-3 items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand" />
               </span>
-              <span className="text-cyan-300 text-xs font-medium">Identidad instantánea</span>
+              <span className="text-brand text-xs font-medium">Identidad instantánea</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
               E-Identidad
@@ -157,20 +158,20 @@ export default function ConsultaEIdentidad() {
             Sin bots, sin esperas. Solo nombre, documento, estado de cédula y datos de expedición.
           </p>
           <ul className="space-y-2 text-xs text-content/80">
-            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />Nombre y apellido</li>
-            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />Estado de la cédula (Vigente / Cancelado)</li>
-            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />Departamento y municipio de expedición</li>
-            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />Fecha de expedición del documento</li>
+            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />Nombre y apellido</li>
+            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />Estado de la cédula (Vigente / Cancelado)</li>
+            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />Departamento y municipio de expedición</li>
+            <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-brand" />Fecha de expedición del documento</li>
           </ul>
         </div>
 
         {/* Formulario */}
         <div className="relative w-full max-w-sm mx-auto">
-          <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+          <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-brand/10 p-6 group">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
             <div className="relative z-10">
               <div className="flex items-center justify-center mb-4">
-                <img src="/img/logo-econfia-1.png" alt="Econfía" className="h-16 w-16 object-contain" />
+                <LogoOrganizacion className="h-16 w-16 object-contain" />
               </div>
               <form onSubmit={handleSubmit} className="space-y-3">
                 {/* Tipo de documento */}
@@ -210,13 +211,13 @@ export default function ConsultaEIdentidad() {
                       type="checkbox"
                       checked={acepta}
                       onChange={(e) => setAcepta(e.target.checked)}
-                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      className="accent-brand w-4 h-4 cursor-pointer"
                     />
                     <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Acepto los{" "}
                       <Terminos
                         inline
-                        triggerClassName="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium transition-colors"
+                        triggerClassName="text-brand hover:text-brand underline underline-offset-4 font-medium transition-colors"
                       />
                     </span>
                   </label>
@@ -225,7 +226,7 @@ export default function ConsultaEIdentidad() {
                       type="checkbox"
                       checked={consentimiento}
                       onChange={(e) => setConsentimiento(e.target.checked)}
-                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      className="accent-brand w-4 h-4 cursor-pointer"
                     />
                     <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Confirmo consentimiento del titular
@@ -239,7 +240,7 @@ export default function ConsultaEIdentidad() {
                   className={`mt-2 w-full px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-300
                     ${!tipoDoc || !cedula || !acepta || !consentimiento || loading
                       ? "bg-surface-2/70 text-muted cursor-not-allowed"
-                      : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+                      : "bg-gradient-to-r from-brand to-brand-2 text-white hover:opacity-90 hover:shadow-lg hover:shadow-brand/50 transform hover:scale-105"
                     }`}
                 >
                   {loading ? (

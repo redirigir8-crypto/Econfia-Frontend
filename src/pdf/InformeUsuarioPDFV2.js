@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import logoEconfia from "../assets/logo-econfia.png";
+import { cargarLogoParaPdf } from "./logoOrganizacion";
 
 const PAGE_W = 297;
 const PAGE_H = 210;
@@ -39,13 +39,15 @@ const PLAN_LABELS = {
   ecorefull: "E-corefull",
 };
 
-export function generarInformeUsuarioPDF(profile, stats) {
+export async function generarInformeUsuarioPDF(profile, stats, organizacion = null) {
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
     format: "a4",
     compress: true,
   });
+
+  const branding = await cargarLogoParaPdf(organizacion);
 
   const fechaHoy = new Date().toLocaleDateString("es-CO", {
     day: "2-digit",
@@ -93,6 +95,7 @@ export function generarInformeUsuarioPDF(profile, stats) {
     completadas,
     pendientes,
     enProceso,
+    branding,
   });
 
   const sections = [
@@ -155,15 +158,15 @@ export function generarInformeUsuarioPDF(profile, stats) {
   let pageNumber = 1;
   sections.forEach((section) => {
     pageNumber += 1;
-    pageNumber = drawTableSection(doc, pageNumber, section);
+    pageNumber = drawTableSection(doc, pageNumber, { ...section, branding });
   });
 
   doc.save(`Informe_Personal_Econfia_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 function drawOverviewPage(doc, data) {
-  drawPageShell(doc, data.pageNumber, "Reporte personal de actividad");
-  drawHero(doc, data.nombreCompleto, data.fechaHoy, data.horaHoy);
+  drawPageShell(doc, data.pageNumber, "Reporte personal de actividad", data.branding);
+  drawHero(doc, data.nombreCompleto, data.fechaHoy, data.horaHoy, data.branding);
   drawMetricGrid(doc, [
     { label: "Consultas realizadas", value: String(data.totalConsultas), color: THEME.primary },
     { label: "Completadas", value: String(data.completadas), color: THEME.success },
@@ -193,7 +196,7 @@ function drawTableSection(doc, startPageNumber, config) {
 
   const paintPage = (continued = false) => {
     doc.addPage("a4", "landscape");
-    drawPageShell(doc, pageNumber, config.title);
+    drawPageShell(doc, pageNumber, config.title, config.branding);
     drawSectionHeader(doc, continued ? `${config.title} (cont.)` : config.title, config.subtitle, config.footerNote, config.accent);
     y = HEADER_Y;
     drawTableHeader(doc, config.columns, y, config.accent);
@@ -220,7 +223,8 @@ function drawTableSection(doc, startPageNumber, config) {
   return pageNumber;
 }
 
-function drawPageShell(doc, pageNumber, label) {
+function drawPageShell(doc, pageNumber, label, branding) {
+  const nombreOrg = branding?.nombre || "Econfia";
   doc.setFillColor(...THEME.bg);
   doc.rect(0, 0, PAGE_W, PAGE_H, "F");
 
@@ -244,12 +248,12 @@ function drawPageShell(doc, pageNumber, label) {
   doc.setDrawColor(...THEME.line);
   doc.line(0, PAGE_H - 12, PAGE_W, PAGE_H - 12);
   doc.setTextColor(...THEME.muted);
-  doc.text("Econfia | Seguimiento de actividad del titular", MARGIN_X, PAGE_H - 4.5);
+  doc.text(`${nombreOrg} | Seguimiento de actividad del titular`, MARGIN_X, PAGE_H - 4.5);
   doc.setTextColor(...THEME.primarySoft);
   doc.text(`Pag. ${pageNumber}`, PAGE_W - MARGIN_X, PAGE_H - 4.5, { align: "right" });
 }
 
-function drawHero(doc, nombreCompleto, fechaHoy, horaHoy) {
+function drawHero(doc, nombreCompleto, fechaHoy, horaHoy, branding) {
   const heroY = 24;
   const heroH = 24;
   const plateX = MARGIN_X + 5;
@@ -262,7 +266,7 @@ function drawHero(doc, nombreCompleto, fechaHoy, horaHoy) {
 
   doc.setFillColor(...THEME.white);
   doc.roundedRect(plateX, plateY, plateW, plateH, 4, 4, "F");
-  drawLogo(doc, plateX, plateY, plateW, plateH);
+  drawLogo(doc, plateX, plateY, plateW, plateH, branding);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(19);
@@ -276,12 +280,16 @@ function drawHero(doc, nombreCompleto, fechaHoy, horaHoy) {
   drawSingleLineText(doc, `${fechaHoy} | ${horaHoy}`, PAGE_W - MARGIN_X - 78, heroY + 17, 78, "right");
 }
 
-function drawLogo(doc, x, y, maxW, maxH) {
+function drawLogo(doc, x, y, maxW, maxH, branding) {
+  const logoSrc = branding?.src;
+  if (!logoSrc) return;
+
   let width = 28;
   let height = 10;
+  const format = logoSrc.startsWith("data:image/jpeg") ? "JPEG" : "PNG";
 
   try {
-    const props = doc.getImageProperties(logoEconfia);
+    const props = doc.getImageProperties(logoSrc);
     const ratio = props.width / props.height;
     width = maxW - 8;
     height = width / ratio;
@@ -296,7 +304,7 @@ function drawLogo(doc, x, y, maxW, maxH) {
 
   const drawX = x + ((maxW - width) / 2);
   const drawY = y + ((maxH - height) / 2);
-  doc.addImage(logoEconfia, "PNG", drawX, drawY, width, height);
+  doc.addImage(logoSrc, format, drawX, drawY, width, height);
 }
 
 function drawMetricGrid(doc, metrics, startY) {

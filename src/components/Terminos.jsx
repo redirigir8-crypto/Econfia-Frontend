@@ -163,7 +163,7 @@ export default function Terminos({
           onClick={() => setInternalOpen(true)}
           className={
             triggerClassName ||
-            "text-cyan-300 underline decoration-cyan-400/60 underline-offset-4 transition hover:text-cyan-200"
+            "text-brand underline decoration-brand/60 underline-offset-4 transition hover:text-brand"
           }
         >
           {triggerLabel}
@@ -171,11 +171,11 @@ export default function Terminos({
         {open &&
           createPortal(
             <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-slate-950/75 px-4 py-6 backdrop-blur-md">
-              <div className="relative flex h-[min(88vh,780px)] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-cyan-400/20 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.12),transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(8,15,30,0.98))] shadow-[0_30px_80px_rgba(2,12,27,0.6)]">
+              <div className="relative flex h-[min(88vh,780px)] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-brand/20 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.12),transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(8,15,30,0.98))] shadow-[0_30px_80px_rgba(2,12,27,0.6)]">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="absolute right-4 top-4 z-10 rounded-full border border-white/10 bg-white/5 p-2 text-white/60 transition hover:border-cyan-300/40 hover:bg-white/10 hover:text-white"
+                  className="absolute right-4 top-4 z-10 rounded-full border border-white/10 bg-white/5 p-2 text-white/60 transition hover:border-brand/40 hover:bg-white/10 hover:text-white"
                   aria-label="Cerrar terminos"
                 >
                   <X size={20} />
@@ -183,7 +183,7 @@ export default function Terminos({
 
                 <div className="border-b border-white/10 px-6 py-5 sm:px-8">
                   <div className="mb-3 flex flex-wrap items-center gap-3">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-200">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brand">
                       <ShieldCheck size={14} />
                       Consulta segura
                     </span>
@@ -203,8 +203,8 @@ export default function Terminos({
                 <div className="grid gap-0 overflow-hidden lg:grid-cols-[280px_1fr]">
                   <aside className="hidden border-r border-white/10 bg-white/[0.03] p-6 lg:block">
                     <div className="space-y-4">
-                      <div className="rounded-2xl border border-cyan-400/15 bg-cyan-500/8 p-4">
-                        <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-200">
+                      <div className="rounded-2xl border border-brand/15 bg-brand/8 p-4">
+                        <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 text-brand">
                           <FileCheck2 size={18} />
                         </div>
                         <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white/90">
@@ -252,13 +252,13 @@ export default function Terminos({
       onClick={handleClose}
     >
       <div
-        className="relative flex h-[min(88vh,780px)] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-cyan-400/20 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.12),transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(8,15,30,0.98))] shadow-[0_30px_80px_rgba(2,12,27,0.6)]"
+        className="relative flex h-[min(88vh,780px)] w-full max-w-5xl flex-col overflow-hidden rounded-[28px] border border-brand/20 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.12),transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.98),rgba(8,15,30,0.98))] shadow-[0_30px_80px_rgba(2,12,27,0.6)]"
         onClick={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 z-10 rounded-full border border-white/10 bg-white/5 p-2 text-white/60 transition hover:border-cyan-300/40 hover:bg-white/10 hover:text-white"
+          className="absolute right-4 top-4 z-10 rounded-full border border-white/10 bg-white/5 p-2 text-white/60 transition hover:border-brand/40 hover:bg-white/10 hover:text-white"
           aria-label="Cerrar terminos"
         >
           <X size={20} />
@@ -266,7 +266,7 @@ export default function Terminos({
 
         <div className="border-b border-white/10 px-6 py-5 sm:px-8">
           <div className="mb-3 flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-200">
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-brand">
               <ShieldCheck size={14} />
               Consulta segura
             </span>
@@ -286,8 +286,8 @@ export default function Terminos({
         <div className="grid gap-0 overflow-hidden lg:grid-cols-[280px_1fr]">
           <aside className="hidden border-r border-white/10 bg-white/[0.03] p-6 lg:block">
             <div className="space-y-4">
-              <div className="rounded-2xl border border-cyan-400/15 bg-cyan-500/8 p-4">
-                <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-200">
+              <div className="rounded-2xl border border-brand/15 bg-brand/8 p-4">
+                <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 text-brand">
                   <FileCheck2 size={18} />
                 </div>
                 <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-white/90">

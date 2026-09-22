@@ -108,7 +108,7 @@ export default function SoundManager() {
       onClick={() => setMuted((m) => !m)}
       title={muted ? "Activar sonidos" : "Silenciar sonidos"}
       aria-label={muted ? "Activar sonidos" : "Silenciar sonidos"}
-      className="fixed bottom-24 left-4 z-[9998] flex h-11 w-11 items-center justify-center rounded-full border border-cyan-400/30 bg-slate-900/80 text-cyan-300 shadow-lg shadow-cyan-500/20 backdrop-blur transition-all hover:bg-slate-800 hover:text-cyan-200"
+      className="fixed bottom-24 left-4 z-[9998] flex h-11 w-11 items-center justify-center rounded-full border border-brand/30 bg-slate-900/80 text-brand shadow-lg shadow-brand/20 backdrop-blur transition-all hover:bg-slate-800 hover:text-brand"
     >
       {muted ? <VolumeX size={20} /> : <Volume2 size={20} />}
     </button>

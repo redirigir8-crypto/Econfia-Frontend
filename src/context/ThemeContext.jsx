@@ -24,11 +24,51 @@ function isValid(t) {
   return THEMES.some((x) => x.id === t);
 }
 
+/** "#10b981" -> "16 185 129" (formato canal-RGB sin coma que usan los
+ * tokens de themes.css, para poder combinarse con rgb(var(--x) / alpha)). */
+function hexARgbTokens(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+}
+
+/** Aplica (o limpia) el branding de una Organizacion sobre los tokens de
+ * tema — logo y colores de acento. Sobreescribe con un custom property
+ * inline en <html>, que gana por especificidad sobre las reglas
+ * [data-theme="x"] de themes.css sin tener que tocar ese archivo.
+ *
+ * --th-brand es el acento principal (color_acento) y --th-brand-2 el
+ * secundario/degradado (color_secundario_efectivo, que el backend ya
+ * resuelve — si la organización no definió uno propio, cae al mismo
+ * color_acento, así que aquí siempre llega un valor listo para usar). */
+export function aplicarBrandingOrganizacion(organizacion) {
+  const root = document.documentElement;
+  const rgbPrincipal = organizacion?.color_acento ? hexARgbTokens(organizacion.color_acento) : null;
+  const rgbSecundario = organizacion?.color_secundario_efectivo
+    ? hexARgbTokens(organizacion.color_secundario_efectivo)
+    : rgbPrincipal;
+  if (rgbPrincipal) {
+    root.style.setProperty("--th-brand", rgbPrincipal);
+    root.style.setProperty("--th-brand-2", rgbSecundario || rgbPrincipal);
+  } else {
+    root.style.removeProperty("--th-brand");
+    root.style.removeProperty("--th-brand-2");
+  }
+  const fondoRgb = organizacion?.color_fondo ? hexARgbTokens(organizacion.color_fondo) : null;
+  if (fondoRgb) {
+    root.style.setProperty("--th-app", fondoRgb);
+  } else {
+    root.style.removeProperty("--th-app");
+  }
+}
+
 const ThemeContext = createContext({
   theme: "dark",
   setTheme: () => {},
   toggleTheme: () => {},
   themes: THEMES,
+  organizacion: null,
 });
 
 export function ThemeProvider({ children }) {
@@ -45,6 +85,10 @@ export function ThemeProvider({ children }) {
     } catch (_) {}
     return "dark";
   });
+  // Cliente white-label del usuario logueado (logo/colores/nombre de
+  // Wallet) — null si no tiene organización, y entonces se usa la marca
+  // Econfia por defecto en toda la UI.
+  const [organizacion, setOrganizacion] = useState(null);
 
   // Refleja el tema en <html data-theme="..."> y actualiza la caché local.
   useEffect(() => {
@@ -73,7 +117,6 @@ export function ThemeProvider({ children }) {
   // dispositivo donde el usuario ya eligió tema, un refresco NUNCA lo revierte;
   // y un dispositivo nuevo sí toma la preferencia guardada en su cuenta.
   const syncFromBackend = useCallback(async () => {
-    if (hadLocalAtStart.current) return; // ya hay preferencia local -> respetarla
     const token = localStorage.getItem("token");
     if (!token || !API) return;
     try {
@@ -82,6 +125,13 @@ export function ThemeProvider({ children }) {
       });
       if (!res.ok) return;
       const data = await res.json();
+      // El branding de la organización (logo/colores) se aplica siempre que
+      // haya sesión, independiente de si el usuario ya tenía un tema local
+      // elegido — es marca del cliente white-label, no una preferencia
+      // personal como el tema claro/oscuro.
+      aplicarBrandingOrganizacion(data?.perfil?.organizacion);
+      setOrganizacion(data?.perfil?.organizacion || null);
+      if (hadLocalAtStart.current) return; // tema ya elegido localmente -> respetarlo
       const t = data?.perfil?.tema_ui;
       if (isValid(t)) setThemeState(t); // el efecto de arriba refresca la caché
     } catch (_) {}
@@ -115,7 +165,7 @@ export function ThemeProvider({ children }) {
   }, [persistToBackend]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, themes: THEMES }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, themes: THEMES, organizacion }}>
       {children}
     </ThemeContext.Provider>
   );

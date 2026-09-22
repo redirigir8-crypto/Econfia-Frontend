@@ -200,7 +200,7 @@ const AdminFuentes = () => {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-cyan-400/25 bg-cyan-500/10 px-5 py-4 shadow-inner">
+              <div className="rounded-2xl border border-brand/25 bg-brand/10 px-5 py-4 shadow-inner">
                 <div className="text-[11px] font-black uppercase tracking-[0.24em] text-muted">Fuentes</div>
                 <div className="mt-2 text-3xl font-black text-brand">{fuentes.length}</div>
               </div>
@@ -214,7 +214,7 @@ const AdminFuentes = () => {
           <div className="mt-6 flex justify-end">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-3 font-black text-white shadow-[0_16px_35px_rgba(14,165,233,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(14,165,233,0.38)]"
+              className="rounded-xl bg-gradient-to-r from-brand to-brand-2 px-5 py-3 font-black text-white shadow-[0_16px_35px_rgba(14,165,233,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(14,165,233,0.38)]"
             >
               Crear nueva fuente
             </button>
@@ -263,7 +263,7 @@ const AdminFuentes = () => {
               {pageFuentes.map((f) => (
                 <tr
                   key={f.id}
-                  className="border-b border-line/10 transition-colors hover:bg-cyan-500/[0.06]"
+                  className="border-b border-line/10 transition-colors hover:bg-brand/[0.06]"
                 >
                   <td className="px-4 py-4 font-bold text-muted">{f.id}</td>
 
@@ -414,7 +414,7 @@ const AdminFuentes = () => {
               </select>
               <button
                 onClick={createFuente}
-                className="mt-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-3 font-black text-white shadow-lg shadow-cyan-500/20"
+                className="mt-2 rounded-xl bg-gradient-to-r from-brand to-brand-2 px-4 py-3 font-black text-white shadow-lg shadow-brand/20"
               >
                 Crear
               </button>

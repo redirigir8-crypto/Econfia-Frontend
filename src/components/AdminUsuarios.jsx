@@ -38,10 +38,10 @@ const EyeOffIcon = () => (
 // ─── Input reutilizable para modales ──────────────────────────────
 const ModalInput = ({ label, ...props }) => (
   <div className="flex flex-col gap-1">
-    {label && <label className="text-xs text-cyan-400 font-medium tracking-wide">{label}</label>}
+    {label && <label className="text-xs text-brand font-medium tracking-wide">{label}</label>}
     <input
       {...props}
-      className="rounded-lg px-3 py-2 border border-slate-600 bg-slate-800/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:bg-slate-800 transition text-sm"
+      className="rounded-lg px-3 py-2 border border-slate-600 bg-slate-800/80 text-white placeholder-slate-500 focus:outline-none focus:border-brand focus:bg-slate-800 transition text-sm"
     />
   </div>
 );
@@ -51,7 +51,7 @@ const Badge = ({ children, color }) => {
   const colors = {
     green:  "bg-green-500/12 text-green-700 border-green-500/30 dark:text-green-300",
     red:    "bg-red-500/12 text-red-700 border-red-500/30 dark:text-red-300",
-    cyan:   "bg-cyan-500/12 text-cyan-700 border-cyan-500/30 dark:text-cyan-300",
+    cyan:   "bg-brand/12 text-brand border-brand/30 dark:text-brand",
     violet: "bg-violet-500/12 text-violet-700 border-violet-500/30 dark:text-violet-300",
     slate:  "bg-surface-2/70 text-muted border-line/20",
   };
@@ -66,13 +66,13 @@ const Badge = ({ children, color }) => {
 const Sheet = ({ children, onClose, title, subtitle, icon }) => (
   <div className="fixed inset-0 z-[65] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm" onClick={onClose}>
     <div
-      className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[24px] border border-cyan-500/25 bg-gradient-to-br from-slate-950 via-blue-950/40 to-slate-950 shadow-2xl shadow-cyan-500/15"
+      className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-hidden rounded-[24px] border border-brand/25 bg-gradient-to-br from-slate-950 via-blue-950/40 to-slate-950 shadow-2xl shadow-brand/15"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-cyan-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-brand/10 blur-3xl" />
       <div className="relative flex items-center gap-3 border-b border-white/10 px-5 py-4">
         {icon && (
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/15 text-lg">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-brand/30 bg-brand/15 text-lg">
             {icon}
           </div>
         )}
@@ -120,6 +120,18 @@ const AdminUsuarios = () => {
   const [selectedPlanes, setSelectedPlanes] = useState([]);
   const [editUserData, setEditUserData]     = useState({ username: "", email: "", first_name: "", last_name: "", password: "" });
   const [showPassword, setShowPassword]     = useState(false);
+
+  // White-label (Organizacion)
+  const [organizaciones, setOrganizaciones]       = useState([]);
+  const [showOrgModal, setShowOrgModal]           = useState(false);
+  const [orgUser, setOrgUser]                     = useState(null);
+  const [selectedOrgId, setSelectedOrgId]         = useState("");
+  const [guardandoOrg, setGuardandoOrg]           = useState(false);
+  const [showNuevaOrgForm, setShowNuevaOrgForm]   = useState(false);
+  const [nuevaOrg, setNuevaOrg]                   = useState({ nombre: "", slug: "", color_acento: "#10b981", color_secundario: "", nombre_wallet: "" });
+  const [nuevaOrgLogo, setNuevaOrgLogo]           = useState(null);
+  const [nuevaOrgLogoPreview, setNuevaOrgLogoPreview] = useState("");
+  const [creandoOrg, setCreandoOrg]               = useState(false);
 
   // Consultas realizadas
   const [showConsultasRealizadasModal, setShowConsultasRealizadasModal] = useState(false);
@@ -193,6 +205,20 @@ const AdminUsuarios = () => {
     fetchPlanes();
   }, [token]);
 
+  const fetchOrganizaciones = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/organizaciones/`, { headers: { Authorization: `Token ${token}` } });
+      if (!res.ok) return;
+      const data = await res.json();
+      setOrganizaciones(Array.isArray(data) ? data : data.results || []);
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchOrganizaciones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
   // ── Ver consultas ─────────────────────────────────────────────
   const fetchConsultasRealizadas = async (userId, page = 1) => {
     setConsultasRealizadasLoading(true);
@@ -241,7 +267,7 @@ const AdminUsuarios = () => {
     try {
       const adminName = localStorage.getItem("username") || "Administrador";
       const consultas = await fetchAllConsultasByUser(user.id);
-      generarInformeAdminIndividualPDF(user, adminName, consultas);
+      await generarInformeAdminIndividualPDF(user, adminName, consultas, user.perfil?.organizacion);
     } catch {
       setToast({ type: "error", message: "No se pudo generar el informe individual" });
     } finally {
@@ -363,6 +389,93 @@ const AdminUsuarios = () => {
       }
     } catch {
       setToast({ type: "error", message: "Error al guardar planes" });
+    }
+  };
+
+  // ── White-label (Organizacion) ─────────────────────────────────
+  const handleAbrirOrganizacion = async (user) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/users/${user.id}/`, { headers: { Authorization: `Token ${token}` } });
+      if (!res.ok) throw new Error();
+      const updatedUser = await res.json();
+      setOrgUser(updatedUser);
+      setSelectedOrgId(updatedUser.perfil?.organizacion ? String(updatedUser.perfil.organizacion.id ?? "") : "");
+      setShowNuevaOrgForm(false);
+      setShowOrgModal(true);
+      fetchOrganizaciones();
+    } catch {
+      setToast({ type: "error", message: "No se pudo cargar el usuario actualizado" });
+    }
+  };
+
+  const cerrarOrgModal = () => {
+    setShowOrgModal(false);
+    setOrgUser(null);
+    setShowNuevaOrgForm(false);
+    handleSeleccionarLogo(null);
+  };
+
+  const handleGuardarOrganizacion = async () => {
+    if (!orgUser?.perfil) return;
+    setGuardandoOrg(true);
+    try {
+      const res = await fetch(`${API_URL}/api/perfiles/${orgUser.perfil.id}/asignar-organizacion/`, {
+        method: "POST",
+        headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ organizacion_id: selectedOrgId || null }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setUsers((prev) => prev.map((u) =>
+        u.id === orgUser.id
+          ? { ...u, perfil: { ...u.perfil, organizacion: data.organizacion } }
+          : u
+      ));
+      setToast({ type: "success", message: selectedOrgId ? "Marca asignada" : "Marca quitada (vuelve a Econfia)" });
+      cerrarOrgModal();
+    } catch {
+      setToast({ type: "error", message: "Error al asignar la organización" });
+    } finally {
+      setGuardandoOrg(false);
+    }
+  };
+
+  const handleSeleccionarLogo = (file) => {
+    setNuevaOrgLogo(file || null);
+    if (nuevaOrgLogoPreview) URL.revokeObjectURL(nuevaOrgLogoPreview);
+    setNuevaOrgLogoPreview(file ? URL.createObjectURL(file) : "");
+  };
+
+  const handleCrearOrganizacion = async () => {
+    if (!nuevaOrg.nombre.trim() || !nuevaOrg.slug.trim()) {
+      setToast({ type: "error", message: "Nombre y slug son obligatorios" });
+      return;
+    }
+    setCreandoOrg(true);
+    try {
+      const fd = new FormData();
+      Object.entries(nuevaOrg).forEach(([key, value]) => fd.append(key, value ?? ""));
+      if (nuevaOrgLogo) fd.append("logo", nuevaOrgLogo);
+      const res = await fetch(`${API_URL}/api/organizaciones/`, {
+        method: "POST",
+        headers: { Authorization: `Token ${token}` },
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const primerError = Object.values(data)[0];
+        throw new Error(Array.isArray(primerError) ? primerError[0] : "No se pudo crear la organización");
+      }
+      setOrganizaciones((prev) => [...prev, data].sort((a, b) => a.nombre.localeCompare(b.nombre)));
+      setSelectedOrgId(String(data.id));
+      setShowNuevaOrgForm(false);
+      setNuevaOrg({ nombre: "", slug: "", color_acento: "#10b981", color_secundario: "", nombre_wallet: "" });
+      handleSeleccionarLogo(null);
+      setToast({ type: "success", message: "Organización creada" });
+    } catch (e) {
+      setToast({ type: "error", message: e.message || "Error al crear la organización" });
+    } finally {
+      setCreandoOrg(false);
     }
   };
 
@@ -514,7 +627,7 @@ const AdminUsuarios = () => {
         <div className="overflow-hidden rounded-[24px] border border-line/15 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.16),_transparent_34%)] bg-surface/90 px-4 py-4 shadow-2xl shadow-black/5 backdrop-blur-xl sm:px-5 sm:py-5 lg:px-7">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <span className="inline-flex rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-200/90">
+              <span className="inline-flex rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-brand/90">
                 Centro administrativo
               </span>
               <h2 className="mt-3 text-2xl font-black tracking-tight text-content sm:text-3xl xl:text-4xl">
@@ -529,7 +642,7 @@ const AdminUsuarios = () => {
               {[
                 { label: "Usuarios activos", value: usuariosActivos, icon: "🟢", ring: "border-emerald-400/30", glow: "hover:shadow-emerald-500/20", bg: "from-emerald-500/15", grad: "from-emerald-300 to-teal-200", bar: "from-emerald-400 to-teal-400" },
                 { label: "Cuentas empresa", value: usuariosEmpresa, icon: "🏢", ring: "border-violet-400/30", glow: "hover:shadow-violet-500/20", bg: "from-violet-500/15", grad: "from-violet-300 to-purple-200", bar: "from-violet-400 to-purple-400" },
-                { label: "Con planes", value: usuariosConPlanes, icon: "📦", ring: "border-sky-400/30", glow: "hover:shadow-sky-500/20", bg: "from-sky-500/15", grad: "from-sky-300 to-cyan-200", bar: "from-sky-400 to-cyan-400" },
+                { label: "Con planes", value: usuariosConPlanes, icon: "📦", ring: "border-sky-400/30", glow: "hover:shadow-sky-500/20", bg: "from-sky-500/15", grad: "from-sky-300 to-brand", bar: "from-sky-400 to-brand" },
                 { label: "Masivas activas", value: usuariosMasivos, icon: "⚡", ring: "border-amber-400/30", glow: "hover:shadow-amber-500/20", bg: "from-amber-500/15", grad: "from-amber-300 to-yellow-200", bar: "from-amber-400 to-yellow-400" },
               ].map((item) => (
                 <div
@@ -553,7 +666,7 @@ const AdminUsuarios = () => {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                 <div className="relative w-full xl:max-w-xl">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-cyan-300/70">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-brand/70">
                     <SearchIcon />
                   </span>
                   <input
@@ -588,8 +701,8 @@ const AdminUsuarios = () => {
                     onClick={() => setOrderAsc((v) => !v)}
                     className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition-all ${
                       orderAsc
-                        ? "border-cyan-500/30 bg-cyan-500/12 text-brand hover:bg-cyan-500/20"
-                        : "border-blue-500/30 bg-blue-500/12 text-blue-500 hover:bg-blue-500/20"
+                        ? "border-brand/30 bg-brand/12 text-brand hover:bg-brand/20"
+                        : "border-brand-2/30 bg-brand-2/12 text-brand-2 hover:bg-brand-2/20"
                     }`}
                   >
                     {orderAsc ? "Orden ID asc" : "Orden ID desc"}
@@ -615,13 +728,13 @@ const AdminUsuarios = () => {
                             }
                           })
                         );
-                        generarInformeAdminPDF(usersParaPDF, adminName, consultasPorUsuario);
+                        await generarInformeAdminPDF(usersParaPDF, adminName, consultasPorUsuario);
                       } finally {
                         setGenerandoPDF(false);
                       }
                     }}
                     disabled={generandoPDF}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-lg shadow-cyan-500/20 transition-all hover:brightness-110 disabled:cursor-wait disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand via-sky-500 to-brand-2 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-lg shadow-brand/20 transition-all hover:brightness-110 disabled:cursor-wait disabled:opacity-50"
                   >
                     {generandoPDF ? <><SpinIcon /> Generando...</> : <><DownloadIcon /> Informe PDF</>}
                   </button>
@@ -629,9 +742,9 @@ const AdminUsuarios = () => {
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="group rounded-2xl border border-line/15 bg-surface/80 px-4 py-3 transition-all hover:border-cyan-400/30 hover:bg-surface">
+                <div className="group rounded-2xl border border-line/15 bg-surface/80 px-4 py-3 transition-all hover:border-brand/30 hover:bg-surface">
                   <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
-                    <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" /> Resultados visibles
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand" /> Resultados visibles
                   </div>
                   <div className="mt-2 text-xl font-bold text-content">{filteredUsers.length}</div>
                 </div>
@@ -671,9 +784,9 @@ const AdminUsuarios = () => {
                     key={u.id}
                     className="overflow-hidden rounded-[26px] border border-line/15 bg-surface/90 shadow-xl shadow-black/5"
                   >
-                    <div className="border-b border-line/10 bg-cyan-500/5 px-4 py-4 sm:px-5">
+                    <div className="border-b border-line/10 bg-brand/5 px-4 py-4 sm:px-5">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/12 text-lg font-black uppercase text-cyan-200">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-brand/20 bg-brand/12 text-lg font-black uppercase text-brand">
                           {(u.username || "U").slice(0, 1)}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -721,7 +834,7 @@ const AdminUsuarios = () => {
                           {u.perfil.planes.map((p) => (
                             <span
                               key={p.id}
-                              className="rounded-full border border-cyan-400/15 bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-200"
+                              className="rounded-full border border-brand/15 bg-brand/10 px-3 py-1 text-xs font-semibold text-brand"
                             >
                               {formatPlanName(p.nombre)}
                             </span>
@@ -741,7 +854,7 @@ const AdminUsuarios = () => {
 
                       <button
                         onClick={() => setGestionUser(u)}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/15 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-cyan-100 transition-all hover:from-cyan-500/30 hover:to-blue-500/30 hover:shadow-lg hover:shadow-cyan-500/20"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-brand/30 bg-gradient-to-r from-brand/15 to-brand-2/15 px-4 py-3 text-xs font-bold uppercase tracking-[0.18em] text-brand transition-all hover:from-brand/30 hover:to-brand-2/30 hover:shadow-lg hover:shadow-brand/20"
                       >
                         ⚙ Gestionar usuario
                       </button>
@@ -779,16 +892,16 @@ const AdminUsuarios = () => {
                       </tr>
                     ) : (
                       pagedUsers.map((u) => (
-                        <tr key={u.id} className="group align-top transition-colors hover:bg-cyan-500/[0.06]">
+                        <tr key={u.id} className="group align-top transition-colors hover:bg-brand/[0.06]">
                           <td className="px-4 py-4">
-                            <span className="rounded-full border border-line/15 bg-surface-2/70 px-2.5 py-1 text-xs font-mono text-muted transition-colors group-hover:border-cyan-400/30 group-hover:text-brand">
+                            <span className="rounded-full border border-line/15 bg-surface-2/70 px-2.5 py-1 text-xs font-mono text-muted transition-colors group-hover:border-brand/30 group-hover:text-brand">
                               #{u.id}
                             </span>
                           </td>
 
                           <td className="px-4 py-4">
                             <div className="flex items-start gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-500/10 text-sm font-black uppercase text-cyan-200 transition-all duration-300 group-hover:border-cyan-400/50 group-hover:bg-cyan-500/20 group-hover:shadow-[0_0_14px_rgba(34,211,238,0.3)]">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-brand/20 bg-brand/10 text-sm font-black uppercase text-brand transition-all duration-300 group-hover:border-brand/50 group-hover:bg-brand/20 group-hover:shadow-[0_0_14px_rgba(34,211,238,0.3)]">
                                 {(u.username || "U").slice(0, 1)}
                               </div>
                               <div className="min-w-0">
@@ -844,7 +957,7 @@ const AdminUsuarios = () => {
                                 {u.perfil.planes.map((p) => (
                                   <span
                                     key={p.id}
-                                    className="rounded-full border border-cyan-400/25 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-2.5 py-1 text-xs font-semibold text-cyan-100 shadow-sm shadow-cyan-500/10"
+                                    className="rounded-full border border-brand/25 bg-gradient-to-r from-brand/20 to-brand-2/20 px-2.5 py-1 text-xs font-semibold text-brand shadow-sm shadow-brand/10"
                                   >
                                     {formatPlanName(p.nombre)}
                                   </span>
@@ -858,7 +971,7 @@ const AdminUsuarios = () => {
                           <td className="px-4 py-4">
                             <button
                               onClick={() => setGestionUser(u)}
-                              className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/15 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-brand transition-all hover:from-cyan-500/30 hover:to-blue-500/30 hover:shadow-lg hover:shadow-cyan-500/20"
+                              className="inline-flex items-center gap-2 rounded-xl border border-brand/30 bg-gradient-to-r from-brand/15 to-brand-2/15 px-4 py-2.5 text-xs font-bold uppercase tracking-[0.16em] text-brand transition-all hover:from-brand/30 hover:to-brand-2/30 hover:shadow-lg hover:shadow-brand/20"
                             >
                               ⚙ Gestionar
                             </button>
@@ -881,17 +994,17 @@ const AdminUsuarios = () => {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="rounded-xl border border-line/15 bg-surface px-3.5 py-2 text-xs font-semibold text-content/70 transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-brand disabled:cursor-not-allowed disabled:opacity-30"
+                  className="rounded-xl border border-line/15 bg-surface px-3.5 py-2 text-xs font-semibold text-content/70 transition hover:border-brand/40 hover:bg-brand/10 hover:text-brand disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   Anterior
                 </button>
-                <span className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3.5 py-2 text-xs font-bold text-brand">
+                <span className="rounded-xl border border-brand/20 bg-brand/10 px-3.5 py-2 text-xs font-bold text-brand">
                   Pagina {currentPage} de {totalPages}
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage >= totalPages}
-                  className="rounded-xl border border-line/15 bg-surface px-3.5 py-2 text-xs font-semibold text-content/70 transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-brand disabled:cursor-not-allowed disabled:opacity-30"
+                  className="rounded-xl border border-line/15 bg-surface px-3.5 py-2 text-xs font-semibold text-content/70 transition hover:border-brand/40 hover:bg-brand/10 hover:text-brand disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   Siguiente
                 </button>
@@ -918,7 +1031,7 @@ const AdminUsuarios = () => {
 
         const Accion = ({ icon, label, sub, onClick, tone = "cyan", disabled }) => {
           const tones = {
-            cyan:   "border-cyan-400/25 hover:border-cyan-400/50 hover:bg-cyan-500/10 text-cyan-200",
+            cyan:   "border-brand/25 hover:border-brand/50 hover:bg-brand/10 text-brand",
             teal:   "border-teal-400/25 hover:border-teal-400/50 hover:bg-teal-500/10 text-teal-200",
             sky:    "border-sky-400/25 hover:border-sky-400/50 hover:bg-sky-500/10 text-sky-200",
             violet: "border-violet-400/25 hover:border-violet-400/50 hover:bg-violet-500/10 text-violet-200",
@@ -926,6 +1039,7 @@ const AdminUsuarios = () => {
             indigo: "border-indigo-400/25 hover:border-indigo-400/50 hover:bg-indigo-500/10 text-indigo-200",
             amber:  "border-amber-400/25 hover:border-amber-400/50 hover:bg-amber-500/10 text-amber-200",
             red:    "border-rose-400/25 hover:border-rose-400/50 hover:bg-rose-500/10 text-rose-200",
+            fuchsia:"border-fuchsia-400/25 hover:border-fuchsia-400/50 hover:bg-fuchsia-500/10 text-fuchsia-200",
           };
           return (
             <button
@@ -945,19 +1059,19 @@ const AdminUsuarios = () => {
         return (
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm" onClick={cerrar}>
             <div
-              className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[26px] border border-cyan-500/25 bg-gradient-to-br from-slate-950 via-blue-950/40 to-slate-950 shadow-2xl shadow-cyan-500/15"
+              className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[26px] border border-brand/25 bg-gradient-to-br from-slate-950 via-blue-950/40 to-slate-950 shadow-2xl shadow-brand/15"
               onClick={(e) => e.stopPropagation()}
             >
               {/* glow */}
-              <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-cyan-500/10 blur-3xl" />
+              <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-brand/10 blur-3xl" />
 
               {/* Header */}
               <div className="relative flex shrink-0 items-center gap-4 border-b border-white/10 px-5 py-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/15 text-xl font-black uppercase text-cyan-200 shadow-lg shadow-cyan-500/20">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-brand/30 bg-brand/15 text-xl font-black uppercase text-brand shadow-lg shadow-brand/20">
                   {(gu.username || "U").slice(0, 1)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-300/80">Gestión de usuario</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand/80">Gestión de usuario</p>
                   <h3 className="truncate text-xl font-black text-white">{gu.username}</h3>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {gu.is_active ? <Badge color="green">Activo</Badge> : <Badge color="red">Inactivo</Badge>}
@@ -978,12 +1092,12 @@ const AdminUsuarios = () => {
               <div className="relative overflow-y-auto px-5 py-5 space-y-5">
                 {/* Créditos destacados */}
                 <div className="grid grid-cols-3 gap-3">
-                  <div className="rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/12 to-transparent px-3 py-3 text-center">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-cyan-300/80">Disponibles</div>
+                  <div className="rounded-2xl border border-brand/20 bg-gradient-to-br from-brand/12 to-transparent px-3 py-3 text-center">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-brand/80">Disponibles</div>
                     <div className="mt-1 text-2xl font-black text-white">{credito(perfil.consultas_disponibles)}</div>
                   </div>
-                  <div className="rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-500/12 to-transparent px-3 py-3 text-center">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-blue-300/80">Cargadas</div>
+                  <div className="rounded-2xl border border-brand-2/20 bg-gradient-to-br from-brand-2/12 to-transparent px-3 py-3 text-center">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-brand-2/80">Cargadas</div>
                     <div className="mt-1 text-2xl font-black text-white">{credito(perfil.consultas_cargadas_total)}</div>
                   </div>
                   <div className="rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/12 to-transparent px-3 py-3 text-center">
@@ -1008,7 +1122,7 @@ const AdminUsuarios = () => {
                   {planesU.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {planesU.map((p) => (
-                        <span key={p.id} className="rounded-full border border-cyan-400/25 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-3 py-1 text-xs font-semibold text-cyan-100">
+                        <span key={p.id} className="rounded-full border border-brand/25 bg-gradient-to-r from-brand/20 to-brand-2/20 px-3 py-1 text-xs font-semibold text-brand">
                           {formatPlanName(p.nombre)}
                         </span>
                       ))}
@@ -1025,6 +1139,7 @@ const AdminUsuarios = () => {
                     <Accion icon="💳" tone="cyan"   label="Créditos" sub="Aumentar / ajustar saldo" onClick={() => act(() => handleOpenConsultasModal(gu))} />
                     <Accion icon="📊" tone="teal"   label="Ver consultas" sub="Cédulas consultadas" onClick={() => act(() => handleVerConsultas(gu))} />
                     {gu.perfil && <Accion icon="📦" tone="sky" label="Editar planes" sub="Asignar o quitar planes" onClick={() => act(() => handleEditPlanes(gu))} />}
+                    {gu.perfil && <Accion icon="🎨" tone="fuchsia" label={perfil.organizacion ? `Marca: ${perfil.organizacion.nombre}` : "White-label"} sub="Marca blanca del cliente" onClick={() => act(() => handleAbrirOrganizacion(gu))} />}
                     {gu.perfil && <Accion icon="⚡" tone="violet" label={perfil.consultas_masivas ? "Masivas (activas)" : "Masivas"} sub="Consultas masivas" onClick={() => act(() => { setMasivasUser(gu); setMasivasPlanId(""); setShowMasivasModal(true); })} />}
                     <Accion icon="✏️" tone="indigo" label="Editar usuario" sub="Datos de la cuenta" onClick={() => act(() => handleEditUser(gu))} />
                     <Accion icon="📄" tone="green"  label="PDF usuario" sub="Informe individual" disabled={generandoPDFUserId === gu.id} onClick={() => act(() => handleGenerateIndividualPDF(gu))} />
@@ -1041,7 +1156,7 @@ const AdminUsuarios = () => {
       {/* ── Modal: Soporte técnico ── */}
       {showSoporteModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="flex max-h-[88vh] w-full max-w-7xl flex-col overflow-hidden rounded-[28px] border border-cyan-500/20 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-2xl shadow-cyan-950/40">
+          <div className="flex max-h-[88vh] w-full max-w-7xl flex-col overflow-hidden rounded-[28px] border border-brand/20 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-2xl shadow-cyan-950/40">
             <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-4">
               <div>
                 <h3 className="text-lg font-black text-white">Centro de soporte técnico</h3>
@@ -1174,7 +1289,7 @@ const AdminUsuarios = () => {
                 onChange={(e) => setConsultasValue(e.target.value === "" ? "" : Number(e.target.value))}
                 onBlur={(e) => { if (e.target.value === "") setConsultasValue(0); }}
                 disabled={consultasInfinitas}
-                className="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white outline-none transition focus:border-cyan-400/60 focus:bg-slate-900 disabled:opacity-40"
+                className="w-full rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-white outline-none transition focus:border-brand/60 focus:bg-slate-900 disabled:opacity-40"
               />
             </div>
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 transition hover:bg-white/[0.06]">
@@ -1182,13 +1297,13 @@ const AdminUsuarios = () => {
                 type="checkbox"
                 checked={consultasInfinitas}
                 onChange={(e) => setConsultasInfinitas(e.target.checked)}
-                className="h-5 w-5 accent-cyan-400"
+                className="h-5 w-5 accent-brand"
               />
               <span className="text-sm font-medium text-white/85">Consultas infinitas (∞)</span>
             </label>
             <button
               onClick={handleSaveConsultas}
-              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition hover:brightness-110"
+              className="w-full rounded-xl bg-gradient-to-r from-brand to-brand-2 py-3 text-sm font-bold text-white shadow-lg shadow-brand/25 transition hover:brightness-110"
             >
               Guardar
             </button>
@@ -1212,7 +1327,7 @@ const AdminUsuarios = () => {
               <ModalInput label="Apellido" name="last_name"  value={editUserData.last_name}  onChange={(e) => setEditUserData({ ...editUserData, [e.target.name]: e.target.value })} placeholder="Apellido" />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs text-cyan-400 font-medium tracking-wide">Nueva contraseña <span className="text-white/30">(opcional)</span></label>
+              <label className="text-xs text-brand font-medium tracking-wide">Nueva contraseña <span className="text-white/30">(opcional)</span></label>
               <div className="relative">
                 <input
                   name="password"
@@ -1220,7 +1335,7 @@ const AdminUsuarios = () => {
                   value={editUserData.password}
                   onChange={(e) => setEditUserData({ ...editUserData, password: e.target.value })}
                   placeholder="••••••••"
-                  className="w-full rounded-lg px-3 py-2 pr-10 border border-slate-600 bg-slate-800/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition text-sm"
+                  className="w-full rounded-lg px-3 py-2 pr-10 border border-slate-600 bg-slate-800/80 text-white placeholder-slate-500 focus:outline-none focus:border-brand transition text-sm"
                 />
                 <button
                   type="button"
@@ -1234,7 +1349,7 @@ const AdminUsuarios = () => {
             </div>
             <button
               onClick={handleSaveEditUser}
-              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition hover:brightness-110"
+              className="w-full rounded-xl bg-gradient-to-r from-brand to-brand-2 py-3 text-sm font-bold text-white shadow-lg shadow-brand/25 transition hover:brightness-110"
             >
               Guardar cambios
             </button>
@@ -1264,12 +1379,12 @@ const AdminUsuarios = () => {
                   }
                   className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-all ${
                     on
-                      ? "border-cyan-400/50 bg-cyan-500/15 text-cyan-100"
+                      ? "border-brand/50 bg-brand/15 text-brand"
                       : "border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20 hover:bg-white/[0.06]"
                   }`}
                 >
                   <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] font-black ${
-                    on ? "border-cyan-400 bg-cyan-400 text-slate-900" : "border-white/30 text-transparent"
+                    on ? "border-brand bg-brand text-slate-900" : "border-white/30 text-transparent"
                   }`}>✓</span>
                   <span className="truncate font-medium">{formatPlanName(plan.nombre)}</span>
                 </button>
@@ -1278,10 +1393,195 @@ const AdminUsuarios = () => {
           </div>
           <button
             onClick={handleSavePlanes}
-            className="mt-4 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 transition hover:brightness-110"
+            className="mt-4 w-full rounded-xl bg-gradient-to-r from-brand to-brand-2 py-3 text-sm font-bold text-white shadow-lg shadow-brand/25 transition hover:brightness-110"
           >
             Guardar cambios
           </button>
+        </Sheet>
+      )}
+
+      {/* ── Modal: White-label (Organizacion) ── */}
+      {showOrgModal && (
+        <Sheet
+          onClose={cerrarOrgModal}
+          icon="🎨"
+          title="Marca blanca (white-label)"
+          subtitle={`Usuario: ${orgUser?.username || ""}`}
+        >
+          <div className="flex flex-col gap-4">
+            <p className="text-xs text-white/45 leading-relaxed">
+              Asigne una organización cliente para que este usuario vea la marca (logo, colores, y en
+              econfiaWallet el nombre y textos legales) de esa empresa en vez de la marca Econfia por defecto.
+            </p>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs text-brand font-medium tracking-wide">Organización</label>
+              <select
+                value={selectedOrgId}
+                onChange={(e) => setSelectedOrgId(e.target.value)}
+                className="rounded-lg px-3 py-2 border border-slate-600 bg-slate-800/80 text-white focus:outline-none focus:border-brand transition text-sm"
+              >
+                <option value="">Sin organización (marca Econfia por defecto)</option>
+                {organizaciones.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.nombre} {org.activa ? "" : "(inactiva)"}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedOrgId && (() => {
+              const orgSel = organizaciones.find((o) => String(o.id) === String(selectedOrgId));
+              if (!orgSel) return null;
+              return (
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
+                  <span
+                    className="h-8 w-8 shrink-0 rounded-lg border border-white/10"
+                    style={{
+                      background: `linear-gradient(135deg, ${orgSel.color_acento}, ${orgSel.color_secundario || orgSel.color_acento})`,
+                    }}
+                  />
+                  <div className="min-w-0 text-xs">
+                    <div className="font-semibold text-white truncate">{orgSel.nombre_wallet_efectivo}</div>
+                    <div className="text-white/40 truncate">{orgSel.perfiles_count} usuario{orgSel.perfiles_count === 1 ? "" : "s"} con esta marca</div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <button
+              onClick={handleGuardarOrganizacion}
+              disabled={guardandoOrg}
+              className="w-full rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 py-3 text-sm font-bold text-white shadow-lg shadow-fuchsia-500/25 transition hover:brightness-110 disabled:opacity-50"
+            >
+              {guardandoOrg ? "Guardando…" : "Guardar asignación"}
+            </button>
+
+            <div className="border-t border-white/10 pt-3">
+              {!showNuevaOrgForm ? (
+                <button
+                  type="button"
+                  onClick={() => setShowNuevaOrgForm(true)}
+                  className="text-xs font-semibold text-fuchsia-300 hover:text-fuchsia-200 transition"
+                >
+                  + Crear nueva organización
+                </button>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-white/40">Nueva organización</div>
+                  <ModalInput
+                    label="Nombre"
+                    value={nuevaOrg.nombre}
+                    onChange={(e) => {
+                      const nombre = e.target.value;
+                      const slug = nombre.toLowerCase().trim()
+                        .normalize("NFD").replace(/[̀-ͯ]/g, "")
+                        .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+                      setNuevaOrg((prev) => ({ ...prev, nombre, slug }));
+                    }}
+                    placeholder="Certicámara"
+                  />
+                  <ModalInput
+                    label="Slug (URL)"
+                    value={nuevaOrg.slug}
+                    onChange={(e) => setNuevaOrg((prev) => ({ ...prev, slug: e.target.value }))}
+                    placeholder="certicamara"
+                  />
+                  <div className="flex items-center gap-3">
+                    <label className="text-xs text-brand font-medium tracking-wide shrink-0">Color principal</label>
+                    <input
+                      type="color"
+                      value={nuevaOrg.color_acento}
+                      onChange={(e) => setNuevaOrg((prev) => ({ ...prev, color_acento: e.target.value }))}
+                      className="h-9 w-14 rounded-lg border border-slate-600 bg-slate-800/80 cursor-pointer"
+                    />
+                    <span className="text-xs text-white/50 font-mono">{nuevaOrg.color_acento}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="text-xs text-brand font-medium tracking-wide shrink-0">Color secundario</label>
+                    <input
+                      type="color"
+                      value={nuevaOrg.color_secundario || nuevaOrg.color_acento}
+                      onChange={(e) => setNuevaOrg((prev) => ({ ...prev, color_secundario: e.target.value }))}
+                      className="h-9 w-14 rounded-lg border border-slate-600 bg-slate-800/80 cursor-pointer"
+                    />
+                    <span className="text-xs text-white/50 font-mono">
+                      {nuevaOrg.color_secundario || "= color principal"}
+                    </span>
+                    {nuevaOrg.color_secundario && (
+                      <button
+                        type="button"
+                        onClick={() => setNuevaOrg((prev) => ({ ...prev, color_secundario: "" }))}
+                        className="text-[11px] text-white/40 hover:text-white/70 transition"
+                      >
+                        Quitar
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-white/35 -mt-1">
+                    Opcional: si la marca tiene dos colores (ej. botones con degradado), defina el secundario. Si
+                    lo deja igual al principal, se usa un solo color en toda la app.
+                  </p>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-brand font-medium tracking-wide">Logo (opcional)</label>
+                    <div className="flex items-center gap-3">
+                      {nuevaOrgLogoPreview ? (
+                        <img
+                          src={nuevaOrgLogoPreview}
+                          alt="Vista previa del logo"
+                          className="h-12 w-12 rounded-lg border border-slate-600 bg-white/5 object-contain"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-dashed border-slate-600 bg-slate-800/40 text-white/25 text-[10px]">
+                          Sin logo
+                        </div>
+                      )}
+                      <div className="flex flex-1 flex-col gap-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleSeleccionarLogo(e.target.files?.[0] || null)}
+                          className="text-xs text-white/60 file:mr-3 file:rounded-lg file:border-0 file:bg-fuchsia-500/20 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-fuchsia-200 hover:file:bg-fuchsia-500/30 file:cursor-pointer cursor-pointer"
+                        />
+                        {nuevaOrgLogo && (
+                          <button
+                            type="button"
+                            onClick={() => handleSeleccionarLogo(null)}
+                            className="self-start text-[11px] text-white/40 hover:text-white/70 transition"
+                          >
+                            Quitar logo
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <ModalInput
+                    label="Nombre de Wallet (opcional)"
+                    value={nuevaOrg.nombre_wallet}
+                    onChange={(e) => setNuevaOrg((prev) => ({ ...prev, nombre_wallet: e.target.value }))}
+                    placeholder="CertiWallet (vacío = econfiaWallet)"
+                  />
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowNuevaOrgForm(false)}
+                      className="flex-1 rounded-lg border border-white/10 py-2 text-xs font-semibold text-white/60 hover:bg-white/5 transition"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCrearOrganizacion}
+                      disabled={creandoOrg}
+                      className="flex-1 rounded-lg bg-gradient-to-r from-fuchsia-500 to-purple-600 py-2 text-xs font-bold text-white transition hover:brightness-110 disabled:opacity-50"
+                    >
+                      {creandoOrg ? "Creando…" : "Crear organización"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </Sheet>
       )}
 
@@ -1294,7 +1594,7 @@ const AdminUsuarios = () => {
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 shrink-0">
               <div>
                 <h3 className="text-base font-bold text-white">
-                  Consultas de <span className="text-cyan-400">{consultasRealizadasUser?.username}</span>
+                  Consultas de <span className="text-brand">{consultasRealizadasUser?.username}</span>
                 </h3>
                 <p className="text-xs text-white/35 mt-0.5">{consultasRealizadasTotal} consulta{consultasRealizadasTotal !== 1 ? "s" : ""} registrada{consultasRealizadasTotal !== 1 ? "s" : ""}</p>
               </div>
@@ -1310,7 +1610,7 @@ const AdminUsuarios = () => {
             {/* Contenido */}
             <div className="flex-1 overflow-y-auto p-4">
               {consultasRealizadasLoading ? (
-                <div className="flex justify-center items-center py-16 text-cyan-400">
+                <div className="flex justify-center items-center py-16 text-brand">
                   <SpinIcon /><span className="ml-2 text-sm">Cargando...</span>
                 </div>
               ) : consultasRealizadas.length === 0 ? (
@@ -1335,7 +1635,7 @@ const AdminUsuarios = () => {
                         {consultasRealizadas.map((c, i) => (
                           <tr key={c.consulta_id} className="hover:bg-white/3 transition-colors">
                             <td className="px-3 py-2 text-white/30">{(consultasRealizadasPage - 1) * 20 + i + 1}</td>
-                            <td className="px-3 py-2 font-mono font-semibold text-cyan-300">{c.cedula || "—"}</td>
+                            <td className="px-3 py-2 font-mono font-semibold text-brand">{c.cedula || "—"}</td>
                             <td className="px-3 py-2 text-white/40">{c.tipo_doc || "—"}</td>
                             <td className="px-3 py-2 text-white/80">{c.nombre_completo || "—"}</td>
                             <td className="px-3 py-2 text-white/40 whitespace-nowrap">
@@ -1353,7 +1653,7 @@ const AdminUsuarios = () => {
                   {consultasRealizadasTotal > 20 && (
                     <div className="flex justify-center gap-2 items-center pt-3">
                       <button
-                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-slate-800/60 text-white/60 text-xs hover:bg-cyan-900/40 hover:text-cyan-300 disabled:opacity-30 transition"
+                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-slate-800/60 text-white/60 text-xs hover:bg-cyan-900/40 hover:text-brand disabled:opacity-30 transition"
                         disabled={consultasRealizadasPage === 1}
                         onClick={() => fetchConsultasRealizadas(consultasRealizadasUser.id, consultasRealizadasPage - 1)}
                       >
@@ -1363,7 +1663,7 @@ const AdminUsuarios = () => {
                         {consultasRealizadasPage} / {Math.ceil(consultasRealizadasTotal / 20)}
                       </span>
                       <button
-                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-slate-800/60 text-white/60 text-xs hover:bg-cyan-900/40 hover:text-cyan-300 disabled:opacity-30 transition"
+                        className="px-3 py-1.5 rounded-lg border border-white/10 bg-slate-800/60 text-white/60 text-xs hover:bg-cyan-900/40 hover:text-brand disabled:opacity-30 transition"
                         disabled={consultasRealizadasPage >= Math.ceil(consultasRealizadasTotal / 20)}
                         onClick={() => fetchConsultasRealizadas(consultasRealizadasUser.id, consultasRealizadasPage + 1)}
                       >

@@ -26,11 +26,20 @@ const THEME = {
 };
 const PIE_COLORS = [THEME.cyan, THEME.blue, THEME.purple, THEME.pink, THEME.emerald, THEME.amber];
 
+/** "#10b981" -> "rgba(16,185,129,0.08)" para usar el color de marca en
+ * lugares que necesitan un string rgba (recharts, no soporta tokens CSS). */
+function hexARgba(hex, alpha) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
 /** Tooltip elegante personalizado */
 function GlassTooltip({ active, payload, label }) {
   if (!active || !payload || !payload.length) return null;
   return (
-    <div className="px-3 py-2 rounded-lg border border-line/20 bg-surface backdrop-blur-xl shadow-2xl shadow-cyan-500/20">
+    <div className="px-3 py-2 rounded-lg border border-line/20 bg-surface backdrop-blur-xl shadow-2xl shadow-brand/20">
       {label && <div className="text-xs text-brand mb-1 font-semibold">{label}</div>}
       {payload.map((p, i) => (
         <div key={i} className="text-sm text-content flex items-center gap-2">
@@ -50,10 +59,10 @@ function GlassTooltip({ active, payload, label }) {
 function ElegantCard({ title, children, className = "" }) {
   return (
     <div
-      className={`${THEME.bgPanel} rounded-[20px] shadow-2xl shadow-cyan-500/10 relative overflow-hidden group ${className}`}
+      className={`${THEME.bgPanel} rounded-[20px] shadow-2xl shadow-brand/10 relative overflow-hidden group ${className}`}
     >
       {/* Glow effect sutil */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
       
       <div className="relative p-3 md:p-4">
         {title && (
@@ -78,12 +87,22 @@ const AVATAR_LIST = [
 ];
 
 export default function Profile() {
-  const { theme } = useTheme();
+  const { theme, organizacion } = useTheme();
   const isLight = theme === "light";
-  // Colores de la gráfica según el tema (recharts usa hex/strings, no clases).
-  const chartAxis = isLight ? "#0f766e" : "#06b6d4";     // teal-700 / cyan
-  const chartTick = isLight ? "#334155" : "#67e8f9";     // slate-700 / cyan claro
-  const chartGrid = isLight ? "rgba(15,23,42,0.08)" : "rgba(6,182,212,0.08)";
+  // Colores de la gráfica según el tema (recharts usa hex/strings, no clases
+  // Tailwind, así que no puede leer los tokens --th-brand directamente).
+  // Si el usuario tiene una Organizacion con marca propia, la gráfica usa
+  // sus colores en vez de los cyan/blue fijos del tema oscuro.
+  const marcaPrincipal = organizacion?.color_acento || null;
+  const marcaSecundaria = organizacion?.color_secundario_efectivo || marcaPrincipal;
+  const chartAxis = marcaPrincipal || (isLight ? "#0f766e" : "#06b6d4");     // teal-700 / cyan
+  const chartTick = marcaSecundaria || (isLight ? "#334155" : "#67e8f9");   // slate-700 / cyan claro
+  const chartGrid = marcaPrincipal
+    ? hexARgba(marcaPrincipal, 0.08)
+    : isLight ? "rgba(15,23,42,0.08)" : "rgba(6,182,212,0.08)";
+  const barGradientDesde = marcaPrincipal || "#06b6d4";
+  const barGradientHasta = marcaSecundaria || "#3b82f6";
+  const cursorFill = marcaPrincipal ? hexARgba(marcaPrincipal, 0.1) : "rgba(6,182,212,0.1)";
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -339,8 +358,8 @@ export default function Profile() {
   return (
     <section className="relative min-h-screen py-4 md:py-6 pb-32 md:pb-36 overflow-hidden bg-transparent">
       {/* Elementos decorativos de fondo */}
-      <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-brand-2/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
@@ -360,7 +379,7 @@ export default function Profile() {
             </div>
 
             <div
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full my-3 overflow-hidden border-2 border-cyan-500/30 relative group cursor-pointer transition-all hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/50"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full my-3 overflow-hidden border-2 border-brand/30 relative group cursor-pointer transition-all hover:border-brand/50 hover:shadow-lg hover:shadow-brand/50"
               onClick={() => setShowAvatarModal(true)}
             >
               <img
@@ -370,7 +389,7 @@ export default function Profile() {
               />
               
               {/* Overlay al hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-brand/20 to-brand-2/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <span className="text-white text-xs font-semibold drop-shadow-lg">
                   {uploadingPhoto ? "Actualizando..." : "Cambiar avatar"}
                 </span>
@@ -391,7 +410,7 @@ export default function Profile() {
                     key={idx}
                     src={avatar}
                     alt={`Avatar ${idx+1}`}
-                    className={`w-20 h-20 rounded-full border-2 cursor-pointer hover:border-cyan-400 transition ${selectedAvatar === avatar ? "border-cyan-500" : "border-transparent"}`}
+                    className={`w-20 h-20 rounded-full border-2 cursor-pointer hover:border-brand transition ${selectedAvatar === avatar ? "border-brand" : "border-transparent"}`}
                     onClick={() => handleAvatarSelect(avatar)}
                   />
                 ))}
@@ -401,13 +420,13 @@ export default function Profile() {
             <h3 className="text-base sm:text-lg font-semibold text-content text-center">{profile?.full_name || profile?.username}</h3>
             <p className="text-muted text-xs sm:text-sm mb-2 text-center break-all">{profile?.email || "Sin correo"}</p>
 
-            <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-brand to-brand-2 text-white font-semibold shadow-lg shadow-cyan-500/30">
+            <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-brand to-brand-2 text-white font-semibold shadow-lg shadow-brand/30">
               {profile?.groups?.length > 0 ? profile.groups[0] : "Usuario"}
             </span>
 
             <div className="w-full grid grid-cols-2 gap-2.5 sm:gap-3 mt-4">
               {/* Consultas */}
-              <div className="rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 hover:from-cyan-500/20 hover:to-blue-500/10 transition-all flex flex-col">
+              <div className="rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 border border-brand/20 bg-gradient-to-br from-brand/10 to-brand-2/5 hover:from-brand/20 hover:to-brand-2/10 transition-all flex flex-col">
                 <div className="text-[10px] sm:text-xs text-brand font-semibold uppercase tracking-wide">Consultas</div>
                 <div className="text-content text-xl sm:text-2xl font-black mt-0.5 flex items-center">
                   {profile?.perfil?.consultas_infinitas
@@ -416,16 +435,16 @@ export default function Profile() {
                 </div>
               </div>
               {/* Planes activos */}
-              <div className="rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 hover:from-blue-500/20 hover:to-purple-500/10 transition-all flex flex-col">
+              <div className="rounded-xl px-3 py-2.5 sm:px-4 sm:py-3 border border-brand-2/20 bg-gradient-to-br from-brand-2/10 to-brand/5 hover:from-brand-2/20 hover:to-brand/10 transition-all flex flex-col">
                 <div className="text-[10px] sm:text-xs text-brand-2 font-semibold uppercase tracking-wide mb-1.5">Planes activos</div>
                 <div className="flex flex-wrap gap-1.5">
                   {(profile?.perfil?.planes && profile.perfil.planes.length > 0)
                     ? profile.perfil.planes.map((plan) => (
                         <span
                           key={plan.id}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/25 to-blue-500/25 border border-cyan-400/30 text-brand text-[10px] sm:text-[11px] font-bold shadow-sm shadow-cyan-500/20"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-brand/25 to-brand-2/25 border border-brand/30 text-brand text-[10px] sm:text-[11px] font-bold shadow-sm shadow-brand/20"
                         >
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand" />
                           {plan.nombre.charAt(0).toUpperCase() + plan.nombre.slice(1)}
                         </span>
                       ))
@@ -436,8 +455,8 @@ export default function Profile() {
             {/* Botón PDF */}
             <div className="w-full flex justify-center mt-5">
               <button
-                className="w-full px-6 py-2 text-sm sm:text-base rounded-xl bg-gradient-to-r from-brand to-brand-2 text-white font-bold shadow-lg shadow-cyan-500/30 hover:opacity-90 transition-all"
-                onClick={() => generarInformeUsuarioPDF(profile, stats)}
+                className="w-full px-6 py-2 text-sm sm:text-base rounded-xl bg-gradient-to-r from-brand to-brand-2 text-white font-bold shadow-lg shadow-brand/30 hover:opacity-90 transition-all"
+                onClick={() => generarInformeUsuarioPDF(profile, stats, organizacion)}
               >
                 Generar informe PDF
               </button>
@@ -449,7 +468,7 @@ export default function Profile() {
         <ElegantCard title="Estadísticas" className="lg:col-span-2 w-full">
           {/* Control de consultas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4 mb-4 md:mb-6">
-            <div className="rounded-xl px-3 py-3 sm:px-4 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/10">
+            <div className="rounded-xl px-3 py-3 sm:px-4 border border-brand/20 bg-gradient-to-br from-brand/10 to-brand-2/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/10">
               <div className="text-[10px] sm:text-xs text-brand font-semibold uppercase tracking-wide">Consultas cargadas</div>
               <div className="text-content text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">
                 {profile?.perfil?.consultas_infinitas
@@ -457,11 +476,11 @@ export default function Profile() {
                   : (profile?.perfil?.consultas_cargadas_total ?? 0)}
               </div>
             </div>
-            <div className="rounded-xl px-3 py-3 sm:px-4 border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-purple-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/10">
+            <div className="rounded-xl px-3 py-3 sm:px-4 border border-brand-2/20 bg-gradient-to-br from-brand-2/10 to-brand/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-2/10">
               <div className="text-[10px] sm:text-xs text-brand-2 font-semibold uppercase tracking-wide">Consultas consumidas</div>
               <div className="text-content text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">{profile?.perfil?.consultas_consumidas ?? 0}</div>
             </div>
-            <div className="rounded-xl px-3 py-3 sm:px-4 border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-cyan-500/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/10">
+            <div className="rounded-xl px-3 py-3 sm:px-4 border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-brand/5 text-center transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/10">
               <div className="text-[10px] sm:text-xs text-ok font-semibold uppercase tracking-wide">Saldo de consultas</div>
               <div className="text-content text-xl sm:text-2xl font-black mt-1 flex items-center justify-center min-h-[34px]">
                 {profile?.perfil?.consultas_infinitas
@@ -487,8 +506,8 @@ export default function Profile() {
               <BarChart data={consultasPorEstado} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
                 <defs>
                   <linearGradient id="barGradient1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.9} />
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.6} />
+                    <stop offset="0%" stopColor={barGradientDesde} stopOpacity={0.9} />
+                    <stop offset="100%" stopColor={barGradientHasta} stopOpacity={0.6} />
                   </linearGradient>
                   <filter id="barShadow" x="-50%" y="-50%" width="200%" height="200%">
                     <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
@@ -514,7 +533,7 @@ export default function Profile() {
                   tick={{ fill: chartTick, fontSize: 11, fontWeight: 600 }}
                   axisLine={{ stroke: chartAxis, strokeWidth: 2 }}
                 />
-                <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(6,182,212,0.1)" }} />
+                <Tooltip content={<GlassTooltip />} cursor={{ fill: cursorFill }} />
                 <Bar
                   dataKey="total"
                   name="Total"

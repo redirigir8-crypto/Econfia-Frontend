@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import logoEconfia from "../assets/logo-econfia.png";
+import { cargarLogoParaPdf } from "./logoOrganizacion";
 
 const PAGE_W = 297;
 const PAGE_H = 210;
@@ -41,13 +41,15 @@ const PLAN_LABELS = {
   ecorefull: "E-corefull",
 };
 
-export function generarInformeAdminPDF(users, adminName, consultasPorUsuario = {}) {
+export async function generarInformeAdminPDF(users, adminName, consultasPorUsuario = {}, organizacion = null) {
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
     format: "a4",
     compress: true,
   });
+
+  const branding = await cargarLogoParaPdf(organizacion);
 
   const safeUsers = Array.isArray(users) ? users : [];
   const generatedDate = new Date();
@@ -70,29 +72,32 @@ export function generarInformeAdminPDF(users, adminName, consultasPorUsuario = {
     horaHoy,
     totals,
     users: safeUsers,
+    branding,
   });
 
   let pageNumber = 1;
   if (safeUsers.length) {
     pageNumber += 1;
-    pageNumber = drawUserTableSection(doc, pageNumber, safeUsers);
+    pageNumber = drawUserTableSection(doc, pageNumber, safeUsers, branding);
   }
 
   safeUsers.forEach((user) => {
     pageNumber += 1;
-    pageNumber = drawUserDetailSection(doc, pageNumber, user, consultasPorUsuario[user.id] || []);
+    pageNumber = drawUserDetailSection(doc, pageNumber, user, consultasPorUsuario[user.id] || [], branding);
   });
 
   doc.save(`Informe_Admin_Usuarios_${generatedDate.toISOString().slice(0, 10)}.pdf`);
 }
 
-export function generarInformeAdminIndividualPDF(user, adminName, consultas = []) {
+export async function generarInformeAdminIndividualPDF(user, adminName, consultas = [], organizacion = null) {
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
     format: "a4",
     compress: true,
   });
+
+  const branding = await cargarLogoParaPdf(organizacion);
 
   const generatedDate = new Date();
   const fechaHoy = generatedDate.toLocaleDateString("es-CO", {
@@ -112,6 +117,7 @@ export function generarInformeAdminIndividualPDF(user, adminName, consultas = []
     fechaHoy,
     horaHoy,
     consultas,
+    branding,
   });
 
   const hasDetailData = (user?.perfil?.historial_recargas || []).length > 0
@@ -119,7 +125,7 @@ export function generarInformeAdminIndividualPDF(user, adminName, consultas = []
     || consultas.length > 0;
 
   if (hasDetailData) {
-    drawUserDetailSection(doc, 2, user, consultas);
+    drawUserDetailSection(doc, 2, user, consultas, branding);
   }
 
   const userSlug = slugify(getUserDisplayName(user) || user?.username || "usuario");
@@ -127,8 +133,8 @@ export function generarInformeAdminIndividualPDF(user, adminName, consultas = []
 }
 
 function drawAdminOverviewPage(doc, data) {
-  drawPageShell(doc, data.pageNumber, "Reporte administrativo de usuarios");
-  drawHero(doc, "Informe administrativo de usuarios", data.adminName, data.fechaHoy, data.horaHoy);
+  drawPageShell(doc, data.pageNumber, "Reporte administrativo de usuarios", data.branding);
+  drawHero(doc, "Informe administrativo de usuarios", data.adminName, data.fechaHoy, data.horaHoy, data.branding);
 
   drawMetricGrid(doc, [
     { label: "Usuarios totales", value: String(data.totals.totalUsuarios), color: THEME.primary },
@@ -150,8 +156,8 @@ function drawIndividualUserOverviewPage(doc, data) {
   const planNames = getPlanNames(user);
   const consultas = data.consultas || [];
 
-  drawPageShell(doc, data.pageNumber, "Informe individual de usuario");
-  drawHero(doc, "Informe individual de usuario", getUserDisplayName(user), data.fechaHoy, data.horaHoy);
+  drawPageShell(doc, data.pageNumber, "Informe individual de usuario", data.branding);
+  drawHero(doc, "Informe individual de usuario", getUserDisplayName(user), data.fechaHoy, data.horaHoy, data.branding);
 
   drawMetricGrid(doc, [
     { label: "Consultas cargadas", value: getConsultasCargadasLabel(user), color: user?.perfil?.consultas_infinitas ? THEME.violet : THEME.primary },
@@ -170,7 +176,7 @@ function drawIndividualUserOverviewPage(doc, data) {
   }
 }
 
-function drawUserTableSection(doc, startPageNumber, users) {
+function drawUserTableSection(doc, startPageNumber, users, branding) {
   const columns = [
     { label: "#", width: 10, align: "center" },
     { label: "Usuario", width: 26 },
@@ -203,10 +209,11 @@ function drawUserTableSection(doc, startPageNumber, users) {
     columns,
     rows,
     totalIndex: null,
+    branding,
   });
 }
 
-function drawUserDetailSection(doc, startPageNumber, user, consultas) {
+function drawUserDetailSection(doc, startPageNumber, user, consultas, branding) {
   let pageNumber = startPageNumber;
   let y = HEADER_Y;
   const userName = getUserDisplayName(user);
@@ -216,7 +223,7 @@ function drawUserDetailSection(doc, startPageNumber, user, consultas) {
 
   const paintPage = (continued = false) => {
     doc.addPage("a4", "landscape");
-    drawPageShell(doc, pageNumber, "Detalle administrativo por usuario");
+    drawPageShell(doc, pageNumber, "Detalle administrativo por usuario", branding);
     drawSectionHeader(
       doc,
       continued ? `Desglose de usuario (cont.)` : "Desglose de usuario",
@@ -340,7 +347,8 @@ function drawUserDetailSection(doc, startPageNumber, user, consultas) {
   return pageNumber;
 }
 
-function drawPageShell(doc, pageNumber, label) {
+function drawPageShell(doc, pageNumber, label, branding) {
+  const nombreOrg = branding?.nombre || "Econfia";
   doc.setFillColor(...THEME.bg);
   doc.rect(0, 0, PAGE_W, PAGE_H, "F");
 
@@ -364,12 +372,12 @@ function drawPageShell(doc, pageNumber, label) {
   doc.setDrawColor(...THEME.line);
   doc.line(0, PAGE_H - 12, PAGE_W, PAGE_H - 12);
   doc.setTextColor(...THEME.muted);
-  doc.text("Econfia | Informe administrativo consolidado", MARGIN_X, PAGE_H - 4.5);
+  doc.text(`${nombreOrg} | Informe administrativo consolidado`, MARGIN_X, PAGE_H - 4.5);
   doc.setTextColor(...THEME.primarySoft);
   doc.text(`Pag. ${pageNumber}`, PAGE_W - MARGIN_X, PAGE_H - 4.5, { align: "right" });
 }
 
-function drawHero(doc, title, subtitle, fechaHoy, horaHoy) {
+function drawHero(doc, title, subtitle, fechaHoy, horaHoy, branding) {
   const heroY = 24;
   const heroH = 24;
   const plateX = MARGIN_X + 5;
@@ -382,7 +390,7 @@ function drawHero(doc, title, subtitle, fechaHoy, horaHoy) {
 
   doc.setFillColor(...THEME.white);
   doc.roundedRect(plateX, plateY, plateW, plateH, 4, 4, "F");
-  drawLogo(doc, plateX, plateY, plateW, plateH);
+  drawLogo(doc, plateX, plateY, plateW, plateH, branding);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
@@ -396,12 +404,16 @@ function drawHero(doc, title, subtitle, fechaHoy, horaHoy) {
   drawSingleLineText(doc, `${fechaHoy} | ${horaHoy}`, PAGE_W - MARGIN_X - 78, heroY + 17, 78, "right");
 }
 
-function drawLogo(doc, x, y, maxW, maxH) {
+function drawLogo(doc, x, y, maxW, maxH, branding) {
+  const logoSrc = branding?.src;
+  if (!logoSrc) return;
+
   let width = 28;
   let height = 10;
+  const format = logoSrc.startsWith("data:image/jpeg") ? "JPEG" : "PNG";
 
   try {
-    const props = doc.getImageProperties(logoEconfia);
+    const props = doc.getImageProperties(logoSrc);
     const ratio = props.width / props.height;
     width = maxW - 8;
     height = width / ratio;
@@ -416,7 +428,7 @@ function drawLogo(doc, x, y, maxW, maxH) {
 
   const drawX = x + ((maxW - width) / 2);
   const drawY = y + ((maxH - height) / 2);
-  doc.addImage(logoEconfia, "PNG", drawX, drawY, width, height);
+  doc.addImage(logoSrc, format, drawX, drawY, width, height);
 }
 
 function drawMetricGrid(doc, metrics, startY) {
@@ -698,7 +710,7 @@ function drawTableSection(doc, startPageNumber, config) {
 
   const paintPage = (continued = false) => {
     doc.addPage("a4", "landscape");
-    drawPageShell(doc, pageNumber, config.title);
+    drawPageShell(doc, pageNumber, config.title, config.branding);
     drawSectionHeader(
       doc,
       continued ? `${config.title} (cont.)` : config.title,

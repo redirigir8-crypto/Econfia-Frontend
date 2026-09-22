@@ -17,8 +17,13 @@ import {
 import { jsPDF } from "jspdf";
 import AnalisisInteligente from "./AnalisisInteligente";
 import { describirFuente } from "../utils/fuentesCatalogo";
+import { useTheme } from "../context/ThemeContext";
 
 export default function DetalleResultados({ consultaId, consulta = null }) {
+  const { organizacion } = useTheme();
+  // Si la Organizacion tiene marca propia, el estado "Sin Clasificar" del
+  // anillo de score usa su color de acento en vez del cyan fijo del tema.
+  const marcaPrincipal = organizacion?.color_acento || null;
   const [detalle, setDetalle] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("analisis"); // "analisis" | "resultados"
@@ -354,8 +359,8 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
     return {
       scoreText: rawScore !== null ? String(rawScore) : "N/A",
       statusLabel: "Sin Clasificar",
-      ringColor: "#38bdf8",
-      dotClass: "bg-cyan-400",
+      ringColor: marcaPrincipal || "#38bdf8",
+      dotClass: "bg-brand",
       scoreTone: "text-brand",
       statusTone: "text-brand border-brand/30 bg-brand/10",
       bannerTone:
@@ -741,7 +746,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-4">
-        <div className="w-16 h-16 rounded-full border-4 border-slate-800 border-t-cyan-400 animate-spin shadow-[0_0_20px_rgba(6,182,212,0.5)]" />
+        <div className="w-16 h-16 rounded-full border-4 border-slate-800 border-t-brand animate-spin shadow-[0_0_20px_rgba(6,182,212,0.5)]" />
         <p className="text-muted text-sm font-semibold">Cargando detalles...</p>
       </div>
     );
@@ -890,8 +895,8 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white
-                       bg-gradient-to-r from-blue-500 to-brand-2 
-                       hover:from-blue-400 hover:to-brand-2
+                       bg-gradient-to-r from-brand to-brand-2
+                       hover:from-brand hover:to-brand-2
                        shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)]
                        transition-all duration-300
                        hover:scale-110 active:scale-95"
@@ -1112,7 +1117,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                     <th className="w-[14%] px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider text-center">Evidencia</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-cyan-500/10">
+                <tbody className="divide-y divide-brand/10">
                   {datosPagina.map((item) => (
                     <tr
                       key={item.id}

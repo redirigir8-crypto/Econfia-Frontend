@@ -120,7 +120,7 @@ export default function AdminSoporte({ embedded = false }) {
 			<div className={`${embedded ? "w-full" : "max-w-7xl mx-auto px-6"}`}>
 				{/* Header */}
 				<div className={embedded ? "mb-5" : "mb-8"}>
-					<h1 className={`${embedded ? "text-2xl" : "text-4xl"} font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2`}>
+					<h1 className={`${embedded ? "text-2xl" : "text-4xl"} font-bold bg-gradient-to-r from-brand to-brand-2 bg-clip-text text-transparent mb-2`}>
 						Panel de Soporte Técnico
 					</h1>
 					<p className="text-gray-400">Gestiona todos los tickets de soporte de usuarios</p>
@@ -131,14 +131,14 @@ export default function AdminSoporte({ embedded = false }) {
 					<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
 						<motion.div
 							whileHover={{ scale: 1.05 }}
-							className="bg-white/5 border border-cyan-500/20 rounded-lg p-4 backdrop-blur"
+							className="bg-white/5 border border-brand/20 rounded-lg p-4 backdrop-blur"
 						>
 							<div className="flex items-center justify-between">
 								<div>
 									<p className="text-gray-400 text-sm">Total Tickets</p>
-									<p className="text-3xl font-bold text-cyan-400">{estadisticas.total}</p>
+									<p className="text-3xl font-bold text-brand">{estadisticas.total}</p>
 								</div>
-								<Inbox size={32} className="text-cyan-400 opacity-50" />
+								<Inbox size={32} className="text-brand opacity-50" />
 							</div>
 						</motion.div>
 
@@ -188,10 +188,10 @@ export default function AdminSoporte({ embedded = false }) {
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 					{/* Lista de Tickets */}
 					<div className="lg:col-span-1">
-						<div className="bg-white/5 border border-cyan-500/20 rounded-lg backdrop-blur overflow-hidden">
+						<div className="bg-white/5 border border-brand/20 rounded-lg backdrop-blur overflow-hidden">
 							{/* Header de lista */}
-							<div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 px-4 py-3 border-b border-cyan-500/20">
-								<h2 className="font-bold text-cyan-300">Tickets Abiertos</h2>
+							<div className="bg-gradient-to-r from-brand/20 to-brand-2/20 px-4 py-3 border-b border-brand/20">
+								<h2 className="font-bold text-brand">Tickets Abiertos</h2>
 								<div className="flex flex-wrap gap-2 mt-3">
 									{[
 										["abierto", "Activos"],
@@ -205,7 +205,7 @@ export default function AdminSoporte({ embedded = false }) {
 											onClick={() => setFiltroEstado(key)}
 											className={`text-xs px-2 py-1 rounded-full border transition ${
 												filtroEstado === key
-													? "bg-cyan-500/25 border-cyan-400/60 text-cyan-100"
+													? "bg-brand/25 border-brand/60 text-cyan-100"
 													: "bg-white/5 border-white/10 text-gray-400 hover:text-cyan-200"
 											}`}
 										>
@@ -216,7 +216,7 @@ export default function AdminSoporte({ embedded = false }) {
 							</div>
 
 							{/* Items */}
-							<div className="divide-y divide-cyan-500/10 max-h-96 overflow-y-auto">
+							<div className="divide-y divide-brand/10 max-h-96 overflow-y-auto">
 								{loading ? (
 									<div className="p-4 text-center text-gray-500">Cargando...</div>
 								) : ticketsFiltrados.length === 0 ? (
@@ -229,12 +229,12 @@ export default function AdminSoporte({ embedded = false }) {
 											onClick={() => seleccionarTicket(ticket)}
 											className={`p-3 cursor-pointer transition ${
 												ticketSeleccionado?.id === ticket.id
-													? "bg-cyan-500/20 border-l-2 border-cyan-400"
+													? "bg-brand/20 border-l-2 border-brand"
 													: "hover:bg-white/5"
 											}`}
 										>
 											<div className="flex items-start justify-between gap-2 mb-2">
-												<p className="text-sm font-mono text-cyan-300">{ticket.ticket_id}</p>
+												<p className="text-sm font-mono text-brand">{ticket.ticket_id}</p>
 												<span className={`text-xs px-2 py-1 rounded-full ${getPrioridadColor(ticket.prioridad)}`}>
 													{ticket.prioridad}
 												</span>
@@ -254,12 +254,12 @@ export default function AdminSoporte({ embedded = false }) {
 							<motion.div
 								initial={{ opacity: 0, x: 20 }}
 								animate={{ opacity: 1, x: 0 }}
-								className="bg-white/5 border border-cyan-500/20 rounded-lg backdrop-blur h-96 flex flex-col overflow-hidden"
+								className="bg-white/5 border border-brand/20 rounded-lg backdrop-blur h-96 flex flex-col overflow-hidden"
 							>
 								{/* Header */}
-								<div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 px-4 py-3 border-b border-cyan-500/20">
+								<div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 px-4 py-3 border-b border-brand/20">
 									<div className="flex items-center justify-between mb-2">
-										<h3 className="font-bold text-cyan-300">{ticketSeleccionado.ticket_id}</h3>
+										<h3 className="font-bold text-brand">{ticketSeleccionado.ticket_id}</h3>
 										<span className={`text-xs px-2 py-1 rounded-full border ${getEstadoColor(ticketSeleccionado.estado)}`}>
 											{ticketSeleccionado.estado.replace('_', ' ').toUpperCase()}
 										</span>
@@ -283,7 +283,7 @@ export default function AdminSoporte({ embedded = false }) {
 												key={estado}
 												type="button"
 												onClick={() => handleCambiarEstado(estado)}
-												className="text-xs px-3 py-1 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:border-cyan-400/50 hover:text-cyan-100 transition"
+												className="text-xs px-3 py-1 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:border-brand/50 hover:text-cyan-100 transition"
 											>
 												{label}
 											</button>
@@ -309,7 +309,7 @@ export default function AdminSoporte({ embedded = false }) {
 								</div>
 
 								{/* Input de Mensaje */}
-								<div className="border-t border-cyan-500/20 p-3 bg-slate-900/50">
+								<div className="border-t border-brand/20 p-3 bg-slate-900/50">
 									<div className="flex gap-2">
 										<input
 											type="text"
@@ -317,7 +317,7 @@ export default function AdminSoporte({ embedded = false }) {
 											onChange={(e) => setNuevoMensaje(e.target.value)}
 											onKeyPress={(e) => e.key === 'Enter' && handleResponder()}
 											placeholder="Escribe tu respuesta..."
-											className="flex-1 bg-slate-800 text-white rounded px-3 py-2 text-sm outline-none border border-cyan-500/30 focus:border-cyan-500 transition"
+											className="flex-1 bg-slate-800 text-white rounded px-3 py-2 text-sm outline-none border border-brand/30 focus:border-brand transition"
 										/>
 										<button
 											onClick={handleResponder}
@@ -330,7 +330,7 @@ export default function AdminSoporte({ embedded = false }) {
 								</div>
 							</motion.div>
 						) : (
-							<div className="bg-white/5 border border-cyan-500/20 rounded-lg backdrop-blur p-6 flex items-center justify-center h-96">
+							<div className="bg-white/5 border border-brand/20 rounded-lg backdrop-blur p-6 flex items-center justify-center h-96">
 								<div className="text-center">
 									<MessageSquare size={48} className="mx-auto text-gray-500 mb-2" />
 									<p className="text-gray-500">Selecciona un ticket para ver detalles</p>

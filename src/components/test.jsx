@@ -149,7 +149,7 @@ export default function Consulta() {
                   <select
                     value={tipoDoc}
                     onChange={(e) => setTipoDoc(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg bg-white/10 text-black placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-4 py-2 rounded-lg bg-white/10 text-black placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-brand-2"
                   >
                     <option value="CC">Cédula de Ciudadanía (CC)</option>
                     <option value="TI">Tarjeta de Identidad (TI)</option>
@@ -168,7 +168,7 @@ export default function Consulta() {
                     type="text"
                     value={cedula}
                     onChange={(e) => setCedula(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg bg-white/10 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full px-4 py-2 rounded-lg bg-white/10 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-brand-2"
                     placeholder="Ej: 123456789"
                   />
                 </div>
@@ -179,11 +179,11 @@ export default function Consulta() {
                     type="checkbox"
                     checked={acepta}
                     onChange={(e) => setAcepta(e.target.checked)}
-                    className="accent-blue-500 w-4 h-4"
+                    className="accent-brand-2 w-4 h-4"
                   />
                   <span className="text-sm text-white/80">
                     Acepto los{" "}
-                    <a href="#" className="text-blue-400 underline">
+                    <a href="#" className="text-brand-2 underline">
                       términos y condiciones
                     </a>
                   </span>
@@ -208,8 +208,8 @@ export default function Consulta() {
                   disabled={!acepta || !consentimiento}
                   className={`mt-2 px-6 py-2 rounded-full font-medium mx-16 transition-all duration-300 ease-in-out 
                     ${!acepta || !consentimiento 
-                      ? "bg-gray-500 cursor-not-allowed text-white/70" 
-                      : "bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-105 hover:shadow-lg"
+                      ? "bg-gray-500 cursor-not-allowed text-white/70"
+                      : "bg-brand-2 hover:opacity-90 text-white transform hover:scale-105 hover:shadow-lg"
                     }`}
                 >
                   Consultar
