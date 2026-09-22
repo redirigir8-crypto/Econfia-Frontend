@@ -95,7 +95,7 @@ export default function ConsultaBasicElemnt() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-24 pb-32 md:pb-36 overflow-hidden bg-transparent">
+    <section className="relative min-h-screen flex items-start justify-center pt-3 pb-32 md:pb-36 overflow-hidden bg-transparent">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-5xl w-full px-4 relative z-10">
         <div className="text-center md:text-left space-y-5">
           <div>
@@ -118,9 +118,7 @@ export default function ConsultaBasicElemnt() {
           <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-brand/10 p-6 group">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
             <div className="relative z-10">
-              <div className="flex items-center justify-center mb-4">
-                <LogoOrganizacion className="h-16 w-16 object-contain" />
-              </div>  
+              <LogoOrganizacion className="mb-4" size={60} />
               <form onSubmit={handleSubmit} className="space-y-2">
                 <div className="space-y-2">
                   <div className="flex flex-col gap-1">

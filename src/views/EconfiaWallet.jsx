@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Toast from "../components/Toast";
 import { useTheme } from "../context/ThemeContext";
+import WalletSolicitudes from "../components/WalletSolicitudes";
 import { MUNICIPIOS_COLOMBIA } from "../utils/municipiosColombia";
 import { PROFESIONES_MUNDO } from "../utils/profesionesMundo";
 
@@ -335,6 +336,7 @@ export default function EconfiaWallet() {
 
   // QR / pase temporal
   const [qr, setQr] = useState(null); // { url, qr_base64, expires_at }
+  const [llave, setLlave] = useState(null); // { clave, expires_at, max_consultas }
   const [segundos, setSegundos] = useState(0);
   const [mostrarSelectorCompartir, setMostrarSelectorCompartir] = useState(false);
   const [atributosCompartir, setAtributosCompartir] = useState(["persona", "documentos", "antecedentes"]);
@@ -710,6 +712,30 @@ export default function EconfiaWallet() {
     }
   };
 
+  // Llave duradera para compartir con una empresa (Fase 1 wallet empresa).
+  const compartirLlave = async (atributos = atributosCompartir) => {
+    if (!atributos || atributos.length === 0) {
+      setToast({ type: "error", message: "Elige al menos un dato para compartir." });
+      return;
+    }
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/compartir-llave/`, {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ atributos, dias: 7, max_consultas: 5 }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ type: "error", message: data.error || "No se pudo generar la llave." });
+        return;
+      }
+      setMostrarSelectorCompartir(false);
+      setLlave(data);
+    } catch {
+      setToast({ type: "error", message: "Error al generar la llave." });
+    }
+  };
+
   const ATRIBUTOS_COMPARTIR_INFO = [
     { key: "persona", label: "Datos personales", detalle: "Nombre y número de documento" },
     { key: "documentos", label: "Documentos", detalle: "Cédula subida a su Wallet" },
@@ -803,6 +829,7 @@ export default function EconfiaWallet() {
         </header>
 
         {/* ================= ZONA A: datos base ================= */}
+        <WalletSolicitudes />
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
             <StepDot n={1} done={baseCompleta} />
@@ -1278,6 +1305,35 @@ export default function EconfiaWallet() {
               className="mt-5 w-full px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors">
               Generar QR con lo seleccionado
             </button>
+            <button onClick={() => compartirLlave(atributosCompartir)}
+              disabled={atributosCompartir.length === 0}
+              className="mt-2 w-full px-5 py-2.5 rounded-lg border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold transition-colors">
+              Generar llave para empresa (7 días)
+            </button>
+          </div>
+        </div>
+      )}
+      {llave && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
+          onClick={() => setLlave(null)}>
+          <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6 text-center"
+            onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setLlave(null)} className="absolute top-3 right-3 text-muted hover:text-content text-lg leading-none">✕</button>
+            <h3 className="text-content font-bold text-lg">Llave para empresa</h3>
+            <p className="text-muted text-xs mt-1 mb-4">
+              Comparte esta llave con la empresa (por WhatsApp, correo o en persona). La empresa la ingresa en “Consultar Wallet”.
+            </p>
+            <div className="bg-surface-2/70 border border-emerald-500/30 rounded-xl py-4">
+              <span className="text-emerald-300 font-mono text-2xl font-bold tracking-widest">{llave.clave}</span>
+            </div>
+            <button
+              onClick={() => { navigator.clipboard?.writeText(llave.clave); setToast({ type: "success", message: "Llave copiada." }); }}
+              className="mt-4 w-full px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors">
+              Copiar llave
+            </button>
+            <p className="text-muted text-[11px] mt-3">
+              Vence: {new Date(llave.expires_at).toLocaleString()} · {llave.max_consultas ? `${llave.max_consultas} consultas` : "consultas ilimitadas"}
+            </p>
           </div>
         </div>
       )}

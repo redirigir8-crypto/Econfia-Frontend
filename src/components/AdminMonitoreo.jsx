@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import MonitoreoAyuda from "./MonitoreoAyuda";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -43,17 +43,6 @@ const COLUMNAS = [
   { key: "Último", tip: "Estado del sondeo más reciente de esta fuente." },
 ];
 
-// Significado de cada estado posible
-const ESTADOS_DOC = [
-  ["ok", "Respondió correctamente y rápido."],
-  ["lento", "Respondió, pero tardó más de 5 segundos."],
-  ["bloqueo", "La fuente bloqueó la petición (403/429) o exige captcha."],
-  ["no_encontrado", "La URL devolvió 404 (puede requerir ajustar la URL objetivo)."],
-  ["error_servidor", "La fuente devolvió un error 5xx."],
-  ["timeout", "No respondió dentro de los 15 segundos."],
-  ["error", "Falló la conexión o el certificado SSL."],
-];
-
 const AdminMonitoreo = () => {
   const token = localStorage.getItem("token");
   const auth = { Authorization: `Token ${token}` };
@@ -66,6 +55,7 @@ const AdminMonitoreo = () => {
   const [toast, setToast] = useState(null);
   const [ayuda, setAyuda] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("todas"); // todas | ok | lento | problema
   const pollRef = useRef(null);
 
   const notificar = (msg, tipo = "ok") => setToast({ msg, tipo });
@@ -139,17 +129,47 @@ const AdminMonitoreo = () => {
   const kpi = reporte?.kpi;
   const pct = progreso.total ? Math.round((progreso.hechos / progreso.total) * 100) : 0;
 
-  // Buscador: si hay texto filtra TODAS las fuentes; si no, muestra las 60 primeras.
+  // "Sondeos del día": revisiones del último día registrado (el acumulado va en el Excel).
+  const diasArr = reporte?.fallos_por_dia || [];
+  const ultimoDia = diasArr.length ? diasArr[diasArr.length - 1] : null;
+  const sondeosDia = ultimoDia ? ultimoDia.total : (kpi?.sondeos_totales ?? 0);
+
+  // Grupos de estado para el filtro rápido.
+  const ESTADO_GRUPO = {
+    ok: ["ok"],
+    lento: ["lento"],
+    problema: ["bloqueo", "timeout", "error", "error_servidor", "no_encontrado"],
+  };
+  const nombreFuente = (r) => r.nombre_pila || r.clave;
+
+  // Buscador + filtro por estado.
+  // Sin búsqueda y con "todas": las 60 peores. Con búsqueda o filtro: TODAS las que calcen
+  // (así las fuentes OK siempre se pueden ver eligiendo el filtro "OK").
   const todasFuentes = reporte?.disponibilidad || [];
   const qBusqueda = busqueda.trim().toLowerCase();
-  const filasVisibles = qBusqueda
-    ? todasFuentes.filter((r) => r.clave.toLowerCase().includes(qBusqueda))
-    : todasFuentes.slice(0, 60);
+  let base = todasFuentes;
+  if (qBusqueda) {
+    base = base.filter(
+      (r) => nombreFuente(r).toLowerCase().includes(qBusqueda) || r.clave.toLowerCase().includes(qBusqueda)
+    );
+  }
+  if (filtroEstado !== "todas") {
+    const estados = ESTADO_GRUPO[filtroEstado] || [];
+    base = base.filter((r) => estados.includes(r.ultimo_estado));
+  }
+  // Orden: en "Con problema" las peores primero; en el resto, las verdes (OK) primero.
+  base = [...base].sort((a, b) =>
+    filtroEstado === "problema"
+      ? a.disponibilidad_pct - b.disponibilidad_pct
+      : b.disponibilidad_pct - a.disponibilidad_pct
+  );
+  const filtrando = qBusqueda || filtroEstado !== "todas";
+  const filasVisibles = filtrando ? base : base.slice(0, 60);
 
   return (
     <div style={{
       fontFamily: "Segoe UI, system-ui, sans-serif", color: T.text,
-      minHeight: "100vh", padding: "120px 32px 48px", boxSizing: "border-box",
+      minHeight: "100vh", padding: "12px 32px 48px", boxSizing: "border-box",
       maxWidth: 1360, margin: "0 auto",
     }}>
       {/* Cabecera */}
@@ -206,12 +226,13 @@ const AdminMonitoreo = () => {
       {kpi && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 16, marginTop: 24 }}>
           <KpiCard icon="📡" label="FUENTES MONITOREADAS" val={kpi.fuentes_monitoreadas} />
-          <KpiCard icon="🔍" label="SONDEOS TOTALES" val={kpi.sondeos_totales} />
+          <KpiCard icon="🗓️" label="SONDEOS DEL DÍA" val={sondeosDia}
+            sub={ultimoDia ? `revisiones del ${ultimoDia.fecha.slice(5)} · total acumulado en el Excel` : "el total acumulado va en el Excel"} />
           <GaugeCard label="DISPONIBILIDAD PROMEDIO" pct={kpi.disponibilidad_promedio_pct} />
           <div className="th-card" style={cardStyle}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 10, letterSpacing: .5 }}>POR ESTADO</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 10, letterSpacing: .5 }}>POR ESTADO · ÚLTIMO DÍA</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {Object.entries(kpi.por_estado || {}).map(([e, n]) => {
+              {Object.entries(kpi.por_estado_dia || kpi.por_estado || {}).map(([e, n]) => {
                 const [bg, fg] = ESTADO_COLOR[e] || ["rgb(var(--th-line) / 0.15)", T.text];
                 return <span key={e} style={{ background: bg, color: fg, fontWeight: 800, fontSize: 12, padding: "3px 9px", borderRadius: 7 }}>{e}: {n}</span>;
               })}
@@ -228,14 +249,25 @@ const AdminMonitoreo = () => {
       )}
 
       {/* Tabla disponibilidad */}
-      <Seccion titulo="Disponibilidad y latencia (peores primero)">
+      <Seccion titulo="Disponibilidad y latencia">
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
           <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
             placeholder="🔎 Buscar fuente por nombre…"
             style={{
-              flex: "1 1 280px", maxWidth: 400, padding: "10px 14px", borderRadius: 12, fontSize: 13,
+              flex: "1 1 260px", maxWidth: 380, padding: "10px 14px", borderRadius: 12, fontSize: 13,
               color: T.text, background: T.surface2, border: `1px solid ${T.line}`, outline: "none",
             }} />
+          {/* Filtro por estado — permite ver SIEMPRE las fuentes OK */}
+          <div style={{ display: "flex", background: T.surface2, borderRadius: 12, padding: 4, border: `1px solid ${T.line}` }}>
+            {[["todas", "Todas"], ["ok", "✅ OK"], ["lento", "⚠ Lentas"], ["problema", "⛔ Con problema"]].map(([k, lbl]) => (
+              <button key={k} onClick={() => setFiltroEstado(k)}
+                style={{
+                  border: "none", cursor: "pointer", padding: "7px 12px", borderRadius: 9, fontWeight: 700, fontSize: 12.5,
+                  background: filtroEstado === k ? T.brand : "transparent",
+                  color: filtroEstado === k ? T.surface : T.muted,
+                }}>{lbl}</button>
+            ))}
+          </div>
           {busqueda && (
             <button onClick={() => setBusqueda("")}
               style={{ cursor: "pointer", padding: "9px 14px", borderRadius: 12, fontWeight: 700, color: T.muted, background: "transparent", border: `1px solid ${T.line}` }}>
@@ -244,7 +276,7 @@ const AdminMonitoreo = () => {
           )}
           <span style={{ fontSize: 12.5, color: T.muted, fontWeight: 700 }}>
             Mostrando {filasVisibles.length} de {todasFuentes.length}
-            {!busqueda && todasFuentes.length > 60 ? " · escribe para ver todas" : ""}
+            {!filtrando && todasFuentes.length > 60 ? " · filtra o busca para ver todas" : ""}
           </span>
         </div>
         {cargando ? <p style={{ color: T.muted }}>Cargando…</p> : (
@@ -265,7 +297,12 @@ const AdminMonitoreo = () => {
                   const [bg, fg] = ESTADO_COLOR[r.ultimo_estado] || ["rgb(var(--th-line) / 0.15)", T.text];
                   return (
                     <tr key={r.clave} style={{ background: i % 2 ? T.lineSoft : "transparent" }}>
-                      <td style={{ padding: "9px 12px", fontWeight: 600 }}>{r.clave}</td>
+                      <td style={{ padding: "9px 12px", fontWeight: 600 }}>
+                        {r.nombre_pila || r.clave}
+                        {r.nombre_pila && (
+                          <div style={{ fontSize: 10.5, fontWeight: 500, color: T.muted, marginTop: 1 }}>{r.clave}</div>
+                        )}
+                      </td>
                       <td style={tdC}>{r.sondeos}</td>
                       <td style={{ ...tdC, minWidth: 92 }}>
                         <div style={{ fontWeight: 800, fontSize: 12, color: dispColor(r.disponibilidad_pct) }}>{r.disponibilidad_pct}%</div>
@@ -284,7 +321,7 @@ const AdminMonitoreo = () => {
                 })}
                 {reporte && !filasVisibles.length && (
                   <tr><td colSpan={9} style={{ padding: 24, textAlign: "center", color: T.muted }}>
-                    {busqueda ? `Sin coincidencias para “${busqueda}”.` : "Aún no hay sondeos. Pulsa “Ejecutar sondeo ahora”."}
+                    {filtrando ? "Sin fuentes que coincidan con el filtro o la búsqueda." : "Aún no hay sondeos. Pulsa “Ejecutar sondeo ahora”."}
                   </td></tr>
                 )}
               </tbody>
@@ -306,7 +343,7 @@ const AdminMonitoreo = () => {
         </div>
       </Seccion>
 
-      {ayuda && <HelpModal onClose={() => setAyuda(false)} />}
+      {ayuda && <MonitoreoAyuda admin onClose={() => setAyuda(false)} />}
 
       {toast && (
         <div style={{
@@ -318,119 +355,7 @@ const AdminMonitoreo = () => {
   );
 };
 
-const HelpModal = ({ onClose }) => {
-  useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  return createPortal((
-    <div onClick={onClose}
-      style={{
-        position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center",
-        background: "rgba(2,6,20,.68)", backdropFilter: "blur(4px)", padding: 20,
-      }}>
-      <div onClick={(e) => e.stopPropagation()} className="th-panel"
-        style={{
-          borderRadius: 20, maxWidth: 680, width: "100%", maxHeight: "86vh", color: T.text,
-          display: "flex", flexDirection: "column", overflow: "hidden",
-          boxShadow: "0 30px 80px rgba(0,0,0,.5)", border: `1px solid rgb(var(--th-brand) / 0.25)`,
-        }}>
-        {/* Cabecera fija */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 14, padding: "20px 24px", flexShrink: 0,
-          background: `linear-gradient(120deg, rgb(var(--th-brand) / 0.20), rgb(var(--th-brand-2) / 0.10))`,
-          borderBottom: `1px solid ${T.line}`,
-        }}>
-          <div style={{
-            width: 46, height: 46, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 24, background: `linear-gradient(140deg, ${T.brand}, ${T.brand2})`, flexShrink: 0,
-            boxShadow: `0 6px 18px rgb(var(--th-brand) / 0.35)`,
-          }}>📡</div>
-          <div style={{ flex: 1 }}>
-            <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800 }}>Cómo funciona el monitoreo</h2>
-            <div style={{ fontSize: 12.5, color: T.muted, marginTop: 2 }}>Guía rápida del panel de fuentes</div>
-          </div>
-          <button onClick={onClose} aria-label="Cerrar"
-            style={{
-              width: 34, height: 34, borderRadius: 10, flexShrink: 0, cursor: "pointer",
-              background: T.lineSoft, border: `1px solid ${T.line}`, color: T.text, fontSize: 20, fontWeight: 700, lineHeight: 1,
-            }}>×</button>
-        </div>
-
-        {/* Cuerpo con scroll */}
-        <div style={{ padding: "20px 24px", overflowY: "auto" }}>
-          {/* Intro destacada */}
-          <div style={{
-            borderLeft: `3px solid ${T.brand}`, background: T.lineSoft, borderRadius: 10,
-            padding: "12px 14px", fontSize: 13.5, lineHeight: 1.55, color: T.muted, marginBottom: 22,
-          }}>
-            Revisa periódicamente las fuentes externas con una <b style={{ color: T.text }}>sonda ligera</b>
-            {" "}(una petición web, sin ejecutar el bot completo ni gastar captcha) y mide tres cosas:{" "}
-            <b style={{ color: T.text }}>disponibilidad</b>, <b style={{ color: T.text }}>latencia</b> y{" "}
-            <b style={{ color: T.text }}>frecuencia de actualización</b>.
-          </div>
-
-          <Bloque icon="🔘" titulo="Botones">
-            <Def chip="▶ Ejecutar sondeo ahora">Lanza un sondeo de todas las fuentes en segundo plano; verás una barra de progreso en vivo.</Def>
-            <Def chip="⬇ Descargar Excel">Descarga todo el reporte con formato y colores en un archivo .xlsx.</Def>
-            <Def chip="7d / 30d / 90d">Cambia la ventana de tiempo sobre la que se calculan las estadísticas.</Def>
-          </Bloque>
-
-          <Bloque icon="📊" titulo="Columnas de la tabla">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 10 }}>
-              {COLUMNAS.map((c) => <Def key={c.key} chip={c.key}>{c.tip}</Def>)}
-            </div>
-          </Bloque>
-
-          <Bloque icon="🚦" titulo="Estados">
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {ESTADOS_DOC.map(([e, d]) => {
-                const [bg, fg] = ESTADO_COLOR[e] || ["rgb(var(--th-line) / 0.15)", T.text];
-                return (
-                  <div key={e} style={{ display: "flex", gap: 12, alignItems: "center", padding: "6px 8px", borderRadius: 8, background: T.lineSoft }}>
-                    <span style={{ background: bg, color: fg, fontWeight: 800, fontSize: 11, padding: "4px 9px", borderRadius: 7, minWidth: 104, textAlign: "center" }}>{e}</span>
-                    <span style={{ fontSize: 13, color: T.muted }}>{d}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </Bloque>
-
-          <Bloque icon="🔄" titulo="Frecuencia de actualización">
-            <div style={{ fontSize: 13, color: T.muted, lineHeight: 1.55 }}>
-              Para los <b style={{ color: T.text }}>boletines</b> (Fiscalía, Procuraduría, etc.) la cadencia
-              real se calcula desde la base de datos. Para el resto, se infiere detectando cambios en el
-              contenido entre sondeos — necesita varias semanas de historial para ser fiable.
-            </div>
-          </Bloque>
-        </div>
-      </div>
-    </div>
-  ), document.body);
-};
-
-const Bloque = ({ icon, titulo, children }) => (
-  <div style={{ marginBottom: 22 }}>
-    <h3 style={{ margin: "0 0 10px", fontSize: 12, fontWeight: 800, color: T.brand, letterSpacing: 1, textTransform: "uppercase", display: "flex", alignItems: "center", gap: 7 }}>
-      <span style={{ fontSize: 15 }}>{icon}</span> {titulo}
-    </h3>
-    {children}
-  </div>
-);
-
-const Def = ({ chip, children }) => (
-  <div style={{ fontSize: 13, lineHeight: 1.5 }}>
-    <span style={{
-      display: "inline-block", fontWeight: 800, color: T.brand, background: "rgb(var(--th-brand) / 0.12)",
-      border: `1px solid rgb(var(--th-brand) / 0.25)`, borderRadius: 7, padding: "1px 8px", marginBottom: 4, fontSize: 12,
-    }}>{chip}</span>
-    <div style={{ color: T.muted }}>{children}</div>
-  </div>
-);
-
-const KpiCard = ({ icon, label, val, color }) => (
+const KpiCard = ({ icon, label, val, color, sub }) => (
   <div className="th-card" style={{ ...cardStyle, display: "flex", alignItems: "center", gap: 14 }}>
     {icon && (
       <div style={{
@@ -443,6 +368,7 @@ const KpiCard = ({ icon, label, val, color }) => (
     <div style={{ minWidth: 0 }}>
       <div style={{ fontSize: 11, fontWeight: 800, color: T.muted, marginBottom: 4, letterSpacing: .5 }}>{label}</div>
       <div style={{ fontSize: 30, fontWeight: 800, color: color || T.text, lineHeight: 1.05 }}>{val}</div>
+      {sub && <div style={{ fontSize: 11.5, color: T.muted, marginTop: 3 }}>{sub}</div>}
     </div>
   </div>
 );

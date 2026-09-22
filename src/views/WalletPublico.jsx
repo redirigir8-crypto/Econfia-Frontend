@@ -1,3 +1,4 @@
+import { DatosEmpresaCompartidos, DocumentosEmpresa } from "../components/WalletEmpresaContenido";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -19,6 +20,8 @@ export default function WalletPublico() {
   const [data, setData] = useState(null);
 
   const cargar = useCallback(async () => {
+    setEstado("cargando");
+    setData(null);
     try {
       const res = await fetch(`${API_URL}/api/wallet/publico/${token}/`);
       if (res.status === 410) return setEstado("expirado");
@@ -49,7 +52,7 @@ export default function WalletPublico() {
 
         {estado === "expirado" && (
           <Aviso titulo="Pase no disponible"
-            texto="Este código QR expiró o fue reemplazado. Pídele a la persona que genere uno nuevo." />
+            texto="Este pase expiró, fue revocado o agotó sus consultas. Solicita un nuevo pase a su titular." />
         )}
         {estado === "error" && (
           <Aviso titulo="No se pudo cargar" texto="Ocurrió un problema al abrir el pase." />
@@ -57,6 +60,21 @@ export default function WalletPublico() {
 
         {estado === "ok" && data && (
           <div className="space-y-6">
+            {data.es_empresa && data.empresa && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h2 className="font-bold mb-3">Datos de la empresa</h2>
+                <DatosEmpresaCompartidos empresa={data.empresa} publico />
+              </div>
+            )}
+            {data.es_empresa && data.representante && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <h2 className="font-bold mb-3">Representante legal</h2>
+                <p className="text-sm break-words">{data.representante.nombre || "—"}</p>
+                {data.representante.num_doc && (
+                  <p className="text-sm text-slate-300">{data.representante.tipo_doc} {data.representante.num_doc}</p>
+                )}
+              </div>
+            )}
             {/* Persona */}
             {data.persona && (
               <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
@@ -100,8 +118,10 @@ export default function WalletPublico() {
             {/* Documentos */}
             {data.atributos?.includes("documentos") && (
             <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-              <h2 className="font-bold mb-3">Documentos</h2>
-              {(!data.documentos || data.documentos.length === 0) ? (
+              <h2 className="font-bold mb-3">{data.es_empresa ? "Documentos de la empresa" : "Documentos"}</h2>
+              {data.es_empresa ? (
+                <DocumentosEmpresa documentos={data.documentos || []} publico />
+              ) : (!data.documentos || data.documentos.length === 0) ? (
                 <p className="text-slate-400 text-xs">Sin documentos.</p>
               ) : (
                 <ul className="space-y-2">

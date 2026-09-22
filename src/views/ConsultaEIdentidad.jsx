@@ -137,7 +137,7 @@ export default function ConsultaEIdentidad() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-24 pb-32 overflow-hidden bg-transparent">
+    <section className="relative min-h-screen flex items-start justify-center pt-3 pb-32 overflow-hidden bg-transparent">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-5xl w-full px-4 relative z-10">
         {/* Descripción */}
         <div className="text-center md:text-left space-y-5">
