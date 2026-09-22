@@ -28,6 +28,15 @@ function nombreDocumento(tipoDoc) {
   return NOMBRE_DOCUMENTO_POR_TIPO[tipoDoc] || "cédula";
 }
 
+// Solo CC/CE/PA tienen OCR real en el backend (ver core/ocr_cedula.py) — el
+// selector del modal de verificación no ofrece TI/PPT/PEP para no arriesgar
+// falsos rechazos por un patrón de documento que no coincide.
+const TIPOS_DOC_VERIFICABLES = [
+  { value: "CC", label: "Cédula de Ciudadanía", icono: "🪪" },
+  { value: "CE", label: "Cédula de Extranjería", icono: "🌎" },
+  { value: "PA", label: "Pasaporte", icono: "📘" },
+];
+
 const TIPO_DOCUMENTO_SUBIDA = [
   { value: "hoja_vida", label: "Hoja de vida" },
   { value: "eps", label: "Certificado de afiliación EPS" },
@@ -1404,7 +1413,13 @@ export default function EconfiaWallet() {
         />
       )}
       {modalVerificacion === "cedula" && (
-        <VerificarCedulaModal onClose={() => setModalVerificacion(null)} setToast={setToast} onVerificado={cargarDocumentos} tipoDoc={estado?.candidato?.tipo_doc} />
+        <VerificarCedulaModal
+          onClose={() => setModalVerificacion(null)}
+          setToast={setToast}
+          onVerificado={cargarDocumentos}
+          tipoDoc={estado?.candidato?.tipo_doc}
+          onTipoDocFijado={cargarEstado}
+        />
       )}
       {modalVerificacion === "sms" && (
         <VerificarSmsModal onClose={() => setModalVerificacion(null)} setToast={setToast} datosTelefono={form.telefono} onVerificado={cargarEstado} />
@@ -2001,7 +2016,7 @@ function dataUrlAArchivo(dataUrl, nombre) {
   return new File([arr], nombre, { type: mime });
 }
 
-function VerificarCedulaModal({ onClose, setToast, onVerificado, tipoDoc }) {
+function VerificarCedulaModal({ onClose, setToast, onVerificado, tipoDoc, onTipoDocFijado }) {
   const [modo, setModo] = useState(null); // null | "camara" | "archivo"
   const [paso, setPaso] = useState("frente"); // frente | reverso | listo
   const [capturas, setCapturas] = useState({ frente: null, reverso: null });
@@ -2020,8 +2035,35 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado, tipoDoc }) {
   // modal de inmediato, para mostrar el resultado final.
   const [verificando, setVerificando] = useState(false);
   const pollDocRef = useRef(null);
+  // Si el candidato todavía no tiene tipo_doc guardado, primero se le pide
+  // elegir CC/CE/Pasaporte (fijándolo vía api/wallet/tipo-doc/) antes de
+  // continuar al paso de fotos — sin esto, el modal asumía "cédula" siempre.
+  const [tipoDocLocal, setTipoDocLocal] = useState(tipoDoc || null);
+  const [fijandoTipoDoc, setFijandoTipoDoc] = useState(false);
 
-  const documento = nombreDocumento(tipoDoc);
+  const elegirTipoDoc = async (valor) => {
+    setFijandoTipoDoc(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/tipo-doc/`, {
+        method: "PATCH",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ tipo_doc: valor }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setToast({ type: "error", message: data?.error || "No se pudo guardar el tipo de documento." });
+        return;
+      }
+      setTipoDocLocal(valor);
+      onTipoDocFijado?.();
+    } catch {
+      setToast({ type: "error", message: "Error de conexión al guardar el tipo de documento." });
+    } finally {
+      setFijandoTipoDoc(false);
+    }
+  };
+
+  const documento = nombreDocumento(tipoDocLocal);
   const ORDEN = ["frente", "reverso"];
   const ETIQUETAS = {
     frente: `Enfoque el frente de su ${documento}`,
@@ -2221,6 +2263,31 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado, tipoDoc }) {
     fd.append("archivo", archivo);
     await enviarDocumento(fd, () => setArchivo(null));
   };
+
+  if (!tipoDocLocal) {
+    return (
+      <VerifModalShell
+        title="¿Qué documento va a verificar?"
+        subtitle="Elija el tipo de documento antes de tomar las fotos. Una vez guardado no podrá cambiarlo."
+        onClose={onClose}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {TIPOS_DOC_VERIFICABLES.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              disabled={fijandoTipoDoc}
+              onClick={() => elegirTipoDoc(t.value)}
+              className="flex flex-col items-center gap-2 rounded-xl bg-surface-2/50 border border-line/10 hover:border-emerald-500/40 px-4 py-6 transition-colors disabled:opacity-50"
+            >
+              <span className="text-3xl">{t.icono}</span>
+              <span className="text-content text-sm font-semibold text-center">{t.label}</span>
+            </button>
+          ))}
+        </div>
+        {fijandoTipoDoc && <p className="text-muted text-[11px] text-center mt-3">Guardando…</p>}
+      </VerifModalShell>
+    );
+  }
 
   if (verificando) {
     return (
