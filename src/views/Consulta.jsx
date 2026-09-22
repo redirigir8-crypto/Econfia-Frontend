@@ -100,7 +100,7 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
         />
       )}
       <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-        <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl border border-line/15 rounded-2xl shadow-2xl shadow-cyan-500/20 max-w-2xl w-full p-6 relative text-content">
+        <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl border border-line/15 rounded-2xl shadow-2xl shadow-brand/20 max-w-2xl w-full p-6 relative text-content">
           {/* Botón cerrar */}
           <button
             onClick={onClose}
@@ -121,7 +121,7 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar fuente..."
-              className="w-full px-3 py-2.5 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-sm focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+              className="w-full px-3 py-2.5 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-sm focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
             />
             <p className="text-xs text-muted mt-1">
               {filteredFuentes.length} fuente{filteredFuentes.length === 1 ? "" : "s"} encontrada{filteredFuentes.length === 1 ? "" : "s"}
@@ -138,7 +138,7 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
                 >
                   <input
                     type="checkbox"
-                    className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                    className="accent-brand w-4 h-4 cursor-pointer"
                     checked={seleccionadas.includes(fuente.nombre)}
                     onChange={() => handleCheckbox(fuente.nombre)}
                   />
@@ -166,7 +166,7 @@ function ModalConsultaMedida({ isOpen, onClose, data }) {
             className={`w-full px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
               loading || seleccionadas.length === 0
                 ? "bg-surface-2/70 text-muted cursor-not-allowed"
-                : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+                : "bg-gradient-to-r from-brand to-brand-2 text-white hover:opacity-90 hover:shadow-lg hover:shadow-brand/50 transform hover:scale-105"
             }`}
           >
             {loading ? "Consultando..." : "Consultar Fuentes"}
@@ -320,7 +320,7 @@ export default function Consulta() {
             {/* Contenido del modal */}
             <div className="relative bg-white/10 border border-white/30 rounded-2xl p-10 shadow-2xl text-center max-w-md w-full mx-4 backdrop-blur-md">
               {/* Icono cargando */}
-              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-cyan-400 mx-auto mb-6"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-brand mx-auto mb-6"></div>
 
               {/* Texto animado */}
               <p className="text-white text-lg font-semibold animate-pulse">
@@ -365,19 +365,19 @@ export default function Consulta() {
       {/* Formulario */}
       <div className="min-h-screen flex items-start justify-center px-4 pt-3 pb-32 md:pb-36 relative overflow-hidden bg-transparent">
         {/* Elementos decorativos de fondo */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-5xl w-full relative z-10">
           {/* Lado izquierdo: Información */}
           <div className="text-center md:text-left space-y-5">
             <div>
-              <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 items-center gap-2">
+              <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-3 items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
                 </span>
-                <span className="text-cyan-300 text-xs font-medium">Consulta Completa</span>
+                <span className="text-brand text-xs font-medium">Consulta Completa</span>
               </div>
               <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
                 Econfia Core Full
@@ -395,19 +395,19 @@ export default function Consulta() {
 
           {/* Lado derecho: Formulario */}
           <div className="relative w-full max-w-sm mx-auto">
-            <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
+            <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-brand/10 p-6 group">
               {/* Glow effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
 
               <div className="relative z-10">
                 <FormLogo />
                 <div className="mb-4 text-center">
-                  <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2 flex items-center gap-2">
+                  <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-2 flex items-center gap-2">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
                     </span>
-                    <span className="text-cyan-300 text-xs font-medium">Verificación segura</span>
+                    <span className="text-brand text-xs font-medium">Verificación segura</span>
                   </div>
                   <h2 className="text-xl font-bold text-content">Verificar Ahora</h2>
                 </div>
@@ -420,7 +420,7 @@ export default function Consulta() {
                       required
                       value={tipoDoc}
                       onChange={(e) => setTipoDoc(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
                     >
                       <option className="bg-surface text-content" value="">
                         Seleccione tipo de documento
@@ -455,7 +455,7 @@ export default function Consulta() {
                       value={cedula}
                       onChange={(e) => setCedula(e.target.value)}
                       placeholder="Ej: 1234567890"
-                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
                     />
                   </div>
 
@@ -466,7 +466,7 @@ export default function Consulta() {
                       type="date"
                       value={fechaExpedicion}
                       onChange={(e) => setFechaExpedicion(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
                     />
                   </div>
 
@@ -486,7 +486,7 @@ export default function Consulta() {
                             value={value}
                             checked={alcance === value}
                             onChange={() => setAlcance(value)}
-                            className="accent-cyan-500 w-3.5 h-3.5 cursor-pointer"
+                            className="accent-brand w-3.5 h-3.5 cursor-pointer"
                           />
                           <span className="text-xs text-content/85 group-hover:text-content transition-colors">{label}</span>
                         </label>
@@ -501,13 +501,13 @@ export default function Consulta() {
                         type="checkbox"
                         checked={acepta}
                         onChange={(e) => setAcepta(e.target.checked)}
-                        className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                        className="accent-brand w-4 h-4 cursor-pointer"
                       />
                       <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                         Acepto los{" "}
                         <Terminos
                           inline
-                          triggerClassName="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium transition-colors"
+                          triggerClassName="text-brand hover:text-brand underline underline-offset-4 font-medium transition-colors"
                         />
                       </span>
                     </label>
@@ -516,7 +516,7 @@ export default function Consulta() {
                         type="checkbox"
                         checked={consentimiento}
                         onChange={(e) => setConsentimiento(e.target.checked)}
-                        className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                        className="accent-brand w-4 h-4 cursor-pointer"
                       />
                       <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                         Confirmo tener consentimiento del titular
@@ -531,7 +531,7 @@ export default function Consulta() {
                     className={`w-full mt-3 px-6 py-2 rounded-lg font-semibold text-xs transition-all duration-300 ${
                       !tipoDoc || !cedula || !acepta || !consentimiento || loading
                         ? "bg-surface-2/70 text-muted cursor-not-allowed"
-                        : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+                        : "bg-gradient-to-r from-brand to-brand-2 text-white hover:opacity-90 hover:shadow-lg hover:shadow-brand/50 transform hover:scale-105"
                     }`}
                   >
                     {loading ? "Procesando..." : "Consultar Ahora"}

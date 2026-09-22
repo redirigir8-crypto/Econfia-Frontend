@@ -207,7 +207,7 @@ function ProcessDockPortal({ items }) {
         </div>
 
         {open && items.length > 0 && (
-          <div className="px-4 pb-4 pt-3 max-h-[50vh] overflow-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent">
+          <div className="px-4 pb-4 pt-3 max-h-[50vh] overflow-auto scrollbar-thin scrollbar-thumb-brand/30 scrollbar-track-transparent">
             <div className="flex flex-col gap-3">
               {items.map(card => {
                 const start = startsRef.current.get(card.row_id || card.id) ?? now;

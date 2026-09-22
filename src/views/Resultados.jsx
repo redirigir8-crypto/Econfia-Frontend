@@ -29,8 +29,19 @@ import {
   isEmpresaConsulta,
   normalizeEmpresaConsulta,
 } from "../utils/experian";
+import { useTheme } from "../context/ThemeContext";
 
 const EXPERIAN_PDF_THEME_OPTIONS = ["claro", "oscuro"];
+
+/** "#06b6d4" -> "rgba(6,182,212,0.1)" para usar el color de marca en
+ * lugares que necesitan un string rgba (CSS global de swiper, no soporta
+ * tokens CSS ni clases Tailwind). */
+function hexARgba(hex, alpha) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
 
 function readStoredExperianPdfTheme() {
   try {
@@ -218,7 +229,7 @@ function FloatingActionsPortal({
                     disabled={savingExperianPdfTheme}
                     className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
                       isActive
-                        ? "bg-cyan-500/20 text-cyan-100"
+                        ? "bg-brand/20 text-brand"
                         : "text-slate-300 hover:text-white"
                     } disabled:cursor-not-allowed disabled:opacity-60`}
                   >
@@ -230,13 +241,13 @@ function FloatingActionsPortal({
 
             <button
               onClick={() => downloadPdf(3)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
-                         text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-brand to-brand-2 hover:opacity-90
+                         text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-brand/30 transition-all hover:shadow-brand/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
               title="Descargar PDF Econfia Adjudicator"
               disabled={downloading || savingExperianPdfTheme}
             >
               {downloading ? (
-                <span className="inline-block w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />
+                <span className="inline-block w-4 h-4 border-2 border-white border-t-brand rounded-full animate-spin" />
               ) : (
                 <FileDown size={16} />
               )}
@@ -247,13 +258,13 @@ function FloatingActionsPortal({
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setOpen((v) => !v)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400
-                         text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-cyan-500/30 transition-all hover:shadow-cyan-500/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-brand to-brand-2 hover:opacity-90
+                         text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-brand/30 transition-all hover:shadow-brand/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
               title="Descargar PDF"
               disabled={downloading}
             >
               {downloading ? (
-                <span className="inline-block w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />
+                <span className="inline-block w-4 h-4 border-2 border-white border-t-brand rounded-full animate-spin" />
               ) : (
                 <FileDown size={16} />
               )}
@@ -262,36 +273,36 @@ function FloatingActionsPortal({
 
             {open && (
               <div className="absolute left-0 mt-2 w-56 rounded-lg overflow-hidden border border-white/20
-                              bg-gradient-to-br from-slate-900/95 via-blue-900/40 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-cyan-500/20 animate-in fade-in duration-200">
+                              bg-gradient-to-br from-slate-900/95 via-blue-900/40 to-slate-900/95 backdrop-blur-xl shadow-2xl shadow-brand/20 animate-in fade-in duration-200">
                 {isEconfiafast ? (
                 <button
                   onClick={() => downloadPdf(3)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-blue-500/20 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-brand-2/20 transition-all group disabled:opacity-60 disabled:cursor-not-allowed"
                   disabled={downloading}
                 >
-                  <Images size={16} className="group-hover:text-blue-400 transition-colors" />
-                  <span className="group-hover:text-blue-300">Descargar PDF</span>
-                  {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
+                  <Images size={16} className="group-hover:text-brand-2 transition-colors" />
+                  <span className="group-hover:text-brand-2">Descargar PDF</span>
+                  {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-brand rounded-full animate-spin" />}
                 </button>
               ) : (
                 <>
                   <button
                     onClick={() => downloadPdf(1)}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-cyan-500/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-brand/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
                     disabled={downloading}
                   >
-                    <FileText size={16} className="group-hover:text-cyan-400 transition-colors" />
-                    <span className="group-hover:text-cyan-300">Descargar PDF Completo</span>
-                    {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
+                    <FileText size={16} className="group-hover:text-brand transition-colors" />
+                    <span className="group-hover:text-brand">Descargar PDF Completo</span>
+                    {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-brand rounded-full animate-spin" />}
                   </button>
                   <button
                     onClick={() => downloadPdf(3)}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-blue-500/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white hover:bg-brand-2/20 transition-all border-b border-white/10 group disabled:opacity-60 disabled:cursor-not-allowed"
                     disabled={downloading}
                   >
-                    <Images size={16} className="group-hover:text-blue-400 transition-colors" />
-                    <span className="group-hover:text-blue-300">Descargar PDF Resumen</span>
-                    {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-cyan-400 rounded-full animate-spin" />}
+                    <Images size={16} className="group-hover:text-brand-2 transition-colors" />
+                    <span className="group-hover:text-brand-2">Descargar PDF Resumen</span>
+                    {downloading && <span className="ml-2 w-4 h-4 border-2 border-white border-t-brand rounded-full animate-spin" />}
                   </button>
                   <button
                     onClick={() => { setOpen(false); onOpenIndividual?.(); }}
@@ -382,9 +393,9 @@ function ExportBatchModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[11000] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm px-4">
-      <div className="w-full max-w-md rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-slate-900/95 via-blue-950/75 to-slate-900/95 shadow-[0_20px_60px_rgba(2,8,23,0.55)] overflow-hidden">
-        <div className="border-b border-cyan-400/15 px-5 py-4">
-          <div className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200">
+      <div className="w-full max-w-md rounded-2xl border border-brand/20 bg-gradient-to-br from-slate-900/95 via-blue-950/75 to-slate-900/95 shadow-[0_20px_60px_rgba(2,8,23,0.55)] overflow-hidden">
+        <div className="border-b border-brand/15 px-5 py-4">
+          <div className="inline-flex items-center rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-brand">
             Configuracion de exportacion
           </div>
           <h3 className="mt-3 text-lg font-bold text-white">
@@ -403,7 +414,7 @@ function ExportBatchModal({
               Registros disponibles
             </div>
             <div className="mt-2 flex items-end justify-between gap-3">
-              <div className="text-3xl font-black text-cyan-200">{totalCount}</div>
+              <div className="text-3xl font-black text-brand">{totalCount}</div>
               <div className="text-right text-xs text-slate-400">
                 Archivo objetivo
                 <div className="mt-1 text-sm font-semibold text-white">{formatLabel}</div>
@@ -421,7 +432,7 @@ function ExportBatchModal({
               max={totalCount}
               value={requestedCount}
               onChange={(event) => setRequestedCount(event.target.value)}
-              className="w-full rounded-xl border border-cyan-400/20 bg-slate-950/70 px-4 py-3 text-white outline-none transition focus:border-cyan-300/50 focus:ring-2 focus:ring-cyan-400/20"
+              className="w-full rounded-xl border border-brand/20 bg-slate-950/70 px-4 py-3 text-white outline-none transition focus:border-brand/50 focus:ring-2 focus:ring-brand/20"
             />
           </label>
 
@@ -437,8 +448,8 @@ function ExportBatchModal({
                   onClick={() => setRequestedCount(String(option))}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                     normalizedCount === option
-                      ? "border-cyan-300/60 bg-cyan-400/20 text-cyan-100"
-                      : "border-white/10 bg-white/5 text-slate-300 hover:border-cyan-400/30 hover:text-cyan-100"
+                      ? "border-brand/60 bg-brand/20 text-brand"
+                      : "border-white/10 bg-white/5 text-slate-300 hover:border-brand/30 hover:text-brand"
                   }`}
                 >
                   {option === totalCount ? `Todo (${option})` : option}
@@ -461,7 +472,7 @@ function ExportBatchModal({
             type="button"
             onClick={() => onConfirm?.(normalizedCount)}
             disabled={isSubmitting || totalCount <= 0}
-            className="inline-flex items-center gap-2 rounded-xl border border-cyan-300/30 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 px-4 py-2 text-sm font-semibold text-white transition hover:from-cyan-500/40 hover:to-blue-500/40 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl border border-brand/30 bg-gradient-to-r from-brand/30 to-brand-2/30 px-4 py-2 text-sm font-semibold text-white transition hover:from-brand/40 hover:to-brand-2/40 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting && (
               <span className="inline-block h-4 w-4 rounded-full border-2 border-white/25 border-t-white animate-spin" />
@@ -477,6 +488,21 @@ function ExportBatchModal({
 
 export default function Resultados() {
   const location = useLocation();
+  const { organizacion } = useTheme();
+  const marcaPrincipal = organizacion?.color_acento || null;
+  const swiperNavColor = marcaPrincipal || "#06b6d4";
+  const swiperNavColorRgba = marcaPrincipal
+    ? hexARgba(marcaPrincipal, 0.1)
+    : "rgba(6, 182, 212, 0.1)";
+  const swiperNavColorRgbaHover = marcaPrincipal
+    ? hexARgba(marcaPrincipal, 0.2)
+    : "rgba(6, 182, 212, 0.2)";
+  const swiperNavBorderRgba = marcaPrincipal
+    ? hexARgba(marcaPrincipal, 0.3)
+    : "rgba(6, 182, 212, 0.3)";
+  const swiperNavBorderRgbaHover = marcaPrincipal
+    ? hexARgba(marcaPrincipal, 0.5)
+    : "rgba(6, 182, 212, 0.5)";
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [consultaSeleccionada, setConsultaSeleccionada] = useState(null);
@@ -944,7 +970,7 @@ export default function Resultados() {
   return (
     <section className="relative min-h-screen py-4 md:py-6 pb-32 md:pb-36 overflow-hidden bg-transparent">
       {/* Elementos decorativos de fondo */}
-      <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
       {/* Modal lote para e-identidad */}
@@ -1057,7 +1083,7 @@ export default function Resultados() {
                 <button
                   type="button"
                   onClick={() => descargarProductoPdf("hdc", consultaSeleccionada.id)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-cyan-400 hover:to-blue-400"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-brand to-brand-2 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
                 >
                   <FileText className="h-4 w-4" /> Descargar PDF
                 </button>
@@ -1077,7 +1103,7 @@ export default function Resultados() {
                 <button
                   type="button"
                   onClick={() => descargarProductoPdf("reconocer", consultaSeleccionada.id)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-cyan-400 hover:to-blue-400"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-brand to-brand-2 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
                 >
                   <FileText className="h-4 w-4" /> Descargar PDF
                 </button>
@@ -1143,7 +1169,7 @@ export default function Resultados() {
                         disabled={savingExperianPdfTheme}
                         className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
                           isActive
-                            ? "bg-cyan-500/20 text-brand"
+                            ? "bg-brand/20 text-brand"
                             : "text-muted hover:text-content"
                         } disabled:cursor-not-allowed disabled:opacity-60`}
                       >
@@ -1156,7 +1182,7 @@ export default function Resultados() {
                   type="button"
                   onClick={() => descargarProductoPdf("experian", consultaSeleccionada.id)}
                   disabled={savingExperianPdfTheme}
-                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-cyan-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-brand to-brand-2 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <FileText className="h-4 w-4" /> Descargar PDF
                 </button>
@@ -1181,13 +1207,13 @@ export default function Resultados() {
               .swiper-custom-nav .swiper-button-next,
               .swiper-custom-nav .swiper-button-prev {
                 display: flex;
-                color: #06b6d4;
-                background: rgba(6, 182, 212, 0.1);
+                color: ${swiperNavColor};
+                background: ${swiperNavColorRgba};
                 backdrop-filter: blur(10px);
                 width: 36px;
                 height: 36px;
                 border-radius: 50%;
-                border: 1px solid rgba(6, 182, 212, 0.3);
+                border: 1px solid ${swiperNavBorderRgba};
                 transition: all 0.3s;
                 left: 4px;
                 right: auto;
@@ -1199,8 +1225,8 @@ export default function Resultados() {
             }
             .swiper-custom-nav .swiper-button-next:hover,
             .swiper-custom-nav .swiper-button-prev:hover {
-              background: rgba(6, 182, 212, 0.2);
-              border-color: rgba(6, 182, 212, 0.5);
+              background: ${swiperNavColorRgbaHover};
+              border-color: ${swiperNavBorderRgbaHover};
               transform: scale(1.1);
             }
             .swiper-custom-nav .swiper-button-next::after,

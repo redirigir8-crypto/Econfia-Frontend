@@ -104,7 +104,7 @@ const TitulosValidationForm = () => {
   return (
     <section className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.18),_transparent_32%),linear-gradient(135deg,_#07111f_0%,_#0d1b2a_45%,_#111827_100%)] px-4 py-10 text-white">
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute left-[-8rem] top-10 h-64 w-64 rounded-full bg-cyan-400 blur-3xl" />
+        <div className="absolute left-[-8rem] top-10 h-64 w-64 rounded-full bg-brand blur-3xl" />
         <div className="absolute bottom-0 right-[-6rem] h-72 w-72 rounded-full bg-sky-700 blur-3xl" />
       </div>
 
@@ -112,7 +112,7 @@ const TitulosValidationForm = () => {
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.9fr]">
           <div className="rounded-[28px] border border-white/10 bg-white/6 p-8 shadow-[0_30px_80px_rgba(2,12,27,0.45)] backdrop-blur-xl">
             <div className="mb-8">
-              <div className="mb-4 inline-flex rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-cyan-200">
+              <div className="mb-4 inline-flex rounded-full border border-brand/30 bg-brand/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-cyan-200">
                 Validacion integral de titulos
               </div>
               <h1 className="max-w-3xl font-serif text-4xl leading-tight text-white md:text-5xl">
@@ -224,7 +224,7 @@ const TitulosValidationForm = () => {
                       type="file"
                       accept=".pdf"
                       onChange={(event) => setArchivoPdf(event.target.files?.[0] || null)}
-                      className={`${inputClassName} file:mr-4 file:rounded-full file:border-0 file:bg-cyan-400/15 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-cyan-100`}
+                      className={`${inputClassName} file:mr-4 file:rounded-full file:border-0 file:bg-brand/15 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-cyan-100`}
                     />
                   </Field>
                   <Field label="Imagen QR">
@@ -232,7 +232,7 @@ const TitulosValidationForm = () => {
                       type="file"
                       accept=".png,.jpg,.jpeg,.webp"
                       onChange={(event) => setArchivoQr(event.target.files?.[0] || null)}
-                      className={`${inputClassName} file:mr-4 file:rounded-full file:border-0 file:bg-cyan-400/15 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-cyan-100`}
+                      className={`${inputClassName} file:mr-4 file:rounded-full file:border-0 file:bg-brand/15 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-cyan-100`}
                     />
                   </Field>
                 </div>
@@ -248,7 +248,7 @@ const TitulosValidationForm = () => {
                   className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition ${
                     !canSubmit || loading
                       ? 'cursor-not-allowed bg-white/10 text-white/35'
-                      : 'bg-cyan-400 text-slate-950 shadow-[0_12px_35px_rgba(34,211,238,0.35)] hover:bg-cyan-300'
+                      : 'bg-brand text-slate-950 shadow-[0_12px_35px_rgba(34,211,238,0.35)] hover:bg-brand'
                   }`}
                 >
                   {loading ? 'Procesando consulta...' : 'Lanzar consulta completa'}
@@ -280,7 +280,7 @@ const TitulosValidationForm = () => {
       {loading && createPortal(
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 backdrop-blur-md">
           <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-slate-950/90 p-8 text-center shadow-2xl">
-            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-white/15 border-t-cyan-300" />
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-white/15 border-t-brand" />
             <p className="text-base font-semibold text-white">Ejecutando consulta</p>
             <p className="mt-2 text-sm text-slate-300/80">Colegios reguladores y bots universitarios disponibles se estan enviando a proceso.</p>
           </div>
@@ -339,7 +339,7 @@ const TitulosValidationForm = () => {
   );
 };
 
-const inputClassName = 'w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-400 outline-none transition focus:border-cyan-300/70 focus:bg-white/10';
+const inputClassName = 'w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-400 outline-none transition focus:border-brand/70 focus:bg-white/10';
 
 const Field = ({ label, required = false, children }) => (
   <label className="block">
@@ -363,7 +363,7 @@ const ResultBlock = ({ title, items, emptyText }) => (
     {items?.length ? (
       <div className="mt-3 flex flex-wrap gap-2">
         {items.map((item) => (
-          <span key={item} className="rounded-full border border-cyan-300/15 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
+          <span key={item} className="rounded-full border border-brand/15 bg-brand/10 px-3 py-1 text-xs text-cyan-100">
             {item}
           </span>
         ))}

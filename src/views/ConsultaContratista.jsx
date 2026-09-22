@@ -1,4 +1,4 @@
-
+import LogoOrganizacion from "../components/LogoOrganizacion";
 import { useState, useEffect, useMemo, useRef } from "react";
 import FormLogo from "../components/FormLogo";
 import { createPortal } from "react-dom";
@@ -289,7 +289,7 @@ export default function ConsultaContratista() {
         createPortal(
           <div className="fixed inset-0 z-50 grid place-items-center bg-white/60 backdrop-blur-md">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-8 text-center w-full max-w-sm">
-              <div className="h-10 w-10 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600 mx-auto mb-4" />
+              <div className="h-10 w-10 animate-spin rounded-full border-2 border-slate-300 border-t-brand-2 mx-auto mb-4" />
               <p className="text-slate-700 font-medium">
                 Procesando tu consulta…
               </p>
@@ -334,7 +334,7 @@ export default function ConsultaContratista() {
       {/* Home - Tema oscuro con hero + formulario elegante */}
       <section className="relative min-h-screen flex items-start justify-center pt-3 pb-32 md:pb-36 overflow-hidden bg-transparent">
         {/* Elementos decorativos de fondo */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
         <div
           className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
           style={{ animationDelay: "1s" }}
@@ -345,12 +345,12 @@ export default function ConsultaContratista() {
             {/* Hero copy (izquierda) */}
             <div className="text-center md:text-left space-y-5">
               <div>
-                <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 items-center gap-2">
+                <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-3 items-center gap-2">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
                   </span>
-                  <span className="text-cyan-300 text-xs font-medium">
+                  <span className="text-brand text-xs font-medium">
                     Consulta Contratista
                   </span>
                 </div>
@@ -367,13 +367,13 @@ export default function ConsultaContratista() {
 
               <div className="space-y-2 pt-2">
                 <div className="flex items-start gap-3">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-cyan-500 flex-shrink-0" />
+                  <span className="mt-1 h-2 w-2 rounded-full bg-brand flex-shrink-0" />
                   <span className="text-xs text-content/85">
                     Interfaz moderna y accesible, optimizada para velocidad.
                   </span>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                  <span className="mt-1 h-2 w-2 rounded-full bg-brand-2 flex-shrink-0" />
                   <span className="text-xs text-content/85">
                     Resultados consistentes con tu flujo actual.
                   </span>
@@ -389,12 +389,18 @@ export default function ConsultaContratista() {
 
             {/* Tarjeta del formulario (derecha) */}
             <div className="relative w-full max-w-sm md:max-w-md lg:max-w-lg mx-auto">
-              <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-5 md:p-6 group">
+              <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-brand/10 p-5 md:p-6 group">
                 {/* Glow effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
 
                 <div className="relative z-10">
+<<<<<<< HEAD
               <FormLogo />
+=======
+                  <div className="flex items-center justify-center mb-4">
+                    <LogoOrganizacion className="h-16 w-16 object-contain" />
+                  </div>
+>>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 
                   {/* Formulario */}
                   <form
@@ -495,7 +501,7 @@ export default function ConsultaContratista() {
                         onChange={(e) => { setProfesion(e.target.value); setProfesionSeleccionada(null); setShowSugerencias(true); }}
                         placeholder="Escribe tu profesión"
                         autoComplete="off"
-                        className="w-full px-3 py-1.5 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                        className="w-full px-3 py-1.5 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
                         onFocus={() => setShowSugerencias(profesionSugerencias.length > 0)}
                         onBlur={() => setTimeout(() => setShowSugerencias(false), 150)}
                       />
@@ -548,7 +554,7 @@ export default function ConsultaContratista() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="ejemplo@correo.com"
                         pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-                        className={`w-full px-3 py-1.5 rounded-lg bg-surface-2/70 text-content text-xs placeholder:text-muted/70 border transition-all backdrop-blur-sm focus:outline-none focus:shadow-lg focus:shadow-cyan-500/10 ${email && !isValidEmail(email) ? "border-red-400/50 focus:border-red-400 focus:ring-1 focus:ring-red-400/30" : "border-line/15 focus:border-brand/50 focus:bg-surface"}`}
+                        className={`w-full px-3 py-1.5 rounded-lg bg-surface-2/70 text-content text-xs placeholder:text-muted/70 border transition-all backdrop-blur-sm focus:outline-none focus:shadow-lg focus:shadow-brand/10 ${email && !isValidEmail(email) ? "border-red-400/50 focus:border-red-400 focus:ring-1 focus:ring-red-400/30" : "border-line/15 focus:border-brand/50 focus:bg-surface"}`}
                       />
                       {email && !isValidEmail(email) && <span className="text-xs text-red-400">Formato de correo no válido</span>}
                     </div>
@@ -586,13 +592,13 @@ export default function ConsultaContratista() {
                           type="checkbox"
                           checked={acepta}
                           onChange={(e) => setAcepta(e.target.checked)}
-                          className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                          className="accent-brand w-4 h-4 cursor-pointer"
                         />
                         <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                           Acepto los{" "}
                           <Terminos
                             inline
-                            triggerClassName="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium transition-colors"
+                            triggerClassName="text-brand hover:text-brand underline underline-offset-4 font-medium transition-colors"
                           />
                         </span>
                       </label>
@@ -602,7 +608,7 @@ export default function ConsultaContratista() {
                           type="checkbox"
                           checked={consentimiento}
                           onChange={(e) => setConsentimiento(e.target.checked)}
-                          className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                          className="accent-brand w-4 h-4 cursor-pointer"
                         />
                         <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                           Confirmo consentimiento del titular
@@ -618,7 +624,7 @@ export default function ConsultaContratista() {
                           ${
                             !canSubmit || loading
                               ? "bg-surface-2/70 text-muted cursor-not-allowed"
-                              : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+                              : "bg-gradient-to-r from-brand to-brand-2 text-white hover:from-brand hover:to-brand-2 hover:shadow-lg hover:shadow-brand/50 transform hover:scale-105"
                           }
                         `}
                     >

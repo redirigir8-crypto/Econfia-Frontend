@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation, Outlet, useNavigate } from "react-router-dom";
+import LogoOrganizacion from "../components/LogoOrganizacion";
 import Taskbar from "../components/TaskBar";
+import { useTheme } from "../context/ThemeContext";
 import {
   SESSION_INACTIVITY_LIMIT_MS,
   clearSession,
@@ -15,6 +17,7 @@ const RESULTADOS_DETALLE_PREFIX = "/d3b7f1e9/";
 export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { organizacion } = useTheme();
   const [resultadosDetalleAbierto, setResultadosDetalleAbierto] = useState(false);
   const hideLayout =
     location.pathname.startsWith(RESULTADOS_DETALLE_PREFIX) ||
@@ -224,23 +227,21 @@ export default function Dashboard() {
               <div className="relative h-[76px] w-[76px] shrink-0">
                 <div className="absolute inset-1 rounded-2xl bg-red-500/10 blur-md transition-all duration-500 group-hover:bg-red-500/16" />
                 <div className="absolute inset-[5px] flex items-center justify-center rounded-2xl border border-line/15 bg-surface/65 shadow-[inset_0_0_10px_rgb(var(--th-content)/0.06)]">
-                  <img
-                    src="/img/logo-econfia-1.png"
-                    alt="Econfía"
-                    className="h-14 w-14 object-contain drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]"
-                  />
+                  <LogoOrganizacion className="h-14 w-14 object-contain drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
                 </div>
               </div>
 
               <div className="flex flex-col justify-center gap-0 leading-none">
                 <div className="econfia-title-shell">
                   <p className="econfia-title font-black text-3xl tracking-[-0.045em] uppercase leading-none">
-                    Econfia
+                    {organizacion?.nombre || "Econfia"}
                   </p>
                 </div>
-                <p className="econfia-logo-tagline mt-2 whitespace-nowrap text-[10px] font-semibold uppercase leading-none tracking-[0.18em] text-muted">
-                  Una marca de Grupo Soluciones
-                </p>
+                {!organizacion && (
+                  <p className="econfia-logo-tagline mt-2 whitespace-nowrap text-[10px] font-semibold uppercase leading-none tracking-[0.18em] text-muted">
+                    Una marca de Grupo Soluciones
+                  </p>
+                )}
               </div>
             </div>
           </div>

@@ -150,11 +150,11 @@ const AdminPlanes = () => {
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-transparent px-3 py-4 pb-28 sm:px-5 md:py-6">
-      <div className="pointer-events-none absolute left-[16%] top-[18%] h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute right-[18%] top-[28%] h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute left-[16%] top-[18%] h-72 w-72 rounded-full bg-brand/10 blur-3xl" />
+      <div className="pointer-events-none absolute right-[18%] top-[28%] h-80 w-80 rounded-full bg-brand-2/10 blur-3xl" />
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="mb-5 overflow-hidden rounded-[26px] border border-line/15 bg-surface/90 px-5 py-5 shadow-2xl shadow-black/5 backdrop-blur-xl md:px-7">
-          <div className="inline-flex rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
+          <div className="inline-flex rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
             Centro administrativo
           </div>
           <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -214,7 +214,7 @@ const AdminPlanes = () => {
 
             <button
               type="submit"
-              className="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-500/20 transition-all hover:from-cyan-400 hover:to-blue-400"
+              className="rounded-xl bg-gradient-to-r from-brand to-brand-2 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-brand/20 transition-all hover:opacity-90"
             >
               {editId ? "Actualizar" : "Crear"}
             </button>
@@ -248,7 +248,7 @@ const AdminPlanes = () => {
               {planes.map((plan) => (
                 <tr
                   key={plan.id}
-                  className="border-b border-line/10 transition hover:bg-cyan-500/[0.06]"
+                  className="border-b border-line/10 transition hover:bg-brand/[0.06]"
                 >
                   <td className="px-3 py-3 font-mono text-muted">#{plan.id}</td>
                   <td className="px-3 py-3 font-bold text-content">{plan.nombre}</td>
@@ -257,7 +257,7 @@ const AdminPlanes = () => {
 
                     <button
                       onClick={() => handleEdit(plan)}
-                      className="rounded-lg border border-cyan-400/25 bg-cyan-500/10 px-3 py-1.5 font-semibold text-brand transition-all hover:bg-cyan-500/20"
+                      className="rounded-lg border border-brand/25 bg-brand/10 px-3 py-1.5 font-semibold text-brand transition-all hover:bg-brand/20"
                     >
                       Editar
                     </button>
@@ -303,7 +303,7 @@ const AdminPlanes = () => {
                         setSelectedUsers(selectedUsers.filter((id) => id !== u.id));
                       }
                     }}
-                    className="accent-cyan-500 w-5 h-5"
+                    className="accent-brand w-5 h-5"
                   />
                   <span className="font-semibold text-content">{u.username}</span>
                   <span className="text-brand">{u.email}</span>
@@ -313,7 +313,7 @@ const AdminPlanes = () => {
           </div>
           <button
             onClick={handleAsignarUsuarios}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold shadow hover:from-cyan-400 hover:to-blue-400 transition-all w-full"
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-brand to-brand-2 text-white font-semibold shadow hover:opacity-90 transition-all w-full"
           >
             Asignar usuarios
           </button>

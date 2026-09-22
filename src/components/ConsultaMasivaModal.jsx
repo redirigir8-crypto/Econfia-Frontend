@@ -211,7 +211,7 @@ export default function ConsultaMasivaModal({
 
   return createPortal(
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/75 backdrop-blur-sm p-4">
-      <div className="bg-gradient-to-br from-slate-900/98 to-blue-950/98 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl shadow-cyan-500/20 w-full max-w-lg">
+      <div className="bg-gradient-to-br from-slate-900/98 to-blue-950/98 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl shadow-brand/20 w-full max-w-lg">
 
         {/* ── Cabecera ──────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
@@ -243,7 +243,7 @@ export default function ConsultaMasivaModal({
                 onClick={() => { setModo(id); setError(null); }}
                 className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
                   modo === id
-                    ? "bg-cyan-500/20 border border-cyan-500/40 text-cyan-300"
+                    ? "bg-brand/20 border border-brand/40 text-brand"
                     : "bg-white/5 border border-white/10 text-white/55 hover:text-white/80 hover:bg-white/8"
                 }`}
               >
@@ -268,7 +268,7 @@ export default function ConsultaMasivaModal({
                   <select
                     value={fila.tipo_doc}
                     onChange={(e) => actualizarFila(idx, "tipo_doc", e.target.value)}
-                    className="w-full px-2 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-400/50 appearance-none cursor-pointer"
+                    className="w-full px-2 py-2 rounded-lg bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-brand/50 appearance-none cursor-pointer"
                   >
                     {TIPOS_DOC.map((t) => (
                       <option key={t} value={t} className="bg-slate-900 text-white">
@@ -283,7 +283,7 @@ export default function ConsultaMasivaModal({
                     value={fila.cedula}
                     onChange={(e) => actualizarFila(idx, "cedula", e.target.value)}
                     placeholder={`Documento ${idx + 1}`}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/30 text-xs focus:outline-none focus:border-cyan-400/50 focus:bg-white/8 transition-all"
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/30 text-xs focus:outline-none focus:border-brand/50 focus:bg-white/8 transition-all"
                   />
 
                   {/* Botón eliminar fila */}
@@ -314,13 +314,13 @@ export default function ConsultaMasivaModal({
           {modo === "archivo" && (
             <div className="space-y-3">
               {/* Paso 1: descargar plantilla */}
-              <div className="bg-blue-500/8 border border-blue-500/20 rounded-xl p-3 space-y-2">
+              <div className="bg-brand-2/8 border border-brand-2/20 rounded-xl p-3 space-y-2">
                 <p className="text-xs text-blue-200 leading-relaxed">
                   <span className="font-semibold">Paso 1:</span> Descarga la plantilla Excel, llena las cédulas y guarda.
                 </p>
                 <button
                   onClick={descargarPlantilla}
-                  className="w-full py-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-cyan-600/80 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-semibold transition-all"
+                  className="w-full py-2 rounded-lg bg-gradient-to-r from-blue-600/80 to-cyan-600/80 hover:from-brand-2 hover:to-brand text-white text-xs font-semibold transition-all"
                 >
                   Descargar Plantilla Excel
                 </button>
@@ -337,7 +337,7 @@ export default function ConsultaMasivaModal({
                   onChange={(e) => setArchivo(e.target.files[0] || null)}
                   className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white/80 text-xs cursor-pointer
                              file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0
-                             file:bg-cyan-500/20 file:text-cyan-300 file:text-xs file:cursor-pointer
+                             file:bg-brand/20 file:text-brand file:text-xs file:cursor-pointer
                              hover:border-white/25 transition-all"
                 />
                 {archivo && (
@@ -363,7 +363,7 @@ export default function ConsultaMasivaModal({
                 type="checkbox"
                 checked={acepta}
                 onChange={(e) => setAcepta(e.target.checked)}
-                className="accent-cyan-500 w-4 h-4 cursor-pointer mt-0.5 flex-shrink-0"
+                className="accent-brand w-4 h-4 cursor-pointer mt-0.5 flex-shrink-0"
               />
               <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors leading-relaxed">
                 Acepto los{" "}
@@ -373,7 +373,7 @@ export default function ConsultaMasivaModal({
                     e.preventDefault();
                     setOpenTerminos(true);
                   }}
-                  className="text-cyan-400 hover:text-cyan-300 underline font-medium"
+                  className="text-brand hover:text-brand underline font-medium"
                 >
                   términos y condiciones
                 </button>
@@ -385,7 +385,7 @@ export default function ConsultaMasivaModal({
                 type="checkbox"
                 checked={consentimiento}
                 onChange={(e) => setConsentimiento(e.target.checked)}
-                className="accent-cyan-500 w-4 h-4 cursor-pointer mt-0.5 flex-shrink-0"
+                className="accent-brand w-4 h-4 cursor-pointer mt-0.5 flex-shrink-0"
               />
               <span className="text-xs text-white/80 group-hover:text-white/100 transition-colors leading-relaxed">
                 Confirmo consentimiento del titular
@@ -425,7 +425,7 @@ export default function ConsultaMasivaModal({
               className={`w-full py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
                 loading || !acepta || !consentimiento
                   ? "bg-white/10 text-white/40 cursor-not-allowed"
-                  : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/40 transform hover:scale-[1.01]"
+                  : "bg-gradient-to-r from-brand to-brand-2 text-white hover:from-brand hover:to-brand-2 hover:shadow-lg hover:shadow-brand/40 transform hover:scale-[1.01]"
               }`}
             >
               {loading ? "Procesando consultas..." : "Iniciar Consultas"}

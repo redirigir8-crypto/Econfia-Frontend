@@ -4,7 +4,7 @@ import { playEventSound } from "./SoundManager";
 
 const ESTADO_LABEL = {
   pendiente: { text: "Pendiente", color: "text-yellow-300", dot: "bg-yellow-400" },
-  en_proceso: { text: "En proceso", color: "text-cyan-300", dot: "bg-cyan-400 animate-pulse" },
+  en_proceso: { text: "En proceso", color: "text-brand", dot: "bg-brand animate-pulse" },
   completado: { text: "Completado", color: "text-green-400", dot: "bg-green-400" },
   finalizado: { text: "Finalizado", color: "text-green-400", dot: "bg-green-400" },
   error: { text: "Error", color: "text-red-400", dot: "bg-red-400" },
@@ -153,16 +153,16 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-sm px-4">
-      <div className="relative w-full max-w-md rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-slate-900/98 via-blue-950/60 to-slate-900/98 shadow-2xl shadow-cyan-500/20 overflow-hidden">
+      <div className="relative w-full max-w-md rounded-2xl border border-brand/30 bg-gradient-to-br from-slate-900/98 via-blue-950/60 to-slate-900/98 shadow-2xl shadow-brand/20 overflow-hidden">
 
         {/* Cabecera */}
         <div className="px-6 pt-5 pb-4 border-b border-white/10">
           <div className="flex items-center gap-2 mb-1">
             <span className="relative flex h-2.5 w-2.5">
-              <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${done ? "bg-green-400" : "bg-cyan-400 animate-ping"}`} />
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${done ? "bg-green-500" : "bg-cyan-500"}`} />
+              <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${done ? "bg-green-400" : "bg-brand animate-ping"}`} />
+              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${done ? "bg-green-500" : "bg-brand"}`} />
             </span>
-            <span className="text-xs font-semibold text-cyan-300 uppercase tracking-widest">
+            <span className="text-xs font-semibold text-brand uppercase tracking-widest">
               {done ? "Consulta completada" : "Procesando consulta"}
             </span>
           </div>
@@ -182,7 +182,7 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
             </div>
             <div className="h-2 rounded-full bg-white/10 overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-700 ${done ? "bg-green-500" : "bg-gradient-to-r from-cyan-500 to-blue-500"}`}
+                className={`h-full rounded-full transition-all duration-700 ${done ? "bg-green-500" : "bg-gradient-to-r from-brand to-brand-2"}`}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -190,8 +190,8 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
 
           {/* Banner fijo de profesión encontrada — permanece visible toda la consulta */}
           {profesionEncontrada && (
-            <div className="flex items-center gap-3 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2.5">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 flex-shrink-0 text-cyan-300" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/10 px-4 py-2.5">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 flex-shrink-0 text-brand" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2a10 10 0 0 1 10 10c0 1.5-.2 3-.6 4.4" />
                 <path d="M12 6a6 6 0 0 1 6 6c0 2-.3 4-1 6" />
                 <path d="M8 12a4 4 0 0 1 8 0c0 3-.5 6-1.5 8.5" />
@@ -200,10 +200,10 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
                 <path d="M5 18c.7-1.9 1-4 1-6a6 6 0 0 1 1.5-4" />
               </svg>
               <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-cyan-300/80">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-brand/80">
                   Profesión encontrada
                 </p>
-                <p className="text-sm font-bold text-cyan-100 truncate">{profesionEncontrada}</p>
+                <p className="text-sm font-bold text-brand/90 truncate">{profesionEncontrada}</p>
               </div>
             </div>
           )}
@@ -218,9 +218,9 @@ export default function LiveQueryModal({ consultaId, onClose, onFinished }) {
                     {active.fuente || active.fuente_nombre || "—"}
                   </p>
                   {active.profesion && (
-                    <p className="text-xs font-semibold text-cyan-300 mt-1">
+                    <p className="text-xs font-semibold text-brand mt-1">
                       Profesión encontrada:{" "}
-                      <span className="text-cyan-200">{active.profesion}</span>
+                      <span className="text-brand/90">{active.profesion}</span>
                     </p>
                   )}
                   {active.mensaje && (

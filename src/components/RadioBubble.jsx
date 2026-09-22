@@ -125,7 +125,7 @@ export default function RadioBubble() {
       {/* Burbuja */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed right-4 bottom-24 z-50 w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 shadow-lg
+        className="fixed right-4 bottom-24 z-50 w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-brand-2 shadow-lg
                    flex items-center justify-center text-white hover:scale-105 active:scale-95 transition"
         title={open ? "Ocultar radio" : "Abrir radio"}
       >
@@ -158,7 +158,7 @@ export default function RadioBubble() {
           <div className="px-3 pt-3 text-white">
             <div className="flex items-center gap-2">
               <button onClick={prev} className="p-2 rounded hover:bg-white/10"><SkipBack size={18} /></button>
-              <button onClick={playPause} className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500" disabled={!current}>
+              <button onClick={playPause} className="px-3 py-2 rounded-lg bg-brand-2 hover:opacity-90" disabled={!current}>
                 {playing ? <Pause size={18} /> : <Play size={18} />}
               </button>
               <button onClick={next} className="p-2 rounded hover:bg-white/10"><SkipForward size={18} /></button>
@@ -178,7 +178,7 @@ export default function RadioBubble() {
                   type="range" min={0} max={1} step={0.01}
                   value={muted ? 0 : volume}
                   onChange={(e) => setVolume(parseFloat(e.target.value))}
-                  className="w-24 accent-blue-500"
+                  className="w-24 accent-brand-2"
                 />
               </div>
             </div>
@@ -193,7 +193,7 @@ export default function RadioBubble() {
                 step={0.1}
                 value={Math.min(currentTime, duration || 0)}
                 onChange={(e) => seek(parseFloat(e.target.value))}
-                className="flex-1 accent-blue-500"
+                className="flex-1 accent-brand-2"
               />
               <span className="tabular-nums">{fmt(duration)}</span>
             </div>
@@ -213,7 +213,7 @@ export default function RadioBubble() {
                         key={`${t.src}-${i}`}
                         onClick={() => { setIndex(i); setIsPlaying(true); }}
                         className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer
-                                    ${active ? "bg-blue-600/20 border border-blue-500/30" : "hover:bg-white/5"}`}
+                                    ${active ? "bg-brand-2/20 border border-brand-2/30" : "hover:bg-white/5"}`}
                       >
                         <span className="text-xs text-white/80 truncate">{t.title}</span>
                       </li>

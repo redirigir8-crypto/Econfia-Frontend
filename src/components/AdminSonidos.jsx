@@ -1,6 +1,7 @@
 // src/components/AdminSonidos.jsx
 import React, { useEffect, useState, useRef } from "react";
 import Toast from "./Toast";
+import { useTheme } from "../context/ThemeContext";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -24,6 +25,14 @@ const ACCENT = {
 const EMPTY_FORM = { nombre: "", evento: "login", volumen: 1, activo: true };
 
 export default function AdminSonidos() {
+  const { organizacion } = useTheme();
+  // Si la Organizacion tiene marca propia, el botón de guardar usa su
+  // degradado de marca en vez del cyan/blue fijo del tema oscuro.
+  const marcaPrincipal = organizacion?.color_acento || null;
+  const marcaSecundaria = organizacion?.color_secundario_efectivo || marcaPrincipal;
+  const botonGuardarBg = marcaPrincipal
+    ? `linear-gradient(135deg,${marcaPrincipal},${marcaSecundaria})`
+    : "linear-gradient(135deg,#06b6d4,#3b82f6)";
   const token = localStorage.getItem("token");
 
   const [sonidos, setSonidos] = useState([]);
@@ -168,7 +177,7 @@ export default function AdminSonidos() {
         {/* Header */}
         <div className="mb-7 mt-2 overflow-hidden rounded-[28px] border border-line/15 bg-surface/90 p-6 shadow-[0_22px_65px_rgba(15,23,42,0.18)] backdrop-blur-xl sm:p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 shadow-lg shadow-cyan-500/10">
+          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-brand/30 bg-brand/10 shadow-lg shadow-brand/10">
             <span className="text-2xl">🔊</span>
           </div>
           <div className="min-w-0">
@@ -221,7 +230,7 @@ export default function AdminSonidos() {
             )}
             <input ref={archivoRef} type="file" accept="audio/*"
               onChange={(e) => setArchivoFile(e.target.files[0] || null)}
-              className="w-full cursor-pointer text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-cyan-600 file:to-blue-600 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90" />
+              className="w-full cursor-pointer text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-brand file:to-brand-2 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90" />
             <p className="mt-1 text-xs text-muted/70">MP3, WAV u OGG</p>
           </div>
 
@@ -232,10 +241,10 @@ export default function AdminSonidos() {
                 Volumen: <span className="text-brand">{Math.round((form.volumen ?? 1) * 100)}%</span>
               </label>
               <input type="range" min="0" max="1" step="0.05" name="volumen" value={form.volumen}
-                onChange={handleChange} className="w-full accent-cyan-500" />
+                onChange={handleChange} className="w-full accent-brand" />
             </div>
             <label className="flex cursor-pointer select-none items-center gap-2 rounded-xl border border-line/15 bg-surface-2/60 px-3 py-2 transition-all hover:border-brand/40">
-              <input type="checkbox" name="activo" checked={form.activo} onChange={handleChange} className="w-5 h-5 rounded accent-cyan-400" />
+              <input type="checkbox" name="activo" checked={form.activo} onChange={handleChange} className="w-5 h-5 rounded accent-brand" />
               <span className="text-sm font-semibold text-content">Activo</span>
               <span className="hidden text-xs text-muted sm:inline">(reemplaza al actual)</span>
             </label>
@@ -244,7 +253,7 @@ export default function AdminSonidos() {
           <div className="relative flex gap-3 pt-1">
             <button type="submit" disabled={loading}
               className="flex-1 py-3 rounded-xl font-bold text-white text-base transition-all disabled:opacity-60 hover:scale-[1.01]"
-              style={{ background: "linear-gradient(135deg,#06b6d4,#3b82f6)", boxShadow: "0 0 24px rgba(6,182,212,0.35)" }}>
+              style={{ background: botonGuardarBg, boxShadow: "0 0 24px rgba(6,182,212,0.35)" }}>
               {loading ? "Guardando…" : editId ? "Actualizar sonido" : "Guardar sonido"}
             </button>
             {editId && (

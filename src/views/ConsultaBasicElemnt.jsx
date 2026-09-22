@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import FormLogo from "../components/FormLogo";
+=======
+import LogoOrganizacion from "../components/LogoOrganizacion";
+>>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -99,12 +103,12 @@ export default function ConsultaBasicElemnt() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-5xl w-full px-4 relative z-10">
         <div className="text-center md:text-left space-y-5">
           <div>
-            <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 items-center gap-2">
+            <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-3 items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
               </span>
-              <span className="text-cyan-300 text-xs font-medium">Consulta Especial</span>
+              <span className="text-brand text-xs font-medium">Consulta Especial</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
               Econfia Basic Element
@@ -115,10 +119,19 @@ export default function ConsultaBasicElemnt() {
           </p>
         </div>
         <div className="relative w-full max-w-sm mx-auto">
+<<<<<<< HEAD
           <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
             <div className="relative z-10">  
               <FormLogo />
+=======
+          <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-brand/10 p-6 group">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-4">
+                <LogoOrganizacion className="h-16 w-16 object-contain" />
+              </div>  
+>>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
               <form onSubmit={handleSubmit} className="space-y-2">
                 <div className="space-y-2">
                   <div className="flex flex-col gap-1">
@@ -127,7 +140,7 @@ export default function ConsultaBasicElemnt() {
                       required
                       value={tipoDoc}
                       onChange={(e) => setTipoDoc(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
                     >
                       <option className="bg-surface text-content" value="">
                         Seleccione tipo de documento
@@ -160,7 +173,7 @@ export default function ConsultaBasicElemnt() {
                       value={cedula}
                       onChange={(e) => setCedula(e.target.value)}
                       placeholder="Ingrese número de documento"
-                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -169,7 +182,7 @@ export default function ConsultaBasicElemnt() {
                       type="date"
                       value={fechaExpedicion}
                       onChange={(e) => setFechaExpedicion(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
                     />
                   </div>
                 </div>
@@ -179,13 +192,13 @@ export default function ConsultaBasicElemnt() {
                       type="checkbox"
                       checked={acepta}
                       onChange={(e) => setAcepta(e.target.checked)}
-                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      className="accent-brand w-4 h-4 cursor-pointer"
                     />
                     <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Acepto los{" "}
                       <Terminos
                         inline
-                        triggerClassName="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium transition-colors"
+                        triggerClassName="text-brand hover:text-brand underline underline-offset-4 font-medium transition-colors"
                       />
                     </span>
                   </label>
@@ -194,7 +207,7 @@ export default function ConsultaBasicElemnt() {
                       type="checkbox"
                       checked={consentimiento}
                       onChange={(e) => setConsentimiento(e.target.checked)}
-                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      className="accent-brand w-4 h-4 cursor-pointer"
                     />
                     <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Confirmo consentimiento del titular
@@ -207,7 +220,7 @@ export default function ConsultaBasicElemnt() {
                   className={`mt-3 w-full px-4 py-2 rounded-lg font-semibold text-xs transition-all duration-300
                     ${!tipoDoc || !cedula || !acepta || !consentimiento || loading
                       ? "bg-surface-2/70 text-muted cursor-not-allowed"
-                      : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+                      : "bg-gradient-to-r from-brand to-brand-2 text-white hover:opacity-90 hover:shadow-lg hover:shadow-brand/50 transform hover:scale-105"
                     }`}
                 >
                   {loading ? "Consultando..." : "Consultar Basic Element"}

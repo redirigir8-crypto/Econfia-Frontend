@@ -70,7 +70,7 @@ function ContactContent() {
 				href="mailto:coordinaciondesarrollo@solutionsgroupcol.com"
 				className="group flex items-center gap-3 rounded-xl border border-line/15 bg-surface-2/70 p-3 transition-all hover:border-brand/30 hover:bg-surface"
 			>
-				<span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400 transition-all group-hover:bg-cyan-500/25">
+				<span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand transition-all group-hover:bg-brand/25">
 					<Mail size={17} />
 				</span>
 				<div>
@@ -82,7 +82,7 @@ function ContactContent() {
 				href="tel:+573170815394"
 				className="group flex items-center gap-3 rounded-xl border border-line/15 bg-surface-2/70 p-3 transition-all hover:border-brand/30 hover:bg-surface"
 			>
-				<span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400 transition-all group-hover:bg-cyan-500/25">
+				<span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand transition-all group-hover:bg-brand/25">
 					<Phone size={17} />
 				</span>
 				<div>
@@ -91,7 +91,7 @@ function ContactContent() {
 				</div>
 			</a>
 			<div className="flex items-center gap-3 rounded-xl border border-line/15 bg-surface-2/70 p-3">
-				<span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
+				<span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand">
 					<MapPin size={17} />
 				</span>
 				<div>
@@ -114,7 +114,7 @@ function FaqItem({ q, a, idx, isContact }) {
 				"w-full",
 				"relative rounded-2xl border transition-all duration-300 shadow-xl shadow-black/5",
 				open
-					? "border-cyan-400/50 bg-gradient-to-br from-cyan-500/15 via-surface to-blue-500/10 shadow-[0_18px_45px_rgba(34,211,238,0.12)]"
+					? "border-brand/50 bg-gradient-to-br from-brand/15 via-surface to-brand-2/10 shadow-[0_18px_45px_rgba(34,211,238,0.12)]"
 					: "border-line/15 bg-surface/85 hover:border-brand/30 hover:bg-surface",
 				"overflow-hidden",
 			].join(" ")}
@@ -125,14 +125,14 @@ function FaqItem({ q, a, idx, isContact }) {
 				onClick={() => setOpen((v) => !v)}
 				aria-expanded={open}
 				className={`relative w-full min-h-[68px] pl-5 pr-14 py-4 flex items-center justify-start text-left select-none transition-all duration-300 ${
-					open ? "bg-cyan-500/10" : "hover:bg-surface-2/70"
+					open ? "bg-brand/10" : "hover:bg-surface-2/70"
 				}`}
 			>
 				<div className="flex items-center gap-4">
 					<span className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
 						open
-							? "bg-cyan-400/25 text-brand shadow-[0_0_12px_rgba(34,211,238,0.25)]"
-							: "bg-cyan-500/15 text-brand"
+							? "bg-brand/25 text-brand shadow-[0_0_12px_rgba(34,211,238,0.25)]"
+							: "bg-brand/15 text-brand"
 					}`}>
 						{idx + 1}
 					</span>
@@ -199,16 +199,16 @@ export default function Ayuda() {
 
 	return (
 		<section className="relative flex min-h-[80vh] w-screen items-center justify-center overflow-hidden p-0 text-content">
-			<div className="pointer-events-none absolute left-[12%] top-[22%] h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
-			<div className="pointer-events-none absolute right-[14%] top-[16%] h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />
+			<div className="pointer-events-none absolute left-[12%] top-[22%] h-64 w-64 rounded-full bg-brand/10 blur-3xl" />
+			<div className="pointer-events-none absolute right-[14%] top-[16%] h-72 w-72 rounded-full bg-brand-2/10 blur-3xl" />
 			<div className={["ayuda relative z-10 grid w-full max-w-[1220px] grid-rows-[auto_auto_1fr] gap-5 px-6", SAFE_TOP, SAFE_BOTTOM].join(" ")}>
 				{/* Encabezado */}
 				<div className="relative overflow-hidden rounded-[26px] border border-line/15 bg-surface/80 px-5 py-5 shadow-2xl shadow-black/5 backdrop-blur-xl md:px-7">
-					<div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-cyan-500/15 blur-3xl" />
-					<div className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl" />
+					<div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-brand/15 blur-3xl" />
+					<div className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-brand-2/10 blur-3xl" />
 					<div className="relative grid grid-cols-1 items-center gap-4 md:grid-cols-[1fr_auto]">
 						<div className="text-center md:text-left">
-							<div className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
+							<div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-brand">
 								<HelpCircle size={14} />
 								Soporte Econfia
 							</div>
@@ -254,7 +254,7 @@ export default function Ayuda() {
 						{Array.from({ length: totalPages }).map((_, i) => (
 							<span
 								key={i}
-								className={["h-2.5 rounded-full transition-all duration-300", i === page ? "w-7 bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.45)]" : "w-2.5 bg-muted/35"].join(" ")}
+								className={["h-2.5 rounded-full transition-all duration-300", i === page ? "w-7 bg-brand shadow-[0_0_8px_rgba(6,182,212,0.45)]" : "w-2.5 bg-muted/35"].join(" ")}
 							/>
 						))}
 					</div>
@@ -262,7 +262,7 @@ export default function Ayuda() {
 					<button
 						onClick={next}
 						disabled={page === totalPages - 1}
-						className={`inline-flex items-center gap-2 rounded-full border border-cyan-400/35 bg-cyan-500/15 px-5 py-2 text-sm font-semibold text-content shadow-lg shadow-black/5 backdrop-blur-xl transition-all duration-200 hover:border-brand/60 hover:bg-cyan-500/25 hover:text-brand active:scale-95 ${page === totalPages - 1 ? "cursor-not-allowed opacity-40" : ""}`}
+						className={`inline-flex items-center gap-2 rounded-full border border-brand/35 bg-brand/15 px-5 py-2 text-sm font-semibold text-content shadow-lg shadow-black/5 backdrop-blur-xl transition-all duration-200 hover:border-brand/60 hover:bg-brand/25 hover:text-brand active:scale-95 ${page === totalPages - 1 ? "cursor-not-allowed opacity-40" : ""}`}
 					>
 						Siguiente <ChevronRight className="size-4" />
 					</button>

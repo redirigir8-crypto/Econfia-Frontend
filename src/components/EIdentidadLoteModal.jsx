@@ -24,7 +24,7 @@ function Avatar({ nombre, size = "lg" }) {
   const ini = getIniciales(nombre);
   const sz = size === "lg" ? "w-16 h-16 text-xl" : "w-7 h-7 text-[10px]";
   return (
-    <div className={`${sz} rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 border-2 border-cyan-400/40 flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-500/20 font-black text-white`}>
+    <div className={`${sz} rounded-full bg-gradient-to-br from-cyan-600 to-blue-700 border-2 border-brand/40 flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand/20 font-black text-white`}>
       {ini}
     </div>
   );
@@ -55,7 +55,7 @@ function Campo({ label, value }) {
 function Spinner() {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-3 py-12">
-      <svg className="animate-spin w-7 h-7 text-cyan-400" viewBox="0 0 24 24" fill="none">
+      <svg className="animate-spin w-7 h-7 text-brand" viewBox="0 0 24 24" fill="none">
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
       </svg>
@@ -131,7 +131,7 @@ export default function EIdentidadLoteModal({ consultaciones, initialId, onClose
         onClick={(e) => e.stopPropagation()}
       >
         {/* Barra degradé superior */}
-        <div className="h-[3px] w-full bg-gradient-to-r from-cyan-200 via-sky-400 to-blue-500 flex-shrink-0" />
+        <div className="h-[3px] w-full bg-gradient-to-r from-cyan-200 via-sky-400 to-brand-2 flex-shrink-0" />
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 flex-shrink-0 bg-white/[0.025]">
@@ -212,7 +212,7 @@ export default function EIdentidadLoteModal({ consultaciones, initialId, onClose
                   {/* ── Hero card ── */}
                   <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,.94),rgba(17,24,39,.92),rgba(7,13,23,.96))] shadow-[0_24px_55px_rgba(2,8,23,0.35)]">
                     {/* Línea degradé superior */}
-                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-100/80 via-sky-300 to-blue-500" />
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-sky-100/80 via-sky-300 to-brand-2" />
                     {/* Glow fondo */}
                     <div className="absolute top-0 right-0 w-44 h-44 bg-sky-100/5 rounded-full blur-3xl" />
                     <FingerprintWatermark />
@@ -331,7 +331,7 @@ export default function EIdentidadLoteModal({ consultaciones, initialId, onClose
                   <button
                     onClick={handlePDF}
                     disabled={descargando}
-                    className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-sky-500 to-blue-600 text-white hover:from-sky-400 hover:to-blue-500 disabled:opacity-50 shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30 transition-all hover:scale-[1.02] min-w-[180px]"
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-sky-500 to-brand-2 text-white hover:from-sky-400 hover:to-brand-2 disabled:opacity-50 shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30 transition-all hover:scale-[1.02] min-w-[180px]"
                   >
                     {descargando ? (
                       <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">

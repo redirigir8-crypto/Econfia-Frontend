@@ -171,7 +171,7 @@ const ConsultaSlide = ({ consultaId }) => {
 
                   {burbujaRiesgo ? (
                     <div className="relative rounded-xl overflow-hidden border p-2 bg-white/5 border-white/10">
-                      <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-cyan-400/20" />
+                      <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-brand/20" />
                       <img
                         src={burbujaRiesgo}
                         alt="Burbuja de riesgo"
@@ -243,7 +243,7 @@ function GridOverlay() {
           backgroundSize: "44px 44px",
         }}
       />
-      <div className="pointer-events-none absolute inset-0 mix-blend-screen animate-[scan_7s_linear_infinite] bg-gradient-to-b from-transparent via-cyan-400/4 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 mix-blend-screen animate-[scan_7s_linear_infinite] bg-gradient-to-b from-transparent via-brand/4 to-transparent" />
       <style>{`
         @keyframes scan {
           0% { transform: translateY(-100%); }
@@ -256,7 +256,7 @@ function GridOverlay() {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl p-[1px] bg-gradient-to-br from-cyan-500/40 to-blue-600/40">
+    <div className="rounded-2xl p-[1px] bg-gradient-to-br from-brand/40 to-brand-2/40">
       <div className="rounded-2xl h-full bg-black/55 backdrop-blur-md border border-white/10 p-6">
         <div className="h-7 w-52 bg-white/10 rounded animate-pulse mb-4" />
         <div className="space-y-3">

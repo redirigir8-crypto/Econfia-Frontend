@@ -81,7 +81,7 @@
           ))}
 
           {/* Borde sutil al hover */}
-          <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 transition-all duration-300 hover:ring-2 hover:ring-cyan-300/35" />
+          <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 transition-all duration-300 hover:ring-2 hover:ring-brand/35" />
         </div>
       </>
     );
@@ -113,7 +113,7 @@
                 className="text-[clamp(1.9rem,3.8vw,2.8rem)] font-bold leading-tight"
                 style={{ fontFamily: "poppins, sans-serif" }}
               >
-                ¿Qué es <span className="text-cyan-400">ECONFIA</span>?
+                ¿Qué es <span className="text-brand">ECONFIA</span>?
               </h2>
 
               <div
@@ -156,7 +156,7 @@
                     "Falsedad de documentos",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 m-0">
-                      <span className="w-2 h-2 mt-[6px] rounded-full bg-cyan-400 shrink-0" />
+                      <span className="w-2 h-2 mt-[6px] rounded-full bg-brand shrink-0" />
                       <span className="m-0">{item}</span>
                     </li>
                   ))}

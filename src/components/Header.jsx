@@ -7,13 +7,13 @@ import { FaEnvelope } from "react-icons/fa";
 import { useTheme } from "../context/ThemeContext";
 import { urlEntrarTitulos } from "../utils/titulosNav";
 
-const linkBase = "flex items-center gap-2 hover:text-cyan-300 transition";
-const linkActive = "text-cyan-400";
+const linkBase = "flex items-center gap-2 hover:text-brand transition";
+const linkActive = "text-brand";
 
 export default function Header() {
   const [isServiciosOpen, setIsServiciosOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, organizacion } = useTheme();
   const serviciosRef = useRef(null);
 
   // Cerrar el menú de servicios si se hace clic fuera
@@ -48,18 +48,25 @@ export default function Header() {
             className="flex items-center gap-2 md:gap-3 cursor-pointer"
           >
             <img
-              src={logoIcon}
-              alt="Logo Econfia"
+              src={organizacion?.logo || logoIcon}
+              alt={organizacion ? `Logo ${organizacion.nombre}` : "Logo Econfia"}
               className="h-9 md:h-11 w-auto object-contain"
             />
-            <div className="flex flex-col justify-center leading-none">
+            {!organizacion && (
+              <div className="flex flex-col justify-center leading-none">
+                <span className="text-content font-bold tracking-[-0.045em] text-lg md:text-2xl">
+                  ECONFIA
+                </span>
+                <span className="text-muted tracking-[0.18em] text-[7px] md:text-[9px] -mt-0.5 whitespace-nowrap">
+                  UNA MARCA DE GRUPO SOLUCIONES
+                </span>
+              </div>
+            )}
+            {organizacion && (
               <span className="text-content font-bold tracking-[-0.045em] text-lg md:text-2xl">
-                ECONFIA
+                {organizacion.nombre}
               </span>
-              <span className="text-muted tracking-[0.18em] text-[7px] md:text-[9px] -mt-0.5 whitespace-nowrap">
-                UNA MARCA DE GRUPO SOLUCIONES
-              </span>
-            </div>
+            )}
           </Link>
         </div>
 
@@ -72,7 +79,7 @@ export default function Header() {
           >
             <button
               onClick={() => setIsServiciosOpen((open) => !open)}
-              className={`flex items-center gap-1 hover:text-cyan-300 transition ${isServiciosOpen ? 'text-cyan-400' : ''}`}
+              className={`flex items-center gap-1 hover:text-brand transition ${isServiciosOpen ? 'text-brand' : ''}`}
               type="button"
             >
               Servicios <ChevronDown size={16} />
@@ -164,7 +171,7 @@ export default function Header() {
 
           <Link
             to="/nosotros"
-            className="hover:text-cyan-300 transition"
+            className="hover:text-brand transition"
           >
             Nosotros
           </Link>
@@ -198,7 +205,7 @@ export default function Header() {
           </Link>
           <Link
             to="/register"
-            className="px-5 py-2 rounded-full bg-cyan-500 text-black border border-transparent hover:bg-transparent hover:border-cyan-500 hover:text-cyan-500 transition font-medium text-sm"
+            className="px-5 py-2 rounded-full bg-brand text-black border border-transparent hover:bg-transparent hover:border-brand hover:text-brand transition font-medium text-sm"
           >
             Registrarse
           </Link>
@@ -231,7 +238,7 @@ export default function Header() {
                 />
               </button>
               {isServiciosOpen && (
-                <div className="mt-2 ml-4 space-y-2 border-l-2 border-cyan-500/30 pl-4">
+                <div className="mt-2 ml-4 space-y-2 border-l-2 border-brand/30 pl-4">
                   <Link
                     to="/servicio-econfia"
                     className="block text-muted hover:text-brand transition py-2"
@@ -283,7 +290,7 @@ export default function Header() {
             <NavLink
               to="/beneficios"
               className={({ isActive }) =>
-                `text-content font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition`
+                `text-content font-medium py-2 ${isActive ? 'text-brand' : 'hover:text-brand'} transition`
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -293,7 +300,7 @@ export default function Header() {
             <NavLink
               to="/blog"
               className={({ isActive }) =>
-                `text-content font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition`
+                `text-content font-medium py-2 ${isActive ? 'text-brand' : 'hover:text-brand'} transition`
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -302,7 +309,7 @@ export default function Header() {
 
             <Link
               to="/nosotros"
-              className="text-content font-medium py-2 hover:text-cyan-300 transition"
+              className="text-content font-medium py-2 hover:text-brand transition"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Nosotros
@@ -311,7 +318,7 @@ export default function Header() {
             <NavLink
               to="/contacto"
               className={({ isActive }) =>
-                `text-content font-medium py-2 ${isActive ? 'text-cyan-400' : 'hover:text-cyan-300'} transition flex items-center gap-2`
+                `text-content font-medium py-2 ${isActive ? 'text-brand' : 'hover:text-brand'} transition flex items-center gap-2`
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -330,14 +337,14 @@ export default function Header() {
               </button>
               <Link
                 to="/login"
-                className="block w-full text-center px-4 py-3 rounded-full border border-cyan-500 text-cyan-400 hover:bg-cyan-500/10 transition font-medium"
+                className="block w-full text-center px-4 py-3 rounded-full border border-brand text-brand hover:bg-brand/10 transition font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Iniciar sesión
               </Link>
               <Link
                 to="/register"
-                className="block w-full text-center px-4 py-3 rounded-full bg-cyan-500 text-black hover:bg-cyan-400 transition font-medium"
+                className="block w-full text-center px-4 py-3 rounded-full bg-brand text-black hover:opacity-90 transition font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Registrarse

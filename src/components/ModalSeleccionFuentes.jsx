@@ -108,13 +108,13 @@ export default function ModalSeleccionFuentes({
     <>
       <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
         {/* Elementos decorativos */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
 
         {/* Modal */}
-        <div className="relative bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full p-6 text-white max-h-[80vh] overflow-y-auto">
+        <div className="relative bg-gradient-to-br from-slate-900/90 via-brand-2/30 to-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[20px] shadow-2xl shadow-brand/20 max-w-3xl w-full p-6 text-white max-h-[80vh] overflow-y-auto">
           {/* Glow effect */}
-          <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+          <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
 
           {/* Botón cerrar */}
           <button
@@ -128,10 +128,10 @@ export default function ModalSeleccionFuentes({
           <div className="relative z-10">
             {/* Título */}
             <div className="text-center mb-4">
-              <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
-                <span className="text-cyan-300 text-xs font-medium">Personaliza tu consulta</span>
+              <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-2">
+                <span className="text-brand text-xs font-medium">Personaliza tu consulta</span>
               </div>
-              <h2 className="text-2xl font-black bg-gradient-to-r from-white via-cyan-100 to-blue-300 bg-clip-text text-transparent">
+              <h2 className="text-2xl font-black bg-gradient-to-r from-white via-brand/40 to-brand-2 bg-clip-text text-transparent">
                 {title}
               </h2>
             </div>
@@ -143,15 +143,15 @@ export default function ModalSeleccionFuentes({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filtrar fuentes por nombre..."
-                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-cyan-400/50 focus:bg-white/10 focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-brand/50 focus:bg-white/10 focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={handleToggleAll}
-                className={`mt-2 md:mt-0 md:ml-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 border border-cyan-400/40 whitespace-nowrap ${
+                className={`mt-2 md:mt-0 md:ml-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 border border-brand/40 whitespace-nowrap ${
                   allSelected
-                    ? "bg-cyan-500/80 text-white hover:bg-cyan-400"
-                    : "bg-white/10 text-cyan-300 hover:bg-cyan-500/20"
+                    ? "bg-brand/80 text-white hover:bg-brand"
+                    : "bg-white/10 text-brand hover:bg-brand/20"
                 }`}
               >
                 {allSelected ? "Deseleccionar todas" : "Seleccionar todas"}
@@ -161,7 +161,7 @@ export default function ModalSeleccionFuentes({
             {/* Contador y aviso de límite */}
             <div className="mb-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-cyan-300 font-medium">
+                <span className="text-xs text-brand font-medium">
                   Fuentes seleccionadas: {seleccionadas.length} / 45
                 </span>
                 {seleccionadas.length >= 45 && (
@@ -173,7 +173,7 @@ export default function ModalSeleccionFuentes({
             {/* Cargando */}
             {cargando ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-cyan-400"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand"></div>
               </div>
             ) : (
               <>
@@ -185,7 +185,7 @@ export default function ModalSeleccionFuentes({
                       return (
                       <label
                         key={fuente.nombre}
-                        className={`flex items-start gap-3 p-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-500/30 transition-all group ${
+                        className={`flex items-start gap-3 p-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-brand/30 transition-all group ${
                           isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                         }`}
                       >
@@ -194,12 +194,12 @@ export default function ModalSeleccionFuentes({
                           checked={seleccionadas.includes(fuente.nombre)}
                           onChange={() => handleCheckbox(fuente.nombre)}
                           disabled={isDisabled}
-                          className={`accent-cyan-500 w-4 h-4 mt-0.5 flex-shrink-0 ${
+                          className={`accent-brand w-4 h-4 mt-0.5 flex-shrink-0 ${
                             isDisabled ? "cursor-not-allowed" : "cursor-pointer"
                           }`}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm text-white group-hover:text-cyan-200 transition-colors">
+                          <p className="font-medium text-sm text-white group-hover:text-brand transition-colors">
                             {fuente.nombre_pila || fuente.nombre}
                           </p>
                         </div>
@@ -227,7 +227,7 @@ export default function ModalSeleccionFuentes({
                     className={`flex-1 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${
                       seleccionadas.length === 0 || loading
                         ? "bg-white/10 text-white/40 cursor-not-allowed"
-                        : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
+                        : "bg-gradient-to-r from-brand to-brand-2 text-white hover:opacity-90 hover:shadow-lg hover:shadow-brand/50"
                     }`}
                   >
                     {loading ? "Confirmar..." : "Confirmar selección"}

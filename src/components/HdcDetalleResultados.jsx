@@ -258,8 +258,8 @@ function buildNegativeCreditSummary({ liabilities, creditCard, overviewCount }) 
 
 function StatTile({ label, value, tone = "cyan" }) {
   const tones = {
-    cyan: "border-cyan-500/25 from-cyan-500/10 to-blue-500/5",
-    emerald: "border-emerald-500/25 from-emerald-500/10 to-cyan-500/5",
+    cyan: "border-brand/25 from-brand/10 to-brand-2/5",
+    emerald: "border-emerald-500/25 from-emerald-500/10 to-brand/5",
     amber: "border-amber-500/25 from-amber-500/10 to-orange-500/5",
     rose: "border-rose-500/25 from-rose-500/10 to-pink-500/5",
     slate: "border-line/15 from-surface-2/80 to-surface/70",
@@ -276,7 +276,7 @@ function Section({ icon: Icon, title, count, children }) {
   return (
     <section className="rounded-[22px] border border-line/15 bg-surface/90 p-5 shadow-xl shadow-black/5 backdrop-blur-xl">
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/[0.08] text-cyan-300">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-brand/25 bg-brand/[0.08] text-brand">
           <Icon className="h-5 w-5" />
         </div>
         <h3 className="text-base font-bold text-content">{title}</h3>
@@ -660,7 +660,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-2 border-t-cyan-400 border-slate-800" />
+        <div className="h-12 w-12 animate-spin rounded-full border-2 border-t-brand border-slate-800" />
       </div>
     );
   }
@@ -709,9 +709,9 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
     <div className="grid gap-4">
       {/* Encabezado */}
       <div className="relative overflow-hidden rounded-[24px] border border-line/15 bg-surface/90 p-6 shadow-2xl shadow-black/5 backdrop-blur-xl">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-cyan-500/[0.06] blur-3xl" />
+        <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-brand/[0.06] blur-3xl" />
         <div className="relative flex flex-wrap items-center gap-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/[0.08] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-brand">
             <ShieldCheck className="h-3.5 w-3.5" />
             Econfia Credit Report
           </div>
@@ -929,7 +929,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
                   <div className="truncate text-sm font-semibold text-content">{fmtText(item.inquiryBusinessName)}</div>
                   <div className="text-xs text-muted">{fmtText(item.inquiryReasonDesc)}</div>
                 </div>
-                <div className="shrink-0 text-xs font-medium text-cyan-300">{fmtText(item.inquiryDate)}</div>
+                <div className="shrink-0 text-xs font-medium text-brand">{fmtText(item.inquiryDate)}</div>
               </div>
             ))}
           </div>
@@ -944,7 +944,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
         <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
           {HDC_GLOSARIO.map(([sigla, significado]) => (
             <div key={sigla} className="rounded-2xl border border-line/15 bg-surface-2/70 p-3">
-              <div className="text-xs font-bold text-cyan-300">{sigla}</div>
+              <div className="text-xs font-bold text-brand">{sigla}</div>
               <div className="mt-0.5 text-xs text-content">{significado}</div>
             </div>
           ))}
@@ -963,7 +963,7 @@ export default function HdcDetalleResultados({ data, consulta, consultaId }) {
         <button
           type="button"
           onClick={() => setShowJson((v) => !v)}
-          className="text-xs font-semibold text-cyan-300 hover:text-cyan-200"
+          className="text-xs font-semibold text-brand hover:text-brand"
         >
           {showJson ? "Ocultar" : "Ver"} respuesta completa (JSON)
         </button>

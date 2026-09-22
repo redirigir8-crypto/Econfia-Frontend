@@ -16,7 +16,7 @@ export default function AudioConsent({ onAccept }) {
       <p>Para una mejor experiencia, ¿desea reproducir sonido?</p>
       <button
         onClick={handleAccept}
-        className="px-4 py-2 bg-cyan-500 rounded-full hover:bg-cyan-400 transition"
+        className="px-4 py-2 bg-brand rounded-full hover:bg-brand/80 transition"
       >
         Sí, reproducir sonido
       </button>

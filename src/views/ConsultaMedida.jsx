@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import FormLogo from "../components/FormLogo";
+=======
+import LogoOrganizacion from "../components/LogoOrganizacion";
+>>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -158,12 +162,12 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
       )}
       <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm">
         {/* Elementos decorativos de fondo */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
-        <div className="relative bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl border border-line/15 rounded-[20px] shadow-2xl shadow-cyan-500/20 max-w-3xl w-full mx-4 p-6 text-content max-h-[92vh] flex flex-col">
+        <div className="relative bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl border border-line/15 rounded-[20px] shadow-2xl shadow-brand/20 max-w-3xl w-full mx-4 p-6 text-content max-h-[92vh] flex flex-col">
           {/* Glow effect */}
-          <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+          <div className="absolute inset-0 opacity-50 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
 
           {/* Botón cerrar */}
           <button
@@ -176,8 +180,8 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
 
           <div className="relative z-10 flex flex-col min-h-0 flex-1">
             <div className="text-center mb-4 flex-shrink-0">
-              <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-2">
-                <span className="text-cyan-300 text-xs font-medium">Personaliza tu consulta</span>
+              <div className="inline-block px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-2">
+                <span className="text-brand text-xs font-medium">Personaliza tu consulta</span>
               </div>
               <h2 className="text-2xl font-black text-content">
                 Consulta a la Medida
@@ -194,12 +198,12 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filtrar fuentes por nombre..."
-                className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-sm focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-sm focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
               />
               <button
                 type="button"
                 onClick={handleToggleAll}
-                className={`mt-2 md:mt-0 md:ml-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 border border-cyan-400/40 ${
+                className={`mt-2 md:mt-0 md:ml-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 border border-brand/40 ${
                   allSelected
                     ? "bg-brand text-white hover:opacity-90"
                     : "bg-brand/10 text-brand hover:bg-brand/20"
@@ -295,13 +299,13 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
                   return (
                   <label
                     key={fuente.id}
-                    className={`flex items-center gap-3 bg-surface-2/60 hover:bg-brand/10 p-3 rounded-lg border border-line/15 transition-all hover:shadow-md hover:shadow-cyan-500/10 group ${
+                    className={`flex items-center gap-3 bg-surface-2/60 hover:bg-brand/10 p-3 rounded-lg border border-line/15 transition-all hover:shadow-md hover:shadow-brand/10 group ${
                       isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                     }`}
                   >
                     <input
                       type="checkbox"
-                      className={`accent-cyan-500 w-4 h-4 ${
+                      className={`accent-brand w-4 h-4 ${
                         isDisabled ? "cursor-not-allowed" : "cursor-pointer"
                       }`}
                       checked={seleccionadas.includes(fuente.nombre)}
@@ -333,7 +337,7 @@ function ModalConsultaMedida({ isOpen, onClose, data, onSuccess, puedeUsarLotes 
                 className={`w-full px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 ${
                   loading || seleccionadas.length === 0
                     ? "bg-surface-2/70 text-muted cursor-not-allowed"
-                    : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50"
+                    : "bg-gradient-to-r from-brand to-brand-2 text-white hover:from-brand hover:to-brand-2 hover:shadow-lg hover:shadow-brand/50"
                 }`}
               >
                 {loading
@@ -492,7 +496,7 @@ export default function ConsultaMedida() {
             {/* Contenido del modal */}
             <div className="relative bg-white/10 border border-white/30 rounded-2xl p-10 shadow-2xl text-center max-w-md w-full mx-4 backdrop-blur-md">
               {/* Icono cargando */}
-              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-cyan-400 mx-auto mb-6"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-brand mx-auto mb-6"></div>
 
               {/* Texto animado */}
               <p className="text-white text-lg font-semibold animate-pulse">
@@ -537,18 +541,18 @@ export default function ConsultaMedida() {
       {/* Formulario con fondo elegante */}
       <section className="relative min-h-screen flex items-start justify-center pt-3 pb-32 md:pb-36 overflow-hidden bg-transparent">
         {/* Elementos decorativos de fondo */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-5xl w-full px-4 relative z-10">
           <div className="text-center md:text-left space-y-5">
             <div>
-              <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-3 items-center gap-2">
+              <div className="inline-flex px-3 py-1 rounded-full bg-gradient-to-r from-brand/20 to-brand-2/20 border border-brand/30 mb-3 items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
                 </span>
-                <span className="text-cyan-300 text-xs font-medium">Consulta Personalizada</span>
+                <span className="text-brand text-xs font-medium">Consulta Personalizada</span>
               </div>
               <h1 className="text-3xl md:text-4xl font-black text-content leading-tight tracking-tight">
                 Econfia Essential
@@ -561,11 +565,11 @@ export default function ConsultaMedida() {
 
             <div className="space-y-2 pt-2">
               <div className="flex items-start gap-3">
-                <span className="mt-1 h-2 w-2 rounded-full bg-cyan-500 flex-shrink-0" />
+                <span className="mt-1 h-2 w-2 rounded-full bg-brand flex-shrink-0" />
                 <span className="text-xs text-content/85">Personaliza completamente tu búsqueda.</span>
               </div>
               <div className="flex items-start gap-3">
-                <span className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <span className="mt-1 h-2 w-2 rounded-full bg-brand-2 flex-shrink-0" />
                 <span className="text-xs text-content/85">Selecciona solo las fuentes que necesitas.</span>
               </div>
               <div className="flex items-start gap-3">
@@ -580,12 +584,18 @@ export default function ConsultaMedida() {
           </div>
 
           <div className="relative w-full max-w-sm mx-auto">
-            <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
+            <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-brand/10 p-6 group">
               {/* Glow effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
 
               <div className="relative z-10">
+<<<<<<< HEAD
               <FormLogo />
+=======
+                <div className="flex items-center justify-center mb-4">
+                  <LogoOrganizacion className="h-16 w-16 object-contain" />
+                </div>
+>>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 
                 <form onSubmit={handleSubmit} className="space-y-2">
                 {/* Inputs */}
@@ -596,7 +606,7 @@ export default function ConsultaMedida() {
                       required
                       value={tipoDoc}
                       onChange={(e) => setTipoDoc(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm appearance-none cursor-pointer"
                     >
                       <option className="bg-surface text-content" value="">
                         Seleccione tipo de documento
@@ -630,7 +640,7 @@ export default function ConsultaMedida() {
                       value={cedula}
                       onChange={(e) => setCedula(e.target.value)}
                       placeholder="Ingrese número de documento"
-                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content placeholder:text-muted/70 text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
                     />
                   </div>
 
@@ -640,7 +650,7 @@ export default function ConsultaMedida() {
                       type="date"
                       value={fechaExpedicion}
                       onChange={(e) => setFechaExpedicion(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-cyan-500/10 transition-all backdrop-blur-sm"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-xs focus:outline-none focus:border-brand/50 focus:bg-surface focus:shadow-lg focus:shadow-brand/10 transition-all backdrop-blur-sm"
                     />
                   </div>
                 </div>
@@ -652,13 +662,13 @@ export default function ConsultaMedida() {
                       type="checkbox"
                       checked={acepta}
                       onChange={(e) => setAcepta(e.target.checked)}
-                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      className="accent-brand w-4 h-4 cursor-pointer"
                     />
                     <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Acepto los{" "}
                         <Terminos
                           inline
-                          triggerClassName="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-medium transition-colors"
+                          triggerClassName="text-brand hover:text-brand underline underline-offset-4 font-medium transition-colors"
                         />
                     </span>
                   </label>
@@ -667,7 +677,7 @@ export default function ConsultaMedida() {
                       type="checkbox"
                       checked={consentimiento}
                       onChange={(e) => setConsentimiento(e.target.checked)}
-                      className="accent-cyan-500 w-4 h-4 cursor-pointer"
+                      className="accent-brand w-4 h-4 cursor-pointer"
                     />
                     <span className="text-xs text-content/85 group-hover:text-content transition-colors">
                       Confirmo consentimiento del titular
@@ -695,7 +705,7 @@ export default function ConsultaMedida() {
                     ${
                       !tipoDoc || !cedula || !acepta || !consentimiento
                         ? "bg-surface-2/70 text-muted cursor-not-allowed"
-                        : "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105"
+                        : "bg-gradient-to-r from-brand to-brand-2 text-white hover:from-brand hover:to-brand-2 hover:shadow-lg hover:shadow-brand/50 transform hover:scale-105"
                     }`}
                 >
                   Consulta a la medida

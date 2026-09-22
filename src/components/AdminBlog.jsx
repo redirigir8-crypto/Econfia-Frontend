@@ -1,6 +1,7 @@
 // src/components/AdminBlog.jsx
 import React, { useEffect, useState, useRef } from "react";
 import Toast from "./Toast";
+import { useTheme } from "../context/ThemeContext";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -13,6 +14,11 @@ const EMPTY_FORM = {
 };
 
 export default function AdminBlog() {
+  const { organizacion } = useTheme();
+  const marcaPrincipal = organizacion?.color_acento || null;
+  const marcaSecundaria = organizacion?.color_secundario_efectivo || marcaPrincipal;
+  const gradienteDesde = marcaPrincipal || "#06b6d4";
+  const gradienteHasta = marcaSecundaria || "#3b82f6";
   const token = localStorage.getItem("token");
 
   const [posts, setPosts]         = useState([]);
@@ -253,7 +259,7 @@ export default function AdminBlog() {
           <button
             onClick={() => { resetForm(); setVista(vista === "form" ? "lista" : "form"); }}
             className="flex items-center gap-2 rounded-xl px-5 py-3 font-black text-white shadow-[0_16px_35px_rgba(14,165,233,0.28)] transition-all hover:-translate-y-0.5"
-            style={{ background: vista === "form" ? "linear-gradient(135deg,#475569,#334155)" : "linear-gradient(135deg,#06b6d4,#3b82f6)" }}
+            style={{ background: vista === "form" ? "linear-gradient(135deg,#475569,#334155)" : `linear-gradient(135deg,${gradienteDesde},${gradienteHasta})` }}
           >
             {vista === "form" ? "← Volver a la lista" : "+ Nueva publicación"}
           </button>
@@ -447,7 +453,7 @@ export default function AdminBlog() {
             <div className="flex flex-wrap items-center gap-6">
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input type="checkbox" name="destacado" checked={form.destacado} onChange={handleChange}
-                  className="w-5 h-5 rounded accent-cyan-400"
+                  className="w-5 h-5 rounded accent-brand"
                 />
                 <span className="font-semibold text-content">⭐ Destacado</span>
                 <span className="text-xs text-muted">(aparece como post principal)</span>
@@ -474,7 +480,7 @@ export default function AdminBlog() {
             <div className="flex gap-3 pt-2">
               <button type="submit" disabled={loading}
                 className="flex-1 py-3 rounded-xl font-bold text-white text-base transition-all disabled:opacity-60"
-                style={{ background: "linear-gradient(135deg,#06b6d4,#3b82f6)", boxShadow: "0 0 20px rgba(6,182,212,0.3)" }}
+                style={{ background: `linear-gradient(135deg,${gradienteDesde},${gradienteHasta})`, boxShadow: marcaPrincipal ? `0 0 20px ${marcaPrincipal}4d` : "0 0 20px rgba(6,182,212,0.3)" }}
               >
                 {loading ? "Guardando…" : editId ? "Actualizar publicación" : "Publicar"}
               </button>
