@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
 import FormLogo from "../components/FormLogo";
-=======
 import LogoOrganizacion from "../components/LogoOrganizacion";
->>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -119,19 +116,18 @@ export default function ConsultaBasicElemnt() {
           </p>
         </div>
         <div className="relative w-full max-w-sm mx-auto">
-<<<<<<< HEAD
           <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-cyan-500/10 p-6 group">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-cyan-500/5 via-transparent to-blue-500/5 pointer-events-none" />
             <div className="relative z-10">  
               <FormLogo />
-=======
+
           <div className="relative w-full bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-brand/10 p-6 group">
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
             <div className="relative z-10">
               <div className="flex items-center justify-center mb-4">
                 <LogoOrganizacion className="h-16 w-16 object-contain" />
               </div>  
->>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
+
               <form onSubmit={handleSubmit} className="space-y-2">
                 <div className="space-y-2">
                   <div className="flex flex-col gap-1">

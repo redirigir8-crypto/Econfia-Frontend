@@ -1,9 +1,5 @@
 import { useMemo, useState } from "react";
-<<<<<<< HEAD
-import FormLogo from "../components/FormLogo";
-=======
 import LogoOrganizacion from "../components/LogoOrganizacion";
->>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
@@ -133,15 +129,9 @@ export default function ConsultaReconocer() {
 
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 
-<<<<<<< HEAD
       <section className="relative min-h-screen overflow-hidden bg-transparent pb-32 pt-3">
-        <div className="absolute right-20 top-20 h-72 w-72 animate-pulse rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute bottom-20 left-20 h-96 w-96 animate-pulse rounded-full bg-blue-500/10 blur-3xl" style={{ animationDelay: "1s" }} />
-=======
-      <section className="relative min-h-screen overflow-hidden bg-transparent pb-32 pt-24">
         <div className="absolute right-20 top-20 h-72 w-72 animate-pulse rounded-full bg-brand/10 blur-3xl" />
         <div className="absolute bottom-20 left-20 h-96 w-96 animate-pulse rounded-full bg-brand-2/10 blur-3xl" style={{ animationDelay: "1s" }} />
->>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 
         <div className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 items-center gap-6 px-4 md:grid-cols-2">
           <div className="space-y-5 text-center md:text-left">
@@ -172,13 +162,9 @@ export default function ConsultaReconocer() {
           <div className="relative mx-auto w-full max-w-sm">
             <div className="group relative w-full rounded-[20px] border border-line/15 bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 p-6 shadow-2xl shadow-brand/10 backdrop-blur-xl">
               <div className="relative z-10">
-<<<<<<< HEAD
-              <FormLogo />
-=======
                 <div className="mb-4 flex items-center justify-center">
                   <LogoOrganizacion className="h-16 w-16 object-contain" />
                 </div>
->>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <div className="flex flex-col gap-1">

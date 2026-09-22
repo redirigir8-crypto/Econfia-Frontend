@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Toast from "../components/Toast";
-<<<<<<< HEAD
-import WalletSolicitudes from "../components/WalletSolicitudes";
-=======
 import { useTheme } from "../context/ThemeContext";
->>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
+import WalletSolicitudes from "../components/WalletSolicitudes";
 import { MUNICIPIOS_COLOMBIA } from "../utils/municipiosColombia";
 import { PROFESIONES_MUNDO } from "../utils/profesionesMundo";
 

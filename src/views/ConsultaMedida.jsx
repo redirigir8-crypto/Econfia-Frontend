@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
-import FormLogo from "../components/FormLogo";
-=======
 import LogoOrganizacion from "../components/LogoOrganizacion";
->>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -589,13 +585,9 @@ export default function ConsultaMedida() {
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px] bg-gradient-to-r from-brand/5 via-transparent to-brand-2/5 pointer-events-none" />
 
               <div className="relative z-10">
-<<<<<<< HEAD
-              <FormLogo />
-=======
                 <div className="flex items-center justify-center mb-4">
                   <LogoOrganizacion className="h-16 w-16 object-contain" />
                 </div>
->>>>>>> e1777c52731af7298aca26537a866d52bc80ce34
 
                 <form onSubmit={handleSubmit} className="space-y-2">
                 {/* Inputs */}
