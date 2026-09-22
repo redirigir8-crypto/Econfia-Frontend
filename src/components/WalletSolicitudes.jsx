@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
-const headers = () => ({ Authorization: `Token ${localStorage.getItem("token")}`, "Content-Type": "application/json" });
+const headers = () => {
+  const h = { Authorization: `Token ${localStorage.getItem("token")}`, "Content-Type": "application/json" };
+  // Empresa activa (Fase 5): permite que un MIEMBRO opere sobre la empresa
+  // seleccionada. Persona natural no lo tiene y su endpoint lo ignora.
+  const empresaId = localStorage.getItem("wallet_empresa_id");
+  if (empresaId) h["X-Empresa-Id"] = empresaId;
+  return h;
+};
 const ESTADOS = { pendiente: "Pendiente", autorizada: "Autorizada", rechazada: "Rechazada", cancelada: "Cancelada", revocada: "Revocada", expirada: "Expirada" };
 const input = "w-full rounded-lg border border-line/15 bg-surface-2 px-3 py-2 text-content text-sm";
 const boton = "rounded-lg bg-brand px-4 py-2 text-white text-sm font-semibold disabled:opacity-50";
