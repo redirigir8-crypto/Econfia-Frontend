@@ -95,6 +95,7 @@ export default function EconfiaWallet() {
 
   // Documentos
   const [documentos, setDocumentos] = useState([]);
+  const [credenciales, setCredenciales] = useState([]);
   const [tipoSubida, setTipoSubida] = useState("hoja_vida");
   const [archivo, setArchivo] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
@@ -169,6 +170,16 @@ export default function EconfiaWallet() {
     }
   }, []);
 
+  const cargarCredenciales = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/credenciales/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setCredenciales(data.credenciales || []);
+    } catch {
+      /* silencioso */
+    }
+  }, []);
+
   const cargarTitulos = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/api/wallet/titulos/`, { headers: authHeaders() });
@@ -205,10 +216,11 @@ export default function EconfiaWallet() {
   useEffect(() => {
     cargarEstado();
     cargarDocumentos();
+    cargarCredenciales();
     cargarTitulos();
     cargarReferencias();
     cargarCertificaciones();
-  }, [cargarEstado, cargarDocumentos, cargarTitulos, cargarReferencias, cargarCertificaciones]);
+  }, [cargarEstado, cargarDocumentos, cargarCredenciales, cargarTitulos, cargarReferencias, cargarCertificaciones]);
 
   // Al saber que ya hay consulta, cargar su resultado y hacer polling si sigue en curso.
   useEffect(() => {
@@ -311,6 +323,29 @@ export default function EconfiaWallet() {
       window.URL.revokeObjectURL(url);
     } catch {
       setToast({ type: "error", message: "Error al descargar el PDF." });
+    }
+  };
+
+  const descargarCredencialPDF = async (credencialId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/credenciales/${credencialId}/pdf/`, {
+        headers: authHeaders(),
+      });
+      if (!res.ok) {
+        setToast({ type: "error", message: "No se pudo descargar la credencial." });
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `credencial-wallet-${credencialId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setToast({ type: "error", message: "Error al descargar la credencial." });
     }
   };
 
@@ -786,10 +821,53 @@ export default function EconfiaWallet() {
           )}
         </div>
 
+        {/* ================= ZONA C1: credenciales emitidas ================= */}
+        <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <StepDot n={4} done={credenciales.length > 0} />
+            <div>
+              <h2 className="text-content font-bold">Mis credenciales</h2>
+              <p className="text-muted text-xs">Credenciales oficiales emitidas para su wallet. Puede descargar el PDF o abrir la verificación pública.</p>
+            </div>
+          </div>
+
+          {credenciales.length === 0 ? (
+            <p className="text-muted text-xs">Aún no tienes credenciales emitidas.</p>
+          ) : (
+            <ul className="space-y-2">
+              {credenciales.map((c) => (
+                <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-2/50 border border-line/10 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-content text-sm font-semibold truncate">{c.esquema}</p>
+                    <p className="text-muted text-[11px] truncate">
+                      {c.organizacion ? `${c.organizacion} · ` : ""}Emitida {new Date(c.created_at).toLocaleString("es-CO")}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${badgeClasses(c.estado)}`}>
+                      {c.estado}
+                    </span>
+                    <button type="button" onClick={() => descargarCredencialPDF(c.id)}
+                      className="text-xs font-semibold text-emerald-300 hover:text-emerald-200">
+                      PDF
+                    </button>
+                    {c.url_verificacion && (
+                      <a href={c.url_verificacion} target="_blank" rel="noreferrer"
+                        className="text-xs font-semibold text-sky-300 hover:text-sky-200">
+                        Verificar ↗
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         {/* ================= ZONA C2: certificaciones laborales ================= */}
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
-            <StepDot n={4} done={certificaciones.length > 0} />
+            <StepDot n={5} done={certificaciones.length > 0} />
             <div>
               <h2 className="text-content font-bold">Certificaciones laborales</h2>
               <p className="text-muted text-xs">Registre su experiencia laboral (empresa, cargo y fechas). Adjuntar la constancia es opcional.</p>
@@ -856,7 +934,7 @@ export default function EconfiaWallet() {
         {/* ================= ZONA D: títulos académicos ================= */}
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
-            <StepDot n={5} done={titulos.length > 0} />
+            <StepDot n={6} done={titulos.length > 0} />
             <div>
               <h2 className="text-content font-bold">Títulos académicos</h2>
               <p className="text-muted text-xs">Registre sus estudios (institución, programa, nivel y año). El diploma es opcional.</p>
@@ -915,7 +993,7 @@ export default function EconfiaWallet() {
         {/* ================= ZONA E: referencias personales ================= */}
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
-            <StepDot n={6} done={referencias.length > 0} />
+            <StepDot n={7} done={referencias.length > 0} />
             <div>
               <h2 className="text-content font-bold">Referencias personales</h2>
               <p className="text-muted text-xs">Agrega hasta {refMax} referencias ({referencias.length}/{refMax}).</p>

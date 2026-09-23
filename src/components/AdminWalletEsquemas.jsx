@@ -49,6 +49,9 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
   const [form, setForm] = useState(null); // { id?, nombre, codigo, descripcion, organizacion_id, estado, campos: [] }
   const [emitForm, setEmitForm] = useState(null); // { esquema, valores: {} }
   const [emitFiles, setEmitFiles] = useState({}); // { clave: File } para campos tipo archivo
+  const [titularQuery, setTitularQuery] = useState("");
+  const [titulares, setTitulares] = useState([]);
+  const [titularSel, setTitularSel] = useState(null);
   const [nitRues, setNitRues] = useState("");
   const [ruesCargando, setRuesCargando] = useState(false);
   const [credenciales, setCredenciales] = useState([]);
@@ -127,6 +130,7 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
       const data = await res.json();
       if (!res.ok) { setError((data.error || "No se pudo guardar.") + (data.detalles ? " " + data.detalles.join(" ") : "")); return; }
       await cargar();
+      setVista("lista");
       setForm(null);
       setMensaje("Esquema guardado.");
     } catch { setError("Error de conexión."); }
@@ -153,10 +157,21 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
   // ── emisión de credenciales ──
   const iniciarEmision = (e) => {
     setUltimaEmitida(null); setError(""); setMensaje(""); setEmitFiles({}); setNitRues("");
+    setTitularQuery(""); setTitulares([]); setTitularSel(null);
     setEmitForm({ esquema: e, valores: {} });
     setVista("emitir");
   };
   const setValor = (clave, valor) => setEmitForm((f) => ({ ...f, valores: { ...f.valores, [clave]: valor } }));
+
+  const buscarTitulares = async () => {
+    setError("");
+    try {
+      const res = await fetch(`${API_URL}/api/admin/wallet/titulares/?q=${encodeURIComponent(titularQuery.trim())}`, { headers: authHeaders() });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "No se pudieron buscar titulares."); return; }
+      setTitulares(data.titulares || []);
+    } catch { setError("Error de conexión buscando titulares."); }
+  };
 
   const emitir = async () => {
     setError(""); setMensaje("");
@@ -165,10 +180,15 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
     if (tieneArchivos) {
       const fd = new FormData();
       fd.append("valores", JSON.stringify(emitForm.valores));
+      if (titularSel?.id) fd.append("sujeto_perfil_id", String(titularSel.id));
       Object.entries(emitFiles).forEach(([clave, file]) => { if (file) fd.append(`archivo__${clave}`, file); });
       opciones = { method: "POST", headers: authHeaders(), body: fd }; // el navegador pone el boundary
     } else {
-      opciones = { method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: JSON.stringify({ valores: emitForm.valores }) };
+      opciones = {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ valores: emitForm.valores, sujeto_perfil_id: titularSel?.id || null }),
+      };
     }
     try {
       const res = await fetch(`${API_URL}/api/admin/wallet/esquemas/${emitForm.esquema.id}/emitir/`, opciones);
@@ -420,6 +440,53 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
           </div>
         ) : (
           <>
+            {/* Titular de la credencial: si se selecciona, aparece en su wallet */}
+            <div style={{ border: `1px solid ${T.line}`, borderRadius: 14, padding: 14, marginTop: 16, background: T.surface }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: T.brand, textTransform: "uppercase", letterSpacing: ".5px", marginBottom: 8 }}>
+                Titular en wallet
+              </div>
+              <p style={{ color: T.muted, fontSize: 12, margin: "0 0 10px" }}>
+                Busca la persona o empresa que recibirá esta credencial. Si no eliges titular, la credencial queda solo en el listado administrativo.
+              </p>
+              {titularSel ? (
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", padding: 10, borderRadius: 10, background: T.surface2 }}>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 13 }}>{titularSel.nombre}</div>
+                    <div style={{ color: T.muted, fontSize: 11 }}>
+                      {titularSel.email}{titularSel.identificacion ? ` · ${titularSel.identificacion}` : ""}{titularSel.organizacion ? ` · ${titularSel.organizacion}` : ""}
+                    </div>
+                  </div>
+                  <button onClick={() => setTitularSel(null)} style={btn(T.surface, T.text)}>Cambiar</button>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <input
+                      value={titularQuery}
+                      onChange={(e) => setTitularQuery(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); buscarTitulares(); } }}
+                      placeholder="Correo, nombre, NIT o empresa"
+                      style={{ ...input, width: 280 }}
+                    />
+                    <button onClick={buscarTitulares} style={btn(T.surface, T.brand)}>Buscar titular</button>
+                  </div>
+                  {titulares.length > 0 && (
+                    <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+                      {titulares.map((t) => (
+                        <button key={t.id} type="button" onClick={() => setTitularSel(t)}
+                          style={{ ...btn(T.surface2, T.text), textAlign: "left", border: `1px solid ${T.line}` }}>
+                          <span style={{ display: "block", fontSize: 13 }}>{t.nombre}</span>
+                          <span style={{ display: "block", color: T.muted, fontSize: 11, marginTop: 2 }}>
+                            {t.email}{t.identificacion ? ` · ${t.identificacion}` : ""}{t.organizacion ? ` · ${t.organizacion}` : ""}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
             {/* Prellenar desde RUES (empresas) */}
             <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 16, flexWrap: "wrap" }}>
               <input value={nitRues} onChange={(e) => setNitRues(e.target.value)} placeholder="NIT para traer de RUES" style={{ ...input, width: 220 }} />
@@ -487,6 +554,13 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
   }
 
   // ─────────────────────────────────────────────── EDITOR ──────────────
+  if (!form) {
+    return (
+      <div style={{ marginTop: 16 }}>
+        <p style={{ color: T.muted, fontSize: 13 }}>Cargando editor…</p>
+      </div>
+    );
+  }
   const soloLectura = form.estado && form.estado !== "borrador";
   return (
     <div style={{ marginTop: 16 }}>

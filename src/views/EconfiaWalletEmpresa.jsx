@@ -65,6 +65,7 @@ function Campo({ k, label, emp, setCampo, inputCls, labelCls, type = "text", pla
 export default function EconfiaWalletEmpresa() {
   const [emp, setEmp] = useState(EMP_VACIA);
   const [documentos, setDocumentos] = useState([]);
+  const [credenciales, setCredenciales] = useState([]);
   const [tiposDoc, setTiposDoc] = useState([]);
   const [precargado, setPrecargado] = useState(false);
   const [cargando, setCargando] = useState(true);
@@ -135,6 +136,15 @@ export default function EconfiaWalletEmpresa() {
   }, []);
 
   useEffect(() => { cargarEstado(); }, [cargarEstado]);
+
+  const cargarCredenciales = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/empresa/credenciales/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setCredenciales(data.credenciales || []);
+    } catch { /* silencioso */ }
+  }, []);
+  useEffect(() => { cargarCredenciales(); }, [cargarCredenciales]);
 
   const cargarCompartidas = useCallback(async () => {
     try {
@@ -218,6 +228,29 @@ export default function EconfiaWalletEmpresa() {
     }
   };
   const consultarWallet = (e) => { e.preventDefault(); consultarPorClave(consultarClave); };
+
+  const descargarCredencialPDF = async (credencialId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/empresa/credenciales/${credencialId}/pdf/`, {
+        headers: authHeaders(),
+      });
+      if (!res.ok) {
+        setToast({ type: "error", message: "No se pudo descargar la credencial." });
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `credencial-empresa-${credencialId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setToast({ type: "error", message: "Error al descargar la credencial." });
+    }
+  };
 
   const toggleCompartir = (k) =>
     setCompartirAtributos((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
@@ -575,6 +608,45 @@ export default function EconfiaWalletEmpresa() {
             </form>
 
             <DocumentosEmpresa documentos={documentos} onEliminar={eliminarDocumento} />
+          </div>
+
+          {/* ── Credenciales emitidas a la empresa ── */}
+          <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-emerald-500/10 p-6">
+            <h2 className="text-lg font-bold text-content mb-1">Credenciales de la empresa</h2>
+            <p className="text-xs text-muted mb-4">
+              Credenciales oficiales emitidas para esta wallet empresarial.
+            </p>
+            {credenciales.length === 0 ? (
+              <p className="text-sm text-muted">Aún no hay credenciales emitidas para esta empresa.</p>
+            ) : (
+              <div className="space-y-2">
+                {credenciales.map((c) => (
+                  <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-surface-2/60 border border-line/15">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-content truncate">{c.esquema}</div>
+                      <div className="text-xs text-muted">
+                        {c.organizacion ? `${c.organizacion} · ` : ""}Emitida {new Date(c.created_at).toLocaleString("es-CO")}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded-md border ${badgeClasses(c.estado)}`}>
+                        {c.estado}
+                      </span>
+                      <button type="button" onClick={() => descargarCredencialPDF(c.id)}
+                        className="text-xs font-semibold text-emerald-300 hover:text-emerald-200">
+                        PDF
+                      </button>
+                      {c.url_verificacion && (
+                        <a href={c.url_verificacion} target="_blank" rel="noreferrer"
+                          className="text-xs font-semibold text-sky-300 hover:text-sky-200">
+                          Verificar ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ── Compartir mi wallet de empresa ── */}

@@ -202,8 +202,23 @@ export default function Profile() {
         if (!resStats.ok) throw new Error("Error al obtener las estadísticas");
         const statsData = await resStats.json();
         setStats(statsData);
-        // Guardar los datos de stats (que incluyen is_staff y is_superuser) en localStorage como 'user'
-        localStorage.setItem("user", JSON.stringify(statsData));
+        // No reemplazamos el usuario completo con las estadísticas: el TaskBar
+        // depende de flags del perfil (por ejemplo es_admin_organizacion) y se
+        // perdían al recargar. Solo refrescamos el perfil dentro del usuario
+        // ya guardado y avisamos a los componentes que leen localStorage.
+        try {
+          const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+          localStorage.setItem("user", JSON.stringify({
+            ...storedUser,
+            perfil: {
+              ...(storedUser?.perfil || {}),
+              ...profileData,
+            },
+          }));
+          window.dispatchEvent(new Event("user-updated"));
+        } catch (_error) {
+          // Si localStorage falla, no bloqueamos la pantalla de perfil.
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
