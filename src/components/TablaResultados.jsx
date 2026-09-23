@@ -299,11 +299,11 @@ export default function TablaResultados({
     <>
       <ProcessDockPortal items={enProcesoCards} />
 
-      <div className="backdrop-blur-xl bg-surface/70 border border-line/15 shadow-[0_8px_32px_rgba(6,182,212,0.12)] rounded-xl md:rounded-2xl overflow-hidden">
+      <div className="backdrop-blur-xl bg-surface/90 border border-line/20 shadow-[0_8px_32px_rgb(var(--th-brand)/0.10)] rounded-xl md:rounded-2xl overflow-hidden">
         {/* Header elegante */}
-        <div className="px-3 md:px-4 py-1.5 md:py-2 bg-surface-2/60 border-b border-line/15">
+        <div className="px-3 md:px-4 py-1.5 md:py-2 bg-surface-2/85 border-b border-line/20">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <h3 className="text-sm md:text-base font-bold bg-gradient-to-r from-brand to-brand-2 bg-clip-text text-transparent flex items-center gap-1.5 md:gap-2">
+            <h3 className="text-sm md:text-base font-bold text-content flex items-center gap-1.5 md:gap-2">
               <svg className="w-4 h-4 md:w-5 md:h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -371,7 +371,7 @@ export default function TablaResultados({
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
-            <tr className="bg-surface-2/70 border-b border-line/15">
+            <tr className="bg-surface-2/90 border-b border-line/20">
                 <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider" title="Consecutivo de tus consultas">N°</th>
                 <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">NIT/Documento</th>
                 <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Tipo de Consulta</th>
@@ -450,7 +450,8 @@ export default function TablaResultados({
                       {isDone ? (
                         <button
                           onClick={() => onVerResultados?.(item)}
-                          className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-brand to-brand-2 hover:opacity-90 text-white rounded-lg font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:scale-105 transform text-[10px] md:text-xs"
+                          className="px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-brand to-brand-2 hover:brightness-105 rounded-lg font-semibold transition-all duration-300 shadow-[0_0_20px_rgb(var(--th-brand)/0.22)] hover:scale-105 transform text-[10px] md:text-xs"
+                          style={{ color: "rgb(var(--th-brand-contrast))" }}
                         >
                           Ver resultados
                         </button>
@@ -477,7 +478,7 @@ export default function TablaResultados({
         </div>
 
         {/* Paginación elegante */}
-        <div className="flex justify-between items-center px-2 md:px-3 py-1.5 md:py-2 mb-0.5 md:mb-1 bg-surface-2/50 border-t border-line/15">
+        <div className="flex justify-between items-center px-2 md:px-3 py-1.5 md:py-2 mb-0.5 md:mb-1 bg-surface-2/85 border-t border-line/20">
           <button
             onClick={() => setPagina(prev => Math.max(prev - 1, 1))}
             disabled={pagina === 1}

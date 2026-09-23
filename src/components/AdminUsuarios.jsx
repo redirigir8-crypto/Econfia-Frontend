@@ -126,6 +126,7 @@ const AdminUsuarios = () => {
   const [showOrgModal, setShowOrgModal]           = useState(false);
   const [orgUser, setOrgUser]                     = useState(null);
   const [selectedOrgId, setSelectedOrgId]         = useState("");
+  const [orgEsAdmin, setOrgEsAdmin]               = useState(false);
   const [guardandoOrg, setGuardandoOrg]           = useState(false);
   const [showNuevaOrgForm, setShowNuevaOrgForm]   = useState(false);
   const [nuevaOrg, setNuevaOrg]                   = useState({ nombre: "", slug: "", color_acento: "#10b981", color_secundario: "", nombre_wallet: "" });
@@ -400,6 +401,7 @@ const AdminUsuarios = () => {
       const updatedUser = await res.json();
       setOrgUser(updatedUser);
       setSelectedOrgId(updatedUser.perfil?.organizacion ? String(updatedUser.perfil.organizacion.id ?? "") : "");
+      setOrgEsAdmin(!!updatedUser.perfil?.es_admin_organizacion);
       setShowNuevaOrgForm(false);
       setShowOrgModal(true);
       fetchOrganizaciones();
@@ -422,13 +424,13 @@ const AdminUsuarios = () => {
       const res = await fetch(`${API_URL}/api/perfiles/${orgUser.perfil.id}/asignar-organizacion/`, {
         method: "POST",
         headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ organizacion_id: selectedOrgId || null }),
+        body: JSON.stringify({ organizacion_id: selectedOrgId || null, es_admin_organizacion: selectedOrgId ? orgEsAdmin : false }),
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
       setUsers((prev) => prev.map((u) =>
         u.id === orgUser.id
-          ? { ...u, perfil: { ...u.perfil, organizacion: data.organizacion } }
+          ? { ...u, perfil: { ...u.perfil, organizacion: data.organizacion, es_admin_organizacion: data.es_admin_organizacion } }
           : u
       ));
       setToast({ type: "success", message: selectedOrgId ? "Marca asignada" : "Marca quitada (vuelve a Econfia)" });
@@ -1448,6 +1450,21 @@ const AdminUsuarios = () => {
                 </div>
               );
             })()}
+
+            {selectedOrgId && (
+              <label className="flex items-start gap-2.5 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.06] px-3 py-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={orgEsAdmin}
+                  onChange={(e) => setOrgEsAdmin(e.target.checked)}
+                  className="mt-0.5"
+                />
+                <span className="text-xs text-white/70 leading-relaxed">
+                  <span className="font-semibold text-white">Admin de Entidad</span> — este usuario podrá diseñar, publicar y emitir los{" "}
+                  <strong>esquemas de credenciales</strong> de esta organización desde econfiaWallet.
+                </span>
+              </label>
+            )}
 
             <button
               onClick={handleGuardarOrganizacion}

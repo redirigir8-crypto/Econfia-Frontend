@@ -129,6 +129,11 @@ if (isAdmin) {
     { path: "/3f8a1e6d", icon: <WalletIcon size={16} strokeWidth={1.75} />, label: "Admin Wallet", color: "emerald" },
   ];
 }
+// Admin de una Entidad (org-admin) que NO es superadmin de Econfia: acceso al
+// panel de Wallet, donde solo verá la pestaña de Esquemas de credenciales.
+else if (user?.perfil?.es_admin_organizacion) {
+  menuItems.push({ path: "/3f8a1e6d", icon: <WalletIcon size={16} strokeWidth={1.75} />, label: "Esquemas Wallet", color: "emerald" });
+}
 
   const navigate = useNavigate();
   const { pathname } = useLocation();

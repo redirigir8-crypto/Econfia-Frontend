@@ -27,7 +27,12 @@ export default function LogoOrganizacion({ className = "h-16 w-16 object-contain
 
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      <EconfiaLogo key={pathname} size={size} color={colorForPath(pathname)} title={alt || "Econfía"} />
+      <EconfiaLogo
+        key={`${pathname}-${organizacion?.color_acento || "default"}`}
+        size={size}
+        color={organizacion?.color_acento || colorForPath(pathname)}
+        title={alt || "Econfía"}
+      />
     </div>
   );
 }

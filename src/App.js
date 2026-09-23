@@ -20,6 +20,7 @@ import ConsultaEIdentidad from "./views/ConsultaEIdentidad";
 import EconfiaWalletHome from "./views/EconfiaWalletHome";
 import WalletPublico from "./views/WalletPublico";
 import AceptarInvitacion from "./pages/AceptarInvitacion";
+import VerificarCredencial from "./pages/VerificarCredencial";
 import Resultados from "./views/Resultados";
 import LogOut from "./views/LogOut";
 import Ayuda from "./views/Ayuda";
@@ -783,6 +784,7 @@ export default function App() {
             <Route path="/beneficios" element={<Beneficios />} />
             <Route path="/w/:token" element={<WalletPublico />} />
             <Route path="/wallet-invitacion" element={<AceptarInvitacion />} />
+            <Route path="/verificar-credencial" element={<VerificarCredencial />} />
             {/* Legales públicas (requeridas por Google Play) */}
             <Route path="/terminos"            element={<TerminosLegales />}    />
             <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />

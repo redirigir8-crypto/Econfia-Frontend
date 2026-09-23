@@ -970,8 +970,8 @@ export default function Resultados() {
   return (
     <section className="relative min-h-screen py-4 md:py-6 pb-32 md:pb-36 overflow-hidden bg-transparent">
       {/* Elementos decorativos de fondo */}
-      <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-20 right-20 w-72 h-72 bg-brand/5 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-brand-2/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
       {/* Modal lote para e-identidad */}
       {consultaSeleccionada && consultaTipoActual === "e-identidad" && (
@@ -1002,7 +1002,7 @@ export default function Resultados() {
                 placeholder="Buscar por ID, Cédula, Nombre o Estado..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full md:w-1/2 px-3 py-1.5 md:py-2 rounded-lg bg-surface/60 border border-line/15 text-sm text-content placeholder-muted focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
+                className="w-full md:w-1/2 px-3 py-1.5 md:py-2 rounded-lg bg-surface/90 border border-line/20 text-sm text-content placeholder-muted focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
               />
 
               <div className="flex flex-col sm:flex-row gap-2">
@@ -1011,7 +1011,7 @@ export default function Resultados() {
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, estado: e.target.value }))
                   }
-                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-surface/60 border border-line/15 text-sm text-content focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm appearance-none cursor-pointer"
+                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-surface/90 border border-line/20 text-sm text-content focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm appearance-none cursor-pointer"
                 >
                   <option className="bg-surface text-content" value="">Todos los estados</option>
                   <option className="bg-surface text-content" value="en_proceso">En proceso</option>
@@ -1025,7 +1025,7 @@ export default function Resultados() {
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, fecha: e.target.value }))
                   }
-                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-surface/60 border border-line/15 text-sm text-content focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
+                  className="w-full sm:w-auto px-3 py-1.5 md:py-2 rounded-lg bg-surface/90 border border-line/20 text-sm text-content focus:outline-none focus:border-brand/50 focus:bg-surface transition-all backdrop-blur-sm"
                 />
               </div>
             </div>

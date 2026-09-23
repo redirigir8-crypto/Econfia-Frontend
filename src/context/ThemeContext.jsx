@@ -24,13 +24,66 @@ function isValid(t) {
   return THEMES.some((x) => x.id === t);
 }
 
-/** "#10b981" -> "16 185 129" (formato canal-RGB sin coma que usan los
- * tokens de themes.css, para poder combinarse con rgb(var(--x) / alpha)). */
-function hexARgbTokens(hex) {
+function parseHexColor(hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
   if (!m) return null;
   const n = parseInt(m[1], 16);
-  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function rgbTokens(rgb) {
+  if (!rgb) return null;
+  return `${rgb.r} ${rgb.g} ${rgb.b}`;
+}
+
+function rgbToHex({ r, g, b }) {
+  const h = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+  return `#${h(r)}${h(g)}${h(b)}`;
+}
+
+function mixRgb(a, b, weight = 0.5) {
+  return {
+    r: a.r + (b.r - a.r) * weight,
+    g: a.g + (b.g - a.g) * weight,
+    b: a.b + (b.b - a.b) * weight,
+  };
+}
+
+function luminance({ r, g, b }) {
+  const channel = (value) => {
+    const v = value / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+}
+
+function colorContrasteSobreMarca(principalHex, secundarioHex) {
+  const principal = parseHexColor(principalHex);
+  if (!principal) return { r: 255, g: 255, b: 255 };
+  const secundario = parseHexColor(secundarioHex) || principal;
+  const fondoPromedio = mixRgb(principal, secundario, 0.5);
+  return luminance(fondoPromedio) > 0.46
+    ? { r: 15, g: 23, b: 42 }
+    : { r: 255, g: 255, b: 255 };
+}
+
+function sameHex(a, b) {
+  return String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+}
+
+/** "#10b981" -> "16 185 129" (formato canal-RGB sin coma que usan los
+ * tokens de themes.css, para poder combinarse con rgb(var(--x) / alpha)). */
+function hexARgbTokens(hex) {
+  return rgbTokens(parseHexColor(hex));
+}
+
+/** Si la organización no define un secundario real, derivamos uno más claro.
+ * Esto evita degradados planos o manchas visuales cuando el admin escoge un
+ * único color fuerte. */
+function derivarColorSecundario(hexPrincipal) {
+  const principal = parseHexColor(hexPrincipal);
+  if (!principal) return null;
+  return rgbToHex(mixRgb(principal, { r: 255, g: 255, b: 255 }, 0.34));
 }
 
 /** Aplica (o limpia) el branding de una Organizacion sobre los tokens de
@@ -45,15 +98,21 @@ function hexARgbTokens(hex) {
 export function aplicarBrandingOrganizacion(organizacion) {
   const root = document.documentElement;
   const rgbPrincipal = organizacion?.color_acento ? hexARgbTokens(organizacion.color_acento) : null;
-  const rgbSecundario = organizacion?.color_secundario_efectivo
-    ? hexARgbTokens(organizacion.color_secundario_efectivo)
-    : rgbPrincipal;
+  const secundarioElegante = organizacion?.color_secundario_efectivo && !sameHex(organizacion.color_secundario_efectivo, organizacion.color_acento)
+    ? organizacion.color_secundario_efectivo
+    : derivarColorSecundario(organizacion?.color_acento);
+  const rgbSecundario = secundarioElegante ? hexARgbTokens(secundarioElegante) : rgbPrincipal;
   if (rgbPrincipal) {
     root.style.setProperty("--th-brand", rgbPrincipal);
     root.style.setProperty("--th-brand-2", rgbSecundario || rgbPrincipal);
+    root.style.setProperty(
+      "--th-brand-contrast",
+      rgbTokens(colorContrasteSobreMarca(organizacion.color_acento, secundarioElegante))
+    );
   } else {
     root.style.removeProperty("--th-brand");
     root.style.removeProperty("--th-brand-2");
+    root.style.removeProperty("--th-brand-contrast");
   }
   const fondoRgb = organizacion?.color_fondo ? hexARgbTokens(organizacion.color_fondo) : null;
   if (fondoRgb) {
