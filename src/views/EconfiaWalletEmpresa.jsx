@@ -66,6 +66,10 @@ export default function EconfiaWalletEmpresa() {
   const [emp, setEmp] = useState(EMP_VACIA);
   const [documentos, setDocumentos] = useState([]);
   const [credenciales, setCredenciales] = useState([]);
+  const [esquemasDisponibles, setEsquemasDisponibles] = useState([]);
+  const [credEditor, setCredEditor] = useState(null); // { esquema, valores }
+  const [credFiles, setCredFiles] = useState({});
+  const [emitiendoCred, setEmitiendoCred] = useState(false);
   const [tiposDoc, setTiposDoc] = useState([]);
   const [precargado, setPrecargado] = useState(false);
   const [cargando, setCargando] = useState(true);
@@ -145,6 +149,15 @@ export default function EconfiaWalletEmpresa() {
     } catch { /* silencioso */ }
   }, []);
   useEffect(() => { cargarCredenciales(); }, [cargarCredenciales]);
+
+  const cargarEsquemasDisponibles = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/empresa/esquemas/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setEsquemasDisponibles(data.esquemas || []);
+    } catch { /* silencioso */ }
+  }, []);
+  useEffect(() => { cargarEsquemasDisponibles(); }, [cargarEsquemasDisponibles]);
 
   const cargarCompartidas = useCallback(async () => {
     try {
@@ -228,6 +241,52 @@ export default function EconfiaWalletEmpresa() {
     }
   };
   const consultarWallet = (e) => { e.preventDefault(); consultarPorClave(consultarClave); };
+
+  const abrirCredencial = (esquema) => {
+    setCredFiles({});
+    setCredEditor({ esquema, valores: { ...(esquema.valores_sugeridos || {}) } });
+  };
+
+  const setCredValor = (clave, valor) => {
+    setCredEditor((prev) => ({ ...prev, valores: { ...(prev?.valores || {}), [clave]: valor } }));
+  };
+
+  const emitirCredencialEmpresa = async () => {
+    if (!credEditor?.esquema) return;
+    setEmitiendoCred(true);
+    try {
+      const tieneArchivos = Object.values(credFiles).some(Boolean);
+      let opciones;
+      if (tieneArchivos) {
+        const fd = new FormData();
+        fd.append("valores", JSON.stringify(credEditor.valores || {}));
+        Object.entries(credFiles).forEach(([clave, file]) => { if (file) fd.append(`archivo__${clave}`, file); });
+        opciones = { method: "POST", headers: authHeaders(), body: fd };
+      } else {
+        opciones = {
+          method: "POST",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ valores: credEditor.valores || {} }),
+        };
+      }
+      const res = await fetch(`${API_URL}/api/wallet/empresa/esquemas/${credEditor.esquema.id}/emitir/`, opciones);
+      const data = await res.json();
+      if (!res.ok) {
+        const detalle = Array.isArray(data.detalles) ? ` ${data.detalles.join(" ")}` : "";
+        setToast({ type: "error", message: (data.error || "No se pudo generar la credencial.") + detalle });
+        return;
+      }
+      setToast({ type: "success", message: "Credencial generada correctamente." });
+      setCredEditor(null);
+      setCredFiles({});
+      cargarCredenciales();
+      cargarEsquemasDisponibles();
+    } catch {
+      setToast({ type: "error", message: "Error al generar la credencial." });
+    } finally {
+      setEmitiendoCred(false);
+    }
+  };
 
   const descargarCredencialPDF = async (credencialId) => {
     try {
@@ -364,6 +423,7 @@ export default function EconfiaWalletEmpresa() {
       if (res.ok) {
         setEmp(normalizar(data.empresa));
         setToast({ type: "success", message: "Datos de la empresa guardados." });
+        cargarEsquemasDisponibles();
       } else {
         setToast({ type: "error", message: data.error || "No se pudo guardar." });
       }
@@ -420,6 +480,50 @@ export default function EconfiaWalletEmpresa() {
   const labelCls = "block text-xs font-semibold text-content/80 mb-1";
 
   const campoProps = { emp, setCampo, inputCls, labelCls };
+  const renderCampoCredencial = (campo) => {
+    const clave = campo.clave;
+    const valor = credEditor?.valores?.[clave] ?? "";
+    if (campo.tipo === "booleano") {
+      return (
+        <label className="flex items-center gap-2 text-sm text-content cursor-pointer">
+          <input
+            type="checkbox"
+            className="accent-emerald-500 w-4 h-4"
+            checked={!!valor && String(valor).toLowerCase() !== "false"}
+            onChange={(e) => setCredValor(clave, e.target.checked)}
+          />
+          Sí
+        </label>
+      );
+    }
+    if (campo.tipo === "lista") {
+      const opciones = campo.validacion?.opciones || [];
+      return (
+        <select className={inputCls} value={valor} onChange={(e) => setCredValor(clave, e.target.value)}>
+          <option value="">Seleccione…</option>
+          {opciones.map((op) => <option key={op} value={op}>{op}</option>)}
+        </select>
+      );
+    }
+    if (campo.tipo === "archivo") {
+      return (
+        <input
+          type="file"
+          accept=".pdf,.png,.jpg,.jpeg,.webp"
+          onChange={(e) => setCredFiles((prev) => ({ ...prev, [clave]: e.target.files?.[0] || null }))}
+          className="w-full text-xs text-content file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-white file:text-xs file:font-semibold hover:file:bg-emerald-400 file:cursor-pointer"
+        />
+      );
+    }
+    return (
+      <input
+        type={campo.tipo === "numero" ? "number" : campo.tipo === "fecha" ? "date" : "text"}
+        className={inputCls}
+        value={valor}
+        onChange={(e) => setCredValor(clave, e.target.value)}
+      />
+    );
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 pb-24">
@@ -608,6 +712,93 @@ export default function EconfiaWalletEmpresa() {
             </form>
 
             <DocumentosEmpresa documentos={documentos} onEliminar={eliminarDocumento} />
+          </div>
+
+          {/* ── Esquemas publicados que la empresa puede completar ── */}
+          <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-emerald-500/10 p-6">
+            <h2 className="text-lg font-bold text-content mb-1">Credenciales disponibles</h2>
+            <p className="text-xs text-muted mb-4">
+              Plantillas publicadas por la entidad. Se completan con los datos que ya tiene tu wallet empresa; si falta algo, puedes llenarlo antes de generar.
+            </p>
+            {esquemasDisponibles.length === 0 ? (
+              <p className="text-sm text-muted">Aún no hay plantillas publicadas para esta empresa.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {esquemasDisponibles.map((e) => (
+                  <div key={e.id} className="rounded-xl border border-line/15 bg-surface-2/60 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold text-content truncate">{e.nombre}</h3>
+                        <p className="text-xs text-muted mt-1">
+                          {e.organizacion || "Global"} · v{e.version}{e.emitidas ? ` · ${e.emitidas} emitida(s)` : ""}
+                        </p>
+                      </div>
+                      <span className="w-4 h-4 rounded-full shrink-0" style={{ background: e.color || "#10b981" }} />
+                    </div>
+                    {e.descripcion && <p className="text-xs text-muted mt-2 line-clamp-2">{e.descripcion}</p>}
+                    <button
+                      type="button"
+                      onClick={() => abrirCredencial(e)}
+                      className="mt-3 px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-white transition-colors"
+                    >
+                      Completar / Generar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {credEditor && (
+              <div className="mt-5 rounded-2xl border border-emerald-500/25 bg-surface/80 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                  <div>
+                    <h3 className="text-content font-bold">{credEditor.esquema.nombre}</h3>
+                    <p className="text-xs text-muted">Revisa los datos autocompletados y completa los campos faltantes.</p>
+                  </div>
+                  <button type="button" onClick={() => { setCredEditor(null); setCredFiles({}); }}
+                    className="px-3 py-1.5 rounded-lg border border-line/15 text-muted hover:text-content text-sm">
+                    Cerrar
+                  </button>
+                </div>
+
+                {(() => {
+                  const grupos = [];
+                  const idx = {};
+                  (credEditor.esquema.campos || []).forEach((c) => {
+                    const g = c.grupo || "Datos";
+                    if (!(g in idx)) { idx[g] = grupos.length; grupos.push({ g, campos: [] }); }
+                    grupos[idx[g]].campos.push(c);
+                  });
+                  return grupos.map((sec) => (
+                    <section key={sec.g} className="mb-4">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-emerald-300 mb-2">{sec.g}</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {sec.campos.map((campo) => (
+                          <div key={campo.clave}>
+                            <label className={labelCls}>
+                              {campo.etiqueta || campo.clave}{campo.requerido ? " *" : ""}
+                            </label>
+                            {renderCampoCredencial(campo)}
+                            {campo.ayuda && <p className="text-[11px] text-muted mt-1">{campo.ayuda}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ));
+                })()}
+
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    disabled={emitiendoCred}
+                    onClick={emitirCredencialEmpresa}
+                    className="px-5 py-2.5 rounded-lg font-semibold text-sm text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 transition-all disabled:opacity-60"
+                  >
+                    {emitiendoCred ? "Generando…" : "Generar credencial"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Credenciales emitidas a la empresa ── */}
