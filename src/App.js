@@ -38,6 +38,8 @@ import ServicioSeguridad from "./pages/ServicioSeguridad";
 import ServicioTitulos from "./pages/ServicioTitulos";
 import TerminosLegales from "./pages/TerminosLegales";
 import PoliticaPrivacidad from "./pages/PoliticaPrivacidad";
+import SmsTerminos from "./pages/SmsTerminos";
+import SmsPoliticaPrivacidad from "./pages/SmsPoliticaPrivacidad";
 import EliminarCuenta from "./pages/EliminarCuenta";
 import TitulosValidationForm from "./views/TitulosValidationForm";
 import AdminPanel from "./pages/AdminPanel";
@@ -786,6 +788,9 @@ export default function App() {
             {/* Legales públicas (requeridas por Google Play) */}
             <Route path="/terminos"            element={<TerminosLegales />}    />
             <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+            {/* Legales públicas del programa SMS de econfiaWallet (requeridas por Twilio) */}
+            <Route path="/sms-terms"           element={<SmsTerminos />}            />
+            <Route path="/sms-privacy-policy"  element={<SmsPoliticaPrivacidad />}  />
             <Route path="/eliminar-cuenta"     element={<EliminarCuenta />}     />
 
             {/* Protegidas */}
