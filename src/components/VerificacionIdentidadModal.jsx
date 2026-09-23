@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
+  BadgeCheck,
   BookOpen,
   Camera,
   Check,
@@ -16,32 +17,39 @@ import {
   ShieldQuestion,
   Smartphone,
   Smile,
+  Stamp,
   Trash2,
 } from "lucide-react";
 import Toast from "./Toast";
 import { useTheme } from "../context/ThemeContext";
+import { evaluarCalidadCaptura } from "../utils/calidadImagen";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 // Nombre del documento a verificar según lo que el candidato declaró en
 // "Sus datos" — el flujo de verificación es el mismo (OCR + captura), pero
-// referirse siempre a "cédula" confunde a quien tiene pasaporte o CE.
+// referirse siempre a "cédula" confunde a quien tiene pasaporte, CE, PP o Visa.
 const NOMBRE_DOCUMENTO_POR_TIPO = {
   CE: "cédula de extranjería",
   PA: "pasaporte",
+  PP: "permiso de permanencia",
+  VISA: "visa",
 };
 
 function nombreDocumento(tipoDoc) {
   return NOMBRE_DOCUMENTO_POR_TIPO[tipoDoc] || "cédula";
 }
 
-// Solo CC/CE/PA tienen OCR real en el backend (ver core/ocr_cedula.py) — el
-// selector del modal de verificación no ofrece TI/PPT/PEP para no arriesgar
-// falsos rechazos por un patrón de documento que no coincide.
+// Solo CC/CE/PA/PP/VISA tienen OCR real en el backend (dispatch por tipo,
+// ver core/ocr_documentos.py) — el selector del modal de verificación no
+// ofrece TI/PPT genérico para no arriesgar falsos rechazos por un patrón
+// de documento que no coincide.
 const TIPOS_DOC_VERIFICABLES = [
   { value: "CC", label: "Cédula de Ciudadanía", icono: IdCard },
   { value: "CE", label: "Cédula de Extranjería", icono: Globe },
   { value: "PA", label: "Pasaporte", icono: BookOpen },
+  { value: "PP", label: "Permiso de Permanencia", icono: BadgeCheck },
+  { value: "VISA", label: "Visa", icono: Stamp },
 ];
 
 function authHeaders(extra = {}) {
@@ -67,9 +75,10 @@ function consejoOcrIlegible(intentos) {
 // ambiguo) — "nunca se configuró Twilio" no es lo mismo que "Twilio está
 // configurado pero falló en este intento".
 function mensajeEnvioSms(data) {
-  if (data?.fallo_envio_real) {
-    return "No se pudo enviar el SMS real en este momento (problema con el proveedor). Se generó un código de respaldo: contacte a soporte si el problema persiste.";
-  }
+  // Si el envío real falla, el backend ya rechaza la solicitud como error
+  // (no llega hasta acá) — no hay guardado silencioso de un código que el
+  // usuario nunca recibió. `simulado` solo aparece en desarrollo, sin
+  // Twilio configurado.
   if (data?.simulado) {
     return "Código generado (modo de prueba: aún no hay SMS real configurado).";
   }
@@ -1028,7 +1037,7 @@ function VerificarRostroModal({ onClose, setToast, onVerificado, esReregistro, t
         return;
       }
       setCodigoEnviado(true);
-      if (data?.fallo_envio_real || data?.simulado) {
+      if (data?.simulado) {
         setToast({ type: "success", message: mensajeEnvioSms(data) });
       }
     } catch {
@@ -1191,16 +1200,26 @@ function dataUrlAArchivo(dataUrl, nombre) {
   return new File([arr], nombre, { type: mime });
 }
 
-function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
+export function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   const [modo, setModo] = useState(null); // null | "camara" | "archivo"
   const [paso, setPaso] = useState("frente"); // frente | reverso | listo
   const [capturas, setCapturas] = useState({ frente: null, reverso: null });
   const [archivo, setArchivo] = useState(null);
+  const [archivoReverso, setArchivoReverso] = useState(null);
+  const [ppTieneReverso, setPpTieneReverso] = useState(true);
   const [enviando, setEnviando] = useState(false);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [camaraLista, setCamaraLista] = useState(false);
   const [errorCamara, setErrorCamara] = useState("");
+  // Quality gate del lado cliente (Fase 5): si la foto sale borrosa o mal
+  // expuesta, se rechaza AQUÍ MISMO (sin gastar un viaje de red) y se
+  // muestra el motivo — el usuario repite la captura del mismo paso sin
+  // avanzar. El backend sigue siendo la autoridad final (ver Fase 3), esto
+  // solo evita la espera de subir una foto que de todas formas se iba a
+  // rechazar.
+  const [avisoCalidad, setAvisoCalidad] = useState("");
+  const [capturando, setCapturando] = useState(false);
   // Cuenta fallos consecutivos de OCR ilegible (foto que ni siquiera se pudo
   // leer, no un dato que no coincide) para dar consejos cada vez más
   // específicos en vez de repetir el mismo mensaje genérico (IDV-02).
@@ -1210,6 +1229,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   // modal de inmediato, para mostrar el resultado final.
   const [verificando, setVerificando] = useState(false);
   const pollDocRef = useRef(null);
+  const pollDocTokenRef = useRef(0);
   // El tipo de documento de "Sus datos" (formulario base) es solo un dato
   // de identidad y casi siempre ya viene fijo (arranca en "CC" por
   // defecto) — no sirve para saber qué va a fotografiar el usuario AHORA.
@@ -1219,18 +1239,28 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   const [tipoDocLocal, setTipoDocLocal] = useState(null);
 
   const documento = nombreDocumento(tipoDocLocal);
-  const ORDEN = ["frente", "reverso"];
+  const dosCaras = tipoDocLocal === "CC" || tipoDocLocal === "CE" || (tipoDocLocal === "PP" && ppTieneReverso);
+  const ORDEN = dosCaras ? ["frente", "reverso"] : ["frente"];
+  const esPdf = archivo?.type === "application/pdf" || /\.pdf$/i.test(archivo?.name || "");
+  const instrucciones = dosCaras ? "Capture primero el frente y después el reverso."
+    : tipoDocLocal === "PA" ? "Capture la página biográfica de su pasaporte."
+    : tipoDocLocal === "VISA" ? "Capture únicamente la página o sección donde aparece la visa."
+    : "Capture la cara que contiene los datos de su permiso.";
   const ETIQUETAS = {
-    frente: `Enfoque el frente de su ${documento}`,
+    frente: tipoDocLocal === "PA" ? "Enfoque la página biográfica de su pasaporte"
+      : tipoDocLocal === "VISA" ? "Enfoque únicamente la página o sección de la visa"
+      : `Enfoque el frente de su ${documento}`,
     reverso: `Ahora enfoque el reverso de su ${documento}`,
   };
 
   useEffect(() => {
     if (modo !== "camara" || paso === "listo") return undefined;
     let activo = true;
+    setCamaraLista(false);
+    setErrorCamara("");
     async function iniciarCamara() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } } });
         if (!activo) { stream.getTracks().forEach((t) => t.stop()); return; }
         streamRef.current = stream;
         if (videoRef.current) {
@@ -1249,7 +1279,22 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   }, [modo, paso]);
 
   const capturarFoto = () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current?.videoWidth || !videoRef.current?.videoHeight || capturando) return;
+    setAvisoCalidad("");
+    setCapturando(true);
+
+    const calidad = evaluarCalidadCaptura(videoRef.current);
+    if (!calidad.aceptable) {
+      // Rechazo local: no se guarda la captura ni se avanza de paso — el
+      // usuario ve el motivo y puede intentar de nuevo con la cámara ya
+      // abierta, sin perder los pasos ya completados. El backend (Fase 3)
+      // sigue siendo la autoridad final; esto solo evita la espera de
+      // subir una foto que de todas formas se iba a rechazar.
+      setAvisoCalidad(calidad.motivos[0]);
+      setCapturando(false);
+      return;
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
@@ -1257,6 +1302,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
     const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
     const nuevasCapturas = { ...capturas, [paso]: dataUrl };
     setCapturas(nuevasCapturas);
+    setCapturando(false);
     const idx = ORDEN.indexOf(paso);
     if (idx < ORDEN.length - 1) {
       setPaso(ORDEN[idx + 1]);
@@ -1269,16 +1315,30 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   const repetir = (p) => {
     setCapturas((c) => ({ ...c, [p]: null }));
     setPaso(p);
+    setAvisoCalidad("");
   };
 
   const volverAlInicio = () => {
+    pollDocTokenRef.current += 1;
+    if (pollDocRef.current) {
+      clearTimeout(pollDocRef.current);
+      pollDocRef.current = null;
+    }
     streamRef.current?.getTracks().forEach((t) => t.stop());
     setModo(null);
     setPaso("frente");
     setCapturas({ frente: null, reverso: null });
     setArchivo(null);
+    setArchivoReverso(null);
     setCamaraLista(false);
     setErrorCamara("");
+    setAvisoCalidad("");
+  };
+
+  const cerrarDocumento = () => {
+    volverAlInicio();
+    setTipoDocLocal(null);
+    onClose();
   };
 
   // Consulta periódica del documento mientras está "pendiente" (Celery
@@ -1287,18 +1347,25 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   // esperar en silencio: puede pasar si Registraduría no responde y el
   // documento queda pendiente indefinidamente (sin reintento automático en
   // el backend) — mejor avisar al usuario que dejarlo esperando para siempre.
+  useEffect(() => () => {
+    pollDocTokenRef.current += 1;
+    if (pollDocRef.current) clearTimeout(pollDocRef.current);
+  }, []);
+
   const POLL_INTENTOS_MAX = 30;
 
   const pollearDocumento = (docId, onReintentar) => {
     setVerificando(true);
-    let activo = true;
+    const token = ++pollDocTokenRef.current;
+    const activo = () => pollDocTokenRef.current === token;
     let intentos = 0;
     const tick = async () => {
+      if (!activo()) return;
       intentos += 1;
       try {
         const res = await fetch(`${API_URL}/api/wallet/documentos/${docId}/`, { headers: authHeaders() });
         const doc = await res.json().catch(() => null);
-        if (!activo) return;
+        if (!activo()) return;
         if (!res.ok || !doc) {
           if (intentos >= POLL_INTENTOS_MAX) {
             setVerificando(false);
@@ -1334,9 +1401,9 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
         }
         setToast({ type: "success", message: "Cédula verificada correctamente." });
         onVerificado?.();
-        onClose();
+        cerrarDocumento();
       } catch {
-        if (!activo) return;
+        if (!activo()) return;
         if (intentos >= POLL_INTENTOS_MAX) {
           setVerificando(false);
           setToast({ type: "error", message: "No se pudo confirmar el estado de su cédula. Intente de nuevo más tarde." });
@@ -1382,13 +1449,19 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
         onReintentar?.();
         return;
       }
+      if (data?.documento?.detalle_verificacion?.resultado === "revision_requerida") {
+        setToast({ type: "info", message: data.documento.detalle_verificacion.mensaje || "El documento requiere revisión." });
+        onVerificado?.();
+        cerrarDocumento();
+        return;
+      }
       if (data?.documento?.estado_verificacion === "pendiente") {
         pollearDocumento(data.documento.id, onReintentar);
         return;
       }
-      setToast({ type: "success", message: "Cédula enviada. Su verificación quedó en proceso." });
+      setToast({ type: "success", message: data?.documento?.estado_verificacion === "verificado" ? "Documento verificado correctamente." : "Documento recibido." });
       onVerificado?.();
-      onClose();
+      cerrarDocumento();
     } catch {
       setToast({ type: "error", message: "Error de conexión al verificar la cédula." });
     } finally {
@@ -1397,11 +1470,13 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   };
 
   const enviarCapturas = async () => {
+    if (!tipoDocLocal || !capturas.frente || (dosCaras && !capturas.reverso)) return;
     const fd = new FormData();
     fd.append("tipo", "cedula");
     fd.append("tipo_doc", tipoDocLocal);
     fd.append("archivo", dataUrlAArchivo(capturas.frente, "cedula-frente.jpg"));
-    fd.append("archivo_reverso", dataUrlAArchivo(capturas.reverso, "cedula-reverso.jpg"));
+    fd.append("captura_documento", "camara");
+    if (dosCaras) fd.append("archivo_reverso", dataUrlAArchivo(capturas.reverso, "documento-reverso.jpg"));
     await enviarDocumento(fd, () => {
       setCapturas({ frente: null, reverso: null });
       setPaso("frente");
@@ -1410,15 +1485,17 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
 
   const enviarArchivo = async (e) => {
     e.preventDefault();
-    if (!archivo) {
-      setToast({ type: "error", message: "Seleccione el archivo escaneado de su cédula (PDF o imagen)." });
+    if (!archivo || (dosCaras && !esPdf && !archivoReverso)) {
+      setToast({ type: "error", message: dosCaras ? "Seleccione ambas caras o un PDF que las contenga." : "Seleccione la imagen o PDF de su documento." });
       return;
     }
     const fd = new FormData();
     fd.append("tipo", "cedula");
     fd.append("tipo_doc", tipoDocLocal);
     fd.append("archivo", archivo);
-    await enviarDocumento(fd, () => setArchivo(null));
+    fd.append("captura_documento", "escaneada");
+    if (dosCaras && !esPdf && archivoReverso) fd.append("archivo_reverso", archivoReverso);
+    await enviarDocumento(fd, () => { setArchivo(null); setArchivoReverso(null); });
   };
 
   if (!tipoDocLocal) {
@@ -1427,7 +1504,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
         title="¿Qué documento va a verificar?"
         subtitle="Elija el tipo de documento que va a fotografiar."
         onClose={onClose}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {TIPOS_DOC_VERIFICABLES.map((t) => (
             <button
               key={t.value}
@@ -1460,13 +1537,20 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
 
   if (modo === null) {
     return (
-      <VerifModalShell title={`Verificar ${documento}`} subtitle="Elija cómo quiere entregar su documento." onClose={onClose}>
+      <VerifModalShell title={`Verificar ${documento}`} subtitle={instrucciones} onClose={onClose}>
+        {tipoDocLocal === "PP" && (
+          <fieldset className="mb-4 flex gap-4 text-sm">
+            <legend className="mb-2">¿Su permiso tiene reverso?</legend>
+            <label><input type="radio" name="ppCaras" checked={ppTieneReverso} onChange={() => setPpTieneReverso(true)} /> Sí, dos caras</label>
+            <label><input type="radio" name="ppCaras" checked={!ppTieneReverso} onChange={() => setPpTieneReverso(false)} /> No, una cara</label>
+          </fieldset>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button type="button" onClick={() => setModo("camara")}
             className="flex flex-col items-center gap-2 rounded-xl bg-surface-2/50 border border-line/10 hover:border-emerald-500/40 px-4 py-6 transition-colors">
             <Camera className="w-8 h-8 text-brand" />
             <span className="text-content text-sm font-semibold">Tomar fotos</span>
-            <span className="text-muted text-[11px] text-center">Frente y reverso con la cámara</span>
+            <span className="text-muted text-[11px] text-center">{dosCaras ? "Frente y reverso con la cámara" : "Una página con la cámara"}</span>
           </button>
           <button type="button" onClick={() => setModo("archivo")}
             className="flex flex-col items-center gap-2 rounded-xl bg-surface-2/50 border border-line/10 hover:border-emerald-500/40 px-4 py-6 transition-colors">
@@ -1481,7 +1565,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
 
   if (modo === "archivo") {
     return (
-      <VerifModalShell title={`Verificar ${documento}`} subtitle={`Suba el PDF o imagen de su ${documento} escaneado (frente y reverso, en una o dos páginas).`} onClose={onClose}>
+      <VerifModalShell title={`Verificar ${documento}`} subtitle={dosCaras ? 'Suba ambas caras como imágenes o un PDF que las contenga.' : instrucciones} onClose={onClose}>
         <form onSubmit={enviarArchivo} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-content/80">Archivo (PDF o imagen, máx 10 MB)</label>
@@ -1489,6 +1573,13 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
               onChange={(e) => setArchivo(e.target.files?.[0] || null)}
               className="text-xs text-content file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-white file:text-xs file:font-semibold hover:file:bg-emerald-400 file:cursor-pointer" />
             {archivo && <p className="text-muted text-[11px] truncate">{archivo.name}</p>}
+            {dosCaras && !esPdf && (
+              <label className="text-xs font-semibold text-content/80">
+                Reverso (imagen, máx 10 MB)
+                <input type="file" accept=".png,.jpg,.jpeg,.webp"
+                  onChange={(e) => setArchivoReverso(e.target.files?.[0] || null)} />
+              </label>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <button type="button" onClick={volverAlInicio} className="text-xs text-muted hover:text-content">
@@ -1497,7 +1588,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
             <button type="submit" disabled={enviando}
               className="ml-auto flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
               {enviando && <Spinner />}
-              {enviando ? "Enviando…" : `Verificar ${documento}`}
+              {enviando ? "Procesando documento…" : `Verificar ${documento}`}
             </button>
           </div>
         </form>
@@ -1506,20 +1597,27 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   }
 
   return (
-    <VerifModalShell title={`Verificar ${documento}`} subtitle={`Tome una foto del frente y luego del reverso de su ${documento}.`} onClose={onClose}>
+    <VerifModalShell title={`Verificar ${documento}`} subtitle={instrucciones} onClose={onClose}>
       {paso !== "listo" ? (
         <div className="flex flex-col items-center gap-3">
-          <p className="text-content text-sm font-semibold">{ETIQUETAS[paso]}</p>
+          <p className="text-content text-sm font-semibold">
+            {capturando ? "Capturando…" : ETIQUETAS[paso]}
+          </p>
           {errorCamara ? (
             <p className="text-red-300 text-xs text-center">{errorCamara}</p>
           ) : (
-            <div className="w-full aspect-[3/2] rounded-lg overflow-hidden border-2 border-emerald-500/50 bg-surface-2/70 flex items-center justify-center">
-              <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+            <div className={`w-full aspect-[3/2] rounded-lg overflow-hidden border-2 bg-surface-2/70 flex items-center justify-center transition-colors ${
+              avisoCalidad ? "border-red-500/60" : "border-emerald-500/50"
+            }`}>
+              <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-contain" />
             </div>
           )}
-          <button type="button" onClick={capturarFoto} disabled={!camaraLista}
+          {avisoCalidad && (
+            <p className="text-red-300 text-xs text-center font-semibold">{avisoCalidad}</p>
+          )}
+          <button type="button" onClick={capturarFoto} disabled={!camaraLista || capturando}
             className="mt-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
-            Capturar
+            {capturando ? "Capturando…" : "Capturar"}
           </button>
           <div className="flex items-center gap-2 mt-1">
             {ORDEN.map((p) => (
@@ -1545,7 +1643,7 @@ function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
           <button type="button" onClick={enviarCapturas} disabled={enviando}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
             {enviando && <Spinner />}
-            {enviando ? "Enviando…" : `Verificar ${documento}`}
+            {enviando ? "Procesando documento…" : `Verificar ${documento}`}
           </button>
         </div>
       )}
