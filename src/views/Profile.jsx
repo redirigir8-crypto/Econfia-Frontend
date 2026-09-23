@@ -7,10 +7,12 @@ import {
 } from "recharts";
 import { Modal } from "antd";
 import { FiLogOut } from "react-icons/fi";
+import { ShieldCheck } from "lucide-react";
 import jsPDF from "jspdf";
 import { generarInformeUsuarioPDF } from "../pdf/InformeUsuarioPDFV2";
 import { clearSession } from "../utils/session";
 import { useTheme } from "../context/ThemeContext";
+import VerificacionIdentidadModal from "../components/VerificacionIdentidadModal";
 
 /** Paleta y helpers de estilo elegante */
 const THEME = {
@@ -108,7 +110,12 @@ export default function Profile() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(null);
+  const [mostrarVerificacionIdentidad, setMostrarVerificacionIdentidad] = useState(false);
   const API_URL = process.env.REACT_APP_API_URL;
+
+  const tienePlanWallet = (profile?.perfil?.planes || []).some(
+    (p) => (p?.nombre || "").toLowerCase() === "wallet"
+  );
 
   const handleLogout = () => {
     clearSession();
@@ -461,6 +468,19 @@ export default function Profile() {
                 Generar informe PDF
               </button>
             </div>
+
+            {/* Verificación de identidad — solo para usuarios con plan Wallet */}
+            {tienePlanWallet && (
+              <div className="w-full flex justify-center mt-2.5">
+                <button
+                  className="w-full flex items-center justify-center gap-2 px-6 py-2 text-sm sm:text-base rounded-xl border border-brand/30 bg-brand/10 text-brand font-bold hover:bg-brand/20 transition-all"
+                  onClick={() => setMostrarVerificacionIdentidad(true)}
+                >
+                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Verificación de identidad
+                </button>
+              </div>
+            )}
           </div>
         </ElegantCard>
 
@@ -548,6 +568,9 @@ export default function Profile() {
         </ElegantCard>
         </div>
       </div>
+      {mostrarVerificacionIdentidad && (
+        <VerificacionIdentidadModal onClose={() => setMostrarVerificacionIdentidad(false)} />
+      )}
     </section>
   );
 }
