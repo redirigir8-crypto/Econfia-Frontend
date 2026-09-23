@@ -66,6 +66,7 @@ export default function EconfiaWalletEmpresa() {
   const [emp, setEmp] = useState(EMP_VACIA);
   const [documentos, setDocumentos] = useState([]);
   const [credenciales, setCredenciales] = useState([]);
+  const [histCred, setHistCred] = useState(null); // { cred, lista } | null
   const [esquemasDisponibles, setEsquemasDisponibles] = useState([]);
   const [credEditor, setCredEditor] = useState(null); // { esquema, valores }
   const [credFiles, setCredFiles] = useState({});
@@ -286,6 +287,15 @@ export default function EconfiaWalletEmpresa() {
     } finally {
       setEmitiendoCred(false);
     }
+  };
+
+  const verHistorialCred = async (cred) => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/credenciales/${cred.id}/verificaciones/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setHistCred({ cred, lista: data.verificaciones || [] });
+      else setToast({ type: "error", message: data.error || "No se pudo cargar el historial." });
+    } catch { setToast({ type: "error", message: "Error de conexión." }); }
   };
 
   const descargarCredencialPDF = async (credencialId) => {
@@ -528,6 +538,27 @@ export default function EconfiaWalletEmpresa() {
   return (
     <div className="max-w-5xl mx-auto px-4 pb-24">
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
+
+      {histCred && (
+        <div onClick={() => setHistCred(null)} className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg bg-surface border border-line/15 rounded-2xl p-5 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-base font-bold text-content">Historial de verificaciones</h3>
+              <button onClick={() => setHistCred(null)} className="text-xs font-semibold text-muted hover:text-content">Cerrar</button>
+            </div>
+            <p className="text-xs text-muted mb-3">{histCred.cred.esquema} · #{histCred.cred.id}</p>
+            {histCred.lista.length === 0 && <p className="text-sm text-muted">Nadie ha verificado esta credencial todavía.</p>}
+            <div className="space-y-1">
+              {histCred.lista.map((v, i) => (
+                <div key={i} className="flex items-center justify-between gap-3 text-xs border-b border-line/10 py-1.5">
+                  <span className="text-content">{new Date(v.fecha).toLocaleString("es-CO")}{v.ip ? <span className="text-muted"> · {v.ip}</span> : null}</span>
+                  <span className={v.valida ? "text-emerald-300 font-bold" : "text-red-300 font-bold"}>{v.valida ? "Válida" : "No válida"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {llaveEmpresa && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
@@ -818,6 +849,10 @@ export default function EconfiaWalletEmpresa() {
                       <div className="text-xs text-muted">
                         {c.organizacion ? `${c.organizacion} · ` : ""}Emitida {new Date(c.created_at).toLocaleString("es-CO")}
                       </div>
+                      <div className={`text-[11px] font-semibold mt-0.5 ${c.verificaciones ? "text-emerald-300" : "text-muted"}`}>
+                        {c.verificaciones ? `✓ Verificada ${c.verificaciones} ${c.verificaciones === 1 ? "vez" : "veces"}` : "Sin verificaciones aún"}
+                        {c.ultima_verificacion ? ` · última ${new Date(c.ultima_verificacion).toLocaleString("es-CO")}` : ""}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className={`text-[10px] font-bold px-2 py-1 rounded-md border ${badgeClasses(c.estado)}`}>
@@ -826,6 +861,10 @@ export default function EconfiaWalletEmpresa() {
                       <button type="button" onClick={() => descargarCredencialPDF(c.id)}
                         className="text-xs font-semibold text-emerald-300 hover:text-emerald-200">
                         PDF
+                      </button>
+                      <button type="button" onClick={() => verHistorialCred(c)}
+                        className="text-xs font-semibold text-content/70 hover:text-content">
+                        Historial
                       </button>
                       {c.url_verificacion && (
                         <a href={c.url_verificacion} target="_blank" rel="noreferrer"

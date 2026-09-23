@@ -24,6 +24,28 @@ const TIPOS = [
 ];
 const ESTADO_COLOR = { borrador: AMBAR, publicado: VERDE, archivado: T.muted };
 
+// Datos de la wallet empresa con los que un campo puede autollenarse.
+const ORIGENES_EMPRESA = [
+  { value: "", label: "— (manual)" },
+  { value: "razon_social", label: "Razón social" },
+  { value: "nombre_comercial", label: "Nombre comercial" },
+  { value: "nit", label: "NIT" },
+  { value: "digito_verificacion", label: "Dígito de verificación" },
+  { value: "tipo_organizacion", label: "Tipo de organización" },
+  { value: "matricula_mercantil", label: "Matrícula mercantil" },
+  { value: "camara_comercio", label: "Cámara de comercio" },
+  { value: "ciiu", label: "CIIU" },
+  { value: "actividad_economica", label: "Actividad económica" },
+  { value: "sector", label: "Sector" },
+  { value: "direccion", label: "Dirección" },
+  { value: "ciudad", label: "Ciudad" },
+  { value: "telefono", label: "Teléfono" },
+  { value: "correo", label: "Correo" },
+  { value: "rep_nombre", label: "Representante legal" },
+  { value: "rep_tipo_doc", label: "Rep. — tipo de doc." },
+  { value: "rep_num_doc", label: "Rep. — número de doc." },
+];
+
 const authHeaders = (extra = {}) => ({ Authorization: `Token ${localStorage.getItem("token")}`, ...extra });
 const input = { padding: "9px 12px", borderRadius: 10, border: `1px solid ${T.line}`, background: T.surface2, color: T.text, fontSize: 13, width: "100%", boxSizing: "border-box" };
 const btn = (bg, color = "#fff") => ({ cursor: "pointer", padding: "8px 14px", borderRadius: 10, border: "none", background: bg, color, fontWeight: 700, fontSize: 13 });
@@ -61,6 +83,7 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
   const [admins, setAdmins] = useState([]);
   const [adminEmail, setAdminEmail] = useState("");
   const [adminOrg, setAdminOrg] = useState("");
+  const [histVerif, setHistVerif] = useState(null); // { cred, lista } | null
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -114,7 +137,7 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
       nombre: form.nombre, codigo: form.codigo, descripcion: form.descripcion, color: form.color || "",
       organizacion_id: form.organizacion_id || null,
       campos: form.campos.map((c, i) => ({
-        etiqueta: c.etiqueta, tipo: c.tipo, requerido: !!c.requerido, ayuda: c.ayuda || "", grupo: c.grupo || "", orden: i,
+        etiqueta: c.etiqueta, tipo: c.tipo, requerido: !!c.requerido, ayuda: c.ayuda || "", grupo: c.grupo || "", origen: c.origen || "", orden: i,
         validacion: {
           regex: c.validacion?.regex || "",
           opciones: c.tipo === "lista"
@@ -261,6 +284,16 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
       const url = URL.createObjectURL(await res.blob());
       window.open(url, "_blank");
       setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch { setError("Error de conexión."); }
+  };
+
+  const verHistorial = async (cred) => {
+    setError("");
+    try {
+      const res = await fetch(`${API_URL}/api/admin/wallet/credenciales/${cred.id}/verificaciones/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "No se pudo cargar el historial."); return; }
+      setHistVerif({ cred, lista: data.verificaciones || [] });
     } catch { setError("Error de conexión."); }
   };
 
@@ -538,9 +571,14 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
                 <div style={{ color: T.muted, fontSize: 12, marginTop: 2 }}>
                   {c.sujeto ? `${c.sujeto} · ` : ""}{new Date(c.created_at).toLocaleString("es-CO")}{c.organizacion ? ` · ${c.organizacion}` : ""}
                 </div>
+                <div style={{ color: c.verificaciones ? VERDE : T.muted, fontSize: 11, marginTop: 3, fontWeight: 600 }}>
+                  {c.verificaciones ? `✓ Verificada ${c.verificaciones} ${c.verificaciones === 1 ? "vez" : "veces"}` : "Sin verificaciones aún"}
+                  {c.ultima_verificacion ? ` · última ${new Date(c.ultima_verificacion).toLocaleString("es-CO")}` : ""}
+                </div>
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 <button onClick={() => descargarPdf(c.id)} style={btn(`linear-gradient(120deg, ${T.brand}, ${T.brand2})`, T.surface)}>PDF</button>
+                <button onClick={() => verHistorial(c)} style={btn(T.surface, T.text)}>Historial</button>
                 {c.url_verificacion && <a href={c.url_verificacion} target="_blank" rel="noreferrer" style={{ ...btn(T.surface, T.text), textDecoration: "none", display: "inline-flex", alignItems: "center" }}>Verificar ↗</a>}
                 {(c.archivos || []).map((a) => (
                   <button key={a.clave} onClick={() => descargarArchivo(c.id, a.clave)} style={btn(T.surface, T.text)} title={a.nombre || a.clave}>📎 {a.nombre || a.clave}</button>
@@ -549,6 +587,27 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
             </div>
           ))}
         </div>
+
+        {histVerif && (
+          <div onClick={() => setHistVerif(null)} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,.6)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+            <div onClick={(ev) => ev.stopPropagation()} style={{ width: "100%", maxWidth: 560, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 14, padding: 18, maxHeight: "80vh", overflowY: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <h3 style={{ margin: 0, fontSize: 15 }}>Historial de verificaciones</h3>
+                <button onClick={() => setHistVerif(null)} style={btn(T.surface, T.muted)}>Cerrar</button>
+              </div>
+              <p style={{ color: T.muted, fontSize: 12, margin: "0 0 12px" }}>{histVerif.cred.esquema} · #{histVerif.cred.id}</p>
+              {histVerif.lista.length === 0 && <p style={{ color: T.muted, fontSize: 13 }}>Nadie ha verificado esta credencial todavía.</p>}
+              <div style={{ display: "grid", gap: 6 }}>
+                {histVerif.lista.map((v, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 12.5, borderBottom: `1px solid ${T.line}`, padding: "7px 0" }}>
+                    <span>{new Date(v.fecha).toLocaleString("es-CO")} {v.ip ? <span style={{ color: T.muted }}>· {v.ip}</span> : null}</span>
+                    <span style={{ color: v.valida ? VERDE : ROJO, fontWeight: 700 }}>{v.valida ? "Válida" : "No válida"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -632,6 +691,10 @@ export default function AdminWalletEsquemas({ esSuperadmin = true }) {
                   </label>
                   <input value={c.grupo || ""} disabled={soloLectura} onChange={(e) => setCampo(i, { grupo: e.target.value })}
                     placeholder="Sección (opcional)" style={{ ...input, width: 150 }} />
+                  <select value={c.origen || ""} disabled={soloLectura} onChange={(e) => setCampo(i, { origen: e.target.value })}
+                    title="Autollenar este campo con un dato de la empresa" style={{ ...input, width: 180 }}>
+                    {ORIGENES_EMPRESA.map((o) => <option key={o.value} value={o.value}>{o.value ? `Autollenar: ${o.label}` : o.label}</option>)}
+                  </select>
                   {c.tipo === "lista" && (
                     <input value={Array.isArray(c.validacion?.opciones) ? c.validacion.opciones.join(", ") : (c.validacion?.opciones || "")}
                       disabled={soloLectura} onChange={(e) => setValidacion(i, { opciones: e.target.value })}
