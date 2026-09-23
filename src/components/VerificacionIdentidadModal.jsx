@@ -1559,6 +1559,11 @@ function VerificarSmsModal({ onClose, setToast, datosTelefono, onVerificado }) {
   const [codigo, setCodigo] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [segundos, setSegundos] = useState(0);
+  // Consentimiento afirmativo y separado, requerido por Twilio para
+  // campañas A2P/10DLC: el usuario debe marcar esto explícitamente antes de
+  // poder enviar el código — nunca preseleccionado. El backend también lo
+  // exige (ver api_wallet_sms_enviar), esto no es solo cosmético.
+  const [aceptoSms, setAceptoSms] = useState(false);
 
   useEffect(() => {
     if (segundos <= 0) return undefined;
@@ -1572,12 +1577,16 @@ function VerificarSmsModal({ onClose, setToast, datosTelefono, onVerificado }) {
       setToast({ type: "error", message: "Ingrese su número de celular." });
       return;
     }
+    if (!aceptoSms) {
+      setToast({ type: "error", message: "Debe aceptar recibir el código de verificación por SMS para continuar." });
+      return;
+    }
     setEnviando(true);
     try {
       const res = await fetch(`${API_URL}/api/wallet/identidad/sms/enviar/`, {
         method: "POST",
         headers: authHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ telefono, canal: "web" }),
+        body: JSON.stringify({ telefono, canal: "web", acepto_sms: aceptoSms }),
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
@@ -1635,7 +1644,28 @@ function VerificarSmsModal({ onClose, setToast, datosTelefono, onVerificado }) {
                 className="flex-1 px-3 py-2 bg-transparent text-content text-sm placeholder:text-muted/60 focus:outline-none" />
             </div>
           </div>
-          <button type="submit" disabled={enviando}
+          <label className="flex items-start gap-2.5 rounded-lg border border-line/15 bg-surface-2/40 px-3 py-2.5 cursor-pointer">
+            <input type="checkbox" checked={aceptoSms} onChange={(e) => setAceptoSms(e.target.checked)}
+              className="mt-0.5 accent-emerald-500 w-4 h-4 flex-shrink-0" />
+            <span className="text-xs text-content/85 leading-relaxed">
+              Acepto recibir por SMS códigos de verificación de ECONFIA en el número proporcionado.
+              Pueden aplicarse tarifas de mensajes y datos. Responde <strong>STOP</strong> para cancelar
+              y <strong>HELP</strong> para ayuda. Consulte los{" "}
+              <a href="/sms-terms" target="_blank" rel="noreferrer"
+                className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2"
+                onClick={(e) => e.stopPropagation()}>
+                Términos del programa SMS
+              </a>
+              {" "}y la{" "}
+              <a href="/sms-privacy-policy" target="_blank" rel="noreferrer"
+                className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2"
+                onClick={(e) => e.stopPropagation()}>
+                Política de Privacidad de SMS
+              </a>
+              .
+            </span>
+          </label>
+          <button type="submit" disabled={enviando || !aceptoSms}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
             {enviando && <Spinner />}
             {enviando ? "Enviando…" : "Enviar código"}
