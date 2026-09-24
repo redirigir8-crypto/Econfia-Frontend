@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check } from "lucide-react";
+import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
+import { Check, ScanFace, Trash2 } from "lucide-react";
 import Toast from "../components/Toast";
 import { useTheme } from "../context/ThemeContext";
 import VerificacionIdentidadModal from "../components/VerificacionIdentidadModal";
@@ -45,6 +47,20 @@ const NIVEL_OPCIONES = [
   { value: "otro", label: "Otro" },
 ];
 
+// Mismas 8 fuentes y mismas claves que FUENTES_WALLET en core/views_wallet.py
+// — deben coincidir exactamente para que el filtro de divulgación selectiva
+// tenga efecto en el pase compartido.
+const FUENTES_ANTECEDENTES_INFO = [
+  { key: "policia_nacional", label: "Policía Nacional" },
+  { key: "procuraduria", label: "Procuraduría General" },
+  { key: "contraloria", label: "Contraloría General" },
+  { key: "personeria", label: "Personería" },
+  { key: "inhabilidades", label: "Inhabilidades" },
+  { key: "rama_judicial", label: "Rama Judicial" },
+  { key: "tyba", label: "Tyba" },
+  { key: "simit", label: "SIMIT" },
+];
+
 // Colores por estado de verificación / resultado.
 function badgeClasses(estado) {
   const e = String(estado || "").toLowerCase();
@@ -87,6 +103,14 @@ export default function EconfiaWallet() {
     ciudad_residencia: "",
   });
   const [guardandoBase, setGuardandoBase] = useState(false);
+  const [editandoBase, setEditandoBase] = useState(false);
+
+  // Confirmación previa a cualquier borrado (documento, certificación,
+  // título o referencia): { tipo, id, nombre } | null. Un solo modal
+  // reutilizado por los 4 botones de eliminar — borrar es irreversible,
+  // así que ninguno actúa directo al clic.
+  const [confirmarEliminar, setConfirmarEliminar] = useState(null);
+  const [eliminando, setEliminando] = useState(false);
 
   // Consulta única
   const [resultado, setResultado] = useState(null);
@@ -123,6 +147,17 @@ export default function EconfiaWallet() {
   const [segundos, setSegundos] = useState(0);
   const [mostrarSelectorCompartir, setMostrarSelectorCompartir] = useState(false);
   const [atributosCompartir, setAtributosCompartir] = useState(["persona", "documentos", "antecedentes"]);
+  // Divulgación selectiva dentro de "antecedentes": qué fuentes concretas
+  // (ver FUENTES_WALLET en core/views_wallet.py) se muestran en el pase.
+  const [fuentesAntecedentesCompartir, setFuentesAntecedentesCompartir] = useState(
+    FUENTES_ANTECEDENTES_INFO.map((f) => f.key)
+  );
+  // Antes de abrir el selector de qué compartir, se exige reconfirmar
+  // identidad (FaceID o SMS, lo que el titular tenga disponible) — evita
+  // que, con la sesión ya iniciada, cualquiera que tome el dispositivo
+  // desatendido genere un QR/llave con los datos del titular sin más que
+  // un clic.
+  const [mostrarReautenticar, setMostrarReautenticar] = useState(false);
 
   const baseCompleta = estado?.base_completa;
   const consultaHabilitada = estado?.consulta_habilitada;
@@ -261,12 +296,35 @@ export default function EconfiaWallet() {
         return;
       }
       setEstado(data);
+      setEditandoBase(false);
       setToast({ type: "success", message: "Datos guardados. Ya puede consultar." });
     } catch {
       setToast({ type: "error", message: "Error al guardar sus datos." });
     } finally {
       setGuardandoBase(false);
     }
+  };
+
+  // Precarga el formulario con los datos ya guardados (candidato_data del
+  // backend, ver views_wallet.py) para editarlos — nombre/apellido llegan
+  // separados ahí pero el formulario usa un solo campo "nombre_completo".
+  const editarBase = () => {
+    const c = estado?.candidato || {};
+    setForm({
+      documento: c.cedula || "",
+      tipo_doc: c.tipo_doc || "CC",
+      fecha_expedicion: c.fecha_expedicion || "",
+      nombre_completo: `${c.nombre || ""} ${c.apellido || ""}`.trim(),
+      fecha_nacimiento: c.fecha_nacimiento || "",
+      lugar_expedicion: c.lugar_expedicion || "",
+      email: c.email || "",
+      profesion: c.profesion || "",
+      profesion_otro: "",
+      sexo: c.sexo || "",
+      telefono: c.telefono || "",
+      ciudad_residencia: c.ciudad_residencia || "",
+    });
+    setEditandoBase(true);
   };
 
   const iniciarConsulta = async () => {
@@ -472,7 +530,7 @@ export default function EconfiaWallet() {
     return () => clearInterval(id);
   }, [qr]);
 
-  const compartir = async (atributos = atributosCompartir) => {
+  const compartir = async (atributos = atributosCompartir, fuentesAntecedentes = fuentesAntecedentesCompartir) => {
     if (!atributos || atributos.length === 0) {
       setToast({ type: "error", message: "Elige al menos un dato para compartir." });
       return;
@@ -481,7 +539,7 @@ export default function EconfiaWallet() {
       const res = await fetch(`${API_URL}/api/wallet/compartir/`, {
         method: "POST",
         headers: { ...authHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ atributos }),
+        body: JSON.stringify({ atributos, fuentes_antecedentes: fuentesAntecedentes }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -496,7 +554,7 @@ export default function EconfiaWallet() {
   };
 
   // Llave duradera para compartir con una empresa (Fase 1 wallet empresa).
-  const compartirLlave = async (atributos = atributosCompartir) => {
+  const compartirLlave = async (atributos = atributosCompartir, fuentesAntecedentes = fuentesAntecedentesCompartir) => {
     if (!atributos || atributos.length === 0) {
       setToast({ type: "error", message: "Elige al menos un dato para compartir." });
       return;
@@ -505,7 +563,7 @@ export default function EconfiaWallet() {
       const res = await fetch(`${API_URL}/api/wallet/compartir-llave/`, {
         method: "POST",
         headers: { ...authHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ atributos, dias: 7, max_consultas: 5 }),
+        body: JSON.stringify({ atributos, fuentes_antecedentes: fuentesAntecedentes, dias: 7, max_consultas: 5 }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -531,6 +589,12 @@ export default function EconfiaWallet() {
     );
   };
 
+  const toggleFuenteAntecedentes = (key) => {
+    setFuentesAntecedentesCompartir((prev) =>
+      prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]
+    );
+  };
+
   const eliminarDocumento = async (id) => {
     try {
       const res = await fetch(`${API_URL}/api/wallet/documentos/${id}/`, {
@@ -544,6 +608,24 @@ export default function EconfiaWallet() {
       }
     } catch {
       setToast({ type: "error", message: "Error al eliminar el documento." });
+    }
+  };
+
+  const ELIMINAR_POR_TIPO = {
+    documento: eliminarDocumento,
+    certificacion: eliminarCertificacion,
+    titulo: eliminarTitulo,
+    referencia: eliminarReferencia,
+  };
+
+  const confirmarYEliminar = async () => {
+    if (!confirmarEliminar) return;
+    setEliminando(true);
+    try {
+      await ELIMINAR_POR_TIPO[confirmarEliminar.tipo](confirmarEliminar.id);
+    } finally {
+      setEliminando(false);
+      setConfirmarEliminar(null);
     }
   };
 
@@ -593,7 +675,7 @@ export default function EconfiaWallet() {
             {/* Derecha: acción principal (QR) */}
             {baseCompleta && (
               <div className="shrink-0">
-                <button onClick={() => setMostrarSelectorCompartir(true)}
+                <button onClick={() => setMostrarReautenticar(true)}
                   className="group inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:-translate-y-0.5">
                   <span className="flex w-9 h-9 rounded-lg bg-white/15 items-center justify-center shrink-0">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -616,13 +698,19 @@ export default function EconfiaWallet() {
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
             <StepDot n={1} done={baseCompleta} />
-            <div>
+            <div className="flex-1">
               <h2 className="text-content font-bold">Sus datos</h2>
               <p className="text-muted text-xs">Documento, fecha de expedición y nombres completos.</p>
             </div>
+            {baseCompleta && !editandoBase && !consultaUsada && (
+              <button type="button" onClick={editarBase}
+                className="shrink-0 px-4 py-1.5 rounded-lg border border-line/20 text-content text-xs font-semibold hover:bg-surface-2/60 transition-colors">
+                Editar
+              </button>
+            )}
           </div>
 
-          {baseCompleta ? (
+          {baseCompleta && !editandoBase ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <Campo label="Nombre" value={`${estado?.candidato?.nombre || ""} ${estado?.candidato?.apellido || ""}`} />
               <Campo label="Documento" value={`${estado?.candidato?.tipo_doc || ""} ${estado?.candidato?.cedula || ""}`} />
@@ -646,7 +734,7 @@ export default function EconfiaWallet() {
                 onChange={(v) => setForm({ ...form, fecha_expedicion: v })} />
               <Input label="Fecha de nacimiento" type="date" value={form.fecha_nacimiento}
                 onChange={(v) => setForm({ ...form, fecha_nacimiento: v })} />
-              <Input label="Lugar de expedición" value={form.lugar_expedicion}
+              <Input label="Lugar de expedición" value={form.lugar_expedicion} listId="ciudades-colombia"
                 onChange={(v) => setForm({ ...form, lugar_expedicion: v })} placeholder="Bogotá D.C." />
               <Select label="Sexo" value={form.sexo}
                 onChange={(v) => setForm({ ...form, sexo: v })} options={SEXO_OPCIONES} />
@@ -668,11 +756,17 @@ export default function EconfiaWallet() {
                 <Input label="Especifique cuál *" value={form.profesion_otro}
                   onChange={(v) => setForm({ ...form, profesion_otro: v })} placeholder="Ej. Apicultor" />
               )}
-              <div className="sm:col-span-2">
+              <div className="sm:col-span-2 flex items-center gap-3">
                 <button type="submit" disabled={guardandoBase}
                   className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
-                  {guardandoBase ? "Guardando…" : "Guardar y habilitar consulta"}
+                  {guardandoBase ? "Guardando…" : editandoBase ? "Guardar cambios" : "Guardar y habilitar consulta"}
                 </button>
+                {editandoBase && (
+                  <button type="button" onClick={() => setEditandoBase(false)} disabled={guardandoBase}
+                    className="px-6 py-2.5 rounded-lg border border-line/20 text-content text-sm font-semibold hover:bg-surface-2/60 transition-colors disabled:opacity-50">
+                    Cancelar
+                  </button>
+                )}
               </div>
             </form>
           )}
@@ -772,7 +866,7 @@ export default function EconfiaWallet() {
                     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${badgeClasses(d.estado_verificacion)}`}>
                       {d.estado_label}
                     </span>
-                    <button onClick={() => eliminarDocumento(d.id)}
+                    <button onClick={() => setConfirmarEliminar({ tipo: "documento", id: d.id, nombre: d.tipo_label })}
                       className="text-muted hover:text-red-400 transition-colors" title="Eliminar">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -840,7 +934,7 @@ export default function EconfiaWallet() {
                       ) : null}
                     </p>
                   </div>
-                  <button onClick={() => eliminarCertificacion(c.id)}
+                  <button onClick={() => setConfirmarEliminar({ tipo: "certificacion", id: c.id, nombre: `${c.cargo} · ${c.empresa}` })}
                     className="text-muted hover:text-red-400 transition-colors shrink-0" title="Eliminar">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -901,7 +995,7 @@ export default function EconfiaWallet() {
                       ) : null}
                     </p>
                   </div>
-                  <button onClick={() => eliminarTitulo(t.id)} className="text-muted hover:text-red-400 transition-colors shrink-0" title="Eliminar">
+                  <button onClick={() => setConfirmarEliminar({ tipo: "titulo", id: t.id, nombre: `${t.programa} · ${t.institucion}` })} className="text-muted hover:text-red-400 transition-colors shrink-0" title="Eliminar">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
@@ -949,7 +1043,7 @@ export default function EconfiaWallet() {
                       {r.telefono}{r.relacion ? ` · ${r.relacion}` : ""}{r.email ? ` · ${r.email}` : ""}
                     </p>
                   </div>
-                  <button onClick={() => eliminarReferencia(r.id)} className="text-muted hover:text-red-400 transition-colors shrink-0" title="Eliminar">
+                  <button onClick={() => setConfirmarEliminar({ tipo: "referencia", id: r.id, nombre: r.nombre })} className="text-muted hover:text-red-400 transition-colors shrink-0" title="Eliminar">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
@@ -960,10 +1054,23 @@ export default function EconfiaWallet() {
           )}
         </div>
       </div>
-      {mostrarSelectorCompartir && (
+      {mostrarReautenticar && (
+        <ReautenticarCompartirModal
+          rostroRegistrado={!!estado?.rostro_registrado}
+          telefonoVerificado={!!estado?.telefono_verificado}
+          telefono={estado?.candidato?.telefono}
+          setToast={setToast}
+          onCancelar={() => setMostrarReautenticar(false)}
+          onConfirmado={() => {
+            setMostrarReautenticar(false);
+            setMostrarSelectorCompartir(true);
+          }}
+        />
+      )}
+      {mostrarSelectorCompartir && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
           onClick={() => setMostrarSelectorCompartir(false)}>
-          <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6"
+          <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setMostrarSelectorCompartir(false)} className="absolute top-3 right-3 text-muted hover:text-content">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -976,32 +1083,88 @@ export default function EconfiaWallet() {
             </p>
             <div className="space-y-2">
               {ATRIBUTOS_COMPARTIR_INFO.map((a) => (
-                <label key={a.key}
-                  className="flex items-start gap-3 rounded-xl border border-line/10 bg-surface-2/50 hover:border-emerald-500/30 px-4 py-3 cursor-pointer transition-colors">
-                  <input type="checkbox" className="mt-1 accent-emerald-500"
-                    checked={atributosCompartir.includes(a.key)}
-                    onChange={() => toggleAtributoCompartir(a.key)} />
-                  <span>
-                    <span className="block text-content text-sm font-semibold">{a.label}</span>
-                    <span className="block text-muted text-[11px]">{a.detalle}</span>
-                  </span>
-                </label>
+                <div key={a.key} className="rounded-xl border border-line/10 bg-surface-2/50 hover:border-emerald-500/30 transition-colors overflow-hidden">
+                  <label className="flex items-start gap-3 px-4 py-3 cursor-pointer">
+                    <input type="checkbox" className="mt-1 accent-emerald-500"
+                      checked={atributosCompartir.includes(a.key)}
+                      onChange={() => toggleAtributoCompartir(a.key)} />
+                    <span>
+                      <span className="block text-content text-sm font-semibold">{a.label}</span>
+                      <span className="block text-muted text-[11px]">{a.detalle}</span>
+                    </span>
+                  </label>
+                  {/* Divulgación selectiva dentro de "Antecedentes": elegir
+                     fuente por fuente (Policía, Procuraduría, ...) en vez de
+                     compartir el bloque completo de una vez. */}
+                  {a.key === "antecedentes" && atributosCompartir.includes("antecedentes") && (
+                    <div className="border-t border-line/10 bg-surface/40 px-4 py-3 space-y-1.5">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-muted text-[11px] font-semibold uppercase tracking-wide">Fuentes a mostrar</span>
+                        <button type="button"
+                          onClick={() => setFuentesAntecedentesCompartir(
+                            fuentesAntecedentesCompartir.length === FUENTES_ANTECEDENTES_INFO.length
+                              ? [] : FUENTES_ANTECEDENTES_INFO.map((f) => f.key)
+                          )}
+                          className="text-[11px] text-emerald-300 hover:text-emerald-200 font-semibold">
+                          {fuentesAntecedentesCompartir.length === FUENTES_ANTECEDENTES_INFO.length ? "Ninguna" : "Todas"}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                        {FUENTES_ANTECEDENTES_INFO.map((f) => (
+                          <label key={f.key} className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" className="accent-emerald-500 w-3.5 h-3.5"
+                              checked={fuentesAntecedentesCompartir.includes(f.key)}
+                              onChange={() => toggleFuenteAntecedentes(f.key)} />
+                            <span className="text-content text-xs">{f.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
-            <button onClick={() => compartir(atributosCompartir)}
-              disabled={atributosCompartir.length === 0}
+            <button onClick={() => compartir(atributosCompartir, fuentesAntecedentesCompartir)}
+              disabled={atributosCompartir.length === 0 || (atributosCompartir.includes("antecedentes") && fuentesAntecedentesCompartir.length === 0)}
               className="mt-5 w-full px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors">
               Generar QR con lo seleccionado
             </button>
-            <button onClick={() => compartirLlave(atributosCompartir)}
-              disabled={atributosCompartir.length === 0}
+            <button onClick={() => compartirLlave(atributosCompartir, fuentesAntecedentesCompartir)}
+              disabled={atributosCompartir.length === 0 || (atributosCompartir.includes("antecedentes") && fuentesAntecedentesCompartir.length === 0)}
               className="mt-2 w-full px-5 py-2.5 rounded-lg border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold transition-colors">
               Generar llave para empresa (7 días)
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-      {llave && (
+      {confirmarEliminar && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
+          onClick={() => !eliminando && setConfirmarEliminar(null)}>
+          <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6 text-center"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="mx-auto mb-3 flex items-center justify-center w-12 h-12 rounded-full bg-red-500/15 border border-red-500/30">
+              <Trash2 className="w-5 h-5 text-red-400" />
+            </div>
+            <h3 className="text-content font-bold text-lg">¿Eliminar este elemento?</h3>
+            <p className="text-muted text-xs mt-2">
+              {confirmarEliminar.nombre ? <span className="text-content font-semibold">"{confirmarEliminar.nombre}"</span> : "Este elemento"} se eliminará permanentemente. Esta acción no se puede deshacer.
+            </p>
+            <div className="flex items-center gap-3 mt-5">
+              <button type="button" onClick={() => setConfirmarEliminar(null)} disabled={eliminando}
+                className="flex-1 px-5 py-2.5 rounded-lg border border-line/20 text-content text-sm font-semibold hover:bg-surface-2/60 transition-colors disabled:opacity-50">
+                Cancelar
+              </button>
+              <button type="button" onClick={confirmarYEliminar} disabled={eliminando}
+                className="flex-1 px-5 py-2.5 rounded-lg bg-red-500 hover:bg-red-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
+                {eliminando ? "Eliminando…" : "Eliminar"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      {llave && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
           onClick={() => setLlave(null)}>
           <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6 text-center"
@@ -1023,9 +1186,10 @@ export default function EconfiaWallet() {
               Vence: {new Date(llave.expires_at).toLocaleString()} · {llave.max_consultas ? `${llave.max_consultas} consultas` : "consultas ilimitadas"}
             </p>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-      {qr && (
+      {qr && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
           onClick={() => setQr(null)}>
           <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6 text-center"
@@ -1072,9 +1236,269 @@ export default function EconfiaWallet() {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
+  );
+}
+
+/* Reconfirmación de identidad (FaceID o SMS) justo antes de compartir datos
+ * por QR/llave — usa lo que el titular ya tenga registrado; si tiene ambos,
+ * lo deja elegir; si no tiene ninguno, bloquea y explica qué falta. */
+function ReautenticarCompartirModal({ rostroRegistrado, telefonoVerificado, telefono, setToast, onCancelar, onConfirmado }) {
+  const [metodo, setMetodo] = useState(
+    rostroRegistrado && telefonoVerificado ? null : rostroRegistrado ? "rostro" : telefonoVerificado ? "sms" : "ninguno"
+  );
+
+  if (metodo === "ninguno" || (!rostroRegistrado && !telefonoVerificado)) {
+    return createPortal(
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4" onClick={onCancelar}>
+        <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6 text-center" onClick={(e) => e.stopPropagation()}>
+          <h3 className="text-content font-bold text-lg">Confirme su identidad primero</h3>
+          <p className="text-muted text-xs mt-2">
+            Para compartir sus datos necesita tener registrado su rostro (Face ID) o su celular verificado por SMS.
+            Complete al menos uno de los dos en la sección de Verificación de identidad.
+          </p>
+          <button onClick={onCancelar}
+            className="mt-5 w-full px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors">
+            Entendido
+          </button>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  if (metodo === null) {
+    return createPortal(
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4" onClick={onCancelar}>
+        <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6" onClick={(e) => e.stopPropagation()}>
+          <h3 className="text-content font-bold text-lg">Confirme que es usted</h3>
+          <p className="text-muted text-xs mt-1 mb-4">
+            Antes de generar el QR, elija cómo quiere reconfirmar su identidad.
+          </p>
+          <div className="space-y-2">
+            <button onClick={() => setMetodo("rostro")}
+              className="w-full text-left rounded-xl border border-line/10 bg-surface-2/50 hover:border-emerald-500/30 px-4 py-3 transition-colors">
+              <span className="block text-content text-sm font-semibold">Face ID</span>
+              <span className="block text-muted text-[11px]">Tome una foto de su rostro para compararla con la registrada.</span>
+            </button>
+            <button onClick={() => setMetodo("sms")}
+              className="w-full text-left rounded-xl border border-line/10 bg-surface-2/50 hover:border-emerald-500/30 px-4 py-3 transition-colors">
+              <span className="block text-content text-sm font-semibold">Código SMS</span>
+              <span className="block text-muted text-[11px]">Reciba un código en su celular verificado ({telefono}).</span>
+            </button>
+          </div>
+          <button onClick={onCancelar} className="mt-4 w-full text-center text-xs text-muted hover:text-content">
+            Cancelar
+          </button>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  if (metodo === "rostro") {
+    return <ReautenticarRostroPaso onCancelar={onCancelar} onConfirmado={onConfirmado} setToast={setToast} />;
+  }
+  return <ReautenticarSmsPaso telefono={telefono} onCancelar={onCancelar} onConfirmado={onConfirmado} setToast={setToast} />;
+}
+
+function ReautenticarRostroPaso({ onCancelar, onConfirmado, setToast }) {
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const [camaraLista, setCamaraLista] = useState(false);
+  const [errorCamara, setErrorCamara] = useState("");
+  const [verificando, setVerificando] = useState(false);
+
+  useEffect(() => {
+    let activo = true;
+    async function iniciarCamara() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+        if (!activo) { stream.getTracks().forEach((t) => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setCamaraLista(true);
+        }
+      } catch {
+        setErrorCamara("No se pudo acceder a la cámara. Verifique los permisos del navegador.");
+      }
+    }
+    iniciarCamara();
+    return () => {
+      activo = false;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
+
+  const confirmar = async () => {
+    if (!videoRef.current?.videoWidth || verificando) return;
+    setVerificando(true);
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      canvas.getContext("2d").drawImage(videoRef.current, 0, 0);
+      const foto = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.9));
+      const fd = new FormData();
+      fd.append("foto", foto, "reautenticacion.jpg");
+      const res = await fetch(`${API_URL}/api/wallet/identidad/rostro/verificar/`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: fd,
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.coincide) {
+        setToast({ type: "error", message: data?.error || "El rostro no coincide. Intente de nuevo." });
+        return;
+      }
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      onConfirmado();
+    } catch {
+      setToast({ type: "error", message: "Error de conexión al verificar su rostro." });
+    } finally {
+      setVerificando(false);
+    }
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4" onClick={onCancelar}>
+      <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6 flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+        <motion.span
+          className="relative flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/20 mb-3"
+          animate={{ scale: [1, 1.06, 1] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <ScanFace className="w-7 h-7 text-emerald-400" />
+          {camaraLista && !verificando && (
+            <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 border-2 border-surface">
+              <Check className="w-3 h-3 text-white" />
+            </span>
+          )}
+        </motion.span>
+        <h3 className="text-content font-bold text-lg">Verifique su rostro</h3>
+        <p className="text-muted text-xs mt-1 mb-4 text-center">
+          Acérquese y ubique su rostro dentro del óvalo.
+        </p>
+        {errorCamara ? (
+          <p className="text-red-300 text-xs text-center">{errorCamara}</p>
+        ) : (
+          <div className="relative w-52 h-64">
+            {/* Máscara ovalada (más alta que ancha, como el contorno de una
+               cara): solo se ve el rostro, sin el fondo rectangular del
+               video crudo. El video es más grande que el óvalo visible para
+               que el recorte no deje bordes rectos asomando. */}
+            <div className={`absolute inset-0 rounded-[50%] overflow-hidden border-2 ${
+              camaraLista ? "border-emerald-500/60 animate-face-scan-pulse" : "border-line/20"
+            } bg-surface-2/70`}>
+              <video ref={videoRef} autoPlay playsInline muted
+                className="absolute top-1/2 left-1/2 w-[150%] h-[130%] -translate-x-1/2 -translate-y-1/2 object-cover scale-x-[-1]" />
+              {camaraLista && !verificando && (
+                <span className="absolute left-0 right-0 h-0.5 bg-emerald-400/90 shadow-[0_0_10px_2px_rgba(16,185,129,0.7)] animate-face-scan-line" />
+              )}
+              {verificando && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-full border-3 border-emerald-500/30 border-t-emerald-400 animate-spin" />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        <div className="flex items-center gap-3 mt-5 w-full">
+          <button type="button" onClick={onCancelar} className="text-xs text-muted hover:text-content">
+            Cancelar
+          </button>
+          <button type="button" onClick={confirmar} disabled={!camaraLista || verificando}
+            className="ml-auto px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+            {verificando ? "Verificando…" : "Confirmar"}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function ReautenticarSmsPaso({ telefono, onCancelar, onConfirmado, setToast }) {
+  const [codigoEnviado, setCodigoEnviado] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [codigo, setCodigo] = useState("");
+  const [verificando, setVerificando] = useState(false);
+
+  useEffect(() => {
+    let activo = true;
+    (async () => {
+      setEnviando(true);
+      try {
+        const res = await fetch(`${API_URL}/api/wallet/identidad/sms/enviar/`, {
+          method: "POST",
+          headers: { ...authHeaders(), "Content-Type": "application/json" },
+          body: JSON.stringify({ telefono }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!activo) return;
+        if (!res.ok) {
+          setToast({ type: "error", message: data?.error || "No se pudo enviar el código." });
+          return;
+        }
+        setCodigoEnviado(true);
+      } catch {
+        if (activo) setToast({ type: "error", message: "Error de conexión al enviar el código." });
+      } finally {
+        if (activo) setEnviando(false);
+      }
+    })();
+    return () => { activo = false; };
+  }, [telefono, setToast]);
+
+  const confirmar = async () => {
+    if (codigo.trim().length !== 6 || verificando) return;
+    setVerificando(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/identidad/sms/verificar/`, {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ telefono, codigo: codigo.trim() }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setToast({ type: "error", message: data?.error || "Código incorrecto." });
+        return;
+      }
+      onConfirmado();
+    } catch {
+      setToast({ type: "error", message: "Error de conexión al verificar el código." });
+    } finally {
+      setVerificando(false);
+    }
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4" onClick={onCancelar}>
+      <div className="relative w-full max-w-sm bg-surface border border-line/15 rounded-2xl shadow-2xl p-6" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-content font-bold text-lg">Ingrese el código</h3>
+        <p className="text-muted text-xs mt-1 mb-4">
+          {enviando ? `Enviando código a ${telefono}…` : codigoEnviado ? `Enviamos un código de 6 dígitos a ${telefono}.` : "No se pudo enviar el código."}
+        </p>
+        <input type="text" inputMode="numeric" maxLength={6} value={codigo}
+          onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
+          placeholder="000000"
+          className="w-full px-3 py-2 rounded-lg bg-surface-2/70 border border-line/15 text-content text-lg tracking-[0.3em] text-center placeholder:text-muted/40 focus:outline-none focus:border-emerald-500/50" />
+        <div className="flex items-center gap-3 mt-4">
+          <button type="button" onClick={onCancelar} className="text-xs text-muted hover:text-content">
+            Cancelar
+          </button>
+          <button type="button" onClick={confirmar} disabled={codigo.trim().length !== 6 || verificando || !codigoEnviado}
+            className="ml-auto px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+            {verificando ? "Verificando…" : "Confirmar"}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }
 

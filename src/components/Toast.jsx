@@ -25,13 +25,13 @@ export default function Toast({ type, message, onClose, sound }) {
     >
       <div
         className={`absolute inset-0 ${
-          type === "error" ? "bg-red-500/40" : "bg-green-500/40"
+          type === "error" ? "bg-red-500/40" : type === "info" ? "bg-amber-500/40" : "bg-green-500/40"
         }`}
       />
       <div
         className="relative px-8 py-6 rounded-2xl shadow-2xl text-white text-lg font-semibold animate-fade-in"
         style={{
-          backgroundColor: type === "error" ? "#dc2626" : "#16a34a",
+          backgroundColor: type === "error" ? "#dc2626" : type === "info" ? "#d97706" : "#16a34a",
         }}
       >
         {message}

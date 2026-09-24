@@ -253,9 +253,16 @@ export default function Dashboard() {
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
-          initial={{ opacity: 0, filter: "blur(12px)", scale: 0.985, y: 14 }}
-          animate={{ opacity: 1, filter: "blur(0px)", scale: 1, y: 0 }}
-          exit={{ opacity: 0, filter: "blur(12px)", scale: 0.985, y: -10 }}
+          // Sin filter/scale a propósito: cualquiera de los dos en este
+          // contenedor (incluso en su valor "neutro" final, blur(0px) o
+          // scale(1) — Framer Motion los deja aplicados inline igual)
+          // crea un containing block para position:fixed, y todos los
+          // modales fixed inset-0 del proyecto (Toast, VerifModalShell,
+          // selector de compartir, etc.) quedan atrapados encogidos dentro
+          // de este <main> en vez de cubrir la pantalla completa.
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.6, ease: [0.2, 0.9, 0.25, 1] }}
           className="flex-1 w-full"
         >
