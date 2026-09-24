@@ -90,6 +90,12 @@ export default function EconfiaWalletEmpresa() {
   const [compartiendo, setCompartiendo] = useState(false);
   const [llaveEmpresa, setLlaveEmpresa] = useState(null);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
+  // Llave fija personal de la empresa (handle propio WLT-..., desde sugerencias)
+  const [llaveFija, setLlaveFija] = useState(null);
+  const [sugerenciasLlave, setSugerenciasLlave] = useState([]);
+  const [llaveInput, setLlaveInput] = useState("");
+  const [guardandoLlave, setGuardandoLlave] = useState(false);
+  const [editandoLlave, setEditandoLlave] = useState(false);
 
   const actualizarLogo = async (archivoLogo) => {
     setSubiendoLogo(true);
@@ -342,6 +348,46 @@ export default function EconfiaWalletEmpresa() {
       setCompartiendo(false);
     }
   };
+
+  const cargarLlaveFija = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/llave-fija/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) {
+        setLlaveFija(data.llave || null);
+        setSugerenciasLlave(data.sugerencias || []);
+        if (data.llave?.clave) setLlaveInput(data.llave.clave);
+        else if ((data.sugerencias || []).length) setLlaveInput(data.sugerencias[0]);
+      }
+    } catch {
+      /* silencioso */
+    }
+  }, []);
+
+  const guardarLlaveFija = async (clave) => {
+    const valor = (clave ?? llaveInput ?? "").trim();
+    if (!valor) { setToast({ type: "error", message: "Elige o escribe una llave." }); return; }
+    setGuardandoLlave(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/llave-fija/`, {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ clave: valor }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setToast({ type: "error", message: data.error || "No se pudo guardar la llave." }); return; }
+      setLlaveFija(data);
+      setLlaveInput(data.clave);
+      setEditandoLlave(false);
+      setToast({ type: "success", message: "Tu llave quedó lista." });
+    } catch {
+      setToast({ type: "error", message: "Error al guardar la llave." });
+    } finally {
+      setGuardandoLlave(false);
+    }
+  };
+
+  useEffect(() => { cargarLlaveFija(); }, [cargarLlaveFija]);
 
   // Vuelca los datos traídos (Cámara local o RUES) sobre el formulario sin
   // pisar lo que el usuario ya haya escrito con valores vacíos.
@@ -876,6 +922,62 @@ export default function EconfiaWalletEmpresa() {
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* ── Mi llave fija (handle propio de la empresa) ── */}
+          <div className="bg-gradient-to-br from-emerald-500/10 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-emerald-500/25 shadow-2xl shadow-emerald-500/10 p-6">
+            <h2 className="text-lg font-bold text-content mb-1">Mi llave</h2>
+            <p className="text-xs text-muted mb-4 leading-relaxed">
+              Es el identificador propio de tu empresa para que un tercero consulte tu wallet. Elige una de las
+              sugerencias (creadas con tu NIT o razón social) y compártela. No cambia ni vence.
+            </p>
+            {llaveFija?.clave && !editandoLlave ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="bg-surface-2/70 border border-emerald-500/30 rounded-xl px-5 py-3">
+                  <span className="text-emerald-300 font-mono text-xl font-bold tracking-widest break-all">{llaveFija.clave}</span>
+                </div>
+                <button onClick={() => copiarCompartido(llaveFija.clave, "Llave")}
+                  className="px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors">
+                  Copiar
+                </button>
+                <button onClick={() => { setEditandoLlave(true); setLlaveInput(llaveFija.clave); }}
+                  className="px-4 py-2.5 rounded-lg border border-line/20 text-muted hover:text-content hover:border-emerald-500/30 text-sm font-semibold transition-colors">
+                  Cambiar
+                </button>
+              </div>
+            ) : sugerenciasLlave.length > 0 ? (
+              <div>
+                <p className="text-muted text-[11px] mb-2">Elige la que prefieras:</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {sugerenciasLlave.map((s) => (
+                    <button key={s} onClick={() => setLlaveInput(s)}
+                      className={`px-3 py-2 rounded-lg font-mono text-sm font-semibold border transition-colors ${
+                        llaveInput === s
+                          ? "bg-emerald-500 text-white border-emerald-500"
+                          : "bg-surface-2/60 text-emerald-300 border-emerald-500/30 hover:border-emerald-400"
+                      }`}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button onClick={() => guardarLlaveFija()} disabled={guardandoLlave || !llaveInput}
+                    className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+                    {guardandoLlave ? "Guardando…" : "Usar esta llave"}
+                  </button>
+                  {llaveFija?.clave && (
+                    <button onClick={() => { setEditandoLlave(false); setLlaveInput(llaveFija.clave); }}
+                      className="px-4 py-2.5 rounded-lg border border-line/20 text-muted hover:text-content text-sm font-semibold transition-colors">
+                      Cancelar
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-muted text-xs">
+                Completa el NIT y la razón social de tu empresa para poder sugerirte una llave.
+              </p>
             )}
           </div>
 
