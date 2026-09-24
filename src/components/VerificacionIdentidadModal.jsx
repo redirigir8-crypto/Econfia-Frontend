@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import {
   AlertTriangle,
   BadgeCheck,
@@ -9,14 +11,14 @@ import {
   Download,
   FileCheck2,
   FileText,
-  Globe,
+  Fingerprint,
   History,
   IdCard,
   Lock,
   MessageCircle,
+  ScanFace,
   ShieldQuestion,
   Smartphone,
-  Smile,
   Stamp,
   Trash2,
 } from "lucide-react";
@@ -46,7 +48,7 @@ function nombreDocumento(tipoDoc) {
 // de documento que no coincide.
 const TIPOS_DOC_VERIFICABLES = [
   { value: "CC", label: "Cédula de Ciudadanía", icono: IdCard },
-  { value: "CE", label: "Cédula de Extranjería", icono: Globe },
+  { value: "CE", label: "Cédula de Extranjería", icono: Fingerprint },
   { value: "PA", label: "Pasaporte", icono: BookOpen },
   { value: "PP", label: "Permiso de Permanencia", icono: BadgeCheck },
   { value: "VISA", label: "Visa", icono: Stamp },
@@ -150,6 +152,63 @@ export default function VerificacionIdentidadModal({ onClose, variant = "modal" 
     cargarEstado();
     cargarDocumentos();
   }, [cargarEstado, cargarDocumentos]);
+
+  // El polling de un documento "pendiente" (Celery corriendo
+  // verificar_documento_wallet contra Registraduría, hasta ~50s) vive aquí,
+  // en el componente padre, y no en el modal de verificación: si viviera en
+  // el modal, cerrarlo (la X, o el propio flujo tras subir la foto) mataba
+  // el polling a mitad de camino y el usuario quedaba viendo "Pendiente"
+  // congelado aunque el backend ya hubiera terminado — solo un refresh de
+  // página mostraba el resultado real ya guardado.
+  const pollDocRef = useRef(null);
+  const pollDocTokenRef = useRef(0);
+  const POLL_INTENTOS_MAX = 30;
+
+  const iniciarPollingDocumento = useCallback((docId) => {
+    if (pollDocRef.current) clearTimeout(pollDocRef.current);
+    const token = ++pollDocTokenRef.current;
+    const activo = () => pollDocTokenRef.current === token;
+    let intentos = 0;
+    const tick = async () => {
+      if (!activo()) return;
+      intentos += 1;
+      try {
+        const res = await fetch(`${API_URL}/api/wallet/documentos/${docId}/`, { headers: authHeaders() });
+        const doc = await res.json().catch(() => null);
+        if (!activo()) return;
+        if (res.ok && doc && doc.estado_verificacion === "pendiente" && intentos < POLL_INTENTOS_MAX) {
+          pollDocRef.current = setTimeout(tick, 4000);
+          return;
+        }
+        // Terminó (verificado/rechazado/revisión), falló la consulta, o se
+        // agotaron los intentos: en cualquier caso, refrescar el estado real
+        // desde el servidor es lo único que debe pasar — el propio "estado"
+        // ya trae el resultado final para pintar los badges sin adivinar.
+        cargarEstado();
+        cargarDocumentos();
+        if (res.ok && doc && doc.estado_verificacion === "pendiente" && intentos >= POLL_INTENTOS_MAX) {
+          setToast({
+            type: "error",
+            message: doc.detalle_verificacion?.mensaje
+              || "La verificación está tardando más de lo normal. Intente de nuevo más tarde.",
+          });
+        }
+      } catch {
+        if (!activo()) return;
+        if (intentos < POLL_INTENTOS_MAX) {
+          pollDocRef.current = setTimeout(tick, 4000);
+        } else {
+          cargarEstado();
+        }
+      }
+    };
+    tick();
+  }, [cargarEstado, cargarDocumentos]);
+
+  useEffect(() => () => {
+    pollDocTokenRef.current += 1;
+    if (pollDocRef.current) clearTimeout(pollDocRef.current);
+  }, []);
 
   // Necesaria tanto para HistorialIdentidadModal como para el resumen de
   // 3 iconos y para decidir qué tarjeta de acción ocultar en variant="inline".
@@ -330,9 +389,9 @@ export default function VerificacionIdentidadModal({ onClose, variant = "modal" 
   const resumenIconos = (
     <div className="grid grid-cols-3 gap-3 mb-4">
       {[
-        { falta: faltaRostro, Icono: Smile, label: "Rostro" },
+        { falta: faltaRostro, Icono: ScanFace, label: "Rostro" },
         { falta: faltaDocumento, Icono: IdCard, label: "Documento" },
-        { falta: faltaTelefono, Icono: MessageCircle, label: "Celular" },
+        { falta: faltaTelefono, Icono: Smartphone, label: "Celular" },
       ].map(({ falta, Icono, label }) => (
         <div
           key={label}
@@ -342,16 +401,26 @@ export default function VerificacionIdentidadModal({ onClose, variant = "modal" 
               : "border-emerald-500/50 bg-emerald-500/10 shadow-lg shadow-emerald-500/10"
           }`}
         >
-          <span className={`relative flex items-center justify-center w-12 h-12 rounded-full ${
-            falta ? "bg-surface-2/70" : "bg-emerald-500/20"
-          }`}>
+          <motion.span
+            className={`relative flex items-center justify-center w-12 h-12 rounded-full ${
+              falta ? "bg-surface-2/70" : "bg-emerald-500/20"
+            }`}
+            animate={falta ? {} : { scale: [1, 1.06, 1] }}
+            transition={falta ? {} : { duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+            whileHover={{ rotate: falta ? 0 : 6 }}
+          >
             <Icono className={`w-6 h-6 ${falta ? "text-muted" : "text-emerald-400"}`} />
             {!falta && (
-              <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 border-2 border-surface">
+              <motion.span
+                className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 border-2 border-surface"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+              >
                 <Check className="w-3 h-3 text-white" />
-              </span>
+              </motion.span>
             )}
-          </span>
+          </motion.span>
           <span className={`text-xs font-bold ${falta ? "text-muted" : "text-emerald-400"}`}>{label}</span>
           <span className="text-[10px] text-muted">{falta ? "Pendiente" : "Verificado"}</span>
         </div>
@@ -400,7 +469,7 @@ export default function VerificacionIdentidadModal({ onClose, variant = "modal" 
           <span className="text-2xl">
             {estado?.rostro_registrado
               ? <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-              : <Smile className="w-6 h-6 text-muted" />}
+              : <ScanFace className="w-6 h-6 text-muted" />}
           </span>
           <span>
             <span className="block text-content text-sm font-semibold">
@@ -522,6 +591,7 @@ export default function VerificacionIdentidadModal({ onClose, variant = "modal" 
           onVerificado={cargarEstado}
           tipoDoc={estado?.candidato?.tipo_doc}
           onTipoDocFijado={cargarEstado}
+          iniciarPollingDocumento={iniciarPollingDocumento}
         />
       )}
       {modalVerificacion === "sms" && (
@@ -598,6 +668,7 @@ export default function VerificacionIdentidadModal({ onClose, variant = "modal" 
           onVerificado={cargarEstado}
           tipoDoc={estado?.candidato?.tipo_doc}
           onTipoDocFijado={cargarEstado}
+          iniciarPollingDocumento={iniciarPollingDocumento}
         />
       )}
       {modalVerificacion === "sms" && (
@@ -662,7 +733,11 @@ function Spinner({ tono = "claro" }) {
 }
 
 function VerifModalShell({ title, subtitle, onClose, children }) {
-  return (
+  // Portal a document.body: si no, este overlay "fixed" hereda como
+  // containing block al ancestro animado más cercano con transform/filter
+  // (ej. el <motion.main> de Framer Motion en Dashboard.jsx) y aparece
+  // encogido en una esquina en vez de cubrir la pantalla completa.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
       <div className="w-full max-w-lg bg-surface border border-line/15 rounded-2xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
         <button onClick={onClose} aria-label="Cerrar"
@@ -673,12 +748,13 @@ function VerifModalShell({ title, subtitle, onClose, children }) {
         {subtitle && <p className="text-muted text-xs mt-1 mb-4">{subtitle}</p>}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
 const ICONO_EVENTO = {
-  registro_rostro: Smile,
+  registro_rostro: ScanFace,
   verificacion_rostro: CheckCircle2,
   verificacion_cedula: IdCard,
   verificacion_telefono: MessageCircle,
@@ -1155,11 +1231,23 @@ function VerificarRostroModal({ onClose, setToast, onVerificado, esReregistro, t
       {paso !== "listo" ? (
         <div className="flex flex-col items-center gap-3">
           <p className="text-content text-sm font-semibold">{ETIQUETAS[paso]}</p>
+          <p className="text-muted text-xs text-center -mt-2">Acérquese y ubique su rostro dentro del óvalo.</p>
           {errorCamara ? (
             <p className="text-red-300 text-xs text-center">{errorCamara}</p>
           ) : (
-            <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-emerald-500/50 bg-surface-2/70 flex items-center justify-center">
-              <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-x-[-1]" />
+            <div className="relative w-56 h-72">
+              {/* Óvalo (más alto que ancho, como el contorno de una cara):
+                 el video se sobredimensiona y centra para que el recorte
+                 no deje bordes rectos asomando por las puntas. */}
+              <div className={`absolute inset-0 rounded-[50%] overflow-hidden border-2 bg-surface-2/70 ${
+                camaraLista ? "border-emerald-500/60 animate-face-scan-pulse" : "border-line/20"
+              }`}>
+                <video ref={videoRef} autoPlay playsInline muted
+                  className="absolute top-1/2 left-1/2 w-[150%] h-[130%] -translate-x-1/2 -translate-y-1/2 object-cover scale-x-[-1]" />
+                {camaraLista && (
+                  <span className="absolute left-0 right-0 h-0.5 bg-emerald-400/90 shadow-[0_0_10px_2px_rgba(16,185,129,0.7)] animate-face-scan-line" />
+                )}
+              </div>
             </div>
           )}
           <button type="button" onClick={capturarFoto} disabled={!camaraLista}
@@ -1200,7 +1288,7 @@ function dataUrlAArchivo(dataUrl, nombre) {
   return new File([arr], nombre, { type: mime });
 }
 
-export function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
+export function VerificarCedulaModal({ onClose, setToast, onVerificado, iniciarPollingDocumento }) {
   const [modo, setModo] = useState(null); // null | "camara" | "archivo"
   const [paso, setPaso] = useState("frente"); // frente | reverso | listo
   const [capturas, setCapturas] = useState({ frente: null, reverso: null });
@@ -1224,12 +1312,6 @@ export function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   // leer, no un dato que no coincide) para dar consejos cada vez más
   // específicos en vez de repetir el mismo mensaje genérico (IDV-02).
   const [intentosOcrIlegible, setIntentosOcrIlegible] = useState(0);
-  // Mientras el documento queda "pendiente" (Celery consultando
-  // Registraduría en segundo plano), se hace polling en vez de cerrar el
-  // modal de inmediato, para mostrar el resultado final.
-  const [verificando, setVerificando] = useState(false);
-  const pollDocRef = useRef(null);
-  const pollDocTokenRef = useRef(0);
   // El tipo de documento de "Sus datos" (formulario base) es solo un dato
   // de identidad y casi siempre ya viene fijo (arranca en "CC" por
   // defecto) — no sirve para saber qué va a fotografiar el usuario AHORA.
@@ -1319,11 +1401,6 @@ export function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
   };
 
   const volverAlInicio = () => {
-    pollDocTokenRef.current += 1;
-    if (pollDocRef.current) {
-      clearTimeout(pollDocRef.current);
-      pollDocRef.current = null;
-    }
     streamRef.current?.getTracks().forEach((t) => t.stop());
     setModo(null);
     setPaso("frente");
@@ -1339,81 +1416,6 @@ export function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
     volverAlInicio();
     setTipoDocLocal(null);
     onClose();
-  };
-
-  // Consulta periódica del documento mientras está "pendiente" (Celery
-  // corriendo verificar_documento_wallet contra Registraduría).
-  // Tras ~2 minutos (30 intentos cada 4s) de seguir "pendiente" se deja de
-  // esperar en silencio: puede pasar si Registraduría no responde y el
-  // documento queda pendiente indefinidamente (sin reintento automático en
-  // el backend) — mejor avisar al usuario que dejarlo esperando para siempre.
-  useEffect(() => () => {
-    pollDocTokenRef.current += 1;
-    if (pollDocRef.current) clearTimeout(pollDocRef.current);
-  }, []);
-
-  const POLL_INTENTOS_MAX = 30;
-
-  const pollearDocumento = (docId, onReintentar) => {
-    setVerificando(true);
-    const token = ++pollDocTokenRef.current;
-    const activo = () => pollDocTokenRef.current === token;
-    let intentos = 0;
-    const tick = async () => {
-      if (!activo()) return;
-      intentos += 1;
-      try {
-        const res = await fetch(`${API_URL}/api/wallet/documentos/${docId}/`, { headers: authHeaders() });
-        const doc = await res.json().catch(() => null);
-        if (!activo()) return;
-        if (!res.ok || !doc) {
-          if (intentos >= POLL_INTENTOS_MAX) {
-            setVerificando(false);
-            setToast({ type: "error", message: "No se pudo confirmar el estado de su cédula. Intente de nuevo más tarde." });
-            onReintentar?.();
-            return;
-          }
-          pollDocRef.current = setTimeout(tick, 4000);
-          return;
-        }
-        if (doc.estado_verificacion === "pendiente") {
-          if (intentos >= POLL_INTENTOS_MAX) {
-            setVerificando(false);
-            setToast({
-              type: "error",
-              message: doc.detalle_verificacion?.mensaje
-                || "La verificación está tardando más de lo normal. Intente de nuevo más tarde.",
-            });
-            onReintentar?.();
-            return;
-          }
-          pollDocRef.current = setTimeout(tick, 4000);
-          return;
-        }
-        setVerificando(false);
-        if (doc.estado_verificacion === "rechazado") {
-          const mensaje = doc.detalle_verificacion?.mensaje
-            || "Los datos no pudieron confirmarse. Intente de nuevo.";
-          setToast({ type: "error", message: mensaje });
-          onVerificado?.();
-          onReintentar?.();
-          return;
-        }
-        setToast({ type: "success", message: "Cédula verificada correctamente." });
-        onVerificado?.();
-        cerrarDocumento();
-      } catch {
-        if (!activo()) return;
-        if (intentos >= POLL_INTENTOS_MAX) {
-          setVerificando(false);
-          setToast({ type: "error", message: "No se pudo confirmar el estado de su cédula. Intente de nuevo más tarde." });
-          onReintentar?.();
-          return;
-        }
-        pollDocRef.current = setTimeout(tick, 4000);
-      }
-    };
-    tick();
   };
 
   // Si el backend rechaza la cédula (ej. el OCR no coincide con los datos
@@ -1456,7 +1458,15 @@ export function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
         return;
       }
       if (data?.documento?.estado_verificacion === "pendiente") {
-        pollearDocumento(data.documento.id, onReintentar);
+        // La verificación contra Registraduría sigue en segundo plano
+        // (Celery, hasta ~1 minuto) — el polling vive en el componente
+        // padre, no aquí, para que siga corriendo aunque el usuario cierre
+        // este modal ya mismo: el badge "Pendiente" se actualiza solo
+        // cuando el resultado llegue, sin necesidad de recargar la página.
+        setToast({ type: "success", message: "Documento recibido. Confirmando con la Registraduría, puede tardar hasta un minuto." });
+        iniciarPollingDocumento?.(data.documento.id);
+        onVerificado?.();
+        cerrarDocumento();
         return;
       }
       setToast({ type: "success", message: data?.documento?.estado_verificacion === "verificado" ? "Documento verificado correctamente." : "Documento recibido." });
@@ -1505,31 +1515,24 @@ export function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
         subtitle="Elija el tipo de documento que va a fotografiar."
         onClose={onClose}>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {TIPOS_DOC_VERIFICABLES.map((t) => (
-            <button
+          {TIPOS_DOC_VERIFICABLES.map((t, i) => (
+            <motion.button
               key={t.value}
               type="button"
               onClick={() => setTipoDocLocal(t.value)}
-              className="flex flex-col items-center gap-2 rounded-xl bg-surface-2/50 border border-line/10 hover:border-emerald-500/40 px-4 py-6 transition-colors"
+              className="flex flex-col items-center gap-2 rounded-xl bg-surface-2/50 border border-line/10 hover:border-emerald-500/40 hover:bg-emerald-500/5 px-4 py-6 transition-colors"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.05, ease: "easeOut" }}
+              whileHover={{ y: -3 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <t.icono className="w-8 h-8 text-brand" />
+              <motion.span whileHover={{ rotate: 6, scale: 1.08 }} transition={{ type: "spring", stiffness: 400, damping: 12 }}>
+                <t.icono className="w-8 h-8 text-brand" />
+              </motion.span>
               <span className="text-content text-sm font-semibold text-center">{t.label}</span>
-            </button>
+            </motion.button>
           ))}
-        </div>
-      </VerifModalShell>
-    );
-  }
-
-  if (verificando) {
-    return (
-      <VerifModalShell
-        title={`Verificar ${documento}`}
-        subtitle="Estamos confirmando sus datos con la Registraduría. Esto puede tardar hasta un minuto."
-        onClose={onClose}>
-        <div className="flex flex-col items-center gap-4 py-4">
-          <span className="w-10 h-10 rounded-full border-4 border-emerald-500/25 border-t-emerald-500 animate-spin" aria-hidden="true" />
-          <p className="text-muted text-xs">Verificando sus datos…</p>
         </div>
       </VerifModalShell>
     );
@@ -1573,7 +1576,12 @@ export function VerificarCedulaModal({ onClose, setToast, onVerificado }) {
               onChange={(e) => setArchivo(e.target.files?.[0] || null)}
               className="text-xs text-content file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-white file:text-xs file:font-semibold hover:file:bg-emerald-400 file:cursor-pointer" />
             {archivo && <p className="text-muted text-[11px] truncate">{archivo.name}</p>}
-            {dosCaras && !esPdf && (
+            {dosCaras && archivo && esPdf && (
+              <p className="text-emerald-400 text-[11px]">
+                PDF de 2 páginas detectado: la segunda página se usa como reverso automáticamente.
+              </p>
+            )}
+            {dosCaras && archivo && !esPdf && (
               <label className="text-xs font-semibold text-content/80">
                 Reverso (imagen, máx 10 MB)
                 <input type="file" accept=".png,.jpg,.jpeg,.webp"
