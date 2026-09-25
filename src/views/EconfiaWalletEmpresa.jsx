@@ -65,6 +65,12 @@ function Campo({ k, label, emp, setCampo, inputCls, labelCls, type = "text", pla
 export default function EconfiaWalletEmpresa() {
   const [emp, setEmp] = useState(EMP_VACIA);
   const [documentos, setDocumentos] = useState([]);
+  const [credenciales, setCredenciales] = useState([]);
+  const [histCred, setHistCred] = useState(null); // { cred, lista } | null
+  const [esquemasDisponibles, setEsquemasDisponibles] = useState([]);
+  const [credEditor, setCredEditor] = useState(null); // { esquema, valores }
+  const [credFiles, setCredFiles] = useState({});
+  const [emitiendoCred, setEmitiendoCred] = useState(false);
   const [tiposDoc, setTiposDoc] = useState([]);
   const [precargado, setPrecargado] = useState(false);
   const [cargando, setCargando] = useState(true);
@@ -84,6 +90,12 @@ export default function EconfiaWalletEmpresa() {
   const [compartiendo, setCompartiendo] = useState(false);
   const [llaveEmpresa, setLlaveEmpresa] = useState(null);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
+  // Llave fija personal de la empresa (handle propio WLT-..., desde sugerencias)
+  const [llaveFija, setLlaveFija] = useState(null);
+  const [sugerenciasLlave, setSugerenciasLlave] = useState([]);
+  const [llaveInput, setLlaveInput] = useState("");
+  const [guardandoLlave, setGuardandoLlave] = useState(false);
+  const [editandoLlave, setEditandoLlave] = useState(false);
 
   const actualizarLogo = async (archivoLogo) => {
     setSubiendoLogo(true);
@@ -135,6 +147,24 @@ export default function EconfiaWalletEmpresa() {
   }, []);
 
   useEffect(() => { cargarEstado(); }, [cargarEstado]);
+
+  const cargarCredenciales = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/empresa/credenciales/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setCredenciales(data.credenciales || []);
+    } catch { /* silencioso */ }
+  }, []);
+  useEffect(() => { cargarCredenciales(); }, [cargarCredenciales]);
+
+  const cargarEsquemasDisponibles = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/empresa/esquemas/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setEsquemasDisponibles(data.esquemas || []);
+    } catch { /* silencioso */ }
+  }, []);
+  useEffect(() => { cargarEsquemasDisponibles(); }, [cargarEsquemasDisponibles]);
 
   const cargarCompartidas = useCallback(async () => {
     try {
@@ -219,6 +249,84 @@ export default function EconfiaWalletEmpresa() {
   };
   const consultarWallet = (e) => { e.preventDefault(); consultarPorClave(consultarClave); };
 
+  const abrirCredencial = (esquema) => {
+    setCredFiles({});
+    setCredEditor({ esquema, valores: { ...(esquema.valores_sugeridos || {}) } });
+  };
+
+  const setCredValor = (clave, valor) => {
+    setCredEditor((prev) => ({ ...prev, valores: { ...(prev?.valores || {}), [clave]: valor } }));
+  };
+
+  const emitirCredencialEmpresa = async () => {
+    if (!credEditor?.esquema) return;
+    setEmitiendoCred(true);
+    try {
+      const tieneArchivos = Object.values(credFiles).some(Boolean);
+      let opciones;
+      if (tieneArchivos) {
+        const fd = new FormData();
+        fd.append("valores", JSON.stringify(credEditor.valores || {}));
+        Object.entries(credFiles).forEach(([clave, file]) => { if (file) fd.append(`archivo__${clave}`, file); });
+        opciones = { method: "POST", headers: authHeaders(), body: fd };
+      } else {
+        opciones = {
+          method: "POST",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ valores: credEditor.valores || {} }),
+        };
+      }
+      const res = await fetch(`${API_URL}/api/wallet/empresa/esquemas/${credEditor.esquema.id}/emitir/`, opciones);
+      const data = await res.json();
+      if (!res.ok) {
+        const detalle = Array.isArray(data.detalles) ? ` ${data.detalles.join(" ")}` : "";
+        setToast({ type: "error", message: (data.error || "No se pudo generar la credencial.") + detalle });
+        return;
+      }
+      setToast({ type: "success", message: "Credencial generada correctamente." });
+      setCredEditor(null);
+      setCredFiles({});
+      cargarCredenciales();
+      cargarEsquemasDisponibles();
+    } catch {
+      setToast({ type: "error", message: "Error al generar la credencial." });
+    } finally {
+      setEmitiendoCred(false);
+    }
+  };
+
+  const verHistorialCred = async (cred) => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/credenciales/${cred.id}/verificaciones/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setHistCred({ cred, lista: data.verificaciones || [] });
+      else setToast({ type: "error", message: data.error || "No se pudo cargar el historial." });
+    } catch { setToast({ type: "error", message: "Error de conexión." }); }
+  };
+
+  const descargarCredencialPDF = async (credencialId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/empresa/credenciales/${credencialId}/pdf/`, {
+        headers: authHeaders(),
+      });
+      if (!res.ok) {
+        setToast({ type: "error", message: "No se pudo descargar la credencial." });
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `credencial-empresa-${credencialId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setToast({ type: "error", message: "Error al descargar la credencial." });
+    }
+  };
+
   const toggleCompartir = (k) =>
     setCompartirAtributos((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
 
@@ -240,6 +348,46 @@ export default function EconfiaWalletEmpresa() {
       setCompartiendo(false);
     }
   };
+
+  const cargarLlaveFija = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/llave-fija/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) {
+        setLlaveFija(data.llave || null);
+        setSugerenciasLlave(data.sugerencias || []);
+        if (data.llave?.clave) setLlaveInput(data.llave.clave);
+        else if ((data.sugerencias || []).length) setLlaveInput(data.sugerencias[0]);
+      }
+    } catch {
+      /* silencioso */
+    }
+  }, []);
+
+  const guardarLlaveFija = async (clave) => {
+    const valor = (clave ?? llaveInput ?? "").trim();
+    if (!valor) { setToast({ type: "error", message: "Elige o escribe una llave." }); return; }
+    setGuardandoLlave(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/llave-fija/`, {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ clave: valor }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setToast({ type: "error", message: data.error || "No se pudo guardar la llave." }); return; }
+      setLlaveFija(data);
+      setLlaveInput(data.clave);
+      setEditandoLlave(false);
+      setToast({ type: "success", message: "Tu llave quedó lista." });
+    } catch {
+      setToast({ type: "error", message: "Error al guardar la llave." });
+    } finally {
+      setGuardandoLlave(false);
+    }
+  };
+
+  useEffect(() => { cargarLlaveFija(); }, [cargarLlaveFija]);
 
   // Vuelca los datos traídos (Cámara local o RUES) sobre el formulario sin
   // pisar lo que el usuario ya haya escrito con valores vacíos.
@@ -331,6 +479,7 @@ export default function EconfiaWalletEmpresa() {
       if (res.ok) {
         setEmp(normalizar(data.empresa));
         setToast({ type: "success", message: "Datos de la empresa guardados." });
+        cargarEsquemasDisponibles();
       } else {
         setToast({ type: "error", message: data.error || "No se pudo guardar." });
       }
@@ -387,10 +536,75 @@ export default function EconfiaWalletEmpresa() {
   const labelCls = "block text-xs font-semibold text-content/80 mb-1";
 
   const campoProps = { emp, setCampo, inputCls, labelCls };
+  const renderCampoCredencial = (campo) => {
+    const clave = campo.clave;
+    const valor = credEditor?.valores?.[clave] ?? "";
+    if (campo.tipo === "booleano") {
+      return (
+        <label className="flex items-center gap-2 text-sm text-content cursor-pointer">
+          <input
+            type="checkbox"
+            className="accent-emerald-500 w-4 h-4"
+            checked={!!valor && String(valor).toLowerCase() !== "false"}
+            onChange={(e) => setCredValor(clave, e.target.checked)}
+          />
+          Sí
+        </label>
+      );
+    }
+    if (campo.tipo === "lista") {
+      const opciones = campo.validacion?.opciones || [];
+      return (
+        <select className={inputCls} value={valor} onChange={(e) => setCredValor(clave, e.target.value)}>
+          <option value="">Seleccione…</option>
+          {opciones.map((op) => <option key={op} value={op}>{op}</option>)}
+        </select>
+      );
+    }
+    if (campo.tipo === "archivo") {
+      return (
+        <input
+          type="file"
+          accept=".pdf,.png,.jpg,.jpeg,.webp"
+          onChange={(e) => setCredFiles((prev) => ({ ...prev, [clave]: e.target.files?.[0] || null }))}
+          className="w-full text-xs text-content file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-white file:text-xs file:font-semibold hover:file:bg-emerald-400 file:cursor-pointer"
+        />
+      );
+    }
+    return (
+      <input
+        type={campo.tipo === "numero" ? "number" : campo.tipo === "fecha" ? "date" : "text"}
+        className={inputCls}
+        value={valor}
+        onChange={(e) => setCredValor(clave, e.target.value)}
+      />
+    );
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 pb-24">
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
+
+      {histCred && (
+        <div onClick={() => setHistCred(null)} className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg bg-surface border border-line/15 rounded-2xl p-5 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-base font-bold text-content">Historial de verificaciones</h3>
+              <button onClick={() => setHistCred(null)} className="text-xs font-semibold text-muted hover:text-content">Cerrar</button>
+            </div>
+            <p className="text-xs text-muted mb-3">{histCred.cred.esquema} · #{histCred.cred.id}</p>
+            {histCred.lista.length === 0 && <p className="text-sm text-muted">Nadie ha verificado esta credencial todavía.</p>}
+            <div className="space-y-1">
+              {histCred.lista.map((v, i) => (
+                <div key={i} className="flex items-center justify-between gap-3 text-xs border-b border-line/10 py-1.5">
+                  <span className="text-content">{new Date(v.fecha).toLocaleString("es-CO")}{v.ip ? <span className="text-muted"> · {v.ip}</span> : null}</span>
+                  <span className={v.valida ? "text-emerald-300 font-bold" : "text-red-300 font-bold"}>{v.valida ? "Válida" : "No válida"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {llaveEmpresa && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
@@ -575,6 +789,196 @@ export default function EconfiaWalletEmpresa() {
             </form>
 
             <DocumentosEmpresa documentos={documentos} onEliminar={eliminarDocumento} />
+          </div>
+
+          {/* ── Esquemas publicados que la empresa puede completar ── */}
+          <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-emerald-500/10 p-6">
+            <h2 className="text-lg font-bold text-content mb-1">Credenciales disponibles</h2>
+            <p className="text-xs text-muted mb-4">
+              Plantillas publicadas por la entidad. Se completan con los datos que ya tiene tu wallet empresa; si falta algo, puedes llenarlo antes de generar.
+            </p>
+            {esquemasDisponibles.length === 0 ? (
+              <p className="text-sm text-muted">Aún no hay plantillas publicadas para esta empresa.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {esquemasDisponibles.map((e) => (
+                  <div key={e.id} className="rounded-xl border border-line/15 bg-surface-2/60 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-bold text-content truncate">{e.nombre}</h3>
+                        <p className="text-xs text-muted mt-1">
+                          {e.organizacion || "Global"} · v{e.version}{e.emitidas ? ` · ${e.emitidas} emitida(s)` : ""}
+                        </p>
+                      </div>
+                      <span className="w-4 h-4 rounded-full shrink-0" style={{ background: e.color || "#10b981" }} />
+                    </div>
+                    {e.descripcion && <p className="text-xs text-muted mt-2 line-clamp-2">{e.descripcion}</p>}
+                    <button
+                      type="button"
+                      onClick={() => abrirCredencial(e)}
+                      className="mt-3 px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-white transition-colors"
+                    >
+                      Completar / Generar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {credEditor && (
+              <div className="mt-5 rounded-2xl border border-emerald-500/25 bg-surface/80 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                  <div>
+                    <h3 className="text-content font-bold">{credEditor.esquema.nombre}</h3>
+                    <p className="text-xs text-muted">Revisa los datos autocompletados y completa los campos faltantes.</p>
+                  </div>
+                  <button type="button" onClick={() => { setCredEditor(null); setCredFiles({}); }}
+                    className="px-3 py-1.5 rounded-lg border border-line/15 text-muted hover:text-content text-sm">
+                    Cerrar
+                  </button>
+                </div>
+
+                {(() => {
+                  const grupos = [];
+                  const idx = {};
+                  (credEditor.esquema.campos || []).forEach((c) => {
+                    const g = c.grupo || "Datos";
+                    if (!(g in idx)) { idx[g] = grupos.length; grupos.push({ g, campos: [] }); }
+                    grupos[idx[g]].campos.push(c);
+                  });
+                  return grupos.map((sec) => (
+                    <section key={sec.g} className="mb-4">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-emerald-300 mb-2">{sec.g}</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {sec.campos.map((campo) => (
+                          <div key={campo.clave}>
+                            <label className={labelCls}>
+                              {campo.etiqueta || campo.clave}{campo.requerido ? " *" : ""}
+                            </label>
+                            {renderCampoCredencial(campo)}
+                            {campo.ayuda && <p className="text-[11px] text-muted mt-1">{campo.ayuda}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ));
+                })()}
+
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    disabled={emitiendoCred}
+                    onClick={emitirCredencialEmpresa}
+                    className="px-5 py-2.5 rounded-lg font-semibold text-sm text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 transition-all disabled:opacity-60"
+                  >
+                    {emitiendoCred ? "Generando…" : "Generar credencial"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Credenciales emitidas a la empresa ── */}
+          <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-emerald-500/10 p-6">
+            <h2 className="text-lg font-bold text-content mb-1">Credenciales de la empresa</h2>
+            <p className="text-xs text-muted mb-4">
+              Credenciales oficiales emitidas para esta wallet empresarial.
+            </p>
+            {credenciales.length === 0 ? (
+              <p className="text-sm text-muted">Aún no hay credenciales emitidas para esta empresa.</p>
+            ) : (
+              <div className="space-y-2">
+                {credenciales.map((c) => (
+                  <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-surface-2/60 border border-line/15">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-content truncate">{c.esquema}</div>
+                      <div className="text-xs text-muted">
+                        {c.organizacion ? `${c.organizacion} · ` : ""}Emitida {new Date(c.created_at).toLocaleString("es-CO")}
+                      </div>
+                      <div className={`text-[11px] font-semibold mt-0.5 ${c.verificaciones ? "text-emerald-300" : "text-muted"}`}>
+                        {c.verificaciones ? `✓ Verificada ${c.verificaciones} ${c.verificaciones === 1 ? "vez" : "veces"}` : "Sin verificaciones aún"}
+                        {c.ultima_verificacion ? ` · última ${new Date(c.ultima_verificacion).toLocaleString("es-CO")}` : ""}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded-md border ${badgeClasses(c.estado)}`}>
+                        {c.estado}
+                      </span>
+                      <button type="button" onClick={() => descargarCredencialPDF(c.id)}
+                        className="text-xs font-semibold text-emerald-300 hover:text-emerald-200">
+                        PDF
+                      </button>
+                      <button type="button" onClick={() => verHistorialCred(c)}
+                        className="text-xs font-semibold text-content/70 hover:text-content">
+                        Historial
+                      </button>
+                      {c.url_verificacion && (
+                        <a href={c.url_verificacion} target="_blank" rel="noreferrer"
+                          className="text-xs font-semibold text-sky-300 hover:text-sky-200">
+                          Verificar ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Mi llave fija (handle propio de la empresa) ── */}
+          <div className="bg-gradient-to-br from-emerald-500/10 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-emerald-500/25 shadow-2xl shadow-emerald-500/10 p-6">
+            <h2 className="text-lg font-bold text-content mb-1">Mi llave</h2>
+            <p className="text-xs text-muted mb-4 leading-relaxed">
+              Es el identificador propio de tu empresa para que un tercero consulte tu wallet. Elige una de las
+              sugerencias (creadas con tu NIT o razón social) y compártela. No cambia ni vence.
+            </p>
+            {llaveFija?.clave && !editandoLlave ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="bg-surface-2/70 border border-emerald-500/30 rounded-xl px-5 py-3">
+                  <span className="text-emerald-300 font-mono text-xl font-bold tracking-widest break-all">{llaveFija.clave}</span>
+                </div>
+                <button onClick={() => copiarCompartido(llaveFija.clave, "Llave")}
+                  className="px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors">
+                  Copiar
+                </button>
+                <button onClick={() => { setEditandoLlave(true); setLlaveInput(llaveFija.clave); }}
+                  className="px-4 py-2.5 rounded-lg border border-line/20 text-muted hover:text-content hover:border-emerald-500/30 text-sm font-semibold transition-colors">
+                  Cambiar
+                </button>
+              </div>
+            ) : sugerenciasLlave.length > 0 ? (
+              <div>
+                <p className="text-muted text-[11px] mb-2">Elige la que prefieras:</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {sugerenciasLlave.map((s) => (
+                    <button key={s} onClick={() => setLlaveInput(s)}
+                      className={`px-3 py-2 rounded-lg font-mono text-sm font-semibold border transition-colors ${
+                        llaveInput === s
+                          ? "bg-emerald-500 text-white border-emerald-500"
+                          : "bg-surface-2/60 text-emerald-300 border-emerald-500/30 hover:border-emerald-400"
+                      }`}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button onClick={() => guardarLlaveFija()} disabled={guardandoLlave || !llaveInput}
+                    className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+                    {guardandoLlave ? "Guardando…" : "Usar esta llave"}
+                  </button>
+                  {llaveFija?.clave && (
+                    <button onClick={() => { setEditandoLlave(false); setLlaveInput(llaveFija.clave); }}
+                      className="px-4 py-2.5 rounded-lg border border-line/20 text-muted hover:text-content text-sm font-semibold transition-colors">
+                      Cancelar
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-muted text-xs">
+                Completa el NIT y la razón social de tu empresa para poder sugerirte una llave.
+              </p>
+            )}
           </div>
 
           {/* ── Compartir mi wallet de empresa ── */}

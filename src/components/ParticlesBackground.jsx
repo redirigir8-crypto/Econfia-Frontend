@@ -48,21 +48,58 @@ const THEME_PARTICLES = {
 };
 
 /** "#10b981" -> "16, 185, 129" para poder armar rgba(...) en los halos. */
-function hexARgbCsv(hex) {
+function parseHexColor(hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || "").trim());
   if (!m) return null;
   const n = parseInt(m[1], 16);
-  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+function rgbCsv(rgb) {
+  if (!rgb) return null;
+  return `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+}
+
+function rgbToHex({ r, g, b }) {
+  const h = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0");
+  return `#${h(r)}${h(g)}${h(b)}`;
+}
+
+function mixRgb(a, b, weight = 0.5) {
+  return {
+    r: a.r + (b.r - a.r) * weight,
+    g: a.g + (b.g - a.g) * weight,
+    b: a.b + (b.b - a.b) * weight,
+  };
+}
+
+function hexARgbCsv(hex) {
+  return rgbCsv(parseHexColor(hex));
+}
+
+function suavizarHex(hex, theme) {
+  const rgb = parseHexColor(hex);
+  if (!rgb) return hex;
+  const target = theme === "dark" ? { r: 255, g: 255, b: 255 } : { r: 15, g: 23, b: 42 };
+  return rgbToHex(mixRgb(rgb, target, theme === "dark" ? 0.38 : 0.18));
+}
+
+function secundarioElegante(principal, secundario) {
+  if (!principal) return secundario || principal;
+  if (secundario && String(secundario).toLowerCase() !== String(principal).toLowerCase()) return secundario;
+  const rgb = parseHexColor(principal);
+  return rgb ? rgbToHex(mixRgb(rgb, { r: 255, g: 255, b: 255 }, 0.34)) : principal;
 }
 
 /** Arma el CSS `background` a partir de la base del tema y sus halos —
  * si se pasan colores de marca, los halos se tiñen con ellos en vez de
  * usar el color fijo del tema (la base oscura/clara/naranja no cambia,
  * solo el tinte de los resplandores). */
-function construirBackground(cfg, rgbPrincipal, rgbSecundario) {
+function construirBackground(cfg, rgbPrincipal, rgbSecundario, brandMode = false) {
   const halos = cfg.halos.map((h, i) => {
     const rgb = i === 0 ? rgbPrincipal || h.rgb : rgbSecundario || rgbPrincipal || h.rgb;
-    return `radial-gradient(circle at ${h.pos}, rgba(${rgb}, ${h.alpha}), transparent ${h.spread})`;
+    const alpha = brandMode ? Math.min(h.alpha * 0.48, 0.09) : h.alpha;
+    return `radial-gradient(circle at ${h.pos}, rgba(${rgb}, ${alpha}), transparent ${h.spread})`;
   });
   return [...halos, cfg.base].join(",\n      ");
 }
@@ -76,17 +113,19 @@ export default function ParticlesBackground() {
   // los del tema — mismo gradiente de fondo base, pero "tiñendo" las
   // constelaciones con el acento principal/secundario del cliente.
   const principal = organizacion?.color_acento || null;
-  const secundario = organizacion?.color_secundario_efectivo || principal;
+  const secundario = secundarioElegante(principal, organizacion?.color_secundario_efectivo);
   const rgbPrincipal = principal ? hexARgbCsv(principal) : null;
   const rgbSecundario = secundario ? hexARgbCsv(secundario) : rgbPrincipal;
   const cfg = principal
     ? {
         ...base,
-        dots: [principal, secundario],
-        linkColor: principal,
-        background: construirBackground(base, rgbPrincipal, rgbSecundario),
+        dots: [suavizarHex(principal, theme), suavizarHex(secundario, theme)],
+        linkColor: suavizarHex(secundario || principal, theme),
+        linkOpacity: Math.min(base.linkOpacity, theme === "dark" ? 0.075 : 0.12),
+        dotOpacity: Math.min(base.dotOpacity, theme === "dark" ? 0.30 : 0.42),
+        background: construirBackground(base, rgbPrincipal, rgbSecundario, true),
       }
-    : { ...base, background: construirBackground(base, null, null) };
+    : { ...base, background: construirBackground(base, null, null, false) };
 
   const particlesInit = async (main) => {
     await loadFull(main);
@@ -102,7 +141,7 @@ export default function ParticlesBackground() {
         background: { image: cfg.background },
         fullScreen: { enable: true, zIndex: -1 },
         particles: {
-          number: { value: 800, density: { enable: true, area: 2000 } },
+          number: { value: principal ? 560 : 800, density: { enable: true, area: 2000 } },
           shape: {
             type: ["circle", "polygon"],
             options: { polygon: { sides: 9 } },

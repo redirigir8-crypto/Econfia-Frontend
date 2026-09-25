@@ -129,6 +129,11 @@ if (isAdmin) {
     { path: "/3f8a1e6d", icon: <WalletIcon size={16} strokeWidth={1.75} />, label: "Admin Wallet", color: "emerald" },
   ];
 }
+// Admin de una Entidad (org-admin) que NO es superadmin de Econfia: acceso al
+// panel de Wallet, donde solo verá la pestaña de Esquemas de credenciales.
+else if (user?.perfil?.es_admin_organizacion) {
+  menuItems.push({ path: "/3f8a1e6d", icon: <WalletIcon size={16} strokeWidth={1.75} />, label: "Esquemas Wallet", color: "emerald" });
+}
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -190,8 +195,12 @@ const N = menuItems.length;
 const ANGLE_STEP = N > 0 ? 360 / N : 0;
 
 // Radio del disco/cilindro.
-// Más grande = cinturón más ancho.
-const DISC_RADIUS = 520;
+// Depende de la cantidad de módulos disponibles: usuarios con pocos accesos no
+// necesitan un anillo gigantesco; admins con muchos módulos conservan espacio.
+const DISC_RADIUS = Math.round(Math.min(520, Math.max(285, 170 + N * 20)));
+const DISC_STAGE_WIDTH = Math.round(Math.min(1180, Math.max(620, DISC_RADIUS * 2 + 260)));
+const DISC_BELT_WIDTH = Math.round(DISC_RADIUS * 1.58);
+const DISC_GLOW_WIDTH = Math.round(DISC_BELT_WIDTH * 0.88);
 
 const activeIndex = menuItems.findIndex(
   (item) => pathname === item.path || pathname.startsWith(item.path + "/")
@@ -307,7 +316,7 @@ return (
       .disc-stage {
         position: relative;
 
-        width: min(1180px, 82vw);
+        width: min(var(--disc-stage-width, 1180px), 82vw);
         height: 205px;
 
         perspective: 1500px;
@@ -329,7 +338,7 @@ return (
         left: 50%;
         top: 34px;
 
-        width: 820px;
+        width: var(--disc-belt-width, 820px);
         height: 240px;
 
         transform:
@@ -388,7 +397,7 @@ return (
 
         transform: translateX(-50%);
 
-        width: 720px;
+        width: var(--disc-glow-width, 720px);
         height: 18px;
 
         border-radius: 50%;
@@ -825,19 +834,19 @@ return (
       @media (max-width: 1100px) {
 
         .disc-stage {
-          width: 760px;
+          width: min(var(--disc-stage-width, 760px), 760px);
           transform: scale(0.90);
         }
 
         .disc-belt {
-          width: 760px;
+          width: min(var(--disc-belt-width, 760px), 760px);
         }
       }
 
       @media (max-width: 820px) {
 
         .disc-stage {
-          width: 620px;
+          width: min(var(--disc-stage-width, 620px), 620px);
 
           transform:
             scale(0.76);
@@ -876,7 +885,15 @@ return (
             DISCO
         ===================================================== */}
 
-        <div className="disc-stage" style={{ "--belt-color": centerColor }}>
+        <div
+          className="disc-stage"
+          style={{
+            "--belt-color": centerColor,
+            "--disc-stage-width": `${DISC_STAGE_WIDTH}px`,
+            "--disc-belt-width": `${DISC_BELT_WIDTH}px`,
+            "--disc-glow-width": `${DISC_GLOW_WIDTH}px`,
+          }}
+        >
 
 
           {/* cinturón */}

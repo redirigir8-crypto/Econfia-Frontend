@@ -202,8 +202,23 @@ export default function Profile() {
         if (!resStats.ok) throw new Error("Error al obtener las estadísticas");
         const statsData = await resStats.json();
         setStats(statsData);
-        // Guardar los datos de stats (que incluyen is_staff y is_superuser) en localStorage como 'user'
-        localStorage.setItem("user", JSON.stringify(statsData));
+        // No reemplazamos el usuario completo con las estadísticas: el TaskBar
+        // depende de flags del perfil (por ejemplo es_admin_organizacion) y se
+        // perdían al recargar. Solo refrescamos el perfil dentro del usuario
+        // ya guardado y avisamos a los componentes que leen localStorage.
+        try {
+          const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+          localStorage.setItem("user", JSON.stringify({
+            ...storedUser,
+            perfil: {
+              ...(storedUser?.perfil || {}),
+              ...profileData,
+            },
+          }));
+          window.dispatchEvent(new Event("user-updated"));
+        } catch (_error) {
+          // Si localStorage falla, no bloqueamos la pantalla de perfil.
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -365,8 +380,8 @@ export default function Profile() {
   return (
     <section className="relative min-h-screen py-4 md:py-6 pb-32 md:pb-36 overflow-hidden bg-transparent">
       {/* Elementos decorativos de fondo */}
-      <div className="absolute top-20 right-20 w-72 h-72 bg-brand/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-brand-2/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-20 right-20 w-72 h-72 bg-brand/5 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 left-20 w-96 h-96 bg-brand-2/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
@@ -386,7 +401,7 @@ export default function Profile() {
             </div>
 
             <div
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full my-3 overflow-hidden border-2 border-brand/30 relative group cursor-pointer transition-all hover:border-brand/50 hover:shadow-lg hover:shadow-brand/50"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full my-3 overflow-hidden border-2 border-brand/30 relative group cursor-pointer transition-all hover:border-brand/50 hover:shadow-lg hover:shadow-brand/25"
               onClick={() => setShowAvatarModal(true)}
             >
               <img
@@ -397,7 +412,7 @@ export default function Profile() {
               
               {/* Overlay al hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-brand/20 to-brand-2/20 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="text-white text-xs font-semibold drop-shadow-lg">
+                <span className="rounded-full bg-slate-950/70 px-2.5 py-1 text-white text-xs font-semibold shadow-lg ring-1 ring-white/15">
                   {uploadingPhoto ? "Actualizando..." : "Cambiar avatar"}
                 </span>
               </div>
@@ -427,7 +442,10 @@ export default function Profile() {
             <h3 className="text-base sm:text-lg font-semibold text-content text-center">{profile?.full_name || profile?.username}</h3>
             <p className="text-muted text-xs sm:text-sm mb-2 text-center break-all">{profile?.email || "Sin correo"}</p>
 
-            <span className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-brand to-brand-2 text-white font-semibold shadow-lg shadow-brand/30">
+            <span
+              className="text-xs px-3 py-1 rounded-full bg-gradient-to-r from-brand to-brand-2 font-semibold shadow-lg shadow-brand/20"
+              style={{ color: "rgb(var(--th-brand-contrast))" }}
+            >
               {profile?.groups?.length > 0 ? profile.groups[0] : "Usuario"}
             </span>
 
@@ -462,7 +480,8 @@ export default function Profile() {
             {/* Botón PDF */}
             <div className="w-full flex justify-center mt-5">
               <button
-                className="w-full px-6 py-2 text-sm sm:text-base rounded-xl bg-gradient-to-r from-brand to-brand-2 text-white font-bold shadow-lg shadow-brand/30 hover:opacity-90 transition-all"
+                className="w-full px-6 py-2 text-sm sm:text-base rounded-xl bg-gradient-to-r from-brand to-brand-2 font-bold shadow-lg shadow-brand/20 hover:brightness-105 transition-all"
+                style={{ color: "rgb(var(--th-brand-contrast))" }}
                 onClick={() => generarInformeUsuarioPDF(profile, stats, organizacion)}
               >
                 Generar informe PDF

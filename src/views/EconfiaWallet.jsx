@@ -119,6 +119,7 @@ export default function EconfiaWallet() {
 
   // Documentos
   const [documentos, setDocumentos] = useState([]);
+  const [credenciales, setCredenciales] = useState([]);
   const [tipoSubida, setTipoSubida] = useState("hoja_vida");
   const [archivo, setArchivo] = useState(null);
   const [subiendo, setSubiendo] = useState(false);
@@ -158,6 +159,13 @@ export default function EconfiaWallet() {
   // desatendido genere un QR/llave con los datos del titular sin más que
   // un clic.
   const [mostrarReautenticar, setMostrarReautenticar] = useState(false);
+
+  // Llave fija personal: handle propio (WLT-...) elegido desde sugerencias.
+  const [llaveFija, setLlaveFija] = useState(null); // { clave, url, qr_base64, atributos } | null
+  const [sugerenciasLlave, setSugerenciasLlave] = useState([]);
+  const [llaveInput, setLlaveInput] = useState("");
+  const [guardandoLlave, setGuardandoLlave] = useState(false);
+  const [editandoLlave, setEditandoLlave] = useState(false);
 
   const baseCompleta = estado?.base_completa;
   const consultaHabilitada = estado?.consulta_habilitada;
@@ -204,6 +212,60 @@ export default function EconfiaWallet() {
     }
   }, []);
 
+  const cargarCredenciales = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/credenciales/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) setCredenciales(data.credenciales || []);
+    } catch {
+      /* silencioso */
+    }
+  }, []);
+
+  const cargarLlaveFija = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/llave-fija/`, { headers: authHeaders() });
+      const data = await res.json();
+      if (res.ok) {
+        setLlaveFija(data.llave || null);
+        setSugerenciasLlave(data.sugerencias || []);
+        if (data.llave?.clave) setLlaveInput(data.llave.clave);
+        else if ((data.sugerencias || []).length) setLlaveInput(data.sugerencias[0]);
+      }
+    } catch {
+      /* silencioso */
+    }
+  }, []);
+
+  const guardarLlaveFija = useCallback(async (clave) => {
+    const valor = (clave ?? llaveInput ?? "").trim();
+    if (!valor) {
+      setToast({ type: "error", message: "Elija o escriba una llave." });
+      return;
+    }
+    setGuardandoLlave(true);
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/llave-fija/`, {
+        method: "POST",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ clave: valor }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ type: "error", message: data.error || "No se pudo guardar la llave." });
+        return;
+      }
+      setLlaveFija(data);
+      setLlaveInput(data.clave);
+      setEditandoLlave(false);
+      setToast({ type: "success", message: "Tu llave quedó lista." });
+    } catch {
+      setToast({ type: "error", message: "Error al guardar la llave." });
+    } finally {
+      setGuardandoLlave(false);
+    }
+  }, [llaveInput]);
+
   const cargarTitulos = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/api/wallet/titulos/`, { headers: authHeaders() });
@@ -240,10 +302,12 @@ export default function EconfiaWallet() {
   useEffect(() => {
     cargarEstado();
     cargarDocumentos();
+    cargarCredenciales();
     cargarTitulos();
     cargarReferencias();
     cargarCertificaciones();
-  }, [cargarEstado, cargarDocumentos, cargarTitulos, cargarReferencias, cargarCertificaciones]);
+    cargarLlaveFija();
+  }, [cargarEstado, cargarDocumentos, cargarCredenciales, cargarTitulos, cargarReferencias, cargarCertificaciones, cargarLlaveFija]);
 
   // Al saber que ya hay consulta, cargar su resultado y hacer polling si sigue en curso.
   useEffect(() => {
@@ -369,6 +433,29 @@ export default function EconfiaWallet() {
       window.URL.revokeObjectURL(url);
     } catch {
       setToast({ type: "error", message: "Error al descargar el PDF." });
+    }
+  };
+
+  const descargarCredencialPDF = async (credencialId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/wallet/credenciales/${credencialId}/pdf/`, {
+        headers: authHeaders(),
+      });
+      if (!res.ok) {
+        setToast({ type: "error", message: "No se pudo descargar la credencial." });
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `credencial-wallet-${credencialId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setToast({ type: "error", message: "Error al descargar la credencial." });
     }
   };
 
@@ -693,6 +780,83 @@ export default function EconfiaWallet() {
           </div>
         </header>
 
+        {/* ============ Mi llave fija personal ============ */}
+        {baseCompleta && (
+          <div className="bg-gradient-to-br from-emerald-500/10 via-surface-2/70 to-surface/95 border border-emerald-500/25 rounded-2xl p-6 shadow-xl mb-6">
+            <div className="flex items-start gap-3">
+              <span className="flex w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-content font-bold text-lg leading-tight">Mi llave</h2>
+                <p className="text-muted text-xs mt-1 leading-relaxed">
+                  Es tu identificador propio para que una empresa consulte tu Wallet. Elige una de las
+                  sugerencias (creadas con tu documento o tu nombre) y compártela por WhatsApp, correo o en persona.
+                </p>
+
+                {llaveFija?.clave && !editandoLlave ? (
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <div className="bg-surface-2/70 border border-emerald-500/30 rounded-xl px-5 py-3">
+                      <span className="text-emerald-300 font-mono text-xl font-bold tracking-widest break-all">{llaveFija.clave}</span>
+                    </div>
+                    <button
+                      onClick={() => { navigator.clipboard?.writeText(llaveFija.clave); setToast({ type: "success", message: "Llave copiada." }); }}
+                      className="px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors">
+                      Copiar
+                    </button>
+                    <button
+                      onClick={() => { setEditandoLlave(true); setLlaveInput(llaveFija.clave); }}
+                      className="px-4 py-2.5 rounded-lg border border-line/20 text-muted hover:text-content hover:border-emerald-500/30 text-sm font-semibold transition-colors">
+                      Cambiar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-4">
+                    {sugerenciasLlave.length > 0 ? (
+                      <>
+                        <p className="text-muted text-[11px] mb-2">Elige la que prefieras:</p>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {sugerenciasLlave.map((s) => (
+                            <button key={s} onClick={() => setLlaveInput(s)}
+                              className={`px-3 py-2 rounded-lg font-mono text-sm font-semibold border transition-colors ${
+                                llaveInput === s
+                                  ? "bg-emerald-500 text-white border-emerald-500"
+                                  : "bg-surface-2/60 text-emerald-300 border-emerald-500/30 hover:border-emerald-400"
+                              }`}>
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() => guardarLlaveFija()}
+                            disabled={guardandoLlave || !llaveInput}
+                            className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+                            {guardandoLlave ? "Guardando…" : "Usar esta llave"}
+                          </button>
+                          {llaveFija?.clave && (
+                            <button onClick={() => { setEditandoLlave(false); setLlaveInput(llaveFija.clave); }}
+                              className="px-4 py-2.5 rounded-lg border border-line/20 text-muted hover:text-content text-sm font-semibold transition-colors">
+                              Cancelar
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-muted text-xs">
+                        Completa tus datos personales (nombre y documento) para poder sugerirte una llave.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ================= ZONA A: datos base ================= */}
         <WalletSolicitudes />
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
@@ -880,10 +1044,53 @@ export default function EconfiaWallet() {
           )}
         </div>
 
+        {/* ================= ZONA C1: credenciales emitidas ================= */}
+        <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <StepDot n={4} done={credenciales.length > 0} />
+            <div>
+              <h2 className="text-content font-bold">Mis credenciales</h2>
+              <p className="text-muted text-xs">Credenciales oficiales emitidas para su wallet. Puede descargar el PDF o abrir la verificación pública.</p>
+            </div>
+          </div>
+
+          {credenciales.length === 0 ? (
+            <p className="text-muted text-xs">Aún no tienes credenciales emitidas.</p>
+          ) : (
+            <ul className="space-y-2">
+              {credenciales.map((c) => (
+                <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-2/50 border border-line/10 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-content text-sm font-semibold truncate">{c.esquema}</p>
+                    <p className="text-muted text-[11px] truncate">
+                      {c.organizacion ? `${c.organizacion} · ` : ""}Emitida {new Date(c.created_at).toLocaleString("es-CO")}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${badgeClasses(c.estado)}`}>
+                      {c.estado}
+                    </span>
+                    <button type="button" onClick={() => descargarCredencialPDF(c.id)}
+                      className="text-xs font-semibold text-emerald-300 hover:text-emerald-200">
+                      PDF
+                    </button>
+                    {c.url_verificacion && (
+                      <a href={c.url_verificacion} target="_blank" rel="noreferrer"
+                        className="text-xs font-semibold text-sky-300 hover:text-sky-200">
+                        Verificar ↗
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         {/* ================= ZONA C2: certificaciones laborales ================= */}
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
-            <StepDot n={4} done={certificaciones.length > 0} />
+            <StepDot n={5} done={certificaciones.length > 0} />
             <div>
               <h2 className="text-content font-bold">Certificaciones laborales</h2>
               <p className="text-muted text-xs">Registre su experiencia laboral (empresa, cargo y fechas). Adjuntar la constancia es opcional.</p>
@@ -950,7 +1157,7 @@ export default function EconfiaWallet() {
         {/* ================= ZONA D: títulos académicos ================= */}
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
-            <StepDot n={5} done={titulos.length > 0} />
+            <StepDot n={6} done={titulos.length > 0} />
             <div>
               <h2 className="text-content font-bold">Títulos académicos</h2>
               <p className="text-muted text-xs">Registre sus estudios (institución, programa, nivel y año). El diploma es opcional.</p>
@@ -1009,7 +1216,7 @@ export default function EconfiaWallet() {
         {/* ================= ZONA E: referencias personales ================= */}
         <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 border border-line/15 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-3 mb-4">
-            <StepDot n={6} done={referencias.length > 0} />
+            <StepDot n={7} done={referencias.length > 0} />
             <div>
               <h2 className="text-content font-bold">Referencias personales</h2>
               <p className="text-muted text-xs">Agrega hasta {refMax} referencias ({referencias.length}/{refMax}).</p>

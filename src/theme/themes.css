@@ -16,6 +16,7 @@ html[data-theme="dark"] {
   --th-line: 148 163 184;    /* divisores (se usan con baja opacidad) */
   --th-brand: 34 211 238;    /* cyan-400 acento */
   --th-brand-2: 59 130 246;  /* blue-500 acento gradiente */
+  --th-brand-contrast: 255 255 255; /* texto sobre degradados de marca */
   --th-ok: 52 211 153;       /* emerald-400 éxito */
   --th-danger: 253 164 175;  /* rose-300 (legible sobre oscuro) */
   --th-warn: 252 211 77;     /* amber-300 */
@@ -30,6 +31,7 @@ html[data-theme="light"] {
   --th-line: 15 23 42;       /* divisores negros (con baja opacidad) */
   --th-brand: 13 148 136;    /* teal-600 acento */
   --th-brand-2: 5 150 105;   /* emerald-600 acento gradiente */
+  --th-brand-contrast: 255 255 255; /* texto sobre degradados de marca */
   --th-ok: 5 150 105;        /* emerald-600 éxito */
   --th-danger: 190 18 60;    /* rose-700 (legible sobre claro) */
   --th-warn: 180 83 9;       /* amber-700 */
@@ -46,6 +48,7 @@ html[data-theme="orange"] {
   --th-line: 67 20 7;        /* divisores cálidos (con baja opacidad) */
   --th-brand: 234 88 12;     /* orange-600 acento */
   --th-brand-2: 245 158 11;  /* amber-500 acento gradiente */
+  --th-brand-contrast: 255 255 255; /* texto sobre degradados de marca */
   --th-ok: 22 163 74;        /* green-600 éxito (legible sobre cálido) */
   --th-danger: 190 18 60;    /* rose-700 */
   --th-warn: 180 83 9;       /* amber-700 */
@@ -65,6 +68,10 @@ html[data-theme="light"] {
    de respaldo por si el canvas aún no cargó. NO se ocultan las partículas. ── */
 html[data-theme="orange"] {
   background-color: rgb(var(--th-app));
+}
+
+.text-brand-contrast {
+  color: rgb(var(--th-brand-contrast));
 }
 
 /* ==========================================================================

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import AdminWalletEsquemas from "./AdminWalletEsquemas";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -68,12 +69,17 @@ export default function AdminWallet() {
   const token = localStorage.getItem("token");
   const auth = { Authorization: `Token ${token}` };
 
+  // Superadmin Econfia ve todo el panel; el admin de una Entidad (org-admin)
+  // solo ve la pestaña de Esquemas de credenciales.
+  const usuarioLocal = (() => { try { return JSON.parse(localStorage.getItem("user")); } catch { return null; } })();
+  const esSuperadmin = !!(usuarioLocal?.is_staff || usuarioLocal?.is_superuser);
+
   const [resumen, setResumen] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
   const [revocaciones, setRevocaciones] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [busqueda, setBusqueda] = useState("");
-  const [pestana, setPestana] = useState("usuarios"); // usuarios | revocaciones
+  const [pestana, setPestana] = useState(esSuperadmin ? "usuarios" : "esquemas"); // usuarios | revocaciones | esquemas
   const [error, setError] = useState("");
   const [revocando, setRevocando] = useState(""); // `${perfil_id}-${metodo}` en curso, o ""
   const [dispositivosModal, setDispositivosModal] = useState(null); // { usuario, dispositivos } | null
@@ -108,7 +114,8 @@ export default function AdminWallet() {
     }
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { cargar(); }, [cargar]);
+  // El org-admin no llama a los endpoints de superadmin (dan 403): solo usa Esquemas.
+  useEffect(() => { if (esSuperadmin) cargar(); }, [cargar, esSuperadmin]);
 
   const buscar = (e) => {
     e.preventDefault();
@@ -207,8 +214,14 @@ export default function AdminWallet() {
   return (
     <div style={{
       fontFamily: "Segoe UI, system-ui, sans-serif", color: T.text,
-      minHeight: "100vh", padding: "120px 32px 48px", boxSizing: "border-box",
-      maxWidth: 1360, margin: "0 auto",
+      // El header (disco) del layout reserva 340px y deja ~90px vacíos debajo;
+      // en superadmin cerramos ese hueco, pero en admin de organización
+      // dejamos más aire para que el formulario no se monte con el taskbar.
+      minHeight: "100vh",
+      padding: esSuperadmin ? "0 32px 48px" : "36px 32px 56px",
+      boxSizing: "border-box",
+      maxWidth: 1360,
+      margin: esSuperadmin ? "-84px auto 0" : "-28px auto 0",
     }}>
       {/* Cabecera */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
@@ -261,8 +274,11 @@ export default function AdminWallet() {
       {/* Pestañas */}
       <div style={{ display: "flex", gap: 8, marginTop: 28, borderBottom: `1px solid ${T.line}` }}>
         {[
-          { key: "usuarios", label: `Usuarios (${usuarios.length})` },
-          { key: "revocaciones", label: `Revocaciones (${revocaciones.length})` },
+          ...(esSuperadmin ? [
+            { key: "usuarios", label: `Usuarios (${usuarios.length})` },
+            { key: "revocaciones", label: `Revocaciones (${revocaciones.length})` },
+          ] : []),
+          { key: "esquemas", label: "Esquemas de credenciales" },
         ].map((tab) => (
           <button key={tab.key} onClick={() => setPestana(tab.key)}
             style={{
@@ -398,6 +414,9 @@ export default function AdminWallet() {
           </table>
         </div>
       )}
+
+      {/* Configuración dinámica de esquemas de credenciales (Certicámara) */}
+      {pestana === "esquemas" && <AdminWalletEsquemas esSuperadmin={esSuperadmin} />}
 
       {dispositivosModal && (
         <div
