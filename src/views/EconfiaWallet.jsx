@@ -160,6 +160,13 @@ export default function EconfiaWallet() {
   // un clic.
   const [mostrarReautenticar, setMostrarReautenticar] = useState(false);
 
+  // Confirmación previa a iniciar la consulta: los datos base quedan
+  // bloqueados en cuanto se usa la única consulta disponible (no editables
+  // ni por el propio titular, ver _consulta_usada en views_wallet.py), así
+  // que se pide una confirmación explícita antes de gastarla — evita que
+  // alguien la consuma con un dato mal digitado sin darse cuenta.
+  const [mostrarConfirmarConsulta, setMostrarConfirmarConsulta] = useState(false);
+
   // Llave fija personal: handle propio (WLT-...) elegido desde sugerencias.
   const [llaveFija, setLlaveFija] = useState(null); // { clave, url, qr_base64, atributos } | null
   const [sugerenciasLlave, setSugerenciasLlave] = useState([]);
@@ -947,7 +954,7 @@ export default function EconfiaWallet() {
           </div>
 
           {!consultaUsada && (
-            <button onClick={iniciarConsulta} disabled={!consultaHabilitada || consultando}
+            <button onClick={() => setMostrarConfirmarConsulta(true)} disabled={!consultaHabilitada || consultando}
               className="px-6 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
               {consultando ? "Iniciando…" : "Consultar mis antecedentes"}
             </button>
@@ -1261,6 +1268,47 @@ export default function EconfiaWallet() {
           )}
         </div>
       </div>
+      {mostrarConfirmarConsulta && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
+          onClick={() => !consultando && setMostrarConfirmarConsulta(false)}>
+          <div className="relative w-full max-w-md bg-surface border border-line/15 rounded-2xl shadow-2xl p-6"
+            onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setMostrarConfirmarConsulta(false)} disabled={consultando}
+              className="absolute top-3 right-3 text-muted hover:text-content disabled:opacity-40">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h3 className="text-content font-bold text-lg pr-6">Confirme sus datos</h3>
+            <p className="text-muted text-xs mt-1 mb-4">
+              Esta consulta solo puede hacerse una vez y sus datos quedarán bloqueados para edición. Verifique que
+              todo esté correcto antes de continuar.
+            </p>
+            <div className="grid grid-cols-2 gap-3 rounded-xl border border-line/10 bg-surface-2/50 p-4 mb-5">
+              <Campo label="Nombre" value={`${estado?.candidato?.nombre || ""} ${estado?.candidato?.apellido || ""}`} />
+              <Campo label="Documento" value={`${estado?.candidato?.tipo_doc || ""} ${estado?.candidato?.cedula || ""}`} />
+              <Campo label="Fecha de expedición" value={estado?.candidato?.fecha_expedicion} />
+              <Campo label="Lugar de expedición" value={estado?.candidato?.lugar_expedicion} />
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setMostrarConfirmarConsulta(false)} disabled={consultando}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-line/20 text-content text-sm font-semibold hover:bg-surface-2/60 transition-colors disabled:opacity-40">
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  setMostrarConfirmarConsulta(false);
+                  await iniciarConsulta();
+                }}
+                disabled={consultando}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
+                {consultando ? "Iniciando…" : "Aceptar y consultar"}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
       {mostrarReautenticar && (
         <ReautenticarCompartirModal
           rostroRegistrado={!!estado?.rostro_registrado}
