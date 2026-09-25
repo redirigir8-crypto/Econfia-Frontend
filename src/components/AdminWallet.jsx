@@ -42,6 +42,15 @@ const botonRevocarStyle = {
 
 const METODO_LABEL_ACCION = { rostro: "el rostro", cedula: "la cédula verificada", telefono: "el teléfono verificado" };
 
+const ICONO_EVENTO_AUDITORIA = {
+  login: "🔑",
+  documento_subido: "📤",
+  documento_eliminado: "🗑️",
+  rostro_registrado: "🙂",
+  telefono_verificado: "💬",
+  datos_eliminados: "⚠️",
+};
+
 function KpiCard({ icono, titulo, valor, sub }) {
   return (
     <div style={{
@@ -75,6 +84,12 @@ export default function AdminWallet() {
   const [revocando, setRevocando] = useState(""); // `${perfil_id}-${metodo}` en curso, o ""
   const [dispositivosModal, setDispositivosModal] = useState(null); // { usuario, dispositivos } | null
   const [cargandoDispositivos, setCargandoDispositivos] = useState(false);
+  // Detalle por usuario: intentos de verificación de cédula (incluye los
+  // rechazados por OCR, que el propio titular ya no ve en su Wallet) e
+  // historial de auditoría (login, subidas, registros/revocaciones).
+  const [detalleModal, setDetalleModal] = useState(null); // { usuario, pestana, intentos, eventos } | null
+  const [cargandoDetalle, setCargandoDetalle] = useState(false);
+  const [descargando, setDescargando] = useState(""); // `${docId}-${cara}` en curso
 
   const cargar = useCallback(async (q = "") => {
     if (!token) return;
@@ -144,6 +159,55 @@ export default function AdminWallet() {
       setDispositivosModal({ usuario: usuario.usuario, dispositivos: [] });
     } finally {
       setCargandoDispositivos(false);
+    }
+  };
+
+  const verDetalle = async (usuario) => {
+    setDetalleModal({ usuario, pestana: "intentos", intentos: [], eventos: [] });
+    setCargandoDetalle(true);
+    try {
+      const [rIntentos, rEventos] = await Promise.all([
+        fetch(`${API_URL}/api/admin/wallet/usuarios/${usuario.perfil_id}/intentos-cedula/`, { headers: auth }),
+        fetch(`${API_URL}/api/admin/wallet/usuarios/${usuario.perfil_id}/auditoria/`, { headers: auth }),
+      ]);
+      const dIntentos = await rIntentos.json().catch(() => null);
+      const dEventos = await rEventos.json().catch(() => null);
+      setDetalleModal({
+        usuario,
+        pestana: "intentos",
+        intentos: rIntentos.ok ? (dIntentos?.intentos || []) : [],
+        eventos: rEventos.ok ? (dEventos?.eventos || []) : [],
+      });
+    } catch {
+      setDetalleModal({ usuario, pestana: "intentos", intentos: [], eventos: [] });
+    } finally {
+      setCargandoDetalle(false);
+    }
+  };
+
+  const descargarDocumento = async (docId, cara) => {
+    const clave = `${docId}-${cara}`;
+    setDescargando(clave);
+    try {
+      const url = `${API_URL}/api/admin/wallet/documentos/${docId}/descargar/${cara === "reverso" ? "reverso/" : ""}`;
+      const res = await fetch(url, { headers: auth });
+      if (!res.ok) throw new Error("No se pudo descargar el documento.");
+      const blob = await res.blob();
+      const nombreHeader = res.headers.get("Content-Disposition") || "";
+      const match = nombreHeader.match(/filename="?([^"]+)"?/);
+      const nombre = match ? match[1] : `documento-${docId}-${cara}`;
+      const objectUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = nombre;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (e) {
+      setError(e.message || "No se pudo descargar el documento.");
+    } finally {
+      setDescargando("");
     }
   };
 
@@ -240,11 +304,12 @@ export default function AdminWallet() {
                 <th style={{ padding: "10px 12px", textAlign: "center" }}>Cédula verificada</th>
                 <th style={{ padding: "10px 12px", textAlign: "center" }}>Teléfono</th>
                 <th style={{ padding: "10px 12px", textAlign: "center" }}>Dispositivos</th>
+                <th style={{ padding: "10px 12px", textAlign: "center" }}>Historial</th>
               </tr>
             </thead>
             <tbody>
               {usuarios.length === 0 ? (
-                <tr><td colSpan={7} style={{ padding: 20, textAlign: "center", color: T.muted }}>
+                <tr><td colSpan={8} style={{ padding: 20, textAlign: "center", color: T.muted }}>
                   Ningún usuario con econfiaWallet todavía.
                 </td></tr>
               ) : usuarios.map((u) => (
@@ -299,6 +364,14 @@ export default function AdminWallet() {
                       color: T.text, background: T.surface2, border: `1px solid ${T.line}`,
                     }}>
                       📱 {u.dispositivos_count}
+                    </button>
+                  </td>
+                  <td style={{ padding: "10px 12px", textAlign: "center" }}>
+                    <button onClick={() => verDetalle(u)} style={{
+                      cursor: "pointer", padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
+                      color: T.text, background: T.surface2, border: `1px solid ${T.line}`,
+                    }}>
+                      🕓 Ver
                     </button>
                   </td>
                 </tr>
@@ -384,6 +457,114 @@ export default function AdminWallet() {
               </div>
             )}
             <button onClick={() => setDispositivosModal(null)} style={{
+              marginTop: 16, cursor: "pointer", padding: "8px 16px", borderRadius: 10, fontWeight: 700,
+              color: T.text, background: T.surface2, border: `1px solid ${T.line}`,
+            }}>Cerrar</button>
+          </div>
+        </div>
+      )}
+
+      {detalleModal && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(0,0,0,0.6)", padding: 16,
+          }}
+          onClick={() => setDetalleModal(null)}
+        >
+          <div
+            style={{
+              width: "100%", maxWidth: 520, maxHeight: "85vh", overflowY: "auto",
+              background: T.surface, border: `1px solid ${T.line}`, borderRadius: 16, padding: 22,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Historial de {detalleModal.usuario.usuario}</h3>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 14, borderBottom: `1px solid ${T.line}` }}>
+              {[
+                { key: "intentos", label: `Intentos de cédula (${detalleModal.intentos.length})` },
+                { key: "auditoria", label: `Auditoría (${detalleModal.eventos.length})` },
+              ].map((tab) => (
+                <button key={tab.key} onClick={() => setDetalleModal({ ...detalleModal, pestana: tab.key })}
+                  style={{
+                    cursor: "pointer", padding: "8px 12px", border: "none", background: "transparent",
+                    borderBottom: detalleModal.pestana === tab.key ? `3px solid ${T.brand}` : "3px solid transparent",
+                    color: detalleModal.pestana === tab.key ? T.text : T.muted, fontWeight: 700, fontSize: 12,
+                  }}>{tab.label}</button>
+              ))}
+            </div>
+
+            {cargandoDetalle ? (
+              <p style={{ color: T.muted, fontSize: 13, marginTop: 14 }}>Cargando…</p>
+            ) : detalleModal.pestana === "intentos" ? (
+              detalleModal.intentos.length === 0 ? (
+                <p style={{ color: T.muted, fontSize: 13, marginTop: 14 }}>Sin intentos de verificación de cédula.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 14 }}>
+                  {detalleModal.intentos.map((it) => (
+                    <div key={it.id} style={{
+                      padding: "10px 12px", borderRadius: 10, background: T.surface2, border: `1px solid ${T.line}`,
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{
+                          fontWeight: 800, fontSize: 12,
+                          color: it.estado === "verificado" ? VERDE : it.estado === "rechazado" ? ROJO : AMBAR,
+                        }}>{it.estado_label}</span>
+                        <span style={{ fontSize: 11, color: T.muted }}>
+                          {it.fecha_subida ? new Date(it.fecha_subida).toLocaleString("es-CO") : "—"}
+                        </span>
+                      </div>
+                      {it.mensaje && <div style={{ fontSize: 12, color: T.muted, marginTop: 4 }}>{it.mensaje}</div>}
+                      {it.motivo && <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>Motivo: {it.motivo}</div>}
+                      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                        <button
+                          disabled={descargando === `${it.id}-frente`}
+                          onClick={() => descargarDocumento(it.id, "frente")}
+                          style={{
+                            cursor: "pointer", padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
+                            color: T.text, background: T.surface, border: `1px solid ${T.line}`,
+                          }}>
+                          {descargando === `${it.id}-frente` ? "Descargando…" : "⬇️ Frente"}
+                        </button>
+                        <button
+                          disabled={descargando === `${it.id}-reverso`}
+                          onClick={() => descargarDocumento(it.id, "reverso")}
+                          style={{
+                            cursor: "pointer", padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
+                            color: T.text, background: T.surface, border: `1px solid ${T.line}`,
+                          }}>
+                          {descargando === `${it.id}-reverso` ? "Descargando…" : "⬇️ Reverso"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : detalleModal.eventos.length === 0 ? (
+              <p style={{ color: T.muted, fontSize: 13, marginTop: 14 }}>
+                Sin eventos registrados todavía (solo se registran desde que se activó este historial).
+              </p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 14 }}>
+                {detalleModal.eventos.map((ev) => (
+                  <div key={ev.id} style={{
+                    padding: "10px 12px", borderRadius: 10, background: T.surface2, border: `1px solid ${T.line}`,
+                  }}>
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>
+                      {ICONO_EVENTO_AUDITORIA[ev.tipo] || "•"} {ev.tipo_label}
+                    </div>
+                    {ev.detalle && <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>{ev.detalle}</div>}
+                    <div style={{ fontSize: 11, color: T.muted, marginTop: 2 }}>
+                      {new Date(ev.fecha).toLocaleString("es-CO")}
+                      {ev.ip ? ` · IP ${ev.ip}` : ""}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button onClick={() => setDetalleModal(null)} style={{
               marginTop: 16, cursor: "pointer", padding: "8px 16px", borderRadius: 10, fontWeight: 700,
               color: T.text, background: T.surface2, border: `1px solid ${T.line}`,
             }}>Cerrar</button>
