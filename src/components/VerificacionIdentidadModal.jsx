@@ -22,9 +22,25 @@ import {
   Stamp,
   Trash2,
 } from "lucide-react";
+import { FaceDetector, FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 import Toast from "./Toast";
 import { useTheme } from "../context/ThemeContext";
 import { evaluarCalidadCaptura } from "../utils/calidadImagen";
+
+// Umbrales de encuadre para la captura automática del rostro, idénticos a
+// los usados en la app móvil (CamaraRostroGuiada, react-native-vision-camera
+// + face-detector) para que el comportamiento sea el mismo en ambas
+// plataformas.
+const ROSTRO_FRACCION_MIN = 0.32;
+const ROSTRO_FRACCION_MAX = 0.62;
+const ROSTRO_CENTRADO_TOLERANCIA = 0.14;
+const FRAMES_ESTABLES_PARA_CAPTURAR = 8;
+// Wasm de MediaPipe servido desde su CDN oficial (no hay build de Node que
+// empaquetar, así que no choca con webpack 5 como pasaba con face-api.js).
+// El modelo .tflite sí se sirve localmente, sin salir del dominio propio.
+const MEDIAPIPE_WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm";
+const MEDIAPIPE_MODELO_URL = "/models/mediapipe/blaze_face_short_range.tflite";
+const MEDIAPIPE_MODELO_MANO_URL = "/models/mediapipe/hand_landmarker.task";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
@@ -1040,64 +1056,283 @@ const MENSAJES_ERROR_ROSTRO = {
     "El rostro que tomó no se parece al de la foto de su cédula. Intente de nuevo con buena luz y mirando de frente, o revise que su cédula sea la correcta.",
 };
 
-function VerificarRostroModal({ onClose, setToast, onVerificado, esReregistro, telefonoVerificado, onIrACedula }) {
-  const requiereReverificacion = !!esReregistro && !!telefonoVerificado;
-  const [fase, setFase] = useState(requiereReverificacion ? "reverificacion" : "captura");
-  const [codigoReverificacion, setCodigoReverificacion] = useState("");
-  const [codigoEnviado, setCodigoEnviado] = useState(false);
-  const [enviandoCodigo, setEnviandoCodigo] = useState(false);
-  const [paso, setPaso] = useState("frontal"); // frontal | izquierda | derecha | listo
-  const [capturas, setCapturas] = useState({ frontal: null, izquierda: null, derecha: null });
-  const [enviando, setEnviando] = useState(false);
-  const [errorRegistro, setErrorRegistro] = useState(null); // { motivo, mensaje } | null
+// Detector de MediaPipe cargado una sola vez por sesión de página (todo el
+// procesamiento ocurre en el navegador del usuario vía WASM, ninguna imagen
+// sale del cliente durante la detección — solo la foto final capturada se
+// sube). El wasm se sirve desde el CDN oficial de MediaPipe; el modelo
+// .tflite se sirve localmente desde este mismo dominio.
+let promesaDetectorFace = null;
+function cargarDetectorFace() {
+  if (!promesaDetectorFace) {
+    promesaDetectorFace = FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL).then((fileset) =>
+      FaceDetector.createFromOptions(fileset, {
+        baseOptions: { modelAssetPath: MEDIAPIPE_MODELO_URL },
+        runningMode: "VIDEO",
+        minDetectionConfidence: 0.5,
+      })
+    );
+  }
+  return promesaDetectorFace;
+}
+
+// BlazeFace (el detector de rostro "short range") solo evalúa "¿hay una
+// cara aquí?": con una mano tapando ojos/boca, sigue devolviendo un score
+// alto (~0.8) y 6 keypoints con buena separación vertical — probablemente
+// porque la silueta de la mano sobre la cara ya se parece lo suficiente a
+// un óvalo de rostro. Confirmado con logs reales: ni el score general ni la
+// geometría de keypoints distinguen mano-tapando de cara-descubierta. La
+// única señal fiable es detectar la mano en sí con un segundo modelo.
+let promesaDetectorMano = null;
+function cargarDetectorMano() {
+  if (!promesaDetectorMano) {
+    promesaDetectorMano = FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL).then((fileset) =>
+      HandLandmarker.createFromOptions(fileset, {
+        baseOptions: { modelAssetPath: MEDIAPIPE_MODELO_MANO_URL },
+        runningMode: "VIDEO",
+        numHands: 2,
+      })
+    );
+  }
+  return promesaDetectorMano;
+}
+
+// ¿El centro de alguna mano detectada cae dentro (o muy cerca) del cuadro
+// del rostro? Si sí, algo la está tapando. Se usa el centroide de los 21
+// landmarks de la mano en vez de un bounding box propio porque
+// HandLandmarker no expone uno directamente por resultado.
+function manoSuperpuestaAlRostro(resultadoManos, boxRostro, videoWidth, videoHeight) {
+  const listas = resultadoManos?.landmarks;
+  if (!listas || listas.length === 0) return false;
+
+  const xMin = boxRostro.originX / videoWidth;
+  const xMax = (boxRostro.originX + boxRostro.width) / videoWidth;
+  const yMin = boxRostro.originY / videoHeight;
+  const yMax = (boxRostro.originY + boxRostro.height) / videoHeight;
+  // Margen negativo: el centroide de la mano debe caer claramente dentro
+  // del óvalo de la cara, no solo rozar el borde del cuadro detectado.
+  const margenX = (xMax - xMin) * 0.15;
+  const margenY = (yMax - yMin) * 0.15;
+
+  return listas.some((puntosMano) => {
+    const cx = puntosMano.reduce((s, p) => s + p.x, 0) / puntosMano.length;
+    const cy = puntosMano.reduce((s, p) => s + p.y, 0) / puntosMano.length;
+    return cx > xMin + margenX && cx < xMax - margenX && cy > yMin + margenY && cy < yMax - margenY;
+  });
+}
+
+// Mismo criterio que evaluarEncuadre() en Movil/CamaraRostroGuiada: usa la
+// fracción del ancho del cuadro que ocupa el rostro (para "acércate"/
+// "aléjate") y el desvío del centro del rostro respecto al centro del
+// video (para "centra tu rostro").
+function evaluarEncuadreWeb(box, videoWidth, videoHeight) {
+  const fraccionAncho = box.width / videoWidth;
+  const centroX = (box.originX + box.width / 2) / videoWidth;
+  const centroY = (box.originY + box.height / 2) / videoHeight;
+  const desvioX = Math.abs(centroX - 0.5);
+  const desvioY = Math.abs(centroY - 0.5);
+
+  if (fraccionAncho < ROSTRO_FRACCION_MIN) return "muy_lejos";
+  if (fraccionAncho > ROSTRO_FRACCION_MAX) return "muy_cerca";
+  if (desvioX > ROSTRO_CENTRADO_TOLERANCIA || desvioY > ROSTRO_CENTRADO_TOLERANCIA) return "centrar";
+  return "listo";
+}
+
+const MENSAJE_ESTADO_ENCUADRE = {
+  sin_rostro: "Ubique su rostro dentro del óvalo",
+  rostro_cubierto: "Despeje su rostro: quite manos, gafas oscuras o cubrebocas",
+  muy_lejos: "Acérquese un poco más",
+  muy_cerca: "Aléjese un poco",
+  centrar: "Centre su rostro en el óvalo",
+  listo: "Perfecto, manténgase así…",
+};
+
+// Cámara con óvalo guía y captura 100% automática (estilo ADDI/Sistecrédito):
+// detecta el rostro en vivo con MediaPipe FaceDetector (BlazeFace, corre
+// completo en el navegador vía WASM), muestra mensajes de distancia/centrado,
+// y dispara la foto sola tras varios frames seguidos bien encuadrados — sin
+// botón manual. Reemplaza el <video>+canvas+"Capturar" anterior.
+function CamaraRostroGuiadaWeb({ onCapturado, deshabilitada }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const detectorRef = useRef(null);
+  const detectorManoRef = useRef(null);
+  const rafRef = useRef(null);
+  const framesEstablesRef = useRef(0);
+  const capturandoRef = useRef(false);
+  const [modeloListo, setModeloListo] = useState(false);
   const [camaraLista, setCamaraLista] = useState(false);
   const [errorCamara, setErrorCamara] = useState("");
-
-  const ORDEN = ["frontal", "izquierda", "derecha"];
-  const ETIQUETAS = { frontal: "Mire al frente", izquierda: "Gire levemente a la izquierda", derecha: "Gire levemente a la derecha" };
+  const [estado, setEstado] = useState("sin_rostro");
 
   useEffect(() => {
-    if (fase !== "captura") return undefined;
+    let activo = true;
+    Promise.all([cargarDetectorFace(), cargarDetectorMano()])
+      .then(([detector, detectorMano]) => {
+        if (!activo) return;
+        detectorRef.current = detector;
+        detectorManoRef.current = detectorMano;
+        setModeloListo(true);
+      })
+      .catch(() => { if (activo) setErrorCamara("No se pudo cargar el detector de rostro. Recargue la página."); });
+    return () => { activo = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!modeloListo) return undefined;
     let activo = true;
     async function iniciarCamara() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
         if (!activo) { stream.getTracks().forEach((t) => t.stop()); return; }
         streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          setCamaraLista(true);
-        }
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+        // No basta con asignar srcObject: hasta que el <video> dispare
+        // loadedmetadata (dimensiones reales) y play() resuelva, el
+        // elemento sigue en 0x0 — MediaPipe intentaba leer frames de ahí y
+        // fallaba (framebuffer de tamaño cero), dejando el óvalo en negro
+        // aunque la detección ya reportara resultados.
+        await new Promise((resolve) => {
+          if (video.readyState >= 1) return resolve();
+          video.onloadedmetadata = () => resolve();
+        });
+        if (!activo) return;
+        await video.play();
+        if (!activo) return;
+        setCamaraLista(true);
       } catch {
         setErrorCamara("No se pudo acceder a la cámara. Verifique los permisos del navegador.");
       }
     }
-    if (paso !== "listo") iniciarCamara();
+    iniciarCamara();
     return () => {
       activo = false;
       streamRef.current?.getTracks().forEach((t) => t.stop());
     };
-  }, [fase, paso]);
+  }, [modeloListo]);
 
-  const capturarFoto = () => {
-    if (!videoRef.current) return;
+  const capturar = useCallback(() => {
+    if (capturandoRef.current || !videoRef.current) return;
+    capturandoRef.current = true;
+    // Dibujar el frame ANTES de detener el stream: al revés (como estaba),
+    // el <video> queda en un estado transitorio justo cuando se le pide el
+    // frame, y drawImage a veces capturaba un canvas negro — el primer paso
+    // salía bien porque el remount con key={paso} da tiempo de sobra, pero
+    // en los pasos siguientes la captura ocurría casi pegada al cambio.
     const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
     canvas.getContext("2d").drawImage(videoRef.current, 0, 0);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-    const nuevasCapturas = { ...capturas, [paso]: dataUrl };
-    setCapturas(nuevasCapturas);
-    const idx = ORDEN.indexOf(paso);
-    if (idx < ORDEN.length - 1) {
-      setPaso(ORDEN[idx + 1]);
-    } else {
-      streamRef.current?.getTracks().forEach((t) => t.stop());
-      setPaso("listo");
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    onCapturado(dataUrl);
+  }, [onCapturado]);
+
+  useEffect(() => {
+    if (!camaraLista || deshabilitada) return undefined;
+
+    function tick() {
+      const video = videoRef.current;
+      const detector = detectorRef.current;
+      const detectorMano = detectorManoRef.current;
+      if (!video || !detector || !detectorMano || capturandoRef.current) return;
+      if (video.readyState >= 2 && video.videoWidth && video.videoHeight) {
+        const timestamp = performance.now();
+        const resultado = detector.detectForVideo(video, timestamp);
+        if (capturandoRef.current) return;
+        const deteccion = resultado?.detections?.[0];
+        if (!deteccion) {
+          framesEstablesRef.current = 0;
+          setEstado("sin_rostro");
+        } else if (manoSuperpuestaAlRostro(detectorMano.detectForVideo(video, timestamp), deteccion.boundingBox, video.videoWidth, video.videoHeight)) {
+          framesEstablesRef.current = 0;
+          setEstado("rostro_cubierto");
+        } else {
+          const nuevoEstado = evaluarEncuadreWeb(deteccion.boundingBox, video.videoWidth, video.videoHeight);
+          setEstado(nuevoEstado);
+          if (nuevoEstado === "listo") {
+            framesEstablesRef.current += 1;
+            if (framesEstablesRef.current >= FRAMES_ESTABLES_PARA_CAPTURAR) {
+              framesEstablesRef.current = 0;
+              capturar();
+              return;
+            }
+          } else {
+            framesEstablesRef.current = 0;
+          }
+        }
+      }
+      rafRef.current = requestAnimationFrame(tick);
     }
-  };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [camaraLista, deshabilitada, capturar]);
+
+  if (errorCamara) {
+    return <p className="text-red-300 text-xs text-center">{errorCamara}</p>;
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <p className={`text-sm font-semibold ${estado === "listo" ? "text-emerald-400" : "text-content"}`}>
+        {!modeloListo || !camaraLista ? "Preparando cámara…" : MENSAJE_ESTADO_ENCUADRE[estado]}
+      </p>
+      <div className="relative w-56 h-72">
+        <div className={`absolute inset-0 rounded-[50%] overflow-hidden border-2 bg-surface-2/70 ${
+          estado === "listo" ? "border-emerald-500/80 animate-face-scan-pulse" : camaraLista ? "border-emerald-500/40" : "border-line/20"
+        }`}>
+          {/* El recorte del óvalo se aplica también aquí, en el propio
+             <video>, no solo en el contenedor: un <video> con aceleración
+             por GPU dentro de un overflow-hidden con border-radius puede
+             decodificar bien (MediaPipe lo lee sin problema) pero el
+             compositor del navegador lo pinta negro, porque pierde el
+             clip al no tener su propia capa. Forzar su propia capa
+             (transform/will-change) y el radius en el propio elemento
+             evita ese bug de composición. */}
+          <video ref={videoRef} autoPlay playsInline muted
+            style={{ borderRadius: "50%", willChange: "transform" }}
+            className="absolute top-1/2 left-1/2 w-[150%] h-[130%] -translate-x-1/2 -translate-y-1/2 object-cover scale-x-[-1]" />
+          {camaraLista && (
+            <span className="absolute left-0 right-0 h-0.5 bg-emerald-400/90 shadow-[0_0_10px_2px_rgba(16,185,129,0.7)] animate-face-scan-line" />
+          )}
+        </div>
+      </div>
+      <p className="text-muted text-[11px] text-center">La foto se toma sola cuando su rostro quede bien encuadrado.</p>
+    </div>
+  );
+}
+
+function VerificarRostroModal({ onClose, setToast, onVerificado, esReregistro, telefonoVerificado, onIrACedula }) {
+  const requiereReverificacion = !!esReregistro && !!telefonoVerificado;
+  const [fase, setFase] = useState(requiereReverificacion ? "reverificacion" : "captura");
+  const [codigoReverificacion, setCodigoReverificacion] = useState("");
+  const [codigoEnviado, setCodigoEnviado] = useState(false);
+  const [enviandoCodigo, setEnviandoCodigo] = useState(false);
+  const [paso, setPaso] = useState("frontal"); // frontal | listo
+  const [capturas, setCapturas] = useState({ frontal: null });
+  const [enviando, setEnviando] = useState(false);
+  const [errorRegistro, setErrorRegistro] = useState(null); // { motivo, mensaje } | null
+  const [procesandoCaptura, setProcesandoCaptura] = useState(false);
+
+  // Un solo paso: las capturas "izquierda"/"derecha" nunca se enviaban al
+  // backend (solo foto_frontal), eran decorativas y en la práctica el
+  // usuario no distinguía la indicación de girar la cabeza.
+  const ORDEN = ["frontal"];
+  const ETIQUETAS = { frontal: "Mire al frente" };
+
+  const onFotoAutomatica = useCallback((dataUrl) => {
+    setProcesandoCaptura(true);
+    setCapturas((c) => {
+      const nuevas = { ...c, [paso]: dataUrl };
+      const idx = ORDEN.indexOf(paso);
+      if (idx < ORDEN.length - 1) setPaso(ORDEN[idx + 1]);
+      else setPaso("listo");
+      return nuevas;
+    });
+    setTimeout(() => setProcesandoCaptura(false), 1200);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paso]);
 
   const enviarCodigoReverificacion = async () => {
     setEnviandoCodigo(true);
@@ -1227,47 +1462,16 @@ function VerificarRostroModal({ onClose, setToast, onVerificado, esReregistro, t
   }
 
   return (
-    <VerifModalShell title="Verificar rostro" subtitle="Tome 3 fotos siguiendo las indicaciones para registrar su rostro." onClose={onClose}>
+    <VerifModalShell title="Verificar rostro" subtitle="Mire al frente para registrar su rostro." onClose={onClose}>
       {paso !== "listo" ? (
         <div className="flex flex-col items-center gap-3">
           <p className="text-content text-sm font-semibold">{ETIQUETAS[paso]}</p>
-          <p className="text-muted text-xs text-center -mt-2">Acérquese y ubique su rostro dentro del óvalo.</p>
-          {errorCamara ? (
-            <p className="text-red-300 text-xs text-center">{errorCamara}</p>
-          ) : (
-            <div className="relative w-56 h-72">
-              {/* Óvalo (más alto que ancho, como el contorno de una cara):
-                 el video se sobredimensiona y centra para que el recorte
-                 no deje bordes rectos asomando por las puntas. */}
-              <div className={`absolute inset-0 rounded-[50%] overflow-hidden border-2 bg-surface-2/70 ${
-                camaraLista ? "border-emerald-500/60 animate-face-scan-pulse" : "border-line/20"
-              }`}>
-                <video ref={videoRef} autoPlay playsInline muted
-                  className="absolute top-1/2 left-1/2 w-[150%] h-[130%] -translate-x-1/2 -translate-y-1/2 object-cover scale-x-[-1]" />
-                {camaraLista && (
-                  <span className="absolute left-0 right-0 h-0.5 bg-emerald-400/90 shadow-[0_0_10px_2px_rgba(16,185,129,0.7)] animate-face-scan-line" />
-                )}
-              </div>
-            </div>
-          )}
-          <button type="button" onClick={capturarFoto} disabled={!camaraLista}
-            className="mt-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
-            Capturar
-          </button>
-          <div className="flex items-center gap-2 mt-1">
-            {ORDEN.map((p) => (
-              <span key={p} className={`w-2.5 h-2.5 rounded-full ${capturas[p] ? "bg-emerald-500" : "bg-line/30"}`} />
-            ))}
-          </div>
+          <CamaraRostroGuiadaWeb key={paso} onCapturado={onFotoAutomatica} deshabilitada={procesandoCaptura} />
         </div>
       ) : (
         <div className="flex flex-col items-center gap-4">
-          <div className="flex gap-3">
-            {ORDEN.map((p) => (
-              <img key={p} src={capturas[p]} alt={p} className="w-20 h-20 rounded-lg object-cover border border-line/15" />
-            ))}
-          </div>
-          <p className="text-muted text-xs text-center">Sus 3 capturas están listas para registrarse.</p>
+          <img src={capturas.frontal} alt="frontal" className="w-24 h-24 rounded-lg object-cover border border-line/15" />
+          <p className="text-muted text-xs text-center">Su captura está lista para registrarse.</p>
           <button type="button" onClick={enviarRegistro} disabled={enviando}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold transition-colors disabled:opacity-50">
             {enviando && <Spinner />}

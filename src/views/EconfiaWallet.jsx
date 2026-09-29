@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { Check, ScanFace, Trash2 } from "lucide-react";
+import { Check, ScanFace, ShieldAlert, Trash2 } from "lucide-react";
 import Toast from "../components/Toast";
 import { useTheme } from "../context/ThemeContext";
 import VerificacionIdentidadModal from "../components/VerificacionIdentidadModal";
@@ -177,6 +177,11 @@ export default function EconfiaWallet() {
   const baseCompleta = estado?.base_completa;
   const consultaHabilitada = estado?.consulta_habilitada;
   const consultaUsada = estado?.consulta_usada;
+  // El backend exige al menos rostro o SMS antes de generar un pase (evita
+  // compartir el Wallet sin haber confirmado que es realmente el titular)
+  // — se refleja aquí para no dejar tocar "Compartir" y que falle recién
+  // al enviar. Mismo criterio que en móvil.
+  const identidadVerificada = !!estado?.rostro_registrado || !!estado?.telefono_verificado;
 
   // Las certificaciones viven en su propia sección (modelo aparte); "Mis
   // documentos" excluye cualquier documento legado de tipo certificación.
@@ -767,7 +772,7 @@ export default function EconfiaWallet() {
             </div>
 
             {/* Derecha: acción principal (QR) */}
-            {baseCompleta && (
+            {baseCompleta && identidadVerificada && (
               <div className="shrink-0">
                 <button onClick={() => setMostrarReautenticar(true)}
                   className="group inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:-translate-y-0.5">
@@ -782,6 +787,14 @@ export default function EconfiaWallet() {
                     <span className="text-[10px] font-normal text-white/80">Pase temporal seguro</span>
                   </span>
                 </button>
+              </div>
+            )}
+            {baseCompleta && !identidadVerificada && (
+              <div className="shrink-0 max-w-xs flex items-start gap-2.5 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3">
+                <ShieldAlert className="w-4 h-4 text-red-300 flex-shrink-0 mt-0.5" />
+                <p className="text-red-200 text-xs leading-relaxed">
+                  Para compartir su Wallet primero verifique su identidad: registre su rostro (Face ID) o verifique su celular por SMS.
+                </p>
               </div>
             )}
           </div>
