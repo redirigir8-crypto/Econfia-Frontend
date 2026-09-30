@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import Toast from "../components/Toast";
 import WalletSolicitudes from "../components/WalletSolicitudes";
 import WalletArchivo from "../components/WalletArchivo";
+import EscanerQR from "../components/EscanerQR";
 import { DatosEmpresaCompartidos, DocumentosEmpresa, GRUPOS_EMPRESA } from "../components/WalletEmpresaContenido";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
@@ -248,6 +249,30 @@ export default function EconfiaWalletEmpresa() {
     }
   };
   const consultarWallet = (e) => { e.preventDefault(); consultarPorClave(consultarClave); };
+
+  // Escaneo de QR con la cámara.
+  const [escanerAbierto, setEscanerAbierto] = useState(false);
+  const onDetectarQR = (texto) => {
+    setEscanerAbierto(false);
+    const t = (texto || "").trim();
+    if (!t) return;
+    // 1) Clave WLT-... (QR de "compartir llave" o llave fija) → consultar.
+    const m = t.toUpperCase().match(/WLT-[A-Z0-9-]+/);
+    if (m) {
+      const clave = m[0];
+      setConsultarClave(clave);
+      consultarPorClave(clave);
+      return;
+    }
+    // 2) URL pública (/w/<token>) → abrir esa página.
+    if (/^https?:\/\//i.test(t)) {
+      window.location.href = t;
+      return;
+    }
+    // 3) Último recurso: intentar como clave tal cual.
+    setConsultarClave(t.toUpperCase());
+    consultarPorClave(t);
+  };
 
   const abrirCredencial = (esquema) => {
     setCredFiles({});
@@ -1025,6 +1050,18 @@ export default function EconfiaWalletEmpresa() {
               >
                 {consultando ? "Consultando…" : "Consultar"}
               </button>
+              <button
+                type="button"
+                onClick={() => setEscanerAbierto(true)}
+                title="Escanear QR con la cámara"
+                className="px-4 py-2.5 rounded-lg font-semibold text-sm text-content bg-surface-2/70 border border-line/15 hover:bg-surface-2 transition-all inline-flex items-center gap-2 whitespace-nowrap"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" /><path d="M14 14h3v3M21 14v7h-7" />
+                </svg>
+                Escanear QR
+              </button>
             </form>
             {resultado && (
               <div className="mt-2 p-4 rounded-xl bg-surface-2/60 border border-line/15 space-y-3">
@@ -1070,6 +1107,8 @@ export default function EconfiaWalletEmpresa() {
               </div>
             )}
           </div>
+
+          <EscanerQR open={escanerAbierto} onClose={() => setEscanerAbierto(false)} onDetected={onDetectarQR} />
 
           {/* ── Wallets compartidas conmigo ── */}
           <div className="bg-gradient-to-br from-surface/95 via-surface-2/80 to-surface/95 backdrop-blur-xl rounded-[20px] border border-line/15 shadow-2xl shadow-emerald-500/10 p-6">

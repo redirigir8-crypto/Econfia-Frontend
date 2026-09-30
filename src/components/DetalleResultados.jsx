@@ -224,11 +224,11 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
     const text = normalizeMensaje(mensaje);
     const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 
-    const titleLine = lines.find((line) => /b[uú]squeda social/i.test(line)) || "";
-    const nameFromTitle = titleLine.match(/b[uú]squeda social:\s*(.+)$/i)?.[1]?.trim();
+    const titleLine = lines.find((line) => /b[uú]squeda (?:social|web por nombre)/i.test(line)) || "";
+    const nameFromTitle = titleLine.match(/b[uú]squeda (?:social|web por nombre):\s*(.+)$/i)?.[1]?.trim();
     const nameFromText = text.match(/para ['"]([^'"]+)['"]/i)?.[1]?.trim();
     const score = Number(text.match(/score de similitud:\s*(\d+)/i)?.[1] || text.match(/score=(\d+)/i)?.[1] || 0);
-    const total = Number(text.match(/total de perfiles:\s*(\d+)/i)?.[1] || 0);
+    const total = Number(text.match(/total de (?:perfiles|resultados):\s*(\d+)/i)?.[1] || 0);
     const networksLine = lines.find((line) => /redes encontradas:/i.test(line)) || "";
     const networks = networksLine
       .replace(/^.*redes encontradas:\s*/i, "")
@@ -244,13 +244,20 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
       const blockLines = block.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
       const first = blockLines[0] || "";
       const networkMatch = first.match(/\[(.*?)\]/);
-      const network = networkMatch?.[1]?.trim() || "Web";
       const title = first
         .replace(/^\d+\.\s*/, "")
         .replace(/^[^[]*\[/, "[")
         .replace(/\[[^\]]+\]\s*/, "")
         .trim();
       const url = block.match(/URL:\s*(https?:\/\/\S+)/i)?.[1] || "";
+      let network = networkMatch?.[1]?.trim() || "Web";
+      if (network.toLowerCase() === "web" && url) {
+        try {
+          network = new URL(url).hostname.replace(/^www\./, "");
+        } catch {
+          network = "Web";
+        }
+      }
       const itemScore = Number(block.match(/Score:\s*(\d+)/i)?.[1] || block.match(/score=(\d+)/i)?.[1] || 0);
       const detail = block.match(/Detalle:\s*(.+)/i)?.[1]?.trim() || block.match(/Fragmento:\s*(.+)/i)?.[1]?.trim() || "";
 
@@ -269,7 +276,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
       total: total || results.length,
       networks,
       results,
-      hasRelevant: /se detectaron|posibles perfiles sociales relevantes/i.test(text),
+      hasRelevant: /se detectaron|resultados web relevantes|coincidencias web/i.test(text),
       rawText: text,
     };
   };
@@ -382,6 +389,17 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
     const pageResults = parsed.results.slice(startIdx, endIdx);
     const exactMatches = parsed.results.filter((result) => result.score >= 80).length;
     const mediumMatches = parsed.results.filter((result) => result.score >= 40 && result.score < 80).length;
+    const websiteCount = new Set(
+      parsed.results
+        .map((result) => {
+          try {
+            return result.url ? new URL(result.url).hostname.replace(/^www\./, "") : "";
+          } catch {
+            return "";
+          }
+        })
+        .filter(Boolean)
+    ).size;
 
     return (
       <section className="space-y-5">
@@ -397,7 +415,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                 {parsed.name}
               </h4>
               <p className="mt-3 text-sm text-muted max-w-2xl">
-                Resultados por similitud de nombre. Requiere revisión manual antes de asociar cualquier perfil a una identidad.
+                Resultados públicos encontrados en Google por similitud de nombre. Requieren revisión manual antes de asociarlos a una identidad.
               </p>
             </div>
 
@@ -408,9 +426,9 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                 <p className="text-[10px] text-muted">sobre 100</p>
               </div>
               <div className="rounded-xl border border-line/10 bg-surface-2/70 p-3">
-                <p className="text-[9px] uppercase tracking-widest text-muted">Perfiles</p>
+                <p className="text-[9px] uppercase tracking-widest text-muted">Resultados</p>
                 <p className="text-2xl font-black text-content">{parsed.total}</p>
-                <p className="text-[10px] text-muted">detectados</p>
+                <p className="text-[10px] text-muted">encontrados</p>
               </div>
               <div className="rounded-xl border border-line/10 bg-surface-2/70 p-3">
                 <p className="text-[9px] uppercase tracking-widest text-muted">Estado</p>
@@ -431,23 +449,10 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             <p className="text-2xl font-black text-amber-200">{mediumMatches}</p>
           </div>
           <div className="rounded-xl border border-slate-400/20 bg-content/[0.03] p-4">
-            <p className="text-[10px] uppercase tracking-widest text-muted">Redes rastreadas</p>
-            <p className="text-2xl font-black text-content">{parsed.networks.length || "N/A"}</p>
+            <p className="text-[10px] uppercase tracking-widest text-muted">Sitios web</p>
+            <p className="text-2xl font-black text-content">{websiteCount || "N/A"}</p>
           </div>
         </div>
-
-        {parsed.networks.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {parsed.networks.map((network) => (
-              <span
-                key={network}
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${getNetworkStyle(network)}`}
-              >
-                {network}
-              </span>
-            ))}
-          </div>
-        )}
 
         <div className="rounded-2xl border border-amber-300/20 bg-amber-500/10 p-4">
           <div className="flex items-start gap-3">
@@ -455,7 +460,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             <div>
               <p className="text-sm font-bold text-amber-100">Validación requerida</p>
               <p className="mt-1 text-xs sm:text-sm text-amber-50/75">
-                El hallazgo no confirma identidad por sí solo. Debe compararse con foto, cargo, empresa, ubicación u otra evidencia documental.
+                El resultado no confirma identidad por sí solo. Debe compararse con nombre completo, ubicación u otra evidencia documental.
               </p>
             </div>
           </div>
@@ -464,7 +469,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted">
-              Perfiles encontrados
+              Resultados encontrados
             </h4>
             <span className="text-[9px] text-content/30 font-mono">
               CODE: RES_{item.id || "N/A"}
@@ -529,7 +534,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
             </div>
           ) : (
             <div className="rounded-2xl border border-line/10 bg-surface-2/70 p-5 text-sm text-muted">
-              No hay perfiles estructurados para mostrar. El detalle original queda disponible en el registro técnico.
+              No hay resultados web estructurados para mostrar. El detalle original queda disponible en el registro técnico.
             </div>
           )}
 
