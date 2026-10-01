@@ -16,8 +16,76 @@ import {
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import AnalisisInteligente from "./AnalisisInteligente";
-import { describirFuente } from "../utils/fuentesCatalogo";
+import { describirFuente, cargarDescripcionesFuente } from "../utils/fuentesCatalogo";
 import { useTheme } from "../context/ThemeContext";
+
+/**
+ * Ícono ⓘ con popover elegante (estilo Econfia) que explica, al pasar el
+ * cursor, qué hace la fuente y qué implica un hallazgo. Datos de describirFuente.
+ */
+function InfoFuente({ item, className = "" }) {
+  const info = describirFuente(item);
+  const ref = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+
+  const WIDTH = 270;
+  const mostrar = () => {
+    const r = ref.current?.getBoundingClientRect();
+    if (r) {
+      const left = Math.max(10, Math.min(r.left, window.innerWidth - WIDTH - 12));
+      setPos({ top: r.bottom + 8, left });
+    }
+    setOpen(true);
+  };
+  const ocultar = () => setOpen(false);
+
+  return (
+    <span className={`relative inline-flex align-middle ${className}`}>
+      <span
+        ref={ref}
+        onMouseEnter={mostrar}
+        onMouseLeave={ocultar}
+        onClick={(e) => { e.stopPropagation(); open ? ocultar() : mostrar(); }}
+        className="inline-flex items-center justify-center w-[15px] h-[15px] rounded-full border border-brand/50 text-brand text-[9px] font-bold leading-none cursor-help select-none hover:bg-brand/15 transition-colors"
+        aria-label="¿Qué hace esta fuente?"
+      >
+        i
+      </span>
+      {open &&
+        createPortal(
+          <div
+            style={{ position: "fixed", top: pos.top, left: pos.left, width: WIDTH, zIndex: 9999 }}
+            className="rounded-xl border border-brand/30 bg-[#0b1220] p-3 text-left shadow-[0_18px_44px_rgba(2,8,23,0.6)]"
+          >
+            <div className="text-[11px] font-extrabold text-brand mb-1.5">{info.titulo}</div>
+            <div className="text-[11px] text-content/85 leading-relaxed">
+              <span className="font-bold text-content">Naturaleza: </span>
+              {info.naturaleza || info.desc}
+            </div>
+            {info.por_que_existe && (
+              <div className="mt-1.5 text-[11px] text-content/85 leading-relaxed">
+                <span className="font-bold text-content">Por qué existe: </span>
+                {info.por_que_existe}
+              </div>
+            )}
+            {info.que_informacion && (
+              <div className="mt-1.5 text-[11px] text-content/85 leading-relaxed">
+                <span className="font-bold text-content">Qué información arroja: </span>
+                {info.que_informacion}
+              </div>
+            )}
+            {info.hallazgo && (
+              <div className="mt-2 pt-2 border-t border-white/10 text-[10px] text-amber-300/85 leading-relaxed">
+                <b className="text-amber-200">Si hay hallazgo:</b> {info.hallazgo}
+              </div>
+            )}
+          </div>,
+          document.body
+        )}
+    </span>
+  );
+}
 
 export default function DetalleResultados({ consultaId, consulta = null }) {
   const { organizacion } = useTheme();
@@ -45,6 +113,13 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
   useEffect(() => {
     isMountedRef.current = true;
     return () => { isMountedRef.current = false; };
+  }, []);
+
+  // Carga (una vez) las descripciones de fuente editables desde la BD.
+  useEffect(() => {
+    cargarDescripcionesFuente().then(() => {
+      if (isMountedRef.current) setDetalle((prev) => (Array.isArray(prev) ? [...prev] : prev));
+    });
   }, []);
 
   
@@ -1077,6 +1152,7 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                       <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-brand mb-1">Fuente</div>
                       <h3 className="text-sm font-bold text-content leading-snug break-words">
                         {item.fuente}
+                        <InfoFuente item={item} className="ml-1.5" />
                       </h3>
                       <p className="mt-1 text-[11px] text-brand/70 leading-snug break-words">
                         {describirFuente(item).titulo}
@@ -1129,11 +1205,9 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
                       className="group hover:bg-gradient-to-r hover:from-brand/5 hover:to-brand-2/5 transition-all duration-300"
                     >
                       <td className="px-2 md:px-3 py-1.5 md:py-2 pr-3">
-                        <span
-                          className="block text-content font-semibold text-xs md:text-sm leading-snug break-words"
-                          title={describirFuente(item).desc}
-                        >
+                        <span className="inline-flex items-center gap-1 text-content font-semibold text-xs md:text-sm leading-snug break-words">
                           {item.fuente}
+                          <InfoFuente item={item} />
                         </span>
                         <span className="block mt-0.5 text-[11px] text-brand/70 leading-snug break-words">
                           {describirFuente(item).titulo}

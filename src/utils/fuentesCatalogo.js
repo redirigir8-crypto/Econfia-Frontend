@@ -13,6 +13,45 @@ const norm = (v) =>
     .replace(/[̀-ͯ]/g, "")
     .trim();
 
+// ---------------------------------------------------------------------------
+// Descripciones editables desde la BD (admin de Django). Tienen prioridad
+// sobre el catálogo quemado de abajo (que queda como respaldo). Se cargan una
+// sola vez con cargarDescripcionesFuente(); si falla, se usa el respaldo.
+// ---------------------------------------------------------------------------
+let DB_REGLAS = null;
+let _cargando = null;
+
+export async function cargarDescripcionesFuente() {
+  if (DB_REGLAS !== null) return DB_REGLAS;
+  if (_cargando) return _cargando;
+  const API = process.env.REACT_APP_API_URL || "http://localhost:8000";
+  _cargando = fetch(`${API}/api/fuentes/descripciones/`)
+    .then((r) => (r.ok ? r.json() : { descripciones: [] }))
+    .then((data) => {
+      DB_REGLAS = (data.descripciones || []).map((d) => ({
+        claves: String(d.claves || "")
+          .split(",")
+          .map((s) => norm(s))
+          .filter(Boolean),
+        titulo: d.titulo,
+        naturaleza: d.naturaleza || "",
+        por_que_existe: d.por_que_existe || "",
+        que_informacion: d.que_informacion || "",
+        desc: d.naturaleza || "",
+        hallazgo: d.hallazgo || "",
+      }));
+      return DB_REGLAS;
+    })
+    .catch(() => {
+      DB_REGLAS = [];
+      return DB_REGLAS;
+    })
+    .finally(() => {
+      _cargando = null;
+    });
+  return _cargando;
+}
+
 // Reglas específicas por fuente (orden = prioridad). La primera que haga match gana.
 // `claves`: se busca que el slug/nombre CONTENGA alguna de estas cadenas.
 const REGLAS = [
@@ -155,6 +194,13 @@ export function describirFuente(item) {
   const nombre = norm(item?.fuente);
   const tipo = norm(item?.tipo_fuente);
   const objetivo = `${slug} ${nombre}`;
+
+  // 1) Descripciones de la BD (editables desde el admin) — tienen prioridad.
+  for (const regla of DB_REGLAS || []) {
+    if (regla.claves.some((k) => objetivo.includes(k) || tipo.includes(k))) {
+      return regla;
+    }
+  }
 
   for (const regla of REGLAS) {
     if (regla.claves.some((k) => objetivo.includes(k))) {
