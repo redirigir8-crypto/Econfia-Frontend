@@ -139,8 +139,10 @@ export default function CardDni({ data }) {
               {documentoLabel}
             </h2>
             <p className="mt-0.5 text-[9px] sm:text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
-              Datos Tomados de la Registraduria Nacional(ANI)
+              Validacion de Identidad
             </p>
+            <p className="mt-0.5 text-[9px] sm:text-[8px] font-medium uppercase tracking-[0.2em] text-slate-500">
+              Datos Consultados Registraduria Nacional (ANI)</p>
           </div>
 
           <div className="shrink-0 rounded-[8px] sm:rounded-[10px] border border-cyan-100/35 bg-white/60 px-2 py-1 sm:px-2.5 sm:py-1.5 text-right shadow-sm">
