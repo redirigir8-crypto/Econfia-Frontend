@@ -139,7 +139,7 @@ export default function CardDni({ data }) {
               {documentoLabel}
             </h2>
             <p className="mt-0.5 text-[9px] sm:text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
-              Documento nacional de identificacion
+              Datos Tomados de la Registraduria Nacional(ANI)
             </p>
           </div>
 
