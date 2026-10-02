@@ -13,38 +13,134 @@ const norm = (v) =>
     .replace(/[̀-ͯ]/g, "")
     .trim();
 
+const limpiarTexto = (value) =>
+  String(value || "")
+    .replace(/\r/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+/**
+ * Convierte la especificación editable en secciones cuando el administrador
+ * utiliza encabezados. Si se escribió texto libre, se conserva completo.
+ */
+function estructurarDescripcion(value) {
+  const desc = limpiarTexto(value);
+  if (!desc) return { desc: "" };
+
+  const encabezados = [
+    { key: "naturaleza", pattern: /^(?:naturaleza(?: de la fuente)?|¿?para qué funciona\??)\s*:?\s*/gim },
+    { key: "por_que_existe", pattern: /^(?:por qué existe(?: la fuente)?|¿?por qué(?: usarla| existe)?\??)\s*:?\s*/gim },
+    { key: "que_informacion", pattern: /^(?:qué información arroja(?: la fuente)?|¿?qué (?:información )?muestra(?: en el mapa)?\??)\s*:?\s*/gim },
+    { key: "hallazgo", pattern: /^(?:si hay hallazgo|implicación de un hallazgo)\s*:?\s*/gim },
+  ];
+
+  const ultimoPorSeccion = new Map();
+  for (const encabezado of encabezados) {
+    encabezado.pattern.lastIndex = 0;
+    let match;
+    while ((match = encabezado.pattern.exec(desc)) !== null) {
+      // En textos pegados desde otra herramienta pueden venir encabezados
+      // repetidos. La última versión suele ser la especificación definitiva.
+      ultimoPorSeccion.set(encabezado.key, {
+        key: encabezado.key,
+        start: match.index,
+        contentStart: match.index + match[0].length,
+      });
+    }
+  }
+  const hallados = Array.from(ultimoPorSeccion.values());
+  hallados.sort((a, b) => a.start - b.start);
+  if (!hallados.length) return { desc };
+
+  const resultado = { desc };
+  hallados.forEach((actual, index) => {
+    // Si una sección se repite, se conserva la primera definición.
+    if (resultado[actual.key]) return;
+    const siguiente = hallados[index + 1];
+    const contenido = limpiarTexto(
+      desc.slice(actual.contentStart, siguiente ? siguiente.start : desc.length)
+    );
+    if (contenido) resultado[actual.key] = contenido;
+  });
+  return resultado;
+}
+
+function crearEntradaFuente(fuente = {}) {
+  const descripcion = fuente.descripcion ?? fuente.fuente_descripcion ?? "";
+  const legado = estructurarDescripcion(descripcion);
+  const naturaleza = limpiarTexto(fuente.naturaleza ?? fuente.fuente_naturaleza);
+  const proposito = limpiarTexto(fuente.proposito ?? fuente.fuente_proposito);
+  const informacion = limpiarTexto(
+    fuente.informacion_reportada ?? fuente.fuente_informacion
+  );
+  const hallazgo = limpiarTexto(
+    fuente.implicacion_hallazgo ?? fuente.fuente_implicacion_hallazgo
+  );
+  return {
+    titulo: fuente.nombre_pila || fuente.titulo || fuente.fuente || fuente.nombre || "Fuente",
+    ...legado,
+    resumen: limpiarTexto(fuente.descripcion_corta ?? fuente.fuente_resumen),
+    naturaleza: naturaleza || legado.naturaleza,
+    por_que_existe: proposito || legado.por_que_existe,
+    que_informacion: informacion || legado.que_informacion,
+    hallazgo: hallazgo || legado.hallazgo,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Descripciones editables desde la BD (admin de Django). Tienen prioridad
 // sobre el catálogo quemado de abajo (que queda como respaldo). Se cargan una
 // sola vez con cargarDescripcionesFuente(); si falla, se usa el respaldo.
 // ---------------------------------------------------------------------------
-let DB_REGLAS = null;
+// Mapa (clave normalizada → {titulo, desc}) armado desde el campo `descripcion`
+// de cada Fuente (editable en el admin de Fuente). Se indexa por nombre,
+// nombre_pila y slug para poder casar con lo que trae el resultado.
+let DB_MAP = null;
 let _cargando = null;
 
 export async function cargarDescripcionesFuente() {
-  if (DB_REGLAS !== null) return DB_REGLAS;
+  if (DB_MAP !== null) return DB_MAP;
   if (_cargando) return _cargando;
   const API = process.env.REACT_APP_API_URL || "http://localhost:8000";
   _cargando = fetch(`${API}/api/fuentes/descripciones/`)
-    .then((r) => (r.ok ? r.json() : { descripciones: [] }))
+    .then((r) => (r.ok ? r.json() : { fuentes: [] }))
     .then((data) => {
-      DB_REGLAS = (data.descripciones || []).map((d) => ({
-        claves: String(d.claves || "")
-          .split(",")
-          .map((s) => norm(s))
-          .filter(Boolean),
-        titulo: d.titulo,
-        naturaleza: d.naturaleza || "",
-        por_que_existe: d.por_que_existe || "",
-        que_informacion: d.que_informacion || "",
-        desc: d.naturaleza || "",
-        hallazgo: d.hallazgo || "",
-      }));
-      return DB_REGLAS;
+      const mapa = new Map();
+      const ambiguas = new Set();
+      const clavesGenericas = new Set(["fuente", "source", "bot", "resultado"]);
+      for (const f of data.fuentes || []) {
+        const tieneContenido = [
+          f.descripcion,
+          f.descripcion_corta,
+          f.naturaleza,
+          f.proposito,
+          f.informacion_reportada,
+          f.implicacion_hallazgo,
+        ].some((value) => limpiarTexto(value));
+        if (!tieneContenido) continue;
+        const entry = crearEntradaFuente(f);
+        for (const id of [f.nombre, f.nombre_pila, f.slug]) {
+          const k = norm(id);
+          if (!k || clavesGenericas.has(k) || ambiguas.has(k)) continue;
+          if (mapa.has(k)) {
+            // Los alias de una misma fuente pueden normalizarse igual.
+            if (mapa.get(k) === entry) continue;
+            // Nunca asociar una descripción por una clave compartida entre
+            // fuentes; fue lo que hacía aparecer BiciBogotá en INTERPOL.
+            mapa.delete(k);
+            ambiguas.add(k);
+          } else {
+            mapa.set(k, entry);
+          }
+        }
+      }
+      DB_MAP = mapa;
+      return DB_MAP;
     })
     .catch(() => {
-      DB_REGLAS = [];
-      return DB_REGLAS;
+      DB_MAP = new Map();
+      return DB_MAP;
     })
     .finally(() => {
       _cargando = null;
@@ -190,16 +286,39 @@ const DEFAULT = {
 };
 
 export function describirFuente(item) {
-  const slug = norm(item?.fuente_nombre);
+  const slug = norm(item?.fuente_slug || item?.fuente_nombre);
   const nombre = norm(item?.fuente);
   const tipo = norm(item?.tipo_fuente);
-  const objetivo = `${slug} ${nombre}`;
+  const nombreInterno = norm(item?.fuente_nombre);
+  const objetivo = `${slug} ${nombreInterno} ${nombre}`;
 
-  // 1) Descripciones de la BD (editables desde el admin) — tienen prioridad.
-  for (const regla of DB_REGLAS || []) {
-    if (regla.claves.some((k) => objetivo.includes(k) || tipo.includes(k))) {
-      return regla;
-    }
+  // El detalle de resultados ya trae la especificación de su Fuente. Esto
+  // evita depender de otra petición y de coincidencias aproximadas de nombre.
+  const tieneDetalleDirecto = [
+    item?.fuente_descripcion,
+    item?.fuente_resumen,
+    item?.fuente_naturaleza,
+    item?.fuente_proposito,
+    item?.fuente_informacion,
+    item?.fuente_implicacion_hallazgo,
+  ].some((value) => limpiarTexto(value));
+  if (tieneDetalleDirecto) {
+    return crearEntradaFuente({
+      fuente: item?.fuente,
+      nombre: item?.fuente_nombre,
+      descripcion: item?.fuente_descripcion,
+      fuente_resumen: item?.fuente_resumen,
+      fuente_naturaleza: item?.fuente_naturaleza,
+      fuente_proposito: item?.fuente_proposito,
+      fuente_informacion: item?.fuente_informacion,
+      fuente_implicacion_hallazgo: item?.fuente_implicacion_hallazgo,
+    });
+  }
+
+  // 1) Descripción editable en la Fuente (campo `descripcion`) — prioridad.
+  if (DB_MAP && DB_MAP.size) {
+    const hit = DB_MAP.get(nombreInterno) || DB_MAP.get(nombre) || DB_MAP.get(slug);
+    if (hit) return hit;
   }
 
   for (const regla of REGLAS) {

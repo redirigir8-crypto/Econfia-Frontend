@@ -13,6 +13,11 @@ import {
   Globe2,
   Search,
   Users,
+  CircleHelp,
+  FileText,
+  Target,
+  ListChecks,
+  TriangleAlert,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 import AnalisisInteligente from "./AnalisisInteligente";
@@ -26,60 +31,199 @@ import { useTheme } from "../context/ThemeContext";
 function InfoFuente({ item, className = "" }) {
   const info = describirFuente(item);
   const ref = useRef(null);
+  const popoverRef = useRef(null);
+  const closeTimerRef = useRef(null);
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const [seccionesExpandidas, setSeccionesExpandidas] = useState(() => new Set());
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 820, arriba: false });
 
-  const WIDTH = 270;
+  const WIDTH = 820;
+  const cancelarOcultado = () => {
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+
   const mostrar = () => {
+    cancelarOcultado();
     const r = ref.current?.getBoundingClientRect();
     if (r) {
-      const left = Math.max(10, Math.min(r.left, window.innerWidth - WIDTH - 12));
-      setPos({ top: r.bottom + 8, left });
+      const width = Math.min(WIDTH, window.innerWidth - 24);
+      const leftIdeal = r.left + r.width / 2 - width / 2;
+      const left = Math.max(12, Math.min(leftIdeal, window.innerWidth - width - 12));
+      const espacioAbajo = window.innerHeight - r.bottom;
+      const arriba = espacioAbajo < 430 && r.top > espacioAbajo;
+      setPos({
+        top: arriba ? r.top - 10 : r.bottom + 10,
+        left,
+        width,
+        arriba,
+      });
     }
     setOpen(true);
   };
-  const ocultar = () => setOpen(false);
+  const ocultar = () => {
+    cancelarOcultado();
+    setOpen(false);
+  };
+  const programarOcultado = () => {
+    cancelarOcultado();
+    closeTimerRef.current = window.setTimeout(() => setOpen(false), 180);
+  };
+
+  useEffect(() => () => cancelarOcultado(), []);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const cerrarConEscape = (event) => {
+      if (event.key === "Escape") {
+        if (closeTimerRef.current) {
+          window.clearTimeout(closeTimerRef.current);
+          closeTimerRef.current = null;
+        }
+        setOpen(false);
+      }
+    };
+    window.addEventListener("keydown", cerrarConEscape);
+    return () => window.removeEventListener("keydown", cerrarConEscape);
+  }, [open]);
+
+  const secciones = [
+    { key: "naturaleza", label: "Naturaleza de la fuente", icon: FileText },
+    { key: "por_que_existe", label: "Por qué existe", icon: Target },
+    { key: "que_informacion", label: "Qué información arroja", icon: ListChecks },
+  ].filter((seccion) => info[seccion.key]);
+
+  const alternarSeccion = (key) => {
+    setSeccionesExpandidas((actuales) => {
+      const siguientes = new Set(actuales);
+      if (siguientes.has(key)) siguientes.delete(key);
+      else siguientes.add(key);
+      return siguientes;
+    });
+  };
+
+  const textoExpandible = (key, texto, className = "text-content/85") => {
+    const contenido = String(texto || "").trim();
+    const expandida = seccionesExpandidas.has(key);
+    const requiereExpansion = contenido.length > 180 || contenido.split("\n").length > 3;
+    return (
+      <>
+        <p
+          className={`mt-1 whitespace-pre-line text-[12px] leading-relaxed ${className} ${
+            requiereExpansion && !expandida ? "line-clamp-3" : ""
+          }`}
+        >
+          {contenido}
+        </p>
+        {requiereExpansion && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              alternarSeccion(key);
+            }}
+            className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-brand transition-colors hover:text-brand/75 focus:outline-none focus-visible:underline"
+            aria-expanded={expandida}
+          >
+            {expandida ? "Ver menos" : "Ver más"}
+            <span aria-hidden="true">{expandida ? "↑" : "↓"}</span>
+          </button>
+        )}
+      </>
+    );
+  };
 
   return (
     <span className={`relative inline-flex align-middle ${className}`}>
-      <span
+      <button
+        type="button"
         ref={ref}
         onMouseEnter={mostrar}
-        onMouseLeave={ocultar}
+        onMouseLeave={programarOcultado}
+        onFocus={mostrar}
+        onBlur={programarOcultado}
         onClick={(e) => { e.stopPropagation(); open ? ocultar() : mostrar(); }}
-        className="inline-flex items-center justify-center w-[15px] h-[15px] rounded-full border border-brand/50 text-brand text-[9px] font-bold leading-none cursor-help select-none hover:bg-brand/15 transition-colors"
+        className="group/help inline-flex h-6 w-6 items-center justify-center rounded-lg border border-brand/30 bg-brand/10 text-brand shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/60 hover:bg-brand/20 hover:shadow-[0_6px_18px_rgba(34,211,238,0.2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
         aria-label="¿Qué hace esta fuente?"
+        aria-expanded={open}
       >
-        i
-      </span>
+        <CircleHelp size={15} strokeWidth={2.2} className="transition-transform duration-200 group-hover/help:rotate-12" />
+      </button>
       {open &&
         createPortal(
           <div
-            style={{ position: "fixed", top: pos.top, left: pos.left, width: WIDTH, zIndex: 9999 }}
-            className="rounded-xl border border-brand/30 bg-[#0b1220] p-3 text-left shadow-[0_18px_44px_rgba(2,8,23,0.6)]"
+            ref={popoverRef}
+            role="dialog"
+            aria-label={`Información sobre ${info.titulo}`}
+            onMouseEnter={cancelarOcultado}
+            onMouseLeave={programarOcultado}
+            style={{
+              position: "fixed",
+              top: pos.top,
+              left: pos.left,
+              width: pos.width,
+              zIndex: 9999,
+              transform: pos.arriba ? "translateY(-100%)" : "none",
+            }}
+            className="max-h-[calc(100vh-24px)] overflow-y-auto overflow-x-hidden rounded-2xl border border-brand/30 bg-[#091321]/[0.98] text-left shadow-[0_24px_70px_rgba(2,8,23,0.72),0_0_30px_rgba(34,211,238,0.08)] backdrop-blur-2xl [scrollbar-width:thin] [scrollbar-color:rgba(34,211,238,.35)_transparent]"
           >
-            <div className="text-[11px] font-extrabold text-brand mb-1.5">{info.titulo}</div>
-            <div className="text-[11px] text-content/85 leading-relaxed">
-              <span className="font-bold text-content">Naturaleza: </span>
-              {info.naturaleza || info.desc}
+            <div className="relative border-b border-brand/15 bg-gradient-to-r from-brand/15 via-brand/5 to-transparent px-5 py-4">
+              <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-brand to-brand-2" />
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand/25 bg-brand/10 text-brand">
+                  <FileText size={18} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-brand/70">Acerca de la fuente</p>
+                  <h4 className="mt-1 text-sm font-extrabold leading-snug text-content">{info.titulo}</h4>
+                  {info.resumen && (
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-content/65">{info.resumen}</p>
+                  )}
+                </div>
+              </div>
             </div>
-            {info.por_que_existe && (
-              <div className="mt-1.5 text-[11px] text-content/85 leading-relaxed">
-                <span className="font-bold text-content">Por qué existe: </span>
-                {info.por_que_existe}
-              </div>
-            )}
-            {info.que_informacion && (
-              <div className="mt-1.5 text-[11px] text-content/85 leading-relaxed">
-                <span className="font-bold text-content">Qué información arroja: </span>
-                {info.que_informacion}
-              </div>
-            )}
+
+            <div className="grid grid-cols-1 gap-4 px-5 py-4 md:grid-cols-2 md:gap-x-6 md:gap-y-5">
+              {secciones.length > 0 ? (
+                secciones.map(({ key, label, icon: Icon }) => (
+                  <section key={key} className="grid grid-cols-[30px_1fr] items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.025] p-3.5">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-brand/90">
+                      <Icon size={14} />
+                    </span>
+                    <div>
+                      <h5 className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-brand/85">{label}</h5>
+                      {textoExpandible(key, info[key])}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <section className="col-span-full grid grid-cols-[30px_1fr] gap-3 rounded-xl border border-white/[0.06] bg-white/[0.025] p-3.5">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-brand/90">
+                    <FileText size={14} />
+                  </span>
+                  <div>
+                    <h5 className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-brand/85">Especificación</h5>
+                    {textoExpandible("desc", info.desc)}
+                  </div>
+                </section>
+              )}
+
             {info.hallazgo && (
-              <div className="mt-2 pt-2 border-t border-white/10 text-[10px] text-amber-300/85 leading-relaxed">
-                <b className="text-amber-200">Si hay hallazgo:</b> {info.hallazgo}
-              </div>
+                <section className="rounded-xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 to-orange-500/[0.06] p-3.5">
+                  <div className="flex items-center gap-2 text-amber-200">
+                    <TriangleAlert size={15} />
+                    <h5 className="text-[10px] font-extrabold uppercase tracking-[0.12em]">Si hay hallazgo</h5>
+                  </div>
+                  {textoExpandible("hallazgo", info.hallazgo, "text-amber-100/80")}
+                </section>
             )}
+            </div>
+
+            <div className="border-t border-white/[0.06] bg-white/[0.02] px-5 py-2.5 text-[9px] uppercase tracking-[0.16em] text-muted/70">
+              Información configurada para esta fuente
+            </div>
           </div>,
           document.body
         )}
