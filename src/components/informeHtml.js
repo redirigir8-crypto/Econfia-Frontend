@@ -176,7 +176,8 @@ export function buildInformeHtml({ consulta, riesgo, resultados, apiUrl, qrUrl, 
     ? (color ? `placeholder_${color}_femenino.png` : "placeholder_femenino_gris.png")
     : (color ? `placeholder_${color}.png` : "placeholder.png");
   const semaforoFile = `semaforo_${color || "gris"}.png`;
-  const staticBase = `${apiUrl}/django_static/img/`;
+  // Servidas por /api/report-asset/ (confiable, no depende de /django_static/).
+  const staticBase = `${apiUrl}/api/report-asset/`;
   const logoUrl = `${staticBase}logo-removebg-preview.png`;
   const avatarUrl = `${staticBase}${avatarFile}`;
   const semaforoUrl = `${staticBase}${semaforoFile}`;
