@@ -18,7 +18,7 @@ import "swiper/css/pagination";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation } from "react-router-dom";
-import { ArrowLeft, FileDown, FileText, Images } from "lucide-react";
+import { ArrowLeft, FileDown, FileText, Images, Eye, ChevronDown } from "lucide-react";
 import {
   isExperianConsulta,
   normalizeExperianConsulta,
@@ -80,6 +80,7 @@ function FloatingActionsPortal({
   onChangeExperianPdfTheme,
   onBack,
   onOpenIndividual, // abre tu ModalDescargaIndividual
+  onVerPdf, // lleva al slide del informe tipo PDF
 }) {
   const [el, setEl] = useState(null);
   const [open, setOpen] = useState(false);
@@ -256,20 +257,31 @@ function FloatingActionsPortal({
           </>
         ) : (
           <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setOpen((v) => !v)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-brand to-brand-2 hover:opacity-90
-                         text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-brand/30 transition-all hover:shadow-brand/50 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed"
-              title="Descargar PDF"
-              disabled={downloading}
-            >
-              {downloading ? (
-                <span className="inline-block w-4 h-4 border-2 border-white border-t-brand rounded-full animate-spin" />
-              ) : (
-                <FileDown size={16} />
-              )}
-              <span className="text-xs sm:text-sm font-semibold">PDF</span>
-            </button>
+            {/* Split: "Ver PDF" (lleva al informe) + caret (opciones de descarga) */}
+            <div className="flex items-center">
+              <button
+                onClick={() => onVerPdf?.()}
+                className="flex items-center gap-2 px-3 py-2 rounded-l-lg bg-gradient-to-r from-brand to-brand-2 hover:opacity-90
+                           text-white border border-white/20 backdrop-blur-xl shadow-lg shadow-brand/30 transition-all hover:shadow-brand/50 hover:scale-105"
+                title="Ver informe"
+              >
+                <Eye size={16} />
+                <span className="text-xs sm:text-sm font-semibold">Ver PDF</span>
+              </button>
+              <button
+                onClick={() => setOpen((v) => !v)}
+                className="flex items-center px-2 py-2 rounded-r-lg bg-gradient-to-r from-brand to-brand-2 hover:opacity-90
+                           text-white border border-l-0 border-white/20 backdrop-blur-xl shadow-lg shadow-brand/30 transition-all hover:shadow-brand/50 disabled:opacity-60 disabled:cursor-not-allowed"
+                title="Opciones de descarga"
+                disabled={downloading}
+              >
+                {downloading ? (
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-brand rounded-full animate-spin" />
+                ) : (
+                  <ChevronDown size={16} />
+                )}
+              </button>
+            </div>
 
             {open && (
               <div className="absolute left-0 mt-2 w-56 rounded-lg overflow-hidden border border-white/20
@@ -506,6 +518,7 @@ export default function Resultados() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [consultaSeleccionada, setConsultaSeleccionada] = useState(null);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
     window.dispatchEvent(
@@ -1068,6 +1081,7 @@ export default function Resultados() {
               onChangeExperianPdfTheme={handleExperianPdfThemeChange}
               onBack={() => setConsultaSeleccionada(null)}
               onOpenIndividual={() => setShowModalIndividual(true)}
+              onVerPdf={() => swiperRef.current?.slideTo(1)}
             />
           )}
           {isHdcActual ? (
@@ -1196,6 +1210,7 @@ export default function Resultados() {
             slidesPerView={1}
             pagination={false}
             navigation
+            onSwiper={(s) => (swiperRef.current = s)}
             className="h-full min-h-0 swiper-custom-nav"
           >
           <style jsx global>{`
@@ -1246,7 +1261,7 @@ export default function Resultados() {
             </SwiperSlide>
 
             <SwiperSlide className="flex flex-row h-full min-h-0">
-            <ConsultaSlide consultaId={consultaSeleccionada.id} />
+            <ConsultaSlide consultaId={consultaSeleccionada.id} consulta={consultaSeleccionada} />
             </SwiperSlide>
             {/* Slide 3 */}
           </Swiper>

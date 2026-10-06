@@ -1,34 +1,39 @@
 // src/views/ConsultaSlide.jsx
+// Muestra los RESULTADOS como un INFORME elegante (estilo AML/HUD oscuro), a
+// pantalla completa, armado por nosotros con los datos reales (NO es el PDF).
+// Incluye botón "Descargar PDF" (ese sí genera/descarga el archivo real) + QR y
+// link de verificación. El otro slide (resultados individuales) NO se toca.
 import { useEffect, useMemo, useState } from "react";
-import {
-  IdCard, User2, Calendar, Venus, FileWarning, Activity,
-  AlertTriangle, Gauge, Clock, BadgeCheck
-} from "lucide-react";
-import holoVideo from "../assets/ai-head.mp4";
+import { AlertTriangle, FileDown } from "lucide-react";
+import { buildInformeHtml } from "./informeHtml";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-const ConsultaSlide = ({ consultaId }) => {
+const blobToDataURL = (blob) =>
+  new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+
+const ConsultaSlide = ({ consultaId, consulta: consultaProp }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [consulta, setConsulta] = useState(null);
-  const [riesgo, setRiesgo] = useState(null);
-  const [burbujaRiesgo, setBurbujaRiesgo] = useState(null);
+  const [html, setHtml] = useState("");
+  const [tipoConsulta, setTipoConsulta] = useState("");
 
-  const riskUI = useMemo(() => {
-    const cat = (riesgo?.categoria || "").toLowerCase();
-    if (cat.includes("alto"))
-      return { ring: "from-red-500 to-orange-500", chip: "bg-red-500/20 text-red-200 border-red-500/40", glow: "shadow-[0_0_40px_5px_rgba(244,63,94,0.25)]" };
-    if (cat.includes("medio"))
-      return { ring: "from-amber-400 to-yellow-500", chip: "bg-yellow-400/15 text-yellow-200 border-yellow-400/40", glow: "shadow-[0_0_40px_5px_rgba(250,204,21,0.20)]" };
-    if (cat.includes("bajo"))
-      return { ring: "from-emerald-400 to-teal-500", chip: "bg-emerald-400/15 text-emerald-200 border-emerald-400/40", glow: "shadow-[0_0_40px_5px_rgba(16,185,129,0.20)]" };
-    return { ring: "from-cyan-400 to-blue-600", chip: "bg-cyan-400/15 text-cyan-200 border-cyan-400/40", glow: "shadow-[0_0_40px_5px_rgba(34,211,238,0.18)]" };
-  }, [riesgo]);
+  const esFull = (tipoConsulta || consultaProp?.tipo_consulta || "").toLowerCase() === "ecorefull";
+
+  // QR (endpoint backend) + link público de verificación.
+  const qrUrl = `${API_URL}/api/qr/${consultaId}/`;
+  const verifyUrl = useMemo(() => {
+    const base = typeof window !== "undefined" ? window.location.origin : "";
+    return `${base}/econfia/resumen-consulta/${consultaId}/`;
+  }, [consultaId]);
 
   useEffect(() => {
     if (!consultaId) return;
-    let revokeBurbuja;
 
     (async () => {
       setLoading(true);
@@ -37,243 +42,90 @@ const ConsultaSlide = ({ consultaId }) => {
         const token = localStorage.getItem("token");
         const headers = { "Content-Type": "application/json", Authorization: `Token ${token}` };
 
-        const consultaRes = await fetch(`${API_URL}/api/consultas/${consultaId}/`, { headers });
-        if (!consultaRes.ok) throw new Error("Error al obtener la consulta");
-        const consultaData = await consultaRes.json();
-        setConsulta(consultaData);
+        const [consultaRes, riesgoRes, resultadosRes, burbujaRes] = await Promise.allSettled([
+          fetch(`${API_URL}/api/consultas/${consultaId}/`, { headers }),
+          fetch(`${API_URL}/api/calcular_riesgo/${consultaId}/`, { headers }),
+          fetch(`${API_URL}/api/resultados/${consultaId}/`, { headers }),
+          fetch(`${API_URL}/api/burbuja-riesgo/${consultaId}/`, { headers }),
+        ]);
 
-        const riesgoRes = await fetch(`${API_URL}/api/calcular_riesgo/${consultaId}/`, { headers });
-        if (!riesgoRes.ok) throw new Error("Error al obtener el riesgo");
-        const riesgoData = await riesgoRes.json();
-        setRiesgo(riesgoData);
+        const okJson = async (settled) => {
+          if (settled.status !== "fulfilled" || !settled.value.ok) return null;
+          try { return await settled.value.json(); } catch { return null; }
+        };
 
-        const burbujaRes = await fetch(`${API_URL}/api/burbuja-riesgo/${consultaId}/`, { headers });
-        if (!burbujaRes.ok) throw new Error("Error al obtener la burbuja de riesgo");
-        const burbujaBlob = await burbujaRes.blob();
-        const burbujaURL = URL.createObjectURL(burbujaBlob);
-        setBurbujaRiesgo(burbujaURL);
-        revokeBurbuja = burbujaURL;
+        const consulta = (await okJson(consultaRes)) || consultaProp || {};
+        setTipoConsulta(consulta?.tipo_consulta || consultaProp?.tipo_consulta || "");
+        const riesgo = await okJson(riesgoRes);
+        const resultadosData = await okJson(resultadosRes);
+        const resultados = Array.isArray(resultadosData)
+          ? resultadosData
+          : (resultadosData?.resultados || []);
+
+        // Diagrama de burbujas (PNG con auth) → data URL para embeberlo en el iframe.
+        let burbujaUrl = "";
+        if (burbujaRes.status === "fulfilled" && burbujaRes.value.ok) {
+          try { burbujaUrl = await blobToDataURL(await burbujaRes.value.blob()); } catch { /* opcional */ }
+        }
+
+        setHtml(buildInformeHtml({ consulta, riesgo, resultados, apiUrl: API_URL, qrUrl, verifyUrl, burbujaUrl }));
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "Error cargando el informe");
       } finally {
         setLoading(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consultaId, consultaProp?.tipo_consulta]);
 
-    return () => {
-      if (revokeBurbuja) URL.revokeObjectURL(revokeBurbuja);
-    };
-  }, [consultaId]);
-
-  if (loading) {
-    return (
-      <div className="relative h-[70vh] md:h-[76vh] rounded-2xl overflow-hidden">
-        <SkeletonVideoRight />
-        <div className="absolute inset-0 grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
-          <div className="p-5 md:p-8">
-            <SkeletonCard />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-200 border border-red-500/30">
-          <AlertTriangle size={18} /> Error: {error}
-        </div>
-      </div>
-    );
-  }
-
-  // Mapeo alternativo para campos del backend
-  const nombreCompleto = `${consulta?.candidato?.first_name || consulta?.candidato?.nombre || ""} ${consulta?.candidato?.last_name || consulta?.candidato?.apellido || ""}`.trim();
-  const fechaNac = consulta?.candidato?.birth_date
-    ? new Date(consulta.candidato.birth_date).toLocaleDateString()
-    : (consulta?.candidato?.fecha_nacimiento ? new Date(consulta.candidato.fecha_nacimiento).toLocaleDateString() : "—");
-  const fechaConsulta = consulta?.fecha ? new Date(consulta.fecha).toLocaleString() : "—";
+  const descargarPdf = () => {
+    // Full → PDF completo (tipo 1); Fast/Essencial → resumen (tipo 3).
+    const tipo = esFull ? 1 : 3;
+    window.open(`${API_URL}/api/generar_consolidado_full/${consultaId}/${tipo}/`, "_blank", "noopener,noreferrer");
+  };
 
   return (
-    <div className="relative h-[70vh] md:h-[76vh] rounded-2xl overflow-hidden bg-black">
-      {/* VIDEO DERECHA — solo en pantallas grandes (evita que se cruce con la tarjeta) */}
-      <div className="absolute inset-0 hidden lg:block">
-        <video
-          className="absolute right-0 top-0 h-full object-cover"
-          src={holoVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{
-            WebkitMaskImage: "linear-gradient(270deg, rgba(0,0,0,1) 45%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.0) 78%)",
-            maskImage: "linear-gradient(270deg, rgba(0,0,0,1) 45%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0.0) 78%)",
-            width: "52vw",
-            minWidth: 440
-          }}
-        />
-        <div
-          className="pointer-events-none absolute inset-0 mix-blend-screen opacity-40"
-          style={{ backgroundImage: `repeating-linear-gradient(to bottom, rgba(0,255,255,.05) 0, rgba(0,255,255,.05) 1px, transparent 2px)` }}
-        />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(16,185,129,0.10),_transparent_60%)]" />
-      </div>
+    <div className="relative w-full h-full min-h-[72vh] bg-[#050914]">
+      {/* Botón flotante Descargar PDF */}
+      {!loading && !error && (
+        <button
+          onClick={descargarPdf}
+          className="absolute top-3 right-4 z-20 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg
+                     bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-400/40
+                     font-semibold text-xs backdrop-blur-md shadow-lg transition hover:scale-105"
+          title="Descargar el PDF del informe"
+        >
+          <FileDown size={15} /> Descargar PDF
+        </button>
+      )}
 
-      {/* PANEL CONTENIDO */}
-      <div className="relative z-10 h-full flex flex-col lg:grid lg:grid-cols-[minmax(0,720px)_1fr]">
-        {/* Columna izquierda con datos + burbuja */}
-        <div className="h-full p-3 sm:p-5 md:p-7 overflow-hidden">
-          <div className={`rounded-2xl p-[1px] bg-gradient-to-br ${riskUI.ring} ${riskUI.glow} h-full`}>
-            <div className="rounded-2xl h-full bg-slate-950/90 backdrop-blur-md border border-white/10 p-3 sm:p-5 md:p-6 overflow-y-auto">
-
-              {/* ====== GRID INTERNO 2 COLS ====== */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                {/* Columna IZQ: encabezado, chips, info */}
-                <div>
-                  {/* encabezado */}
-                  <div className="flex items-start justify-between mb-5">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-widest text-cyan-200/70">Expediente</p>
-                      <h2 className="text-xl md:text-2xl font-semibold text-white drop-shadow">
-                        {nombreCompleto || "—"}
-                      </h2>
-                    </div>
-                    <span className="inline-flex items-center gap-2 text-xs px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-gray-200">
-                      <BadgeCheck size={14} /> {consulta?.estado || "—"}
-                    </span>
-                  </div>
-
-                  {/* chips */}
-                  <div className="mb-5 flex flex-wrap gap-2">
-                    <Chip icon={<Activity size={14} />} className={riskUI.chip}>
-                      {riesgo?.categoria || "—"}
-                    </Chip>
-                    <Chip icon={<Gauge size={14} />}>Prob: {riesgo?.probabilidad ?? "—"}</Chip>
-                    <Chip icon={<Gauge size={14} />}>Cons: {riesgo?.consecuencia ?? "—"}</Chip>
-                    <Chip icon={<AlertTriangle size={14} />}>Score: {riesgo?.riesgo ?? "—"}</Chip>
-                    <Chip icon={<Clock size={14} />}>{fechaConsulta}</Chip>
-                  </div>
-
-                  {/* info */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <InfoRow icon={<User2 size={16} />} label="Nombre" value={nombreCompleto || "—"} />
-                    <InfoRow icon={<IdCard size={16} />} label="Cédula" value={consulta?.candidato?.document || consulta?.candidato?.cedula || "—"} />
-                    <InfoRow icon={<Venus size={16} />} label="Sexo" value={consulta?.candidato?.gender || consulta?.candidato?.sexo || "—"} />
-                    <InfoRow icon={<FileWarning size={16} />} label="Tipo doc." value={consulta?.candidato?.doc_type || consulta?.candidato?.tipo_doc || "—"} />
-                    <InfoRow icon={<Calendar size={16} />} label="Nacimiento" value={fechaNac} />
-                  </div>
-                </div>
-
-                {/* Columna DER: burbuja a la derecha */}
-                <div className="flex flex-col">
-                  <h3 className="text-sm font-semibold text-cyan-200/90 mb-2 tracking-wide">Burbuja de riesgo</h3>
-
-                  {burbujaRiesgo ? (
-                    <div className="relative rounded-xl overflow-hidden border p-2 bg-white/5 border-white/10">
-                      <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-brand/20" />
-                      <img
-                        src={burbujaRiesgo}
-                        alt="Burbuja de riesgo"
-                        className="w-full h-auto max-h-[420px] object-contain rounded-lg"
-                      />
-                      <div
-                        className="pointer-events-none absolute inset-0 opacity-20"
-                        style={{ backgroundImage: `repeating-linear-gradient(to bottom, rgba(59,130,246,.35) 0, rgba(59,130,246,.35) 1px, transparent 2px)` }}
-                      />
-                    </div>
-                  ) : (
-                    <EmptyBox />
-                  )}
-                </div>
-              </div>
-              {/* ====== /GRID INTERNO ====== */}
-
-            </div>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <div className="w-full h-full grid place-items-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 text-rose-300 border border-rose-500/30">
+            <AlertTriangle size={18} /> {error}
           </div>
         </div>
-
-        {/* Columna derecha (espacio del video, ya está absoluto detrás) */}
-        <div />
-      </div>
-
-      <GridOverlay />
+      ) : (
+        <iframe
+          title="Informe de resultados"
+          srcDoc={html}
+          className="w-full h-full"
+          style={{ border: 0, display: "block", minHeight: "72vh" }}
+        />
+      )}
     </div>
   );
 };
 
-/* ------- UI helpers ------- */
-function Chip({ children, icon, className = "" }) {
+function Loader() {
   return (
-    <span className={`inline-flex items-center gap-2 text-[11px] px-2 py-1 rounded-md border border-white/10 bg-white/5 text-gray-100 ${className}`}>
-      {icon} {children}
-    </span>
-  );
-}
-
-function InfoRow({ icon, label, value }) {
-  return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-200">
-      <span className="shrink-0 opacity-80">{icon}</span>
-      <div className="flex flex-col leading-tight">
-        <span className="text-[11px] uppercase tracking-wider text-gray-400">{label}</span>
-        <span className="text-sm font-medium text-white">{String(value)}</span>
+    <div className="w-full h-full min-h-[72vh] grid place-items-center bg-[#050914]">
+      <div className="flex flex-col items-center gap-3 text-cyan-200/80">
+        <div className="h-10 w-10 rounded-full border-2 border-cyan-500/30 border-t-cyan-400 animate-spin" />
+        <span className="text-sm font-mono tracking-wider">Armando informe…</span>
       </div>
-    </div>
-  );
-}
-
-function EmptyBox() {
-  return (
-    <div className="h-40 w-full rounded-xl bg-white/5 border border-white/10 grid place-items-center text-gray-400 text-sm">
-      Sin imagen disponible
-    </div>
-  );
-}
-
-/* ------- Visual sugar ------- */
-function GridOverlay() {
-  return (
-    <>
-      <div
-        className="pointer-events-none absolute inset-0 opacity-25"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, rgba(59,130,246,.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(59,130,246,.15) 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-        }}
-      />
-      <div className="pointer-events-none absolute inset-0 mix-blend-screen animate-[scan_7s_linear_infinite] bg-gradient-to-b from-transparent via-brand/4 to-transparent" />
-      <style>{`
-        @keyframes scan {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(100%); }
-        }
-      `}</style>
-    </>
-  );
-}
-
-function SkeletonCard() {
-  return (
-    <div className="rounded-2xl p-[1px] bg-gradient-to-br from-brand/40 to-brand-2/40">
-      <div className="rounded-2xl h-full bg-black/55 backdrop-blur-md border border-white/10 p-6">
-        <div className="h-7 w-52 bg-white/10 rounded animate-pulse mb-4" />
-        <div className="space-y-3">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-4 w-full bg-white/10 rounded animate-pulse" />
-          ))}
-        </div>
-        <div className="mt-6 h-44 bg-white/10 rounded-xl animate-pulse" />
-      </div>
-    </div>
-  );
-}
-
-function SkeletonVideoRight() {
-  return (
-    <div className="absolute inset-0">
-      <div className="absolute right-0 top-0 h-full w-[70vw] min-w-[640px] bg-gradient-to-b from-slate-900 to-black animate-pulse" />
     </div>
   );
 }
