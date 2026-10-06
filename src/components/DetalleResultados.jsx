@@ -394,7 +394,21 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
     return Number.isFinite(parsed) ? parsed : null;
   };
 
+  // Fuentes INFORMATIVAS / complementarias: encontrar un registro aquí NO es una
+  // alerta negativa. Ej: RUES (registro mercantil/empresarial) — tener matrícula
+  // es solo un dato complementario, no un antecedente. No deben pintarse en rojo.
+  const esFuenteInformativa = (item) => {
+    const txt = `${item?.fuente || ""} ${item?.fuente_nombre || ""} ${item?.tipo_fuente || ""}`.toLowerCase();
+    return (
+      txt.includes("rues") ||
+      txt.includes("registro único empresarial") ||
+      txt.includes("registro unico empresarial")
+    );
+  };
+
   const isPositiveResult = (item) => {
+    // Las fuentes informativas (RUES, etc.) nunca son "alerta": se muestran neutras.
+    if (esFuenteInformativa(item)) return false;
     const numericScore = getNumericScore(item?.score);
     if (numericScore !== null) return numericScore >= 3;
     const estado = (item?.estado || "").toLowerCase();
