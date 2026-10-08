@@ -49,6 +49,7 @@ import AdminPlanes from "./components/AdminPlanes";
 import AdminFuentes from "./components/AdminFuentes";
 import EmpresaRuesResult from "./components/EmpresaRuesResult";
 import ConsultaEmpresa from "./views/ConsultaEmpresa";
+import ConsultaInmueblesSNR from "./views/ConsultaInmueblesSNR";
 import ConsultaFask from "./views/ConsultaFask";
 import ConsultaEssencialExpress from "./views/ConsultaEssencialExpress";
 import ConsultaExperian from "./views/ConsultaExperian";
@@ -76,6 +77,7 @@ import {
   GraduationCap,
   Sparkles,
   ScanSearch,
+  Landmark,
 } from "lucide-react";
 import networkGif from "./assets/GIF by São Paulo City.gif";
 
@@ -413,6 +415,7 @@ function Home() {
     { label: "Consulta de antecedentes", href: "/consulta", Icon: Search },
     { label: "Consulta de contratistas", href: "/6c1b9f3d", Icon: Briefcase },
     { label: "Empresas y RUES", href: "/4a7e2b8f", Icon: Building2 },
+    { label: "Econfia Asset Search", href: "/inmuebles-snr", Icon: Landmark },
     { label: "Validación de títulos", href: "/2b7d5e9c", Icon: GraduationCap },
     { label: "Consulta Express", href: "/a1e6c4b8", Icon: Sparkles },
     { label: "Planes y precios", href: "/precios", Icon: CreditCard },
@@ -815,6 +818,7 @@ export default function App() {
               <Route path="/e7c1a9d4"          element={<EconfiaWalletHome />}        />
               <Route path="/6c1b9f3d"          element={<ConsultaContratista />}      />
               <Route path="/4a7e2b8f"          element={<ConsultaEmpresa />}          />
+              <Route path="/inmuebles-snr"     element={<ConsultaInmueblesSNR />}     />
               <Route path="/8f5c3a1b/:nit"     element={<EmpresaRuesResult />}        />
               <Route path="/d3b7f1e9"          element={<Resultados />}               />
               <Route path="/resultados"         element={<Resultados />}               />

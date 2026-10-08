@@ -377,7 +377,9 @@ export default function TablaResultados({
                 <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Tipo de Consulta</th>
                 <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Nombre</th>
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Estado</th>
-              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Fecha</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Inicio</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Fin</th>
+              <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider" title="Duración de la consulta en segundos">Duración (s)</th>
               <th className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-brand uppercase tracking-wider">Acción</th>
               </tr>
             </thead>
@@ -433,17 +435,41 @@ export default function TablaResultados({
                       )}
                     </td>
 
+                    {/* Inicio */}
                     <td className="px-2 md:px-3 py-1.5 md:py-2 text-muted text-[10px] md:text-xs">
-                      {item.fecha ? (
+                      {(item.fecha_inicio || item.fecha) ? (
                         <div className="flex flex-col gap-1">
                           <span className="text-brand font-semibold">
-                            {new Date(item.fecha).toLocaleDateString()}
+                            {new Date(item.fecha_inicio || item.fecha).toLocaleDateString()}
                           </span>
                           <span className="text-muted">
-                            {new Date(item.fecha).toLocaleTimeString()}
+                            {new Date(item.fecha_inicio || item.fecha).toLocaleTimeString()}
                           </span>
                         </div>
                       ) : "—"}
+                    </td>
+
+                    {/* Fin */}
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-muted text-[10px] md:text-xs">
+                      {item.fecha_fin ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-content font-semibold">
+                            {new Date(item.fecha_fin).toLocaleDateString()}
+                          </span>
+                          <span className="text-muted">
+                            {new Date(item.fecha_fin).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      ) : "—"}
+                    </td>
+
+                    {/* Duración (s) */}
+                    <td className="px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs">
+                      {item.duracion_segundos != null ? (
+                        <span className="inline-flex items-center rounded-md bg-surface-2/60 border border-line/15 text-content font-mono font-semibold px-2 py-1">
+                          {item.duracion_segundos}s
+                        </span>
+                      ) : <span className="text-muted">—</span>}
                     </td>
 
                     <td className="px-2 md:px-3 py-1.5 md:py-2">

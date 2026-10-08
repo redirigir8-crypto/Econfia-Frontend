@@ -442,14 +442,22 @@ export default function DetalleResultados({ consultaId, consulta = null }) {
   };
 
   const isSocialSearchResult = (item) => {
+    // RUES se llama "Registro Único Empresarial y Social": la palabra "social"
+    // hacía que esta función lo confundiera con la Búsqueda Social (OSINT) y le
+    // pintara la plantilla equivocada. Las fuentes informativas nunca son OSINT.
+    if (esFuenteInformativa(item)) return false;
     const fuente = `${item?.fuente || ""} ${item?.fuente_nombre || ""}`.toLowerCase();
     const mensaje = normalizeMensaje(item?.mensaje).toLowerCase();
     return (
-      fuente.includes("social") ||
+      // Identificadores específicos de la Búsqueda Social, NO el genérico "social".
+      fuente.includes("social_search") ||
       fuente.includes("búsqueda social") ||
       fuente.includes("busqueda social") ||
+      fuente.includes("contact search") ||
       mensaje.includes("búsqueda social") ||
-      mensaje.includes("busqueda social")
+      mensaje.includes("busqueda social") ||
+      mensaje.includes("búsqueda web por nombre") ||
+      mensaje.includes("busqueda web por nombre")
     );
   };
 

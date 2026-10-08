@@ -6,6 +6,8 @@
 // metadatos auditables inventados (IP/hash/token falsos) para no mostrar datos
 // que no son reales; se conserva toda la estética.
 
+import { describirFuente } from "../utils/fuentesCatalogo";
+
 const esc = (v) =>
   String(v == null ? "" : v)
     .replace(/&/g, "&amp;")
@@ -70,7 +72,11 @@ function matrizHeatmap(prob, cons) {
 
 // Tarjeta de una fuente/resultado
 function resultadoCard(r, i, total, mediaBase) {
-  const fuente = esc(r?.fuente_nombre || r?.fuente || "Fuente");
+  // Nombre amigable de la fuente (mismo catálogo que usa el detalle), para NO
+  // mostrar el slug interno (ej. "rues", "garantias_mobiliarias_oficial").
+  const infoFuente = describirFuente(r) || {};
+  const nombreAmigable = infoFuente.titulo && infoFuente.titulo !== "Fuente" ? infoFuente.titulo : null;
+  const fuente = esc(nombreAmigable || r?.fuente_nombre || r?.fuente || "Fuente");
   const tipo = esc(r?.tipo_fuente || r?.tipo || "");
   const estado = (r?.estado || "").toString();
   const estadoLow = estado.toLowerCase();
@@ -170,8 +176,10 @@ export function buildInformeHtml({ consulta, riesgo, resultados, apiUrl, qrUrl, 
   const catLow = (cat || "").toLowerCase();
   const colorMap = { extremo: "rojo", alto: "rojo", medio: "amarillo", bajo: "verde" };
   const color = colorMap[catLow] || "";
-  const sexoLow = (sexo || "").toLowerCase();
-  const esFem = ["femenino", "f", "mujer"].includes(sexoLow);
+  // Detección de sexo robusta (mismo criterio que CardDni.jsx), para elegir
+  // bien el retrato de hombre/mujer.
+  const sexoLow = (sexo || "").trim().toLowerCase();
+  const esFem = ["f", "femenino", "female", "mujer"].includes(sexoLow);
   const avatarFile = esFem
     ? (color ? `placeholder_${color}_femenino.png` : "placeholder_femenino_gris.png")
     : (color ? `placeholder_${color}.png` : "placeholder.png");

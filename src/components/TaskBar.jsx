@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search, FileText, LogOut, User,  BookOpen,  Volume2,
-  ChevronLeft, ChevronRight, Sun, Moon, Activity, MousePointerClick,
+  ChevronLeft, ChevronRight, Sun, Moon, Activity, MousePointerClick, Landmark,
 } from "lucide-react";
 
 import { Fuel } from "lucide-react";
@@ -74,6 +74,9 @@ if (hasPlanes) {
   }
   if(planes.includes("empresa")){
     consultaItems.push({ path: "/4a7e2b8f", icon: < BriefcaseBusinessIcon  size={26} strokeWidth={1.75} />, label: "Empresa RUES", color: "emerald" });
+  }
+  if (planes.includes("inmuebles-snr")) {
+    consultaItems.push({ path: "/inmuebles-snr", icon: <Landmark size={28} strokeWidth={1.75} />, label: "Econfia Asset Search", color: "sky" });
   }
   if (planes.includes("econfiafast")) {
     consultaItems.push({ path: "/7f3a9e2b", icon: <ZapIcon size={26} />, label: "E-Fast", color: "yellow" });
@@ -165,6 +168,7 @@ else if (user?.perfil?.es_admin_organizacion) {
     "E-Essential": "Consulta esencial",
     "E-Basic Element": "Consulta básica",
     "Empresa RUES": "Información empresarial confiable",
+    "Econfia Asset Search": "Matrículas y direcciones registradas",
     "E-Fast": "Validación instantánea de documentos",
     "E-Essencial Express": "Consultas por número de documento",
     "Validación de títulos": "Verificación académica",
