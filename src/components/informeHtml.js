@@ -18,9 +18,85 @@ const esc = (v) =>
 const esImagen = (archivo) =>
   typeof archivo === "string" && /\.(png|jpe?g|webp|gif)$/i.test(archivo.trim());
 
+const urlHttpSegura = (value) => {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return "";
+  const candidate = raw.startsWith("www.") ? `https://${raw}` : raw;
+  try {
+    const parsed = new URL(candidate);
+    return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
+  } catch {
+    return "";
+  }
+};
+
+const urlOficialResultado = (resultado) => {
+  const extra = resultado?.datos_extra && typeof resultado.datos_extra === "object"
+    ? resultado.datos_extra
+    : {};
+  const candidates = [
+    resultado?.url_oficial,
+    resultado?.url_fuente,
+    resultado?.source_url,
+    extra.url_oficial,
+    extra.fuente_url,
+    extra.url_fuente,
+    extra.source_url,
+    extra.official_url,
+    extra.url,
+    extra.link,
+    resultado?.fuente_url,
+  ];
+  return candidates.map(urlHttpSegura).find(Boolean) || "";
+};
+
+const fechaHoraConsulta = (value) => {
+  if (!value) return "Fecha y hora no disponibles";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Fecha y hora no disponibles";
+  return new Intl.DateTimeFormat("es-CO", {
+    timeZone: "America/Bogota",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date);
+};
+
 const num = (v) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
+};
+
+const formatearMensajeResultado = (value) => {
+  const raw = String(value || "Sin mensaje.").replace(/\r/g, "").trim();
+  const lines = raw.split("\n");
+  const structuredCount = lines.filter((line) => /^[^:/]{1,80}:\s*/.test(line.trim())).length;
+
+  if (structuredCount < 2) {
+    return `<p class="text-sm text-slate-200 font-sans whitespace-pre-wrap break-words leading-6">${esc(raw)}</p>`;
+  }
+
+  return lines.map((line) => {
+    const clean = line.trim();
+    if (!clean) return `<div class="h-3" aria-hidden="true"></div>`;
+    const match = clean.match(/^([^:/]{1,80}):\s*(.*)$/);
+    if (!match) {
+      return `<p class="text-sm text-slate-200 leading-6 break-words">${esc(clean)}</p>`;
+    }
+    const label = esc(match[1]);
+    const content = esc(match[2]);
+    if (!content) {
+      return `<h5 class="mt-3 first:mt-0 text-sm font-bold text-cyan-200">${label}</h5>`;
+    }
+    return `<div class="grid gap-1 border-b border-slate-700/40 py-1.5 sm:grid-cols-[minmax(190px,auto)_1fr]">
+      <span class="text-xs font-semibold text-slate-400">${label}</span>
+      <span class="text-sm text-slate-100 break-words">${content}</span>
+    </div>`;
+  }).join("");
 };
 
 // Paleta por categoría de riesgo
@@ -71,12 +147,14 @@ function matrizHeatmap(prob, cons) {
 }
 
 // Tarjeta de una fuente/resultado
-function resultadoCard(r, i, total, mediaBase) {
+function resultadoCard(r, i, total, mediaBase, fechaConsulta) {
   // Nombre amigable de la fuente (mismo catálogo que usa el detalle), para NO
   // mostrar el slug interno (ej. "rues", "garantias_mobiliarias_oficial").
   const infoFuente = describirFuente(r) || {};
   const nombreAmigable = infoFuente.titulo && infoFuente.titulo !== "Fuente" ? infoFuente.titulo : null;
-  const fuente = esc(nombreAmigable || r?.fuente_nombre || r?.fuente || "Fuente");
+  // El nombre guardado en Fuente es autoritativo. El catálogo se usa solo
+  // cuando el backend no envía nombre, nunca para sustituirlo por la categoría.
+  const fuente = esc(r?.fuente || r?.fuente_nombre || nombreAmigable || "Fuente");
   const tipo = esc(r?.tipo_fuente || r?.tipo || "");
   const estado = (r?.estado || "").toString();
   const estadoLow = estado.toLowerCase();
@@ -87,11 +165,19 @@ function resultadoCard(r, i, total, mediaBase) {
         ? "bg-rose-950/70 text-rose-300 border-rose-500/40"
         : "bg-amber-950/70 text-amber-300 border-amber-500/40");
   const score = r?.score != null ? esc(r.score) : "—";
-  const mensaje = esc(r?.mensaje || "Sin mensaje.");
+  const mensajeHtml = formatearMensajeResultado(r?.mensaje);
   const hasImg = esImagen(r?.archivo);
   const imgUrl = hasImg
     ? `${mediaBase}${String(r.archivo).replace(/^.*?media[\\/]/, "")}`
     : "";
+  const urlOficial = urlOficialResultado(r);
+  const extra = r?.datos_extra && typeof r.datos_extra === "object" ? r.datos_extra : {};
+  const fechaInicio = fechaHoraConsulta(
+    r?.fecha_inicio_fuente || extra.fecha_inicio_fuente || r?.fecha_consulta || fechaConsulta
+  );
+  const fechaFinRaw = r?.fecha_fin_fuente || extra.fecha_fin_fuente;
+  const fechaFin = fechaFinRaw ? fechaHoraConsulta(fechaFinRaw) : "";
+  const imagenEvidencia = `<img src="${esc(imgUrl)}" alt="Evidencia ${fuente}" loading="lazy" class="w-full max-w-3xl h-auto rounded-lg border border-slate-700" />`;
 
   const evidencia = hasImg
     ? `
@@ -108,7 +194,9 @@ function resultadoCard(r, i, total, mediaBase) {
           <span class="ml-3 text-[11px] font-mono text-slate-400 truncate">${fuente}</span>
         </div>
         <div class="bg-slate-950 p-3 flex justify-center">
-          <img src="${esc(imgUrl)}" alt="Evidencia ${fuente}" loading="lazy" class="w-full max-w-3xl h-auto rounded-lg border border-slate-700" />
+          ${urlOficial
+            ? `<a href="${esc(urlOficial)}" target="_blank" rel="noopener noreferrer" title="Abrir la fuente oficial" class="block w-full max-w-3xl cursor-pointer transition hover:opacity-90">${imagenEvidencia}</a>`
+            : imagenEvidencia}
         </div>
       </div>
     </div>`
@@ -140,9 +228,16 @@ function resultadoCard(r, i, total, mediaBase) {
         </div>
         <div class="bg-brand-navy/60 p-3 rounded-lg border border-brand-border">
           <span class="text-slate-400 block text-[10px] uppercase font-mono">Resultado del análisis</span>
-          <p class="text-sm text-slate-200 mt-1 font-sans whitespace-pre-wrap break-words">${mensaje}</p>
+          <div class="mt-2">${mensajeHtml}</div>
         </div>
         ${evidencia}
+        <div class="mt-4 rounded-lg border border-cyan-500/25 bg-cyan-950/20 px-4 py-3 text-[11px] leading-5 text-slate-300">
+          <p><strong class="text-cyan-300">Nota de consulta:</strong> ingreso a la fuente el ${esc(fechaInicio)}.${fechaFin ? ` Finalizó el ${esc(fechaFin)}.` : ""}</p>
+          ${urlOficial
+            ? `<p class="mt-1"><strong class="text-cyan-300">URL oficial de la fuente:</strong> <a href="${esc(urlOficial)}" target="_blank" rel="noopener noreferrer" class="break-all text-cyan-300 underline underline-offset-2 hover:text-cyan-200">${esc(urlOficial)}</a></p>`
+            : `<p class="mt-1"><strong class="text-cyan-300">URL oficial:</strong> no registrada para esta fuente.</p>`}
+          ${hasImg && urlOficial ? `<p class="mt-1 text-slate-400">Selecciona la evidencia para abrir la página oficial.</p>` : ""}
+        </div>
       </div>
     </div>
   </section>`;
@@ -197,7 +292,9 @@ export function buildInformeHtml({ consulta, riesgo, resultados, apiUrl, qrUrl, 
 
   const items = Array.isArray(resultados) ? resultados.filter((r) => r?.mensaje || r?.score != null || r?.archivo) : [];
   const totalFuentes = items.length;
-  const cards = items.map((r, idx) => resultadoCard(r, idx + 1, totalFuentes, mediaBase)).join("\n");
+  const cards = items
+    .map((r, idx) => resultadoCard(r, idx + 1, totalFuentes, mediaBase, consulta?.fecha))
+    .join("\n");
 
   return `<!DOCTYPE html>
 <html class="dark" lang="es"><head>

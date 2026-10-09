@@ -3,6 +3,46 @@ import Modal from "./Modal";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
+const camposInformativosVacios = {
+  descripcion_corta: "",
+  naturaleza: "",
+  proposito: "",
+  informacion_reportada: "",
+  implicacion_hallazgo: "",
+};
+
+const CamposInformativosFuente = ({ value, onChange }) => {
+  const fields = [
+    ["descripcion_corta", "Resumen breve", "Texto introductorio que aparece debajo del nombre de la fuente."],
+    ["naturaleza", "Naturaleza de la fuente", "Qué es la fuente y qué entidad o servicio la administra."],
+    ["proposito", "Para qué funciona / por qué existe", "Finalidad de la fuente y razón por la que Econfia la consulta."],
+    ["informacion_reportada", "Qué información arroja", "Datos, registros o estados que puede devolver la consulta."],
+    ["implicacion_hallazgo", "Si hay hallazgo", "Cómo debe interpretarse una coincidencia o novedad."],
+  ];
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {fields.map(([name, label, placeholder], index) => (
+        <label
+          key={name}
+          className={`block ${index === 0 ? "md:col-span-2" : ""}`}
+        >
+          <span className="mb-1.5 block text-xs font-black uppercase tracking-[0.12em] text-muted">
+            {label}
+          </span>
+          <textarea
+            rows={index === 0 ? 2 : 4}
+            value={value[name] || ""}
+            placeholder={placeholder}
+            onChange={(e) => onChange({ ...value, [name]: e.target.value })}
+            className="w-full resize-y rounded-xl border border-line/15 bg-surface px-4 py-3 text-sm leading-6 text-content outline-none placeholder:text-muted/60 focus:border-brand/50 focus:ring-4 focus:ring-brand/10"
+          />
+        </label>
+      ))}
+    </div>
+  );
+};
+
 const AdminFuentes = () => {
   const token = localStorage.getItem("token");
 
@@ -20,12 +60,16 @@ const AdminFuentes = () => {
     nombre: "",
     nombre_pila: "",
     tipo: "",
+    url: "",
+    ...camposInformativosVacios,
   });
 
   const [newFuente, setNewFuente] = useState({
     nombre: "",
     nombre_pila: "",
     tipo: "",
+    url: "",
+    ...camposInformativosVacios,
   });
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -99,6 +143,12 @@ const AdminFuentes = () => {
       nombre: f.nombre,
       nombre_pila: f.nombre_pila,
       tipo: f.tipo.id || f.tipo,
+      url: f.url || "",
+      descripcion_corta: f.descripcion_corta || "",
+      naturaleza: f.naturaleza || "",
+      proposito: f.proposito || "",
+      informacion_reportada: f.informacion_reportada || "",
+      implicacion_hallazgo: f.implicacion_hallazgo || "",
     });
   };
 
@@ -152,7 +202,10 @@ const AdminFuentes = () => {
       const result = await res.json();
       // El backend ahora retorna { detail, fuente }
       setFuentes([...fuentes, result.fuente || result]);
-      setNewFuente({ nombre: "", nombre_pila: "", tipo: "" });
+      setNewFuente({
+        nombre: "", nombre_pila: "", tipo: "", url: "",
+        ...camposInformativosVacios,
+      });
       setShowCreateModal(false);
       setToast({ type: "success", message: result.detail || "Fuente creada" });
     } catch (err) {
@@ -246,14 +299,41 @@ const AdminFuentes = () => {
             </select>
           </div>
 
+          {editId && (
+            <div className="border-b border-line/10 bg-brand/[0.04] px-5 py-6">
+              <div className="mb-5">
+                <h3 className="text-lg font-black text-content">Contenido informativo de la fuente</h3>
+                <p className="mt-1 text-sm text-muted">
+                  Este contenido aparece en “Acerca de la fuente” dentro de los resultados.
+                </p>
+              </div>
+              <CamposInformativosFuente value={editData} onChange={setEditData} />
+              <div className="mt-5 flex justify-end gap-3">
+                <button
+                  onClick={() => setEditId(null)}
+                  className="rounded-xl border border-line/15 bg-surface px-5 py-2.5 font-black text-content"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={saveEdit}
+                  className="rounded-xl bg-emerald-500 px-5 py-2.5 font-black text-white shadow-lg shadow-emerald-500/20"
+                >
+                  Guardar información
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* TABLA */}
           <div className="overflow-x-auto px-5 py-5">
-          <table className="min-w-[860px] w-full text-sm text-content">
+          <table className="min-w-[1080px] w-full text-sm text-content">
             <thead>
               <tr className="bg-surface-2/80 text-left text-[12px] uppercase tracking-[0.18em] text-muted">
                 <th className="px-4 py-4">ID</th>
                 <th className="px-4 py-4">Nombre</th>
                 <th className="px-4 py-4">Nombre Pila</th>
+                <th className="px-4 py-4">URL oficial</th>
                 <th className="px-4 py-4">Tipo</th>
                 <th className="px-4 py-4">Acciones</th>
               </tr>
@@ -295,6 +375,30 @@ const AdminFuentes = () => {
                       />
                     ) : (
                       f.nombre_pila
+                    )}
+                  </td>
+
+                  <td className="px-4 py-4 text-content/90">
+                    {editId === f.id ? (
+                      <input
+                        type="url"
+                        placeholder="https://entidad.gov.co/consulta"
+                        value={editData.url}
+                        onChange={(e) => setEditData({ ...editData, url: e.target.value })}
+                        className="w-full min-w-[260px] rounded-lg border border-line/15 bg-surface px-3 py-2 text-content outline-none focus:border-brand/50"
+                      />
+                    ) : f.url ? (
+                      <a
+                        href={f.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block max-w-[300px] truncate text-brand underline underline-offset-2"
+                        title={f.url}
+                      >
+                        {f.url}
+                      </a>
+                    ) : (
+                      <span className="text-muted">Sin registrar</span>
                     )}
                   </td>
 
@@ -412,6 +516,18 @@ const AdminFuentes = () => {
                   </option>
                 ))}
               </select>
+              <input
+                type="url"
+                placeholder="URL oficial (https://...)"
+                value={newFuente.url}
+                onChange={(e) => setNewFuente({ ...newFuente, url: e.target.value })}
+                className="rounded-xl border border-line/15 bg-surface px-4 py-3 text-content outline-none placeholder:text-muted/70 focus:border-brand/50"
+              />
+              <div className="my-2 border-t border-line/10 pt-5">
+                <h4 className="mb-1 font-black text-content">Contenido de “Acerca de la fuente”</h4>
+                <p className="mb-4 text-sm text-muted">Completa los textos explicativos que verá el usuario.</p>
+                <CamposInformativosFuente value={newFuente} onChange={setNewFuente} />
+              </div>
               <button
                 onClick={createFuente}
                 className="mt-2 rounded-xl bg-gradient-to-r from-brand to-brand-2 px-4 py-3 font-black text-white shadow-lg shadow-brand/20"
