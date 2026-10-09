@@ -107,7 +107,7 @@ function ExecutiveChartPanel({ direcciones, celulares, telefonos, emails }) {
   if (!channels.length && !strength.length) return null;
 
   return (
-    <Section icon={Activity} title="Resumen de contactabilidad">
+    <Section icon={Activity} title="Contact Search">
       <div className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
         <div className="rounded-2xl border border-line/15 bg-gradient-to-br from-surface-2/95 via-surface/90 to-surface-2/80 p-4 shadow-lg shadow-black/5">
           <div className="mb-3 flex items-center justify-between gap-3">

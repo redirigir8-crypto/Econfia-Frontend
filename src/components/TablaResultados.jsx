@@ -16,6 +16,7 @@ const PLAN_LABELS = {
   "econfia credit report": "Econfia Credit Report",
   "econfia recognize":   "Econfia Contact Search",
   "econfia contact search": "Econfia Contact Search",
+  "econfia asset search": "Econfia Asset Search",
   "validacion-titulos":  "Validación Títulos",
   "contratista":         "Contratista",
   "ecorefull":           "E-corefull",
@@ -387,7 +388,8 @@ export default function TablaResultados({
               {datosPagina.map((item, idx) => {
                 const estado = (item.estado || "").toLowerCase();
                 const isProcessing = estado === "en_proceso";
-                const isDone = estado === "completado";
+                const isDone = estado === "completado"
+                  || (item.source === "inmuebles-snr" && estado === "sin_resultados");
                 const start = startsRef.current.get(item.row_id || item.id) ?? now;
                 const percent = percentFrom(start, now, item.tipo_consulta);
 

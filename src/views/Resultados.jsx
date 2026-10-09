@@ -6,6 +6,7 @@ import ExperianDetalleResultados from "../components/ExperianDetalleResultados";
 import HdcDetalleResultados from "../components/HdcDetalleResultados";
 import ReconocerDetalleResultados from "../components/ReconocerDetalleResultados";
 import EmpresaDetalleResultados from "../components/EmpresaDetalleResultados";
+import { AssetSearchResultados } from "./ConsultaInmueblesSNR";
 import EIdentidadLoteModal from "../components/EIdentidadLoteModal";
 import ModalDescargaIndividual from "../modals/ModalDescargaIndividual";
 import ConsultaSlide from "../components/ConsultaSlide";
@@ -26,6 +27,8 @@ import {
   normalizeHdcConsulta,
   isReconocerConsulta,
   normalizeReconocerConsulta,
+  isAssetSearchConsulta,
+  normalizeAssetSearchConsulta,
   isEmpresaConsulta,
   normalizeEmpresaConsulta,
 } from "../utils/experian";
@@ -594,11 +597,12 @@ export default function Resultados() {
         Authorization: `Token ${token}`,
       };
 
-      const [consultasRes, experianRes, hdcRes, reconocerRes, empresaRes] = await Promise.all([
+      const [consultasRes, experianRes, hdcRes, reconocerRes, assetSearchRes, empresaRes] = await Promise.all([
         fetch(`${API_URL}/api/consultas/`, { headers }),
         fetch(`${API_URL}/api/experian/consultas/`, { headers }),
         fetch(`${API_URL}/api/hdc/consultas/`, { headers }),
         fetch(`${API_URL}/api/reconocer/consultas/`, { headers }),
+        fetch(`${API_URL}/api/inmuebles-snr/historial/?limit=100`, { headers }),
         fetch(`${API_URL}/api/historial-empresas-rues/?limit=80`, { headers }),
       ]);
 
@@ -608,6 +612,7 @@ export default function Resultados() {
       let experianRows = [];
       let hdcRows = [];
       let reconocerRows = [];
+      let assetSearchRows = [];
       let empresaRows = [];
 
       if (experianRes.ok) {
@@ -622,6 +627,10 @@ export default function Resultados() {
         const reconocerJson = await reconocerRes.json();
         reconocerRows = (reconocerJson?.consultas || []).map(normalizeReconocerConsulta);
       }
+      if (assetSearchRes.ok) {
+        const assetSearchJson = await assetSearchRes.json();
+        assetSearchRows = (assetSearchJson?.consultas || []).map(normalizeAssetSearchConsulta);
+      }
       if (empresaRes.ok) {
         const empresaJson = await empresaRes.json();
         empresaRows = (empresaJson?.empresas || []).map(normalizeEmpresaConsulta);
@@ -632,6 +641,7 @@ export default function Resultados() {
         ...experianRows,
         ...hdcRows,
         ...reconocerRows,
+        ...assetSearchRows,
         ...empresaRows,
       ].filter(hasDisplayableCoreIdentity).sort((left, right) => {
         const leftTime = left.fecha ? new Date(left.fecha).getTime() : 0;
@@ -702,7 +712,12 @@ export default function Resultados() {
     return matchSearch && matchEstado && matchFecha;
   });
   const exportableData = [...filteredData]
-    .filter((item) => (item.source || "consulta") === "consulta" && (item.estado || "").toLowerCase() === "completado")
+    .filter((item) => {
+      const source = item.source || "consulta";
+      const estado = (item.estado || "").toLowerCase();
+      return ["consulta", "experian", "hdc", "reconocer", "inmuebles-snr"].includes(source)
+        && ["completado", "sin_resultados"].includes(estado);
+    })
     .sort((left, right) => {
       const leftTime = left.fecha ? new Date(left.fecha).getTime() : 0;
       const rightTime = right.fecha ? new Date(right.fecha).getTime() : 0;
@@ -719,8 +734,8 @@ export default function Resultados() {
     setExportModal((prev) => ({ ...prev, open: false }));
   };
 
-  const downloadExport = async (format, consultaIds) => {
-    if (!consultaIds.length) return false;
+  const downloadExport = async (format, consultaRefs) => {
+    if (!consultaRefs.length) return false;
 
     const isPdf = format === "pdf";
     const setExporting = isPdf ? setExportingPdf : setExportingExcel;
@@ -738,7 +753,7 @@ export default function Resultados() {
           Authorization: `Token ${token}`,
         },
         body: JSON.stringify({
-          consulta_ids: consultaIds,
+          consulta_refs: consultaRefs,
         }),
       });
 
@@ -779,11 +794,11 @@ export default function Resultados() {
   };
 
   const handleConfirmExport = async (requestedCount) => {
-    const selectedIds = exportableData
+    const selectedRefs = exportableData
       .slice(0, requestedCount)
-      .map((item) => item.id);
+      .map((item) => ({ source: item.source || "consulta", id: item.id }));
 
-    const wasSuccessful = await downloadExport(exportModal.format, selectedIds);
+    const wasSuccessful = await downloadExport(exportModal.format, selectedRefs);
     if (wasSuccessful) {
       setExportModal((prev) => ({ ...prev, open: false }));
     }
@@ -802,7 +817,10 @@ export default function Resultados() {
           Authorization: `Token ${token}`,
         },
         body: JSON.stringify({
-          consulta_ids: exportableData.map((item) => item.id),
+          consulta_refs: exportableData.map((item) => ({
+            source: item.source || "consulta",
+            id: item.id,
+          })),
         }),
       });
 
@@ -853,7 +871,10 @@ export default function Resultados() {
           Authorization: `Token ${token}`,
         },
         body: JSON.stringify({
-          consulta_ids: exportableData.map((item) => item.id),
+          consulta_refs: exportableData.map((item) => ({
+            source: item.source || "consulta",
+            id: item.id,
+          })),
         }),
       });
 
@@ -941,7 +962,10 @@ export default function Resultados() {
   const descargarProductoPdf = async (kind, id) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/api/${kind}/consultas/${id}/pdf/`, {
+      const endpoint = kind === "inmuebles-snr"
+        ? `${API_URL}/api/inmuebles-snr/${id}/pdf/`
+        : `${API_URL}/api/${kind}/consultas/${id}/pdf/`;
+      const res = await fetch(endpoint, {
         headers: token ? { Authorization: `Token ${token}` } : {},
       });
       if (!res.ok) throw new Error(`Error al descargar PDF: ${res.status}`);
@@ -954,6 +978,7 @@ export default function Resultados() {
         experian: `econfia-adjudicator_${id}.pdf`,
         hdc: `econfia-credit-report_${id}.pdf`,
         reconocer: `econfia-contact-search_${id}.pdf`,
+        "inmuebles-snr": `econfia-asset-search_${id}.pdf`,
       };
       const filename = match?.[1]
         ? decodeURIComponent(match[1])
@@ -978,6 +1003,7 @@ export default function Resultados() {
   const isExperianActual = isExperianConsulta(consultaActual);
   const isHdcActual = isHdcConsulta(consultaActual);
   const isReconocerActual = isReconocerConsulta(consultaActual);
+  const isAssetSearchActual = isAssetSearchConsulta(consultaActual);
   const isEmpresaActual = isEmpresaConsulta(consultaActual);
 
   return (
@@ -1070,7 +1096,7 @@ export default function Resultados() {
           </div>
         ) : consultaTipoActual !== "e-identidad" ? (
         <div className="w-full max-w-7xl mx-auto min-h-[78vh] xl:min-h-[82vh] h-[calc(100vh-10rem)] max-h-[calc(100vh-5rem)]">
-          {!isHdcActual && !isReconocerActual && !isExperianActual && !isEmpresaActual && (
+          {!isHdcActual && !isReconocerActual && !isExperianActual && !isAssetSearchActual && !isEmpresaActual && (
             <FloatingActionsPortal
               apiUrl={API_URL}
               consultaId={consultaSeleccionada.id}
@@ -1084,7 +1110,23 @@ export default function Resultados() {
               onVerPdf={() => swiperRef.current?.slideTo(1)}
             />
           )}
-          {isHdcActual ? (
+          {isAssetSearchActual ? (
+            <div className="h-full min-h-0 overflow-y-auto pt-2">
+              <div className="mb-4 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConsultaSeleccionada(null)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-line/20 bg-surface/90 px-4 py-2 text-sm font-semibold text-content shadow-lg shadow-black/5 backdrop-blur-xl transition hover:border-brand/30 hover:bg-surface-2/90 hover:text-brand"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Regresar
+                </button>
+              </div>
+              <AssetSearchResultados
+                consulta={consultaSeleccionada}
+                onPdf={() => descargarProductoPdf("inmuebles-snr", consultaSeleccionada.id)}
+              />
+            </div>
+          ) : isHdcActual ? (
             <div className="h-full min-h-0 overflow-y-auto pt-2">
               <div className="mb-4 flex items-center gap-2">
                 <button
@@ -1269,7 +1311,7 @@ export default function Resultados() {
 
           {/* Modal fuera del Swiper */}
           <ModalDescargaIndividual
-            isOpen={showModalIndividual && !isExperianActual}
+            isOpen={showModalIndividual && !isExperianActual && !isAssetSearchActual}
             onClose={() => setShowModalIndividual(false)}
             data={{ consultaId: consultaSeleccionada?.id }}
           />

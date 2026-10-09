@@ -99,6 +99,27 @@ export function normalizeReconocerConsulta(item) {
 
 // ── Empresa RUES ───────────────────────────────────────────────────────────
 
+export function isAssetSearchConsulta(item) {
+  const source = String(item?.source || "").trim().toLowerCase();
+  const tipo = String(item?.tipo_consulta || item?.tipo || "").trim().toLowerCase();
+  return source === "inmuebles-snr" || tipo === "econfia asset search";
+}
+
+export function normalizeAssetSearchConsulta(item) {
+  return {
+    ...item,
+    id: item.id,
+    row_id: `inmuebles-snr-${item.id}`,
+    source: "inmuebles-snr",
+    tipo: "PERSONA",
+    tipo_consulta: "Econfia Asset Search",
+    cedula: item.numero_documento || "",
+    nombre: "Consulta de activos inmobiliarios",
+    fecha: item.fecha_inicio || item.fecha_consulta || null,
+    consulta_original_id: item.id,
+  };
+}
+
 export function isEmpresaConsulta(item) {
   const source = String(item?.source || "").trim().toLowerCase();
   const tipo = String(item?.tipo_consulta || item?.tipo || "").trim().toLowerCase();

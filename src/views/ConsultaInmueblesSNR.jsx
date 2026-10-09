@@ -36,7 +36,7 @@ function Estado({ value }) {
   );
 }
 
-function Resultados({ consulta, onPdf }) {
+export function AssetSearchResultados({ consulta, onPdf }) {
   if (!consulta) return null;
   const registros = consulta.registros || [];
   return (
@@ -177,7 +177,7 @@ export default function ConsultaInmueblesSNR() {
         </div>
       </section>
 
-      <Resultados consulta={resultado} onPdf={() => descargarPdf(resultado)} />
+      <AssetSearchResultados consulta={resultado} onPdf={() => descargarPdf(resultado)} />
 
       <section className="rounded-[2rem] border border-line/15 bg-surface/80 p-5 md:p-7">
         <div className="flex items-center gap-3"><History className="text-brand" /><div><h2 className="text-xl font-black text-content">Historial de inmuebles</h2><p className="text-sm text-muted">Solo aparecen las consultas realizadas por tu usuario.</p></div></div>
