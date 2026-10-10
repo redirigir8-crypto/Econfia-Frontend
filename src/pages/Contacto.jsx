@@ -456,7 +456,9 @@ export default function Contacto() {
                     <div>
                       <p className="text-xs font-semibold text-muted">Teléfono</p>
                       <p className="font-semibold text-content transition-colors group-hover:text-brand">
-                        +57 305 422 6582
+                        <a href="tel:+573054226582" className="hover:underline">+57 305 422 6582</a>
+                        <span className="mx-1.5 text-muted">/</span>
+                        <a href="tel:+573012489768" className="hover:underline">+57 301 248 9768</a>
                       </p>
                     </div>
                   </div>
@@ -500,6 +502,14 @@ export default function Contacto() {
                     <a
                       href="https://wa.me/573054226582"
                       target="_blank" rel="noopener noreferrer"
+                      aria-label="WhatsApp +57 305 422 6582"
+                      className="w-10 h-10 rounded-lg bg-green-500/20 hover:bg-green-500/30 flex items-center justify-center text-green-400 hover:text-green-300 transition-all hover:scale-110">
+                      <FaWhatsapp size={18} />
+                    </a>
+                    <a
+                      href="https://wa.me/573012489768"
+                      target="_blank" rel="noopener noreferrer"
+                      aria-label="WhatsApp +57 301 248 9768"
                       className="w-10 h-10 rounded-lg bg-green-500/20 hover:bg-green-500/30 flex items-center justify-center text-green-400 hover:text-green-300 transition-all hover:scale-110">
                       <FaWhatsapp size={18} />
                     </a>
